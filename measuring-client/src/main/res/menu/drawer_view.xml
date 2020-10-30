@@ -57,15 +57,16 @@
                     android:id="@+id/drawer_setting_pictures"
                     android:title="@string/drawer_setting_pictures"
                     android:visible="true"
+                    android:checkable="true"
                     app:actionLayout="@layout/drawer_list_switch"
-                    app:showAsAction="ifRoom"
-                    android:checkable="false" /> <!-- for DAT enabled -->
+                    app:showAsAction="ifRoom" />
 
                 <item
                     android:actionLayout="@android:layout/simple_list_item_1"
                     android:id="@+id/drawer_settings_camera"
+                    android:visible="true"
                     android:title="@string/drawer_settings"
-                    app:showAsAction="ifRoom" /> <!-- for DAT enabled -->
+                    app:showAsAction="ifRoom" />
 
             </group>
         </menu>
