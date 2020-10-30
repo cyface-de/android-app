@@ -44,8 +44,8 @@ buildscript {
 ext {
     // This app
     applicationId = "de.cyface.app"
-    versionName = "0.0.0" // Also increase versionCode. Both are only increased on release branch.
-    versionCode = 1
+    versionName = "0.0.0" // Version shown to the user. Only increase this on the release branch.
+    versionCode = 1 // Automatically incremented by CI. Required for Play Store releases
 
     /*
      * Some of these values are used directly by the Cyface submodules. If you change any of these values you must
