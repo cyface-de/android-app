@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+    android:contentAuthority="de.cyface.app.provider"
+    android:accountType="de.cyface.app.pro"
+    android:userVisible="false"
+    android:supportsUploading="true"
+    android:allowParallelSyncs="false"
+    android:isAlwaysSyncable="true" />
+    <!-- If we want to have a userVisible account in the Android settings we need to set userVisible
+    to true and at least un-comment the comments in authenticator.xml and provide the icons. -->

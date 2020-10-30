@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name" translatable="false">Bluetooth-LE</string>
+    <string name="ble_not_supported">BLE is not supported by this device</string>
+    <string name="ble_supported">BLE is supported by this device.</string>
+    <string name="unknown_device">Unknown Device</string>
+    <string name="wheel_circumference">Wheel Circumference</string>
+    <string name="please_choose_a_csc_sensor">Please choose a CSC Sensor</string>
+    <string name="ok" translatable="false">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="scan_for_devices">Scan for Devices</string>
+    <string name="error_no_valid_device">ERROR: No valid device!</string>
+</resources>

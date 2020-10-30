@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/terms_of_use_view"
+                android:padding="4pt">
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/accept_terms"
+        android:id="@+id/accept_terms_button"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:enabled="false"/>
+
+    <CheckBox
+        android:text="@string/accept_terms_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/accept_terms_checkbox"
+        android:layout_above="@+id/accept_terms_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:paddingTop="4pt"/>
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/accept_terms_checkbox">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/disclaimer"
+                android:id="@+id/disclaimer"
+                android:paddingTop="8pt"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="7.5pt"
+                android:text="@string/disclaimer_content"
+                android:id="@+id/disclaimer_content"
+                android:padding="4pt"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/privacy"
+                android:id="@+id/privacy"
+                android:paddingTop="4pt"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="7.5pt"
+                android:text="@string/privacy_content"
+                android:id="@+id/privacy_content"
+                android:layout_gravity="center_horizontal"
+                android:padding="4pt"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

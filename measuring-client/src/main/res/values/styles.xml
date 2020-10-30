@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+        Application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+
+        <!-- Material Design -->
+        <!--   app branding color for the app bar, e.g used for the tool bar -->
+        <item name="colorPrimary">@color/primary_color</item>
+        <!--   darker variant of the branding color, e.g. used for the status bar & contextual app bars -->
+        <item name="colorPrimaryVariant">@color/primary_color_variant</item>
+        <item name="colorOnPrimary">@color/text_on_primary_color</item>
+
+        <item name="colorSecondary">@color/secondary_color</item>
+        <item name="colorSecondaryVariant">@color/secondary_color_variant</item>
+        <item name="colorOnSecondary">@color/text_on_secondary_color</item>
+
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/primary_color</item>
+    </style>
+
+    <style name="SplashTheme" parent="AppTheme" />
+
+</resources>

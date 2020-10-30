@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ble_not_supported">Dieses Gerät unterstützt kein BLE.</string>
+    <string name="ble_supported">Dieses Gerät unterstützt BLE.</string>
+    <string name="unknown_device">Unbekanntes Gerät</string>
+    <string name="wheel_circumference">Radumfang</string>
+    <string name="please_choose_a_csc_sensor">Bitte wählen Sie den gewünschten Sensor</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="scan_for_devices">Geräte suchen</string>
+    <string name="error_no_valid_device">FEHLER: Kein gültiges Gerät!</string>
+</resources>

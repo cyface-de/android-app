@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="de.cyface.app">
+
+    <uses-sdk tools:overrideLibrary="android_libs.ub_uiautomator" />
+    <application>
+        <!-- This workaround is required to use GoogleMaps with API 28
+        but does not fix it currently see CY-4457 so it's disabled as
+        long as we're still testing the SDK integration. It will be
+        enabled again when we release a new version of the android client.
+        From https://issuetracker.google.com/issues/79478779 -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+    </application>
+
+</manifest>

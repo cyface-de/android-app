@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:custom="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:weightSum="7">
+
+  <com.google.android.gms.maps.MapView
+    android:id="@+id/mapView"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="4" />
+
+  <!-- Keep the tabs consistent with helper class Modality -->
+  <com.google.android.material.tabs.TabLayout
+    android:id="@+id/tab_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    custom:tabIconTint="@color/gray">
+
+    <com.google.android.material.tabs.TabItem
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:icon="@drawable/ic_directions_car" />
+
+    <com.google.android.material.tabs.TabItem
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:icon="@drawable/ic_directions_bike" />
+
+    <com.google.android.material.tabs.TabItem
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:icon="@drawable/ic_walking" />
+
+    <com.google.android.material.tabs.TabItem
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:icon="@drawable/ic_bus" />
+
+    <com.google.android.material.tabs.TabItem
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:icon="@drawable/ic_train" />
+  </com.google.android.material.tabs.TabLayout>
+
+  <RelativeLayout
+    android:id="@+id/activity_main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_gravity="bottom"
+    android:layout_weight="3">
+
+    <!-- Using AppCompatImageButton and custom:srcCompat with tools:ignore to make this compatible for lower android versions -->
+    <!-- As there is no circle_stop button, we have a circle and only change the symbol within -->
+    <androidx.appcompat.widget.AppCompatImageButton
+      android:id="@+id/capture_data_button_background"
+      android:layout_width="200dp"
+      android:layout_height="200dp"
+      android:layout_centerHorizontal="true"
+      android:layout_centerVertical="true"
+      android:adjustViewBounds="true"
+      android:background="@android:color/transparent"
+      android:scaleType="fitXY"
+      android:tint="@color/text_on_secondary_color"
+      custom:srcCompat="@drawable/ic_circle"
+      tools:ignore="MissingPrefix" />
+    <!-- The symbol indicating the state to reach after the next click -->
+    <androidx.appcompat.widget.AppCompatImageButton
+      android:id="@+id/capture_data_main_button"
+      android:layout_width="100dp"
+      android:layout_height="100dp"
+      android:layout_centerHorizontal="true"
+      android:layout_centerVertical="true"
+      android:adjustViewBounds="true"
+      android:background="@android:color/transparent"
+      android:contentDescription="@string/text_button_start"
+      android:scaleType="fitXY"
+      android:tint="@color/text_on_secondary_color"
+      custom:srcCompat="@drawable/ic_play"
+      tools:ignore="MissingPrefix" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+      android:id="@+id/data_sync_button"
+      android:layout_width="80dp"
+      android:layout_height="80dp"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentBottom="true"
+      android:layout_gravity="start|bottom"
+      android:adjustViewBounds="true"
+      android:background="@android:color/transparent"
+      android:contentDescription="@string/synchronize"
+      android:scaleType="fitXY"
+      android:tint="@color/gray"
+      custom:srcCompat="@drawable/ic_sync"
+      tools:ignore="MissingPrefix" />
+
+    <com.github.lzyzsd.circleprogress.DonutProgress
+      android:id="@+id/connection_status_progress"
+      android:layout_width="80dp"
+      android:layout_height="80dp"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentBottom="true"
+      android:layout_gravity="start|bottom"
+      android:background="@android:color/transparent"
+      android:visibility="invisible"
+      custom:donut_finished_color="@color/primary_color"
+      custom:donut_progress="0"
+      custom:donut_text_color="@color/primary_color_variant"
+      custom:donut_unfinished_color="@color/primary_color" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/data_capturing_measurement_id"
+      android:layout_width="200dp"
+      android:layout_height="20dp"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentBottom="true"
+      android:layout_gravity="bottom|end"
+      android:layout_marginEnd="10dp"
+      android:layout_marginBottom="30dp"
+      android:contentDescription="@string/measurement_id"
+      android:gravity="bottom|end"
+      android:textAlignment="textEnd"
+      android:textColor="@color/text_on_secondary_color"
+      android:textSize="12sp" />
+
+    <LinearLayout
+      android:layout_width="300dp"
+      android:layout_height="20dp"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentBottom="true"
+      android:layout_gravity="bottom|end"
+      android:layout_marginEnd="10dp"
+      android:layout_marginBottom="10dp"
+      android:gravity="bottom|end">
+
+      <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/camera_capturing_info"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="10dp"
+        android:contentDescription="@string/distance"
+        android:textColor="@color/primary_color"
+        android:visibility="invisible"
+        android:textSize="14sp" />
+
+      <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/data_capturing_distance"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/camera_images"
+        android:textAlignment="textEnd"
+        android:textColor="@color/primary_color"
+        android:textSize="14sp" />
+    </LinearLayout>
+
+  </RelativeLayout>
+
+</LinearLayout>

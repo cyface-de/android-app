@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="de.cyface.app">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Until API 22 we need this permission to delete the deprecated generic pro account -->
+    <uses-permission
+        android:name="android.permission.MANAGE_ACCOUNTS"
+        android:maxSdkVersion="22" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Needed to check if wifi is available -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Google Maps Android API permission -->
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
+    <!-- The accounts permissions are the reason why "contacts" permissions are requested -->
+    <!-- Allows the app to create accounts and getting / setting their passwords. -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <!-- Apps need "GET_ACCOUNTS" permission to read information about accounts. -->
+    <uses-permission
+      android:name="android.permission.GET_ACCOUNTS" />
+    <!-- Allows applications to write & read the sync settings. -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <!-- sync stats permissions are needed to check if the data sync is currently active -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- allowBackup=false as we did not yet define what we really want to backup-->
+    <application
+        android:name=".MeasuringClient"
+        android:allowBackup="false"
+        android:icon="@drawable/ic_logo_vector"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning"
+        android:usesCleartextTraffic="${usesCleartextTraffic}"><!-- only > API 23 ok, only for debugging -->
+
+        <!-- Google Maps for Android requirements -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
+        <activity android:name=".ui.TermsOfUseActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.MainActivity"
+            android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
+        </activity>
+
+        <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
+        <activity
+            android:name=".ui.LoginActivity"
+            android:label="@string/title_activity_login" />
+
+        <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
+        <provider
+            android:name="de.cyface.persistence.MeasuringPointsContentProvider"
+            android:authorities="de.cyface.app.provider"
+            android:exported="false"
+            android:process=":persistence_process"
+            android:syncable="true"
+            tools:replace="android:authorities" />
+    </application>
+
+</manifest>

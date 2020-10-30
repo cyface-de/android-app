@@ -1,0 +1,2 @@
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="de.cyface.app.pro" />

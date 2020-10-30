@@ -1,0 +1,11 @@
+{
+  "name": "cyface-mock-api",
+  "private": true,
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "dependencies": {
+    "connect-api-mocker": "^1.9.0",
+    "express": "^4.17.1"
+  }
+}

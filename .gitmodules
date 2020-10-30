@@ -1,0 +1,9 @@
+[submodule "backend"]
+	path = backend
+	url = git@github.com:cyface-de/android-backend.git
+[submodule "energy_settings"]
+	path = energy_settings
+	url = git@github.com:cyface-de/android-energy-settings.git
+[submodule "camera_service"]
+	path = camera_service
+	url = git@github.com:cyface-de/android-camera-service.git

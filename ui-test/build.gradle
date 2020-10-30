@@ -1,0 +1,72 @@
+/*
+ * Copyright 2017 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ */
+/**
+ * Gradle's build file for the module which hold all test which require UI-input.
+ *
+ * @author Armin Schnabel
+ * @author Klemens Muthmann
+ * @version 1.0.1
+ * @since 1.0.0
+ */
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 23 // This needs to be at least as big as the biggest minSdkVersion of the dependencies
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        applicationId "de.cyface.ui_test"
+
+        // The Instrumentation test runner used to run tests.
+        testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceCompatibility
+        targetCompatibility rootProject.ext.targetCompatibility
+    }
+}
+
+// In the com.android.test plugin you can only have compile
+dependencies {
+    // App's dependencies, including test
+    // This is need to avoid 'No resource identifier found for attribute 'layout_constraintBottom_toBottomOf'
+    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+
+    // Local dependencies
+    //compile project(':Utils') // to reuse existing app icons
+    implementation project(':bluetooth-le')
+
+    // Dependencies for instrumentation tests
+    // - If Junit symbols are not resolvable in IntelliJ, make sure Build Variant is set to debug
+    // - Loading another dependency (e.g. module) only it's production dependencies (compile) are loaded but not other dependencies (e.g. testCompile)
+    // Mockito Core does not work on android. That's why we need Mockito Android in this case.
+    androidTestImplementation 'org.mockito:mockito-android:' + rootProject.ext.mockitoVersion
+    androidTestImplementation 'androidx.test:runner:' + rootProject.ext.runnerVersion
+    androidTestImplementation 'androidx.test:rules:' + rootProject.ext.rulesVersion
+    androidTestImplementation 'androidx.annotation:annotation:' + rootProject.ext.supportLibVersion
+    // END instrumentation test dependencies
+}

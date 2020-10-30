@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Show current camera status and mode -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical">
+
+      <TextView
+        android:id="@+id/camera_settings_camera_status_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/camera_status"
+        android:paddingBottom="4pt"
+        android:paddingStart="0pt"
+        android:paddingEnd="4pt" />
+
+      <TextView
+        android:id="@+id/camera_settings_camera_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="4pt" />
+    </LinearLayout>
+
+    <!-- - - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="@color/gray"
+      android:layout_marginTop="8pt"
+      android:layout_marginBottom="8pt" />
+
+    <!-- Supported Camera2 features -->
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/camera_settings_title_supported_features"
+      android:paddingBottom="4pt" />
+
+    <!-- Camera2 support level -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingBottom="4pt">
+
+      <TextView
+        android:id="@+id/camera_settings_hardware_support_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/camera_feature_camera2_support_level"
+        android:textSize="6pt"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt" />
+
+      <TextView
+        android:id="@+id/camera_settings_hardware_support"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Manual sensor support -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingBottom="4pt">
+
+      <TextView
+        android:id="@+id/camera_settings_manual_sensor_support_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/camera_feature_manual_sensor"
+        android:textSize="6pt"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt" />
+
+      <TextView
+        android:id="@+id/camera_settings_manual_sensor_support"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Calibration level of focus distance -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingBottom="4pt">
+
+      <TextView
+        android:id="@+id/camera_settings_focus_calibration_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/camera_feature_focus_distance_calibration"
+        android:textSize="6pt"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt" />
+
+      <TextView
+        android:id="@+id/camera_settings_focus_calibration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Hyper-focal distance -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingBottom="4pt">
+
+      <TextView
+        android:id="@+id/camera_settings_hyper_focal_distance_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/camera_feature_hyper_focal_distance"
+        android:textSize="6pt"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt" />
+
+      <TextView
+        android:id="@+id/camera_settings_hyper_focal_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Closest focus distance -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingBottom="4pt">
+
+      <TextView
+        android:id="@+id/camera_settings_minimum_focus_distance_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/camera_feature_focus_distance_minimum"
+        android:textSize="6pt"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt" />
+
+      <TextView
+        android:id="@+id/camera_settings_minimum_focus_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- - - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="@color/gray"
+      android:layout_marginTop="8pt"
+      android:layout_marginBottom="8pt" />
+
+    <!-- JPEG settings -->
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/camera_settings_JPEG_settings"
+      android:layout_marginBottom="4pt" />
+
+    <!-- distance-based capturing mode -->
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/distance_based_capturing"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt">
+
+      <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/camera_settings_distance_based_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+      <com.google.android.material.slider.Slider
+        android:id="@+id/camera_settings_trigger_distance_slider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:stepSize="1"
+        android:valueFrom="4"
+        android:valueTo="100"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_distance_based_preference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_distance_based_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt"
+        android:visibility="invisible" />
+    </LinearLayout>
+
+    <!-- Static Focus Distance -->
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/static_camera_focus_distance"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt">
+
+      <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/camera_settings_static_focus_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+      <!-- for min/max distance see LENS_INFO_FOCUS_DISTANCE_CALIBRATION -->
+      <com.google.android.material.slider.Slider
+        android:id="@+id/camera_settings_static_focus_distance_slider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:stepSize="0.25"
+        android:valueFrom="0.25"
+        android:valueTo="1.0"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_static_focus_preference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_static_focus_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt"
+        android:visibility="invisible" />
+    </LinearLayout>
+
+    <!-- Static Exposure Time -->
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/static_camera_exposure_time"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt">
+
+      <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/camera_settings_static_exposure_time_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+      <!-- The slider is not useful for a set of predefined values like 1E9/54444, 1/8000, 1/125-->
+      <!--com.google.android.material.slider.Slider
+          android:id="@+id/camera_settings_static_exposure_time_slider"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:stepSize="1250000"
+          android:valueFrom="0"
+          android:valueTo="10000000"
+          android:visibility="invisible" /-->
+
+      <TextView
+        android:id="@+id/camera_settings_static_exposure_time_preference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_static_exposure_time_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt"
+        android:visibility="invisible" />
+    </LinearLayout>
+
+    <!-- Exposure value for Static Exposure Time -->
+    <TextView
+      android:id="@+id/camera_settings_static_exposure_value_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/static_camera_exposure_value"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt">
+
+      <com.google.android.material.slider.Slider
+        android:id="@+id/camera_settings_static_exposure_value_slider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:stepSize="1"
+        android:valueFrom="10"
+        android:valueTo="16"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_static_exposure_value_preference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+
+      <TextView
+        android:id="@+id/camera_settings_static_exposure_value_preference_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="4"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt"
+        android:visibility="invisible" />
+    </LinearLayout>
+
+    <!-- - - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="@color/gray"
+      android:layout_marginTop="8pt"
+      android:layout_marginBottom="8pt" />
+
+    <!-- Sensor frequency -->
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/settings_sensor_frequency" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:paddingStart="4pt"
+      android:paddingLeft="4pt"
+      android:paddingEnd="4pt"
+      android:paddingRight="4pt">
+
+      <com.google.android.material.slider.Slider
+        android:id="@+id/settings_sensor_frequency_slider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:stepSize="50"
+        android:valueFrom="50"
+        android:valueTo="500" />
+
+      <TextView
+        android:id="@+id/settings_sensor_frequency_preference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt"
+        android:text="@string/settings_sensor_frequency_unit" />
+    </LinearLayout>
+
+  </LinearLayout>
+</ScrollView>
