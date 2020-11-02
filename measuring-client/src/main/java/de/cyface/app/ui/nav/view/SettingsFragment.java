@@ -557,7 +557,7 @@ public class SettingsFragment extends Fragment {
 
         final Integer focusDistanceCalibration = characteristics
                 .get(CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION);
-        Validate.isTrue(focusDistanceCalibration != null);
+        if (focusDistanceCalibration == null) return "N/A";
 
         switch (focusDistanceCalibration) {
             case CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED:
