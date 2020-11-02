@@ -48,6 +48,7 @@ import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * Async task to delete measurements with all their data.
@@ -168,6 +169,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             unFinishedMeasurement = persistenceLayer.loadCurrentlyCapturedMeasurement();
         } catch (final NoSuchMeasurementException e) {
             unFinishedMeasurement = null;
+            Sentry.captureException(e);
         } catch (final CursorIsNullException e) {
             throw new IllegalStateException(e);
         }

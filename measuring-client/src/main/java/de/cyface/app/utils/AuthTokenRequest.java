@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import de.cyface.app.ui.LoginActivity;
 import de.cyface.synchronization.CyfaceAuthenticator;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * Asynchronous Request to get a new auth token.
@@ -79,6 +80,9 @@ public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRe
             authToken = cyfaceAuthenticator.getAuthToken(null, account, AUTH_TOKEN_TYPE, null)
                     .getString(AccountManager.KEY_AUTHTOKEN);
         } catch (final NetworkErrorException e) {
+            // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
+            // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
+            Sentry.captureException(e);
             // "the authenticator could not honor the request due to a network error"
             return new AuthTokenRequestParams(account, false);
         }

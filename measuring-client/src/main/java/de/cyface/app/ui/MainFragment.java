@@ -78,6 +78,7 @@ import de.cyface.synchronization.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * A {@code Fragment} for the main UI used for data capturing and supervision of the capturing process.
@@ -141,6 +142,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
                 currentMeasurementsEvents = dataCapturingButton.loadCurrentMeasurementsEvents();
                 map.renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
             } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+                Sentry.captureException(e);
                 Log.w(TAG,
                         "onMapReadyRunnable failed to loadCurrentMeasurementsEvents. Thus, map.renderMeasurement() is not executed. This should only happen when the capturing already stopped.");
             }
@@ -389,7 +391,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
 
     void necessaryPermissionsGranted() {
         if (fragmentRoot != null && fragmentRoot.isShown()) {
-            map.showAndMoveToCurrentLocation();
+            map.showAndMoveToCurrentLocation(true);
         }
     }
 
@@ -446,6 +448,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
             // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
             dataCapturingService.shutdownDataCapturingService();
         } catch (SynchronisationException e) {
+            Sentry.captureException(e);
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e);
         }
         dataCapturingService.removeConnectionStatusListener(this);

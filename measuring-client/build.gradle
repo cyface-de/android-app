@@ -27,7 +27,18 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
+apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // Exception tracking when using proguard
+        classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
+    }
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -129,7 +140,35 @@ android {
     }
 }
 
+// Exception tracking
+sentry {
+    // Disables or enables the automatic configuration of ProGuard
+    // for Sentry.  This injects a default config for ProGuard so
+    // you don't need to do it manually.
+    autoProguardConfig true
+
+    // Enables or disables the automatic upload of mapping files
+    // during a build.  If you disable this, you'll need to manually
+    // upload the mapping files with sentry-cli when you do a release.
+    autoUpload true
+
+    // Disables or enables the automatic configuration of Native Symbols
+    // for Sentry. This executes sentry-cli automatically so
+    // you don't need to do it manually.
+    // Default is disabled.
+    uploadNativeSymbols false
+
+    // Does or doesn't include the source code of native code for Sentry.
+    // This executes sentry-cli with the --include-sources param. automatically so
+    // you don't need to do it manually.
+    // Default is disabled.
+    includeNativeSources false
+}
+
 dependencies {
+    // Exception tracking
+    implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
+
     // To build an app with > 64K methods
     implementation "androidx.multidex:multidex:$rootProject.ext.multidexVersion"
     // To change the material design

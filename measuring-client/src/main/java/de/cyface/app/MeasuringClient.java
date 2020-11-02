@@ -31,6 +31,7 @@ import androidx.multidex.MultiDexApplication;
 import de.cyface.app.ui.LoginActivity;
 import de.cyface.synchronization.CyfaceAuthenticator;
 import de.cyface.synchronization.ErrorHandler;
+import io.sentry.Sentry;
 
 /**
  * The implementation of Android's {@code Application} class for this project.
@@ -52,6 +53,15 @@ public class MeasuringClient extends MultiDexApplication {
         if (errorCode != UNAUTHORIZED) {
             Toast.makeText(MeasuringClient.this, errorMessage, Toast.LENGTH_LONG).show();
         }
+
+        // There are two cases we can have network errors
+        // 1. during authentication (AuthTokenRequest), ether login or before upload
+        // 2. during upload (SyncPerformer/SyncAdapter)
+        // In the first case we get the full stacktrace by a Sentry.capture in AuthTokenRequest
+        // but in the second case we cannot get the stacktrace as it's only available in the SDK.
+        // For that reason we also capture a message here.
+        // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
+        Sentry.captureMessage(errorCode.name() + ": " + errorMessage);
     };
 
     @Override

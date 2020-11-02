@@ -66,6 +66,7 @@ import de.cyface.persistence.model.GeoLocation;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * The Map class handles everything around the GoogleMap view of {@link MainFragment}.
@@ -150,13 +151,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         this.googleMap = googleMap;
         googleMap.setMaxZoomPreference(2.0f);
         googleMap.setMaxZoomPreference(20.0f);
-        showAndMoveToCurrentLocation();
-        // Deactivated as we currently don't render tiles anymore:
-        // final String preferenceModality =
-        // preferences.getString(applicationContext.getString(R.string.modality_context_key), "");
-        // if (!preferenceModality.equals(""))
-        // loadCyfaceTiles(Modality.valueOf(preferenceModality));
-
+        showAndMoveToCurrentLocation(false);
         onMapReadyRunnable.run();
     }
 
@@ -285,47 +280,13 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         eventMarker.clear();
     }
 
-    /*
-     * With this, we overlay the Google Map tiles with our own tiles
-     ** /
-     * void loadCyfaceTiles(final Modality modality) {
-     * final TileProvider tileProvider = new UrlTileProvider(256, 256) {
+    /**
+     * Shows the user's location on the map and moves the camera to that position.
      *
-     * @Override
-     * public URL getTileUrl(int x, int y, int zoom) {
-     * final String modality_string = (modality.equals(Modality.BICYCLE) ? modality.name() : Modality.CAR.name());
-     * final String s = String.format(Locale.GERMANY,
-     * "http://s1.cyface.de/" + modality_string.toLowerCase() + "_tiles_matched/%d/%d/%d.png", zoom, x,
-     * y);
-     * if (!checkTileExists(x, y, zoom)) {
-     * return null;
-     * }
-     * try {
-     * return new URL(s);
-     * } catch (final MalformedURLException e) {
-     * throw new IllegalStateException(e);
-     * }
-     * }
-     * /*
-     * Check that the tile server supports the requested x, y and zoom.
-     * Complete this stub according to the tile range you support.
-     * If you support a limited range of tiles at different zoom levels, then you
-     * need to define the supported x, y range at each zoom level.
-     * /
-     * private boolean checkTileExists(int x, int y, int zoom) {
-     * int minZoom = 0;
-     * int maxZoom = 20;
-     * return !(zoom < minZoom || zoom > maxZoom);
-     * }
-     * };
-     * if (tileOverlay != null)
-     * tileOverlay.remove();
-     * tileOverlay = googleMap.addTileOverlay(new
-     * TileOverlayOptions().fadeIn(false).tileProvider(tileProvider));
-     * }
+     * @param permissionWereJustGranted {@code True} if the permissions were just granted. In this case we expect the
+     *            permissions to be available and track if otherwise.
      */
-
-    void showAndMoveToCurrentLocation() {
+    void showAndMoveToCurrentLocation(final boolean permissionWereJustGranted) {
         try {
             // Create an instance of GoogleAPIClient
             if (googleApiClient == null) {
@@ -333,19 +294,32 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
                         .addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
             }
             googleApiClient.connect();
-            if (googleMap != null) { // needed if e.g. google play services on phone out of date and map not loaded
+            // Happens when Google Play Services on phone is out of date
+            if (googleMap != null) {
                 googleMap.setMyLocationEnabled(true);
             }
         } catch (final SecurityException e) {
-            Log.w(TAG, "Location permission not (yet) granted");
+            if (permissionWereJustGranted) {
+                Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing");
+                Sentry.captureException(e);
+            }
+            // This happens as the Map is shown in background when asking for location permission
+            // There is no need to track this event as long as the permissions were not just granted
         }
     }
 
-    private void moveToLocation() {
+    /**
+     * Moves the GoogleMap camera to the last location.
+     *
+     * @param highFrequentRequest {@code True} if this is called very frequently, e.g. on each location update. In this
+     *            case no Exception tracking event is sent to Sentry to limit Sentry quota.
+     */
+    private void moveToLocation(final boolean highFrequentRequest) {
         try {
             final Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             if (location == null) {
-                Log.d(TAG, "moveToLocation: location is null");
+                // This happens as the Map is shown in background when asking for location permission
+                // There is no need to track this event
                 return;
             }
 
@@ -353,15 +327,22 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
             final CameraPosition.Builder builder = new CameraPosition.Builder().target(currentLocation);
             CameraPosition.Builder builder1 = builder.zoom(17);
             CameraPosition cameraPosition = builder1.build();
+
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera");
+                if (!highFrequentRequest) {
+                    Sentry.captureMessage("Map.moveToLocation: GoogleMap is null");
+                }
                 return;
             }
 
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         } catch (final SecurityException e) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?");
+            if (!highFrequentRequest) {
+               Sentry.captureException(e);
+            }
         }
     }
 
@@ -371,7 +352,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
 
     @Override
     public void onConnected(@Nullable final Bundle bundle) {
-        moveToLocation();
+        moveToLocation(false);
     }
 
     @Override
@@ -416,7 +397,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
     @Override
     public void onLocationChanged(final Location location) {
         if (isAutoCenterMapEnabled) {
-            moveToLocation();
+            moveToLocation(true);
         }
     }
 

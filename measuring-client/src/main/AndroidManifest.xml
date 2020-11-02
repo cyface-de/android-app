@@ -43,6 +43,9 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:usesCleartextTraffic="${usesCleartextTraffic}"><!-- only > API 23 ok, only for debugging -->
 
+        <!-- Inject Sentry DSN -->
+        <meta-data android:name="io.sentry.dsn" android:value="https://REPLACE_WITH_SENTRY_PUBLIC_KEY@o0.ingest.sentry.io/0" />
+
         <!-- Google Maps for Android requirements -->
         <meta-data
             android:name="com.google.android.gms.version"

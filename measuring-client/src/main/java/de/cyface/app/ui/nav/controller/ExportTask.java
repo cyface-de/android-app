@@ -128,6 +128,7 @@ public class ExportTask extends AsyncTask<Void, Void, Long> {
                     }).show();
         } catch (final NullPointerException e) {
             Log.d(TAG, "Dialog (export successful) not shown: Activity not active.");
+            // We don't need to report this to Sentry as it's ok if this happens (app is closed)
         }
     }
 

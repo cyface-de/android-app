@@ -47,6 +47,7 @@ import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * A selectable list which is bound to a {@code Measurement} {@code android.widget.Adapter}.
@@ -160,6 +161,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
                 events = persistenceLayer.loadEvents(measurementId, Event.EventType.MODALITY_TYPE_CHANGE);
             } catch (final CursorIsNullException e) {
                 Log.w(TAG, "Ignored onItemClick.loadTracks() because of null Cursor.");
+                Sentry.captureException(e);
                 return;
             }
             map.renderMeasurement(tracks, events, true);

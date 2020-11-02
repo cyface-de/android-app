@@ -89,6 +89,8 @@ ext {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     // android-frontend dependencies
+    sentryAndroidVersion = "3.1.1"
+    sentryAndroidGradlePluginVersion = "1.7.36"
     mapPlayServicesVersion = "17.0.0"
     locationPlayServicesVersion = "17.0.0"
     materialVersion = "1.2.0-beta01" // Beta because we need version >= 1.2.0 for the slider
