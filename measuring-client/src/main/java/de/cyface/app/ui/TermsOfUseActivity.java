@@ -18,15 +18,14 @@
  */
 package de.cyface.app.ui;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCEPTED_TERMS_KEY;
-import static de.cyface.app.utils.Constants.TAG;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -36,11 +35,13 @@ import de.cyface.app.R;
 
 /**
  * The TermsOfUserActivity is the first {@link Activity} started on app launch.
+ * <p>
  * It's responsible for informing the user about the terms of use (and data privacy conditions).
+ * <p>
  * When the current terms are accepted or have been before, the {@link MainActivity} is launched.
  *
  * @author Armin Schnabel
- * @version 1.0.7
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class TermsOfUseActivity extends Activity implements View.OnClickListener {
@@ -53,7 +54,22 @@ public class TermsOfUseActivity extends Activity implements View.OnClickListener
      * The button to click to accept the terms of use and data privacy conditions.
      */
     private Button acceptTermsButton;
+    /**
+     * {@code True} if the user opted-in to error reporting.
+     */
+    private boolean isReportingEnabled;
+    /**
+     * To check whether the user accepted the terms and opted-in to error reporting.
+     */
     private SharedPreferences preferences;
+    /**
+     * Allows the user to opt-in to error reporting.
+     */
+    private CheckBox acceptReportsCheckbox;
+    /**
+     * To ask the user to accept the terms.
+     */
+    private CheckBox acceptTermsCheckbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,34 +80,48 @@ public class TermsOfUseActivity extends Activity implements View.OnClickListener
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent);
             finish();
-        } else {
-            showTermsToUser();
+            return;
         }
-    }
 
-    private boolean currentTermsHadBeenAccepted() {
-        int accepted_terms = preferences.getInt(ACCEPTED_TERMS_KEY, 0);
-        boolean alreadyAccepted = accepted_terms == BuildConfig.currentTerms;
-        if (!alreadyAccepted) {
-            Log.d(TAG, "current terms (" + BuildConfig.currentTerms + ") different from accepted terms ("
-                    + accepted_terms + ") -> showing terms of use.");
-        }
-        return alreadyAccepted;
-    }
-
-    private void showTermsToUser() {
         setContentView(R.layout.activity_terms_of_use);
+    }
+
+    /**
+     * @return {@code True} if the latest privacy policy was accepted by the user.
+     */
+    private boolean currentTermsHadBeenAccepted() {
+        final int acceptedTermsVersion = preferences.getInt(ACCEPTED_TERMS_KEY, 0);
+        return acceptedTermsVersion == BuildConfig.currentTerms;
+    }
+
+    /**
+     * Registers the handlers for user interaction.
+     */
+    private void registerOnClickListeners() {
         acceptTermsButton = findViewById(R.id.accept_terms_button);
         acceptTermsButton.setOnClickListener(this);
-        CheckBox acceptTermsCheckbox = findViewById(R.id.accept_terms_checkbox);
+        acceptTermsCheckbox = findViewById(R.id.accept_terms_checkbox);
+        acceptReportsCheckbox = findViewById(R.id.accept_reports_checkbox);
         acceptTermsCheckbox
                 .setOnCheckedChangeListener((buttonView, isChecked) -> acceptTermsButton.setEnabled(isChecked));
+        acceptReportsCheckbox
+                .setOnCheckedChangeListener((buttonView, isChecked) -> isReportingEnabled = isChecked);
+    }
+
+    /**
+     * Unregisters the handlers for user interaction.
+     */
+    private void unregisterOnClickListeners() {
+        acceptTermsButton.setOnClickListener(null);
+        acceptTermsCheckbox.setOnCheckedChangeListener(null);
+        acceptReportsCheckbox.setOnCheckedChangeListener(null);
     }
 
     @Override
     public void onClick(View view) {
         final SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(ACCEPTED_TERMS_KEY, BuildConfig.currentTerms);
+        editor.putBoolean(ACCEPTED_REPORTING_KEY, isReportingEnabled);
         editor.apply();
         this.startActivity(callMainActivityIntent);
         finish();
@@ -100,12 +130,13 @@ public class TermsOfUseActivity extends Activity implements View.OnClickListener
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterOnClickListeners();
         acceptTermsButton.setOnClickListener(null);
     }
 
     @Override
     public void onResume() {
-        acceptTermsButton.setOnClickListener(this);
+        registerOnClickListeners();
         super.onResume();
     }
 }

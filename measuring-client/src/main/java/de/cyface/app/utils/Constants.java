@@ -37,9 +37,15 @@ public class Constants {
     public final static String PACKAGE = "de.cyface.app";
     public final static String TAG = PACKAGE; // This can be references as default TAG for this app
     public final static String SUPPORT_EMAIL = "mail@cyface.de";
+    /**
+     * Identifies the accepted terms version in the preferences.
+     */
     public final static String ACCEPTED_TERMS_KEY = PACKAGE + ".accepted_terms";
+    /**
+     * Identifies if the user opted-in to error reporting in the preferences.
+     */
+    public final static String ACCEPTED_REPORTING_KEY = PACKAGE + ".accepted_reporting";
     public final static String PREFERENCES_SERVER_KEY = SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY;
-
     public final static String PREFERENCES_MODALITY_KEY = PACKAGE + ".modality";
     public final static String PREFERENCES_MOVE_TO_LOCATION_KEY = PACKAGE + ".zoom_to_location";
     public final static String PREFERENCES_SYNCHRONIZATION_KEY = PACKAGE + ".synchronization_enabled";
@@ -85,13 +91,13 @@ public class Constants {
      */
     public final static int PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID = 4;
 
-  /**
-   * The key for the {@code SharedPreferences}. This entry contains the preferred sensor frequency.
-   */
-  public static final String PREFERENCES_SENSOR_FREQUENCY_KEY = PACKAGE + ".sensor_frequency";
+    /**
+     * The key for the {@code SharedPreferences}. This entry contains the preferred sensor frequency.
+     */
+    public static final String PREFERENCES_SENSOR_FREQUENCY_KEY = PACKAGE + ".sensor_frequency";
 
-  /**
-   * Default value in Hz when there is no user preference stored yet.
-   */
-  public final static int DEFAULT_SENSOR_FREQUENCY = 100;
+    /**
+     * Default value in Hz when there is no user preference stored yet.
+     */
+    public final static int DEFAULT_SENSOR_FREQUENCY = 100;
 }
