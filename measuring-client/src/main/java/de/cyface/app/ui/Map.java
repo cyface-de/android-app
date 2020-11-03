@@ -18,6 +18,7 @@
  */
 package de.cyface.app.ui;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.lang.ref.WeakReference;
@@ -107,7 +108,6 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
      * The {@code SharedPreferences} used to store the user's preferences.
      */
     private final SharedPreferences preferences;
-    // private TileOverlay tileOverlay;
     /**
      * The {@code Runnable} triggered when the {@code GoogleMap} is loaded and ready.
      */
@@ -122,6 +122,10 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
      * be replaced or removed.
      */
     public final static long TEMPORARY_EVENT_MARKER_ID = -1L;
+    /**
+     * {@code True} if the user opted-in to error reporting.
+     */
+    private final boolean isReportingEnabled;
 
     /**
      * @param view The {@code MapView} element of the {@code GoogleMap}.
@@ -142,6 +146,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         view.getMapAsync(this);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
+        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
         isAutoCenterMapEnabled = preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY, false);
     }
 
@@ -301,7 +306,9 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         } catch (final SecurityException e) {
             if (permissionWereJustGranted) {
                 Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing");
-                Sentry.captureException(e);
+                if (isReportingEnabled) {
+                    Sentry.captureException(e);
+                }
             }
             // This happens as the Map is shown in background when asking for location permission
             // There is no need to track this event as long as the permissions were not just granted
@@ -331,7 +338,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera");
-                if (!highFrequentRequest) {
+                if (!highFrequentRequest && isReportingEnabled) {
                     Sentry.captureMessage("Map.moveToLocation: GoogleMap is null");
                 }
                 return;
@@ -340,8 +347,8 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         } catch (final SecurityException e) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?");
-            if (!highFrequentRequest) {
-               Sentry.captureException(e);
+            if (!highFrequentRequest && isReportingEnabled) {
+                Sentry.captureException(e);
             }
         }
     }

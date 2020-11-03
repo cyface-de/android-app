@@ -19,6 +19,7 @@
 package de.cyface.app.ui;
 
 import static de.cyface.app.ui.MainActivity.getMainActivityFromContext;
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.DEFAULT_SENSOR_FREQUENCY;
@@ -142,7 +143,10 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
                 currentMeasurementsEvents = dataCapturingButton.loadCurrentMeasurementsEvents();
                 map.renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
             } catch (final NoSuchMeasurementException | CursorIsNullException e) {
-                Sentry.captureException(e);
+                final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
+                if (isReportingEnabled) {
+                    Sentry.captureException(e);
+                }
                 Log.w(TAG,
                         "onMapReadyRunnable failed to loadCurrentMeasurementsEvents. Thus, map.renderMeasurement() is not executed. This should only happen when the capturing already stopped.");
             }
@@ -221,7 +225,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
                 getMainActivityFromContext(context), future -> {
                     final AccountManager accountManager1 = AccountManager.get(context);
                     try {
-                        // noinspection unused - this allows us to detect when LoginActivity is closed
+                        // allows to detect when LoginActivity is closed
                         future.getResult();
 
                         // The LoginActivity created a temporary account which cannot be used for synchronization.
@@ -448,7 +452,10 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
             // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
             dataCapturingService.shutdownDataCapturingService();
         } catch (SynchronisationException e) {
-            Sentry.captureException(e);
+            final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
+            if (isReportingEnabled) {
+                Sentry.captureException(e);
+            }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e);
         }
         dataCapturingService.removeConnectionStatusListener(this);

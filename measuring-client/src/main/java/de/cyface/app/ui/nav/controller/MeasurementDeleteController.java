@@ -18,6 +18,7 @@
  */
 package de.cyface.app.ui.nav.controller;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.externalCyfaceFolderPath;
@@ -30,8 +31,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -61,11 +64,15 @@ import io.sentry.Sentry;
  */
 public final class MeasurementDeleteController extends AsyncTask<ListView, Void, ListView> {
 
-    private WeakReference<Context> contextReference;
+    private final WeakReference<Context> contextReference;
     /**
      * The data persistenceLayer used by this controller.
      */
     private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    /**
+     * {@code True} if the user opted-in to error reporting.
+     */
+    private final boolean isReportingEnabled;
 
     /**
      * Creates a new completely initialized object of this class with the current context.
@@ -74,6 +81,8 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
         this.contextReference = new WeakReference<>(context);
         this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
                 new DefaultPersistenceBehaviour());
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
     }
 
     @Override
@@ -169,7 +178,9 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             unFinishedMeasurement = persistenceLayer.loadCurrentlyCapturedMeasurement();
         } catch (final NoSuchMeasurementException e) {
             unFinishedMeasurement = null;
-            Sentry.captureException(e);
+            if (isReportingEnabled) {
+                Sentry.captureException(e);
+            }
         } catch (final CursorIsNullException e) {
             throw new IllegalStateException(e);
         }

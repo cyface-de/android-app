@@ -18,6 +18,7 @@
  */
 package de.cyface.app.ui.button;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.Constants.TAG;
@@ -166,7 +167,11 @@ public class DataCapturingButton
      * Helps to reduce the Sentry quota used. We only want to receive this event once for each DataCapturingButton
      * instance not for each location event.
      */
-    private boolean[] onNewGeoLocationAcquiredExceptionTriggered = new boolean[] {false, false, false};
+    private final boolean[] onNewGeoLocationAcquiredExceptionTriggered = new boolean[] {false, false, false};
+    /**
+     * {@code True} if the user opted-in to error reporting.
+     */
+    private boolean isReportingEnabled;
 
     public DataCapturingButton(@NonNull final MainFragment mainFragment) {
         this.listener = new HashSet<>();
@@ -187,6 +192,7 @@ public class DataCapturingButton
 
         // To get the vehicle
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
         // To load the measurement distance
         this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
@@ -346,7 +352,7 @@ public class DataCapturingButton
         if (dataCapturingService.reconnect(IS_RUNNING_CALLBACK_TIMEOUT)) {
             Log.d(TAG, "onResume: reconnecting DCS succeeded");
             setLocationListener();
-            // We resync the button here as the data capturing can be canceled while the app is closed
+            // We re-sync the button here as the data capturing can be canceled while the app is closed
             setButtonStatus(button, OPEN);
             setButtonEnabled(button);
             // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
@@ -840,7 +846,10 @@ public class DataCapturingButton
         if (dataCapturingService == null) {
             Log.w(TAG, "Skipping DCS.disconnect() as DCS is null");
             // This should not happen, thus, reporting to Sentry
-            Sentry.captureMessage("DCButton.onDestroyView: dataCapturingService is null");
+
+            if (isReportingEnabled) {
+                Sentry.captureMessage("DCButton.onDestroyView: dataCapturingService is null");
+            }
         } else {
             try {
                 dataCapturingService.disconnect();
@@ -893,7 +902,7 @@ public class DataCapturingButton
             // GeoLocations may also arrive shortly after a measurement was stopped. Thus, this may not crash.
             // This happened on the Emulator with emulated live locations.
             Log.w(TAG, "onNewGeoLocationAcquired: No currently captured measurement found, doing nothing.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[0]) {
+            if (!onNewGeoLocationAcquiredExceptionTriggered[0] && isReportingEnabled) {
                 onNewGeoLocationAcquiredExceptionTriggered[0] = true;
                 Sentry.captureException(e);
             }
@@ -916,17 +925,17 @@ public class DataCapturingButton
             mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
         } catch (final CursorIsNullException e) {
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
-                + "Thus, map.renderMeasurement() is ignored. This should only happen id "
-                + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[1]) {
+                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
+                    + "the capturing already stopped.");
+            if (!onNewGeoLocationAcquiredExceptionTriggered[1] && isReportingEnabled) {
                 onNewGeoLocationAcquiredExceptionTriggered[1] = true;
                 Sentry.captureException(e);
             }
         } catch (NoSuchMeasurementException e) {
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
-                + "Thus, map.renderMeasurement() is ignored. This should only happen id "
-                + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[2]) {
+                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
+                    + "the capturing already stopped.");
+            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && isReportingEnabled) {
                 onNewGeoLocationAcquiredExceptionTriggered[2] = true;
                 Sentry.captureException(e);
             }

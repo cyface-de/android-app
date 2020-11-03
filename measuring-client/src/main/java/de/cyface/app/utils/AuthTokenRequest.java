@@ -18,6 +18,7 @@
  */
 package de.cyface.app.utils;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
@@ -28,7 +29,9 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -82,7 +85,11 @@ public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRe
         } catch (final NetworkErrorException e) {
             // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
             // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-            Sentry.captureException(e);
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
+            if (isReportingEnabled) {
+                Sentry.captureException(e);
+            }
             // "the authenticator could not honor the request due to a network error"
             return new AuthTokenRequestParams(account, false);
         }

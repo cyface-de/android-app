@@ -18,11 +18,12 @@
  */
 package de.cyface.app;
 
-import static de.cyface.app.utils.Constants.TAG;
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.synchronization.ErrorHandler.ErrorCode.UNAUTHORIZED;
 
 import android.content.IntentFilter;
-import android.util.Log;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -47,7 +48,19 @@ import io.sentry.Sentry;
  */
 public class MeasuringClient extends MultiDexApplication {
 
+    /**
+     * Stores the user's preferences.
+     */
+    private SharedPreferences preferences;
+
+    /**
+     * Allows to subscribe to error events.
+     */
     private static ErrorHandler errorHandler;
+
+    /**
+     * Reports error events to the user via UI and to Sentry, if opted-in.
+     */
     private final ErrorHandler.ErrorListener errorListener = (errorCode, errorMessage) -> {
         // All other errors are shown by the LoginActivity
         if (errorCode != UNAUTHORIZED) {
@@ -57,18 +70,25 @@ public class MeasuringClient extends MultiDexApplication {
         // There are two cases we can have network errors
         // 1. during authentication (AuthTokenRequest), ether login or before upload
         // 2. during upload (SyncPerformer/SyncAdapter)
-        // In the first case we get the full stacktrace by a Sentry.capture in AuthTokenRequest
+        // In the first case we get the full stacktrace by a Sentry capture in AuthTokenRequest
         // but in the second case we cannot get the stacktrace as it's only available in the SDK.
         // For that reason we also capture a message here.
         // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-        Sentry.captureMessage(errorCode.name() + ": " + errorMessage);
+        final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
+        if (isReportingEnabled) {
+            Sentry.captureMessage(errorCode.name() + ": " + errorMessage);
+        }
     };
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "Starting Cyface application.");
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity.class;
+
+        // Register error listener
         errorHandler = new ErrorHandler();
         LocalBroadcastManager.getInstance(this).registerReceiver(errorHandler,
                 new IntentFilter(ErrorHandler.ERROR_INTENT));
