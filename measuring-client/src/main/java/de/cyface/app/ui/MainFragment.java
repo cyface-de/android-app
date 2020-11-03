@@ -85,7 +85,7 @@ import io.sentry.Sentry;
  * A {@code Fragment} for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.4.0
+ * @version 1.4.1
  * @since 1.0.0
  */
 public class MainFragment extends Fragment implements ConnectionStatusListener {

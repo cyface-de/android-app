@@ -43,7 +43,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.4.5
+ * @version 1.5.0
  * @since 1.0.0
  */
 public class MeasuringClient extends MultiDexApplication {

@@ -52,7 +52,7 @@ import io.sentry.Sentry;
  * TODO [CY-3737]: This class should be removed and the methods moved to the WiFiSurveyor with different names
  *
  * @author Armin Schnabel
- * @version 4.0.1
+ * @version 4.0.2
  * @since 1.0.0
  */
 public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRequest.AuthTokenRequestParams> {

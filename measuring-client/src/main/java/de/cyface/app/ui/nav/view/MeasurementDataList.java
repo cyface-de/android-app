@@ -56,7 +56,7 @@ import io.sentry.Sentry;
  * A selectable list which is bound to a {@code Measurement} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 2.0.3
+ * @version 2.0.4
  * @since 2.0.0
  */
 class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,

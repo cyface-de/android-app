@@ -73,7 +73,7 @@ import io.sentry.Sentry;
  * The Map class handles everything around the GoogleMap view of {@link MainFragment}.
  *
  * @author Armin Schnabel
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
