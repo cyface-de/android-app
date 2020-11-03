@@ -3,6 +3,7 @@
 
   <!-- Other -->
   <string name="accept_terms">Accetta condizioni</string>
+  <string name="accept_reports_details">Trasmettere automaticamente i messaggi di errore e l\'utilizzo delle app</string>
   <string name="accept_terms_details">Ho letto il disclaimer e l\'informativa sulla privacy e accetto queste condizioni.</string>
   <string name="notification_channel_name_info">Informazioni</string>
   <string name="notification_channel_name_warning">Avvisi</string>
@@ -137,6 +138,23 @@
         \nAmtsgericht Dresden
         \nHRB: 36726
         \nUSt.-Id. (VAT no.): DE-312598748</string>
+
+  <!-- Attention: The legal text should be updated first in Confluence! -->
+  <string name="reports">Tracciamento degli errori attraverso Sentry</string>
+  <string name="reports_content">
+        Miglioriamo e sviluppiamo costantemente la nostra app. Tuttavia, non possiamo garantire un funzionamento senza errori dell\'app. Al fine di mantenere i possibili errori di programmazione al minimo, utilizziamo Sentry, un servizio di Functional Software Inc., 132 Hawthorne St., San Francisco, CA 94107, USA (di seguito "Sentry"). La sentinella controlla gli errori che si verificano all\'interno della nostra App e ci informa su di essi. In caso di errore del software, le seguenti informazioni vengono trasmesse automaticamente a Sentry:
+
+        \n \n- Messaggi di errore che si verificano quando si utilizza l\'app
+        \n- Informazioni sull\'utilizzo dell\'app immediatamente prima del verificarsi dell\'errore
+        \n- Data e ora degli errori, ora di inizio dell\'applicazione
+        \n- informazioni sul dispositivo: Sistema operativo, versione app e modello di dispositivo
+        \n- identificatore per l\'identificazione dei guasti dello stesso apparecchio
+        \n- Stato del dispositivo: carica e temperatura della batteria, livello di carica, tempo di avvio del dispositivo, memoria, tipo di connessione (Wi-Fi/dati mobili), spazio di memoria, memoria disponibile, lingua preferita, orientamento del dispositivo, risoluzione e densità dello schermo, fuso orario
+        \n- Indirizzo IP dell\'apparecchio (stabilendo la connessione)
+
+        \n Le informazioni sono raccolte in forma anonima, non vengono utilizzate per scopi personali o per scopi pubblicitari e poi cancellate di nuovo. La base giuridica per il suddetto trattamento dei dati è costituita dall\'art. 6 cpv. 1 lett. f della GDPR.
+
+        \n \n L\'unico scopo dell\'elaborazione è quello di migliorare la stabilità e l\'usabilità dell\'app. Ulteriori informazioni sul trattamento dei dati da parte di Sentry si trovano nell\'Informativa sulla privacy di Sentry: https://sentry.io/privacy/</string>
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <string name="disclaimer">Disclaimer</string>

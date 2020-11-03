@@ -3,6 +3,7 @@
 
   <!-- Other -->
   <string name="accept_terms">Bedingungen akzeptieren</string>
+  <string name="accept_reports_details">Fehlermeldungen und App-Nutzung automatisch übermitteln</string>
   <string name="accept_terms_details">Ich habe den Disclaimer und die Datenschutzbedingungen gelesen und akzeptiere diese.</string>
   <string name="notification_channel_name_info">Information</string>
   <string name="notification_channel_name_warning">Warnungen</string>
@@ -136,6 +137,23 @@
         \nAmtsgericht Dresden
         \nHRB: 36726
         \nUSt.-Id.: DE-312598748</string>
+
+  <!-- Attention: The legal text should be updated first in Confluence! -->
+  <string name="reports">Fehler-Tracking durch Sentry</string>
+  <string name="reports_content">
+        Wir verbessern und entwickeln unsere App ständig weiter. Trotzdem können wir keinen fehlerfreien Betrieb der App garantieren. Um mögliche Programmierfehler so gering wie möglich zu halten, verwenden wir Sentry, ein Service von Functional Software Inc., 132 Hawthorne St, San Francisco, CA 94107, USA (nachfolgend "Sentry"). Sentry überwacht Fehler die innerhalb unserer App auftreten und informiert uns über diese. Im Falle eines Software-Fehlers werden automatisch folgende Informationen an Sentry übermittelt:
+
+        \n\n- Fehlermeldungen, die bei der Verwendung der App auftreten
+        \n- Informationen über die Verwendung der App unmittelbar vor dem Auftreten des Fehlers
+        \n- Datum und Uhrzeit der Fehler, Startzeitpunkt der App
+        \n- Geräteinformationen: Betriebssystem, App Version und Gerätemodell
+        \n- Kennung zur Identifizierung von Fehlern desselben Geräts
+        \n- Status des Geräts: Batterieladung und -temperatur, Ladezustand, Zeitpunkt des Gerätestarts, Arbeitsspeicher, Verbindungstyp (Wi-Fi/Mobil-Daten), Speicherplatz, verfügbarer Speicher, bevorzugte Sprache, Geräteausrichtung, Bildschirmauflösung und -dichte, Zeitzone
+        \n- IP-Adresse des Geräts (durch den Verbindungsaufbau)
+
+        \n\nDie Informationen werden anonym erhoben, nicht für persönliche Zwecke oder zu Werbezwecken verwendet und anschließend wieder gelöscht. Rechtsgrundlage für die vorgenannte Datenverarbeitung ist Art. 6, Abs. 1 lit. f der DSGVO.
+
+        \n\nZweck der Verarbeitung ist ausschließlich die Verbessung der Stabilität und Nutzbarkeit der App. Weitere Informationen bzgl. der Datenverarbeitung durch Sentry finden Sie in den Datenschutzrichtlinien von Sentry: https://sentry.io/privacy/</string>
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <string name="disclaimer">Disclaimer</string>
