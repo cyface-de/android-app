@@ -35,7 +35,7 @@ To download the Cyface libraries (SDK, Energy Settings, Camera Service):
 github.user=YOUR_USERNAME
 github.token=YOUR_ACCESS_TOKEN
 ....
-. Build the app `./gradlew build`
+* Build the app `./gradlew build`
 
 [[inject-secrets]]
 === Inject Secrets
@@ -47,27 +47,25 @@ The credentials are usually injected by the CI:
 
 Create a file `sentry.properties` with the following credentials:
 
-[source]
-----
+....
 defaults.project=android-app
 defaults.org=cyface
-auth.token=REPLACE_WITH_API_TOKEN
-----
-
-Replace the DSN in the `measuring-client/src/main/AndroidManifest.xml` file:
-
-[source]
-----
-<meta-data android:name="io.sentry.dsn" android:value="https://REPLACE_WITH_SENTRY_PUBLIC_KEY@o0.ingest.sentry.io/0" />
-----
+auth.token=SECRET_TOKEN
+....
 
 ==== Google Maps
 
-Replace the API key in `measuring-client/src/main/res/values/gmaps_api_key.xml`.
+Add the following to your `local.properties` file:
+....
+google.maps_api_key=SECRET_KEY
+....
 
 ==== Cyface Guest Credentials
 
-Replace the password in `measuring-client/build.gradle`.
+Add the following to your `local.properties` file:
+....
+cyface.guest_password=GUEST_PASSWORD
+....
 
 
 [[developer-guide]]
