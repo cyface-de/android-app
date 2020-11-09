@@ -99,15 +99,19 @@ android {
             buildConfigField "String", "guestPassword", '"MOCKED"'
         }
         release {
+            // Load credentials
+            def properties = new Properties()
+            properties.load(new FileInputStream("local.properties"))
+
             // mapping.xml file required to decode stack traces, but it's included in the bundle
             minifyEnabled true
             // https://developer.android.com/studio/build/shrink-code.html
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // signingConfig is set by the CI
-            buildConfigField "String", "cyfaceServer", "\"https://s2.cyface.de/api/v2\""
-            buildConfigField "String", "guestLogin", "\"guest\""
-            buildConfigField "String", "guestPassword", "\"REPLACE_WITH_PASSWORD\""
+            buildConfigField "String", "cyfaceServer", '"https://s2.cyface.de/api/v2"'
+            buildConfigField "String", "guestLogin", '"guest"'
+            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.guest_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
