@@ -43,8 +43,8 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:usesCleartextTraffic="${usesCleartextTraffic}"><!-- only > API 23 ok, only for debugging -->
 
-        <!-- Inject Sentry DSN -->
-        <meta-data android:name="io.sentry.dsn" android:value="https://REPLACE_WITH_SENTRY_PUBLIC_KEY@o0.ingest.sentry.io/0" />
+        <!-- Sentry DSN. This ids the account but is not a secret. -->
+        <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
 
         <!-- Google Maps for Android requirements -->
         <meta-data
