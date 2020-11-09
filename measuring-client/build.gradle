@@ -54,6 +54,10 @@ android {
         return stdout.toString().trim()
     }
 
+    // Load credentials
+    def properties = new Properties()
+    properties.load(new FileInputStream("local.properties"))
+
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -78,6 +82,9 @@ android {
         // Ensure that the backend's "CyfaceFull" flavor is always used
         missingDimensionStrategy 'project', 'cyface'
         missingDimensionStrategy 'mode', 'full'
+
+        // Load Google Maps API key
+        manifestPlaceholders = [ googleMapsApiKey:"${properties.getProperty('google.maps_api_key')}"]
     }
 
     buildTypes {
@@ -99,10 +106,6 @@ android {
             buildConfigField "String", "guestPassword", '"MOCKED"'
         }
         release {
-            // Load credentials
-            def properties = new Properties()
-            properties.load(new FileInputStream("local.properties"))
-
             // mapping.xml file required to decode stack traces, but it's included in the bundle
             minifyEnabled true
             // https://developer.android.com/studio/build/shrink-code.html
