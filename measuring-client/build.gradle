@@ -56,7 +56,7 @@ android {
 
     // Load credentials
     def properties = new Properties()
-    properties.load(new FileInputStream("local.properties"))
+    file("local.properties").withInputStream { properties.load(it) }
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
