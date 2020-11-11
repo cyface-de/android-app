@@ -18,6 +18,7 @@
  */
 package de.cyface.app.ui.button;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.Constants.TAG;
@@ -103,13 +104,14 @@ import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * The button listener for the button to start and stop the data capturing service.
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.7.0
+ * @version 3.8.0
  * @since 1.0.0
  */
 public class DataCapturingButton
@@ -161,6 +163,15 @@ public class DataCapturingButton
      * the updated track is requested. This is {@code null} if there is no unfinished measurement.
      */
     private List<Track> currentMeasurementsTracks;
+    /**
+     * Helps to reduce the Sentry quota used. We only want to receive this event once for each DataCapturingButton
+     * instance not for each location event.
+     */
+    private final boolean[] onNewGeoLocationAcquiredExceptionTriggered = new boolean[] {false, false, false};
+    /**
+     * {@code True} if the user opted-in to error reporting.
+     */
+    private boolean isReportingEnabled;
 
     public DataCapturingButton(@NonNull final MainFragment mainFragment) {
         this.listener = new HashSet<>();
@@ -181,6 +192,7 @@ public class DataCapturingButton
 
         // To get the vehicle
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
         // To load the measurement distance
         this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
@@ -340,7 +352,7 @@ public class DataCapturingButton
         if (dataCapturingService.reconnect(IS_RUNNING_CALLBACK_TIMEOUT)) {
             Log.d(TAG, "onResume: reconnecting DCS succeeded");
             setLocationListener();
-            // We resync the button here as the data capturing can be canceled while the app is closed
+            // We re-sync the button here as the data capturing can be canceled while the app is closed
             setButtonStatus(button, OPEN);
             setButtonEnabled(button);
             // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
@@ -818,30 +830,44 @@ public class DataCapturingButton
     @Override
     public void onDestroyView() {
         button.setOnClickListener(null);
+        disconnect(dataCapturingService, cameraService);
+    }
 
-        // Disconnect DataCapturingService
+    /**
+     * Unbinds the services. They continue to run in the background but won't send any updates to this button.
+     * <p>
+     * Instead of only disconnecting when `isRunning()` returns a timeout we always disconnect.
+     * This way the race condition between view destruction and timeout is prevented [MOV-588].
+     *
+     * @param dataCapturingService the capturing service to unregister from
+     * @param cameraService the camera service to unregister from
+     */
+    private void disconnect(final DataCapturingService dataCapturingService, final CameraService cameraService) {
         if (dataCapturingService == null) {
             Log.w(TAG, "Skipping DCS.disconnect() as DCS is null");
+            // This should not happen, thus, reporting to Sentry
+
+            if (isReportingEnabled) {
+                Sentry.captureMessage("DCButton.onDestroyView: dataCapturingService is null");
+            }
         } else {
-            // Before we disconnected only when isRunningCallback returned true but we had to remove the
-            // callback because it crashed when the BGS was not running with (MOV-588):
-            // - MainActivity leaked IntentReceiver (PongReceiver) - did you for get to unregister it?
-            // - unregister (which is called when the timeout happens) crashes - PongReceiver not registered
             try {
                 dataCapturingService.disconnect();
             } catch (DataCapturingException e) {
-                Log.w(TAG, "Failed to unbind as the background service was not running.");
+                // This just tells us there is no running capturing in the background, see [MOV-588]
+                Log.d(TAG, "No need to unbind as the background service was not running.");
             }
         }
 
-        // Disconnect CameraService
         if (cameraService == null) {
-            Log.w(TAG, "Skipping CameraService.disconnect() as CameraService is null");
+            Log.d(TAG, "Skipping CameraService.disconnect() as CameraService is null");
+            // No need to capture this as this is always null when camera is disabled
         } else {
             try {
                 cameraService.disconnect();
             } catch (DataCapturingException e) {
-                Log.w(TAG, "Failed to unbind as the camera background service was not running.");
+                // This just tells us there is no running capturing in the background, see [MOV-588]
+                Log.d(TAG, "No need to unbind as the camera background service was not running.");
             }
         }
     }
@@ -876,6 +902,10 @@ public class DataCapturingButton
             // GeoLocations may also arrive shortly after a measurement was stopped. Thus, this may not crash.
             // This happened on the Emulator with emulated live locations.
             Log.w(TAG, "onNewGeoLocationAcquired: No currently captured measurement found, doing nothing.");
+            if (!onNewGeoLocationAcquiredExceptionTriggered[0] && isReportingEnabled) {
+                onNewGeoLocationAcquiredExceptionTriggered[0] = true;
+                Sentry.captureException(e);
+            }
             return;
         } catch (final CursorIsNullException e) {
             throw new IllegalStateException(e);
@@ -893,10 +923,22 @@ public class DataCapturingButton
         try {
             currentMeasurementsEvents = loadCurrentMeasurementsEvents();
             mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
-        } catch (final CursorIsNullException | NoSuchMeasurementException e) {
-            Log.w(TAG,
-                    "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). Thus," +
-                            "map.renderMeasurement() is ignored. This should only happen id the capturing already stopped.");
+        } catch (final CursorIsNullException e) {
+            Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
+                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
+                    + "the capturing already stopped.");
+            if (!onNewGeoLocationAcquiredExceptionTriggered[1] && isReportingEnabled) {
+                onNewGeoLocationAcquiredExceptionTriggered[1] = true;
+                Sentry.captureException(e);
+            }
+        } catch (NoSuchMeasurementException e) {
+            Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
+                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
+                    + "the capturing already stopped.");
+            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && isReportingEnabled) {
+                onNewGeoLocationAcquiredExceptionTriggered[2] = true;
+                Sentry.captureException(e);
+            }
         }
     }
 

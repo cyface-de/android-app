@@ -66,7 +66,7 @@ import de.cyface.utils.Validate;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.1.0
+ * @version 1.1.1
  * @since 1.0.0
  */
 public class ExportTask extends AsyncTask<Void, Void, Long> {
@@ -128,6 +128,7 @@ public class ExportTask extends AsyncTask<Void, Void, Long> {
                     }).show();
         } catch (final NullPointerException e) {
             Log.d(TAG, "Dialog (export successful) not shown: Activity not active.");
+            // We don't need to report this to Sentry as it's ok if this happens (app is closed)
         }
     }
 

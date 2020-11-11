@@ -18,6 +18,7 @@
  */
 package de.cyface.app.utils;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
@@ -28,7 +29,9 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -36,6 +39,7 @@ import androidx.annotation.NonNull;
 import de.cyface.app.ui.LoginActivity;
 import de.cyface.synchronization.CyfaceAuthenticator;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * Asynchronous Request to get a new auth token.
@@ -48,7 +52,7 @@ import de.cyface.utils.Validate;
  * TODO [CY-3737]: This class should be removed and the methods moved to the WiFiSurveyor with different names
  *
  * @author Armin Schnabel
- * @version 4.0.1
+ * @version 4.0.2
  * @since 1.0.0
  */
 public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRequest.AuthTokenRequestParams> {
@@ -79,6 +83,13 @@ public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRe
             authToken = cyfaceAuthenticator.getAuthToken(null, account, AUTH_TOKEN_TYPE, null)
                     .getString(AccountManager.KEY_AUTHTOKEN);
         } catch (final NetworkErrorException e) {
+            // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
+            // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
+            if (isReportingEnabled) {
+                Sentry.captureException(e);
+            }
             // "the authenticator could not honor the request due to a network error"
             return new AuthTokenRequestParams(account, false);
         }

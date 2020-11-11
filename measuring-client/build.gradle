@@ -21,13 +21,24 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.7.0
+ * @version 1.8.0
  * @since 1.0.0
  */
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
+apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // Exception tracking when using proguard
+        classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
+    }
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -43,6 +54,10 @@ android {
         return stdout.toString().trim()
     }
 
+    // Load credentials
+    def properties = new Properties()
+    file("../local.properties").withInputStream { properties.load(it) }
+
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -56,17 +71,20 @@ android {
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
 
-        buildConfigField("String", "localHostIp", "\"10.0.2.2\"")
-        buildConfigField "String", "GitHash", "\"${getGitHash()}\""
+        buildConfigField("String", "localHostIp", '"10.0.2.2"')
+        buildConfigField "String", "GitHash", '"${getGitHash()}"'
         // we don't describe this provider build variable in the README so it's probably deprecated
-        // buildConfigField("String", "provider", "\"de.cyface.app.provider\"")
+        // buildConfigField("String", "provider", '"de.cyface.app.provider"')
 
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
-        buildConfigField "int", "currentTerms", "3"
+        buildConfigField "int", "currentTerms", "4"
 
         // Ensure that the backend's "CyfaceFull" flavor is always used
         missingDimensionStrategy 'project', 'cyface'
         missingDimensionStrategy 'mode', 'full'
+
+        // Load Google Maps API key
+        manifestPlaceholders = [ googleMapsApiKey:"${properties.getProperty('google.maps_api_key')}"]
     }
 
     buildTypes {
@@ -77,15 +95,15 @@ android {
             // Select one of the APIs below, depending on your needs
 
             // Mock-api, only supports mock-login (used by UI test on CI)
-            buildConfigField "String", "cyfaceServer", "\"https://demo.cyface.de/api/v2\""
+            buildConfigField "String", "cyfaceServer", '"https://demo.cyface.de/api/v2"'
             manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
 
             // Local mock-api via emulator (see ./mock-api) - can be easily modified for testing
-            //buildConfigField "String", "cyfaceServer", "\"http://10.0.2.2:9113/api/v2\""
+            //buildConfigField "String", "cyfaceServer", '"http://10.0.2.2:9113/api/v2"'
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
-            buildConfigField "String", "guestLogin", "\"MOCKED\""
-            buildConfigField "String", "guestPassword", "\"MOCKED\""
+            buildConfigField "String", "guestLogin", '"MOCKED"'
+            buildConfigField "String", "guestPassword", '"MOCKED"'
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
@@ -94,9 +112,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // signingConfig is set by the CI
-            buildConfigField "String", "cyfaceServer", "\"https://s2.cyface.de/api/v2\""
-            buildConfigField "String", "guestLogin", "\"guest\""
-            buildConfigField "String", "guestPassword", "\"REPLACE_WITH_PASSWORD\""
+            buildConfigField "String", "cyfaceServer", '"https://s2.cyface.de/api/v2"'
+            buildConfigField "String", "guestLogin", '"guest"'
+            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.guest_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
@@ -129,7 +147,35 @@ android {
     }
 }
 
+// Exception tracking
+sentry {
+    // Disables or enables the automatic configuration of ProGuard
+    // for Sentry.  This injects a default config for ProGuard so
+    // you don't need to do it manually.
+    autoProguardConfig true
+
+    // Enables or disables the automatic upload of mapping files
+    // during a build.  If you disable this, you'll need to manually
+    // upload the mapping files with sentry-cli when you do a release.
+    autoUpload true
+
+    // Disables or enables the automatic configuration of Native Symbols
+    // for Sentry. This executes sentry-cli automatically so
+    // you don't need to do it manually.
+    // Default is disabled.
+    uploadNativeSymbols false
+
+    // Does or doesn't include the source code of native code for Sentry.
+    // This executes sentry-cli with the --include-sources param. automatically so
+    // you don't need to do it manually.
+    // Default is disabled.
+    includeNativeSources false
+}
+
 dependencies {
+    // Exception tracking
+    implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
+
     // To build an app with > 64K methods
     implementation "androidx.multidex:multidex:$rootProject.ext.multidexVersion"
     // To change the material design

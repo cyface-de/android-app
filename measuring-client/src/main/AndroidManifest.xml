@@ -43,13 +43,16 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:usesCleartextTraffic="${usesCleartextTraffic}"><!-- only > API 23 ok, only for debugging -->
 
+        <!-- Sentry DSN. This ids the account but is not a secret. -->
+        <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
+
         <!-- Google Maps for Android requirements -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="${googleMapsApiKey}" />
 
         <uses-library
             android:name="org.apache.http.legacy"

@@ -18,13 +18,16 @@
  */
 package de.cyface.app.ui.nav.view;
 
+import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.util.List;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.View;
@@ -47,12 +50,13 @@ import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
+import io.sentry.Sentry;
 
 /**
  * A selectable list which is bound to a {@code Measurement} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 2.0.3
+ * @version 2.0.4
  * @since 2.0.0
  */
 class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,
@@ -83,6 +87,10 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
      * The {@code Map} on which the {@code Measurement}s are shown.
      */
     private final Map map;
+    /**
+     * {@code True} if the user opted-in to error reporting.
+     */
+    private final boolean isReportingEnabled;
 
     /**
      * @param activity The {@code FragmentActivity} required to create a new {@link CursorEventAdapter} and
@@ -101,6 +109,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         this.persistenceLayer = persistenceLayer;
         this.measurementOverviewFragment = measurementOverviewFragment;
         this.map = map;
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
     }
 
     /**
@@ -160,6 +170,9 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
                 events = persistenceLayer.loadEvents(measurementId, Event.EventType.MODALITY_TYPE_CHANGE);
             } catch (final CursorIsNullException e) {
                 Log.w(TAG, "Ignored onItemClick.loadTracks() because of null Cursor.");
+                if (isReportingEnabled) {
+                    Sentry.captureException(e);
+                }
                 return;
             }
             map.renderMeasurement(tracks, events, true);

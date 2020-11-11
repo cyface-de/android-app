@@ -3,6 +3,7 @@
 
   <!-- Other -->
   <string name="accept_terms">Accept terms</string>
+  <string name="accept_reports_details">Automatically transmit error messages and app usage</string>
   <string name="accept_terms_details">I have read the disclaimer and privacy policy and accept these conditions.</string>
   <string name="app_name" translatable="false">Cyface</string>
   <string name="notification_channel_name_info">Info</string>
@@ -141,6 +142,23 @@
         \nAmtsgericht Dresden
         \nHRB: 36726
         \nUSt.-Id. (VAT no.): DE-312598748</string>
+
+  <!-- Attention: The legal text should be updated first in Confluence! -->
+  <string name="reports">Error tracking by Sentry</string>
+  <string name="reports_content">
+        We are constantly improving and developing our app. Nevertheless, we cannot guarantee error-free operation of the app. In order to keep possible programming errors to a minimum, we use Sentry, a service provided by Functional Software Inc, 132 Hawthorne St, San Francisco, CA 94107, USA (hereinafter "Sentry"). Sentry monitors errors that occur within our App and informs us of them. In the event of a software error, the following information is automatically transmitted to Sentry:
+
+        \n\n- Error messages that occur while using the App
+        \n- Information about the use of the app immediately before the error occurred
+        \n- Date and time of the errors, start time of the app
+        \n- Device information: operating system, app version and device model
+        \n- Identifier to identify errors from the same device
+        \n- Status of the device: battery charge and temperature, charging state, boot time, memory space, connection type (Wi-Fi/mobile data), storage space, available storage, preferred language, device orientation, screen resolution and density, time zone
+        \n- IP address of the machine (when the connection is established)
+
+        \n\nThe information is collected anonymously, not used for personal purposes or for advertising purposes and then deleted again. The legal basis for the above-mentioned data processing is Art. 6, Paragraph 1 lit. f of the GDPR.
+
+        \n\nThe sole purpose of processing is to improve the stability and usability of the app. For further information regarding data processing by Sentry, please refer to the Sentry Privacy Policy: https://sentry.io/privacy/</string>
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <string name="disclaimer">Disclaimer</string>
