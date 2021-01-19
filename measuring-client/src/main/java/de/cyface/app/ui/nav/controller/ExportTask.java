@@ -187,7 +187,6 @@ public class ExportTask extends AsyncTask<Void, Void, Long> {
                 targetOutputStream = new FileOutputStream(target);
                 bytesTransferred = zipFolder(sourceFolder, targetOutputStream);
 
-                // getContext() not only available on higher APIs
                 informMediaScanner(context, target);
             }
 

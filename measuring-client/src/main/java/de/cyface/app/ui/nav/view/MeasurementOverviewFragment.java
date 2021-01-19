@@ -141,7 +141,7 @@ public class MeasurementOverviewFragment extends Fragment {
     /**
      * A {@code View.OnClickListener} for the addButton action button used to add {@code Event}s.
      */
-    private View.OnClickListener addButtonClickListener = new View.OnClickListener() {
+    private final View.OnClickListener addButtonClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             final GoogleMap googleMap = map.getGoogleMap();

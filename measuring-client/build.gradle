@@ -44,16 +44,6 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
-    // We add the git hash to the email feedback of users in the app, needs to be before its first use
-    def getGitHash = { ->
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-parse', '--short', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
-    }
-
     // Load credentials
     def properties = new Properties()
     file("../local.properties").withInputStream { properties.load(it) }
