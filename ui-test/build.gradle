@@ -54,7 +54,7 @@ android {
 dependencies {
     // App's dependencies, including test
     // This is need to avoid 'No resource identifier found for attribute 'layout_constraintBottom_toBottomOf'
-    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+    implementation 'androidx.constraintlayout:constraintlayout:' + rootProject.ext.constrantLayoutVersion
 
     // Local dependencies
     //compile project(':Utils') // to reuse existing app icons
