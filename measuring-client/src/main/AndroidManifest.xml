@@ -9,7 +9,7 @@
     <uses-permission
         android:name="android.permission.MANAGE_ACCOUNTS"
         android:maxSdkVersion="22" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -31,7 +31,15 @@
     <!-- sync stats permissions are needed to check if the data sync is currently active -->
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Android 10+: No longer required see https://developer.android.com/training/data-storage/shared/media -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+      android:maxSdkVersion="28"/>
+
+    <!-- Android 10+: Permission no longer provides write access -->
+    <!-- Android 10+: Write to MediaStore.Download without permissions -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+      android:maxSdkVersion="28"
+      tools:ignore="ScopedStorage" />
 
     <!-- allowBackup=false as we did not yet define what we really want to backup-->
     <application

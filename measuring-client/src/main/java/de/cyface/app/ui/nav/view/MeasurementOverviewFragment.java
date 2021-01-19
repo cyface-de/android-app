@@ -256,10 +256,13 @@ public class MeasurementOverviewFragment extends Fragment {
         Validate.notNull(fragmentActivity);
         switch (item.getItemId()) {
             case R.id.export_menu_item:
-                if (ContextCompat.checkSelfPermission(fragmentActivity,
+                // Permission requirements: https://developer.android.com/training/data-storage
+                final boolean requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
+                final boolean missingPermissions = ContextCompat.checkSelfPermission(fragmentActivity,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                         || ContextCompat.checkSelfPermission(fragmentActivity,
-                                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+                if (requiresWritePermission && missingPermissions) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         requestPermissions(
                                 new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE,
