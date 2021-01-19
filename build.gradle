@@ -54,7 +54,7 @@ ext {
      */
 
     cyfaceBackendVersion = "6.1.1" // Also update submodule commit ref
-    cyfaceUtilsVersion = "1.4.0" // Maven dependency
+    cyfaceUtilsVersion = "2.0.1" // Maven dependency
     cyfaceEnergySettingsVersion = "2.1.2" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "2.3.0" // Also update submodule commit ref
 
