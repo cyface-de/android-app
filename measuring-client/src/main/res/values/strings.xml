@@ -74,7 +74,6 @@
   <string name="sync_disabled_toast">If you capture measurements without syncing over Wi-Fi for too long the app will use much storage space until the data is synced or deleted</string>
   <string name="zoom_to_location_enabled_toast">Attention: When you activate this option and leave the app opened during long drives the app will use much mobile data to download the quality data for the whole route</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
-  <string name="API_too_low_for_bluetooth">Currently you can only use external bluetooth sensors with devices which have Android 4.3 or higher installed.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
   <string name="drawer_settings">Settings</string>
