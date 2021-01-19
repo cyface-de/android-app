@@ -87,13 +87,14 @@ android {
             // Mock-api, only supports mock-login (used by UI test on CI)
             buildConfigField "String", "cyfaceServer", '"https://demo.cyface.de/api/v2"'
             manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
-
-            // Local mock-api via emulator (see ./mock-api) - can be easily modified for testing
-            //buildConfigField "String", "cyfaceServer", '"http://10.0.2.2:9113/api/v2"'
-            //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
-
             buildConfigField "String", "guestLogin", '"MOCKED"'
             buildConfigField "String", "guestPassword", '"MOCKED"'
+
+            // Local mock-api via emulator (see ./mock-api) - can be easily modified for testing
+            //buildConfigField "String", "cyfaceServer", '"http://10.0.2.2:8080/api/v2"'
+            //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
+            //buildConfigField "String", "guestLogin", '"guest"'
+            //buildConfigField "String", "guestPassword", '"secret"'
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
