@@ -71,7 +71,6 @@
   <string name="sync_disabled_toast">Wenn über einen längeren Zeitraum Messungen aufgenommen werden ohne diese über WLAN zu synchronisieren belegt diese App viel Speicherplatz bis die Daten gesynct oder gelöscht werden</string>
   <string name="zoom_to_location_enabled_toast">Achtung: Wenn Sie diese Option aktiviert haben und die App während einer längeren Fahrt geöffnet lassen, wird ein größeres Volumen an mobilen Daten verwendet um die Qualitätsdaten der ganzen Strecke anzuzeigen</string>
   <string name="no_camera_available_toast">Es wurde keine Kamera gefunden die benutzt werden kann.</string>
-  <string name="API_too_low_for_bluetooth">Derzeit können nur mit Android Geräten ab Version 4.3 Bluetooth Sensoren verwendet werden.</string>
   <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente.</string>
   <string name="drawer_setting_camera_focus_distance">Kamera Fokus Distanz</string>
   <string name="drawer_settings">Einstellungen</string>

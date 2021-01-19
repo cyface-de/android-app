@@ -73,8 +73,8 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
     /**
      * The {@link MainFragment} required to access the {@link WiFiSurveyor} syncable setting.
      */
-    private MainFragment mainFragment;
-    private SwitchCompat cameraServiceToggle;
+    private final MainFragment mainFragment;
+    private final SwitchCompat cameraServiceToggle;
     private final NavigationView view;
 
     public NavDrawer(final MainActivity mainActivity, final NavigationView view, final DrawerLayout layout,
@@ -319,7 +319,6 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
      * final CompoundButton compoundButton = (CompoundButton)view;
      * final Context applicationContext = view.getContext().getApplicationContext();
      * if (compoundButton.isChecked()) {
-     * if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
      * final BluetoothLeSetup bluetoothLeSetup = new BluetoothLeSetup(new BluetoothLeSetupListener() {
      *
      * @Override
@@ -345,10 +344,6 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
      * }
      * });
      * bluetoothLeSetup.setup(mainActivity);
-     * } else {
-     * compoundButton.setChecked(false);
-     * Toast.makeText(applicationContext, R.string.API_too_low_for_bluetooth, Toast.LENGTH_LONG).show();
-     * }
      * } else {
      * final SharedPreferences.Editor editor = preferences.edit();
      * editor.remove(BLUETOOTHLE_DEVICE_MAC_KEY);

@@ -71,7 +71,6 @@
   <string name="sync_disabled_toast">Se si catturano le misurazioni senza sincronizzarsi su Wi-Fi per troppo tempo, l\'applicazione utilizzerà molto spazio di archiviazione fino a quando i dati vengono sincronizzati o cancellati.</string>
   <string name="zoom_to_location_enabled_toast">Attenzione: Quando si attiva questa opzione e si lascia l\'applicazione aperta durante i lunghi viaggi, l\'applicazione utilizzerà molti dati mobili per scaricare i dati di qualità per l\'intero percorso.</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
-  <string name="API_too_low_for_bluetooth">Currently you can only use external bluetooth sensors with devices which have Android 4.3 or higher installed.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
   <string name="drawer_settings">Settings</string>

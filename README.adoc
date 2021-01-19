@@ -127,20 +127,6 @@ See https://github.com/cyface-de/android-backend#release-a-new-version[Cyface An
 * After pushing the release tag to Github out CI builds the Android Bundle now automatically
 * Checkout this build, copy the bundle from the artifacts and upload it to Play Store
 
-==== In case you need to publish _manually_ to the Github Registry
-
-[arabic]
-. Make sure you are authenticated to the repository:
-* You need a Github account with write-access to this Github repository
-* Create a https://github.com/settings/tokens[personal access token on Github] with "write:packages" permissions
-* Create or adjust a `local.properties` file in the project root containing:
-+
-....
-github.user=YOUR_USERNAME
-github.token=YOUR_ACCESS_TOKEN
-....
-. Execute the publish command `./gradlew publishAll`
-
 
 [[license]]
 == License
