@@ -53,13 +53,13 @@
                     app:actionLayout="@layout/drawer_list_switch"
                     app:showAsAction="ifRoom"/-->
 
-                <item
+                <!--item
                     android:id="@+id/drawer_setting_pictures"
                     android:title="@string/drawer_setting_pictures"
                     android:visible="true"
                     android:checkable="true"
                     app:actionLayout="@layout/drawer_list_switch"
-                    app:showAsAction="ifRoom" />
+                    app:showAsAction="ifRoom" /-->
 
                 <item
                     android:actionLayout="@android:layout/simple_list_item_1"

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- to be added on demand during run-time -->
+  <item
+    type="id"
+    name="drawer_setting_pictures" />
+</resources>

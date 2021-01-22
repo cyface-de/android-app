@@ -18,7 +18,9 @@
  */
 package de.cyface.app.ui.nav.controller;
 
+import static android.view.Menu.NONE;
 import static de.cyface.app.utils.Constants.PREFERENCES_MOVE_TO_LOCATION_KEY;
+import static de.cyface.app.utils.Constants.PREFERENCES_SENSOR_FREQUENCY_KEY;
 import static de.cyface.app.utils.Constants.PREFERENCES_SYNCHRONIZATION_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION;
@@ -36,6 +38,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Toast;
@@ -55,6 +58,7 @@ import de.cyface.app.ui.MainFragment;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.synchronization.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
+import de.cyface.utils.Validate;
 
 /**
  * The Nav Drawer is a menu which allows the user to switch settings with one click and to access other
@@ -74,7 +78,7 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
      * The {@link MainFragment} required to access the {@link WiFiSurveyor} syncable setting.
      */
     private final MainFragment mainFragment;
-    private final SwitchCompat cameraServiceToggle;
+    private SwitchCompat cameraServiceToggle;
     private final NavigationView view;
 
     public NavDrawer(final MainActivity mainActivity, final NavigationView view, final DrawerLayout layout,
@@ -84,43 +88,57 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
         this.layout = layout;
         this.mainActivity = mainActivity;
         this.mainFragment = mainFragment;
+        final Menu menu = view.getMenu();
 
         view.setNavigationItemSelectedListener(this);
 
         // setup nav bar setting switches
         final Context applicationContext = mainActivity.getApplicationContext();
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
-        final SwitchCompat zoomToLocationToggle = (SwitchCompat)view.getMenu()
-                .findItem(R.id.drawer_setting_zoom_to_location).getActionView();
-        final SwitchCompat synchronizationToggle = (SwitchCompat)view.getMenu()
-                .findItem(R.id.drawer_setting_synchronization).getActionView();
+        final SwitchCompat zoomToLocationToggle = (SwitchCompat)menu.findItem(R.id.drawer_setting_zoom_to_location)
+                .getActionView();
+        final SwitchCompat synchronizationToggle = (SwitchCompat)menu.findItem(R.id.drawer_setting_synchronization)
+                .getActionView();
 
-        // final SwitchCompat connectToExternalSpeedSensorToggle = (SwitchCompat)view.getMenu()
-        // .findItem(R.id.drawer_setting_speed_sensor).getActionView();
-        cameraServiceToggle = (SwitchCompat)view.getMenu().findItem(R.id.drawer_setting_pictures).getActionView();
+
+        // Enable camera-feature depending on the signed-in account
+        // final SwitchCompat settingsLink = (SwitchCompat)menu.findItem(R.id.drawer_settings_camera).getActionView();
+        // settingsLink.setVisibility(sensorFrequency < 100 ? View.GONE : View.VISIBLE);
+        final int sensorFrequency = preferences.getInt(PREFERENCES_SENSOR_FREQUENCY_KEY, 100);
+        if (sensorFrequency != 100) {
+          final MenuItem addedItem = menu.add(NONE, R.id.drawer_setting_pictures, NONE, R.string.drawer_setting_pictures);
+          addedItem.setActionView(R.layout.drawer_list_switch);
+          final MenuItem cameraToggleItem = menu.findItem(R.id.drawer_setting_pictures);
+          cameraServiceToggle = (SwitchCompat)cameraToggleItem.getActionView();
+          cameraServiceToggle.setChecked(preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false));
+          cameraServiceToggle.setOnCheckedChangeListener(new PicturesToggleListener());
+        }
+
+        /*
+         * Disabled Bluetooth-Speed-Sensor
+         * final SwitchCompat connectToExternalSpeedSensorToggle =
+         * (SwitchCompat)menu.findItem(R.id.drawer_setting_speed_sensor).getActionView();
+         * final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
+         * && preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
+         * connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
+         * connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
+         */
 
         zoomToLocationToggle.setChecked(preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false));
         // SynchronizationEnabled is set to the user preference when account is created
         final boolean syncEnabledPreference = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true);
         Log.d(WiFiSurveyor.TAG, "Setting navDrawer switch to syncEnabledPreference: " + syncEnabledPreference);
         synchronizationToggle.setChecked(syncEnabledPreference);
-        /*
-         * final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
-         * && preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
-         * connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
-         */
-        cameraServiceToggle.setChecked(preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false));
 
         zoomToLocationToggle.setOnCheckedChangeListener(new AutoCenterMapSettingsChangedListener());
         synchronizationToggle.setOnCheckedChangeListener(new SynchronizationToggleListener());
-        // connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
-        cameraServiceToggle.setOnCheckedChangeListener(new PicturesToggleListener());
 
         final ActionBarDrawerToggle drawerToggle = setupDrawerToggle(layout, toolbar);
         layout.addDrawerListener(drawerToggle); // Tie DrawerLayout events to the ActionBarToggle
     }
 
     public void deactivateCameraService() {
+        Validate.notNull(cameraServiceToggle);
         cameraServiceToggle.setChecked(false);
         final SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
