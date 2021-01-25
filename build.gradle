@@ -56,7 +56,7 @@ ext {
     cyfaceBackendVersion = "6.1.1" // Also update submodule commit ref
     cyfaceUtilsVersion = "2.0.1" // Maven dependency
     cyfaceEnergySettingsVersion = "3.0.0" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "2.3.0" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "3.0.0" // Also update submodule commit ref
 
     minSdkVersion = 21
     targetSdkVersion = 30
