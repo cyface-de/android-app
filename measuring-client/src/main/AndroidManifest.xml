@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="de.cyface.app">
 
+    <!-- (!) We do *not* need ACCESS_BACKGROUND_LOCATION as we only need location in Foreground Service-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Until API 22 we need this permission to delete the deprecated generic pro account -->
     <uses-permission
         android:name="android.permission.MANAGE_ACCOUNTS"

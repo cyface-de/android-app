@@ -13,3 +13,6 @@ local.properties
 # git backup files
 *.orig
 */google-services.json
+
+# keystore file, when copied into this project for manual (test) deployment of "release" variant
+/release-upload-key.jks
