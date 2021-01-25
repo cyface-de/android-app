@@ -53,7 +53,7 @@ ext {
      * prevents you from the creation of an incompatible fork and enables us to work standalone on the submodules.
      */
 
-    cyfaceBackendVersion = "6.1.1" // Also update submodule commit ref
+    cyfaceBackendVersion = "6.2.0" // Also update submodule commit ref
     cyfaceUtilsVersion = "2.0.1" // Maven dependency
     cyfaceEnergySettingsVersion = "3.0.0" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "3.0.0" // Also update submodule commit ref
