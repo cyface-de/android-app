@@ -31,7 +31,8 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
@@ -109,7 +110,8 @@ allprojects {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
         // Required by submodules: camera_service, energy_settings, measuring-client, backend
         maven {
             url "https://maven.pkg.github.com/cyface-de/android-utils"
