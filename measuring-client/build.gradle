@@ -84,17 +84,29 @@ android {
 
             // Select one of the APIs below, depending on your needs
 
-            // Mock-api, only supports mock-login (used by UI test on CI)
-            buildConfigField "String", "cyfaceServer", '"https://demo.cyface.de/api/v2"'
-            manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
-            buildConfigField "String", "guestLogin", '"MOCKED"'
-            buildConfigField "String", "guestPassword", '"MOCKED"'
+            // Phone - to local collector - ! only if iptables allow connection from outside
+            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.local_api')}\""
+            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.local_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.local_password')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
-            // Local mock-api via emulator (see ./mock-api) - can be easily modified for testing
-            //buildConfigField "String", "cyfaceServer", '"http://10.0.2.2:8080/api/v2"'
+            // EMULATOR - to local collector
+            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.emulator_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
-            //buildConfigField "String", "guestLogin", '"guest"'
-            //buildConfigField "String", "guestPassword", '"secret"'
+            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.emulator_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.emulator_password')}\""
+
+            // Staging
+            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.staging_api')}\""
+            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.staging_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.staging_password')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"false"]
+
+            // MOCK-API - only supports login - used by UI test on CI
+            buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.demo_api')}\""
+            manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
+            buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.demo_user')}\""
+            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.demo_password')}\""
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
