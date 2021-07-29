@@ -55,7 +55,7 @@ ext {
 
     // Cyface dependencies
     cyfaceBackendVersion = "6.2.0" // Also update submodule commit ref
-    cyfaceUtilsVersion = "2.0.2" // Maven dependency
+    cyfaceUtilsVersion = "3.0.1" // Maven dependency
     cyfaceEnergySettingsVersion = "3.0.2" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "3.0.1" // Also update submodule commit ref
     cyfaceProtosVersion = "0.0.3" // (!) Keep in sync with `persistence/build.gradle`: `sourceSets`
