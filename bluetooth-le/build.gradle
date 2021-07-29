@@ -37,6 +37,12 @@ android {
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
     }
 
+    // Enabling desugaring to support Java 8 and Java 11 features
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceCompatibility
+        targetCompatibility rootProject.ext.targetCompatibility
+    }
+
     lintOptions {
         abortOnError false
     }
