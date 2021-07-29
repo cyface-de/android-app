@@ -142,6 +142,9 @@ android {
         pickFirst 'META-INF/ASL2.0'
         pickFirst 'META-INF/LICENSE'
         pickFirst 'META-INF/NOTICE'
+
+        // To resolve the conflict warning after adding google-api-client dependency
+        exclude 'META-INF/DEPENDENCIES'
     }
 
     compileOptions {

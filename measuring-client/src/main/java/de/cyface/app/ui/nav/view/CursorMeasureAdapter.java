@@ -111,7 +111,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
         final MeasurementStatus status = MeasurementStatus
                 .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
         if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
-                || status == MeasurementStatus.SYNCED) {
+                || status == MeasurementStatus.SYNCED || status == MeasurementStatus.SKIPPED) {
             label += " - " + status.toString().toLowerCase();
         }
         // Checkable
