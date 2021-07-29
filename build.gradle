@@ -27,7 +27,6 @@
 
 buildscript {
     ext.kotlin_version = "1.4.32"
-    ext.java_version = JavaVersion.VERSION_1_8
 
     repositories {
         google()
@@ -94,8 +93,9 @@ ext {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     // Java version
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    kotlinTargetJavaVersion = "11"
 
     // Android-frontend
     sentryAndroidVersion = "3.1.1"
