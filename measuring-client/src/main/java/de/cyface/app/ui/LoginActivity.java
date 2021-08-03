@@ -49,6 +49,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.BuildConfig;
 import de.cyface.app.MeasuringClient;
 import de.cyface.app.R;
@@ -57,7 +59,6 @@ import de.cyface.app.utils.Constants;
 import de.cyface.synchronization.CyfaceAuthenticator;
 import de.cyface.synchronization.ErrorHandler;
 import de.cyface.synchronization.WiFiSurveyor;
-import de.cyface.utils.Validate;
 
 /**
  * A login screen that offers login via email/password.

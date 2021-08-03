@@ -38,13 +38,14 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.EventTable;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
-import de.cyface.utils.Validate;
 
 /**
  * A selectable list which is bound to a {@code Event} {@code android.widget.Adapter}.

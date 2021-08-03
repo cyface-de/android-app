@@ -72,6 +72,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.MainFragment;
 import de.cyface.app.ui.Map;
@@ -103,7 +105,6 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.DiskConsumption;
-import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
 /**
@@ -949,7 +950,7 @@ public class DataCapturingButton
     }
 
     private void addLocationToCachedTrack(@NonNull final GeoLocation location) {
-        Validate.notNull("onNewGeoLocation - cached track is null", currentMeasurementsTracks);
+        Validate.notNull(currentMeasurementsTracks, "onNewGeoLocation - cached track is null");
 
         if (!location.isValid()) {
             Log.d(TAG, "updateCachedTrack: ignoring invalid point");

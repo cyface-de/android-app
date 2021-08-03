@@ -50,10 +50,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.persistence.DefaultFileAccess;
 import de.cyface.persistence.serialization.Point3dFile;
-import de.cyface.utils.Validate;
 
 /**
  * Async task which exports the measurement data without the image data.

@@ -40,9 +40,10 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.persistence.model.Modality;
-import de.cyface.utils.Validate;
 
 /**
  * After the user installed the app for the first time, after accepting the terms, this dialog is shown

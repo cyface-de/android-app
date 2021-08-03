@@ -59,6 +59,8 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.app.ui.dialog.ModalityDialog;
@@ -75,7 +77,6 @@ import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
-import de.cyface.utils.Validate;
 
 /**
  * This {@link Fragment} is used to show all stored measurements in an AdapterView.

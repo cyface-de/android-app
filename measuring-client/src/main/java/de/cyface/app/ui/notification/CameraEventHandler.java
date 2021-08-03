@@ -41,11 +41,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.MainActivity;
 import de.cyface.camera_service.BackgroundService;
 import de.cyface.camera_service.EventHandlingStrategy;
-import de.cyface.utils.Validate;
 
 /**
  * A {@link EventHandlingStrategy} to respond to specified events triggered by the
@@ -100,7 +101,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
         }
 
         final NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Validate.notNull("Manager for service notifications not available.", manager);
+        Validate.notNull(manager, "Manager for service notifications not available.");
 
         if (manager.getNotificationChannel(channelId) == null) {
             final NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
@@ -299,7 +300,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
     @NonNull
     public Notification buildCapturingNotification(@NonNull final BackgroundService context,
             final boolean isVideoModeRequested) {
-        Validate.notNull("No context provided!", context);
+        Validate.notNull(context, "No context provided!");
         final String channelId = NOTIFICATION_CHANNEL_ID_RUNNING;
 
         // Open Activity when the notification is clicked

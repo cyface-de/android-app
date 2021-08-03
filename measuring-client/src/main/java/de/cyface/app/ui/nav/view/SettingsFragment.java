@@ -66,10 +66,11 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import org.apache.commons.lang3.Validate;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.dialog.ExposureTimeDialog;
 import de.cyface.camera_service.Utils;
-import de.cyface.utils.Validate;
 
 /**
  * This {@link Fragment} is used to allow advanced users to configure the capturing modes.
