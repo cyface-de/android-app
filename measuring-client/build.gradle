@@ -96,17 +96,19 @@ android {
             //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.emulator_user')}\""
             //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.emulator_password')}\""
 
+            // FIXME !!! v2 -> v3 in all server credentials/url injections! (CI, local.properties, ...)
+
             // Staging
-            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.staging_api')}\""
-            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.staging_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.staging_password')}\""
-            //manifestPlaceholders = [usesCleartextTraffic:"false"]
+            buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.staging_api')}\""
+            buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.staging_user')}\""
+            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.staging_password')}\""
+            manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // MOCK-API - only supports login - used by UI test on CI
-            buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.demo_api')}\""
-            manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
-            buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.demo_user')}\""
-            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.demo_password')}\""
+            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.demo_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
+            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.demo_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.demo_password')}\""
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle

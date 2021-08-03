@@ -26,7 +26,9 @@
  */
 
 buildscript {
+    ext.gradle_version = "7.0.0"
     ext.kotlin_version = "1.5.21"
+    ext.matcher_version = "1.2.2"
 
     repositories {
         google()
@@ -34,9 +36,9 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.3'
+        classpath "com.android.tools.build:gradle:$gradle_version"
         // Required for versioning Google play services.
-        classpath "com.google.android.gms:strict-version-matcher-plugin:1.2.2"
+        classpath "com.google.android.gms:strict-version-matcher-plugin:$matcher_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
