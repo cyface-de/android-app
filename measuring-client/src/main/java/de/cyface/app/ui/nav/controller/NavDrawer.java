@@ -53,7 +53,7 @@ import de.cyface.app.R;
 import de.cyface.app.ui.MainActivity;
 import de.cyface.app.ui.MainFragment;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
-import de.cyface.synchronization.SynchronisationException;
+import de.cyface.synchronization.exception.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
 
 /**

@@ -77,7 +77,7 @@ import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.synchronization.ConnectionStatusListener;
-import de.cyface.synchronization.SynchronisationException;
+import de.cyface.synchronization.exception.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.CursorIsNullException;
 import io.sentry.Sentry;
