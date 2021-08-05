@@ -373,7 +373,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
     private void selectModalityTab() {
         final TabLayout tabLayout = fragmentRoot.findViewById(R.id.tab_layout);
         final String modality = preferences.getString(PREFERENCES_MODALITY_KEY, null);
-        Validate.notNull("Modality should already be set but isn't.", modality);
+        Validate.notNull(modality, "Modality should already be set but isn't.");
 
         // Select the Modality tab
         final TabLayout.Tab tab;
