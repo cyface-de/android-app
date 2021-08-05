@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2021 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -20,6 +20,7 @@ package de.cyface.app.ui;
 
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.Validate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,13 +29,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.android.material.textfield.TextInputEditText;
 
-import de.cyface.utils.Validate;
-
 /**
  * Unit tests for the {@link LoginActivity}. All dependencies to the Android framework are mocked.
  *
  * @author Armin Schnabel
- * @version 1.0.10
+ * @version 1.0.11
  * @since 1.0.0
  */
 @RunWith(MockitoJUnitRunner.class)
