@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2021 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -112,7 +112,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
                 .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
         if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
                 || status == MeasurementStatus.SYNCED || status == MeasurementStatus.SKIPPED) {
-            label += " - " + status.toString().toLowerCase();
+            label += " - " + status.toString().toLowerCase(Locale.ENGLISH);
         }
         // Checkable
         itemView.setEnabled(true);
@@ -133,7 +133,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
             @NonNull final Modality modality) {
         if (contextWeakReference == null) {
             Log.w(TAG, "WeakReference is null, displaying database identifier instead of translation for modality.");
-            return modality.getDatabaseIdentifier().toLowerCase();
+            return modality.getDatabaseIdentifier().toLowerCase(Locale.ENGLISH);
         }
 
         final Context context = contextWeakReference.get();
@@ -151,7 +151,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
             case MOTORBIKE:
                 return context.getString(R.string.modality_motorbike);
             case UNKNOWN:
-                return modality.getDatabaseIdentifier().toLowerCase();
+                return modality.getDatabaseIdentifier().toLowerCase(Locale.ENGLISH);
             default:
                 throw new IllegalArgumentException("Unknown modality type: " + modality);
         }

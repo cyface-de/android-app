@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2021 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -83,7 +83,7 @@ import de.cyface.utils.CursorIsNullException;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 4.5.4
+ * @version 4.5.5
  * @since 1.0.0
  */
 public class MeasurementOverviewFragment extends Fragment {
@@ -255,40 +255,39 @@ public class MeasurementOverviewFragment extends Fragment {
     public boolean onOptionsItemSelected(final MenuItem item) {
         final FragmentActivity fragmentActivity = getActivity();
         Validate.notNull(fragmentActivity);
-        switch (item.getItemId()) {
-            case R.id.export_menu_item:
-                // Permission requirements: https://developer.android.com/training/data-storage
-                final boolean requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
-                final boolean missingPermissions = ContextCompat.checkSelfPermission(fragmentActivity,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                        || ContextCompat.checkSelfPermission(fragmentActivity,
-                                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
-                if (requiresWritePermission && missingPermissions) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(
-                                new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                        Manifest.permission.READ_EXTERNAL_STORAGE},
-                                Constants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT);
-                    } else {
-                        Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data_no_permission),
-                                Toast.LENGTH_LONG).show();
-                    }
+        if (item.getItemId() == R.id.export_menu_item) {
+            // Permission requirements: https://developer.android.com/training/data-storage
+            final boolean requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
+            final boolean missingPermissions = ContextCompat.checkSelfPermission(fragmentActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(fragmentActivity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+            if (requiresWritePermission && missingPermissions) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    Manifest.permission.READ_EXTERNAL_STORAGE},
+                            Constants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT);
                 } else {
-                    new ExportTask(fragmentActivity).execute();
+                    Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data_no_permission),
+                            Toast.LENGTH_LONG).show();
                 }
-                return true;
-            case R.id.select_all_item:
-                selectAllItems();
-                return true;
-            case R.id.delete_measurement_item:
-                if (isEventsListShown) {
-                    deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
-                } else {
-                    deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView());
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            } else {
+                new ExportTask(fragmentActivity).execute();
+            }
+            return true;
+        } else if (item.getItemId() == R.id.select_all_item) {
+            selectAllItems();
+            return true;
+        } else if (item.getItemId() == R.id.delete_measurement_item) {
+            if (isEventsListShown) {
+                deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
+            } else {
+                deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView());
+            }
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
