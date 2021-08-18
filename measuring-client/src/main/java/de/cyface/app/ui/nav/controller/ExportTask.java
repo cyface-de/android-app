@@ -59,7 +59,7 @@ import de.cyface.persistence.serialization.Point3dFile;
 /**
  * Async task which exports the measurement data without the image data.
  *
- * FIXME: AsyncTasks all run on the same thread this is only for short running operations!!
+ * TODO: AsyncTasks all run on the same thread this is only for short running operations!!
  * this will block e.g. authRequest and delete- async tasks!
  * see min 3:45 for alternatives:
  * https://www.youtube.com/watch?v=jtlRNNhane0&list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE&index=4
@@ -72,7 +72,7 @@ import de.cyface.persistence.serialization.Point3dFile;
  */
 public class ExportTask extends AsyncTask<Void, Void, Long> {
 
-    private WeakReference<Context> contextReference;
+    private final WeakReference<Context> contextReference;
     private final String targetPathTimestamp;
 
     public ExportTask(@NonNull final Context context) {

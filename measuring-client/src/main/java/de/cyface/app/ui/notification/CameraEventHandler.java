@@ -182,7 +182,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
                     context.getString(R.string.notification_channel_description_warning),
                     NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
         }
-        // FIXME: see if we not create two of those warnings (DCS and CS)
+        // TODO: see if we not create two of those warnings (DCS and CS)
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
                 NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
                         .setSmallIcon(R.drawable.ic_logo_only_c)

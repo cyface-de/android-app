@@ -96,8 +96,6 @@ android {
             //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.emulator_user')}\""
             //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.emulator_password')}\""
 
-            // FIXME !!! v2 -> v3 in all server credentials/url injections! (CI, local.properties, ...)
-
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.staging_api')}\""
             buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.staging_user')}\""
