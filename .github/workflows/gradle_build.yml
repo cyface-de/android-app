@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  unit-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +28,7 @@ jobs:
           token: ${{ secrets.GH_READ_TOKEN }}
 
       # Use cached dependencies unless dependencies classes or gradle files changed
+          # see https://github.com/ReactiveCircus/android-emulator-runner
       - uses: actions/cache@v2
         with:
           path: |
@@ -56,7 +57,10 @@ jobs:
       - name: Assemble app
         run: ./gradlew assembleDebug
 
-  test:
+      - name: Run Unit Tests
+        run: ./gradlew :measuring-client:test --stacktrace
+
+  integration:
     runs-on: macos-latest # recommended by `reactiveCircus/android-emulator-runner`
     needs: build
     strategy:
@@ -99,9 +103,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8'
-
-      - name: Run Unit Tests
-        run: ./gradlew test --stacktrace
 
       - name: Create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'

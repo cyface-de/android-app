@@ -1,0 +1,100 @@
+# This workflow publishes a new version to the Github Registry.
+#
+# @author Armin Schnabel
+# @version 1.0.0
+# @since 2.16.0
+name: Gradle Publish
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          token: ${{ secrets.GH_READ_TOKEN }}
+
+      # Use cached dependencies unless dependencies classes or gradle files changed
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
+
+      - name: Create truststore
+        run: |
+          # When no truststore is required by the server we create an empty file or else the build fails
+          mkdir -p backend/synchronization/src/main/res/raw
+          touch backend/synchronization/src/main/res/raw/truststore.jks
+
+      - name: Create sentry.properties
+        run |
+        # Inject Sentry secrets
+        echo "defaults.project=android-app" > sentry.properties
+        echo "defaults.org=cyface" >> sentry.properties
+        echo "auth.token=${{ secrets.SENTRY_API_TOKEN }}" >> sentry.properties
+
+      - name: Create local.properties for release
+        run: |
+          # Use a personal read token to install the Cyface Utils package
+          echo "github.user=${{ secrets.GH_READ_ACCOUNT }}" > local.properties
+          echo "github.token=${{ secrets.GH_READ_TOKEN }}" >> local.properties
+          # Inject Cyface guest password
+          echo "cyface.guest_password=${{ secrets.PUBLIC_GUEST_PASSWORD }}" >> local.properties
+          # Inject Google Maps API key
+          echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> local.properties
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      # TODO: increment versionCode manually or automatically => build.gradle
+      - name: Get App version code
+        id: version
+        run: |
+          echo "::set-output name=commits::$(git rev-list --count HEAD)"
+
+      - name: Build the app
+        run: ./gradlew assembleRelease
+
+      # TODO: sign
+
+      - name: Upload apk
+        uses: actions/upload-artifact@v2
+        with:
+          name: debug apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      # Automatically mark this tag as release on Github
+    - uses: actions/create-release@v1
+      id: create_release
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: false
+        # Release tags of format `1.2.3-beta1 / -alpha1 / -test1` are considered a pre-release
+        prerelease: ${{ contains(github.ref, 'test') || contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload APK/Bundle
+      id: upload_release_asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.sign.outputs.signedReleaseFile }}
+        asset_name: signed-app.apk
+        asset_content_type: application/zip
