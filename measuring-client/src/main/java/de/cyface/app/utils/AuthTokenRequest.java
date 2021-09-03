@@ -36,10 +36,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.ui.LoginActivity;
 import de.cyface.synchronization.CyfaceAuthenticator;
+import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
 /**

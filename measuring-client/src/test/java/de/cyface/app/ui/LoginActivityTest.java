@@ -20,7 +20,6 @@ package de.cyface.app.ui;
 
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.Validate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.android.material.textfield.TextInputEditText;
+
+import de.cyface.utils.Validate;
 
 /**
  * Unit tests for the {@link LoginActivity}. All dependencies to the Android framework are mocked.

@@ -59,8 +59,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
 import de.cyface.app.ui.nav.view.CursorMeasureAdapter;
 import de.cyface.app.utils.Constants;
@@ -68,6 +66,7 @@ import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.GeoLocation;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
+import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
 /**

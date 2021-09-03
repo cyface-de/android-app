@@ -38,11 +38,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.synchronization.WiFiSurveyor;
+import de.cyface.utils.Validate;
 
 /**
  * A button listener for the button to trigger data sync and show its progress

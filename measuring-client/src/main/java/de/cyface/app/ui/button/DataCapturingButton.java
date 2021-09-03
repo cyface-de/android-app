@@ -72,8 +72,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
 import de.cyface.app.ui.MainFragment;
 import de.cyface.app.ui.Map;
@@ -106,6 +104,7 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.DiskConsumption;
+import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
 /**

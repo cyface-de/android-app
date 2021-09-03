@@ -59,8 +59,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.BuildConfig;
 import de.cyface.app.R;
 import de.cyface.app.ui.button.DataCapturingButton;
@@ -80,6 +78,7 @@ import de.cyface.synchronization.ConnectionStatusListener;
 import de.cyface.synchronization.exception.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.CursorIsNullException;
+import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
 /**

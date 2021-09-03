@@ -22,7 +22,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import org.apache.commons.lang3.Validate;
+import de.cyface.utils.Validate;
 
 /**
  * Basic class which provides info about the connection status

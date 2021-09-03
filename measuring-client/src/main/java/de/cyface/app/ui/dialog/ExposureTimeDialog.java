@@ -35,9 +35,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
+import de.cyface.utils.Validate;
 
 /**
  * To allow the user to select the exposure time from a set of common values (1/125s, 1/250s, ...)

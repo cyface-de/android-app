@@ -134,7 +134,9 @@ public class CapturingNotificationTest {
 
         // Act: Open Notification Area
         device.openNotification();
+        //noinspection SpellCheckingInspection
         device.wait(Until.hasObject(By.pkg("com.android.systemui")), DEFAULT_TIMEOUT);
+        //noinspection SpellCheckingInspection
         final BySelector navigationScroller = By.res("com.android.systemui:id/notification_stack_scroller");
         final UiObject2 notificationArea = device.findObject(navigationScroller);
 
@@ -205,6 +207,7 @@ public class CapturingNotificationTest {
 
         // On Android 10+ the location permission screen changed.
         // We now request "Allow app to access location only while in foreground"
+        //noinspection SpellCheckingInspection
         final BySelector allowButtonSelector = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                 ? By.res("com.android.permissioncontroller:id/permission_allow_foreground_only_button")
                 : By.res("com.android.packageinstaller:id/permission_allow_button");

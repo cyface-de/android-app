@@ -41,12 +41,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
 import de.cyface.app.ui.MainActivity;
 import de.cyface.camera_service.BackgroundService;
 import de.cyface.camera_service.EventHandlingStrategy;
+import de.cyface.utils.Validate;
 
 /**
  * A {@link EventHandlingStrategy} to respond to specified events triggered by the

@@ -36,14 +36,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
 import de.cyface.utils.CursorIsNullException;
+import de.cyface.utils.Validate;
 
 /**
  * {@code AsyncTask} to delete {@code Event}s with all their data.

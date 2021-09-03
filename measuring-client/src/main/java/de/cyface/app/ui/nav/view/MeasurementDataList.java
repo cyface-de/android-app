@@ -41,8 +41,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 
-import org.apache.commons.lang3.Validate;
-
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultLocationCleaningStrategy;
@@ -51,6 +49,7 @@ import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
+import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
 /**

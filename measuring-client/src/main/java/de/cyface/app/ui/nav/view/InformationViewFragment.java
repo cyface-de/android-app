@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import org.apache.commons.lang3.Validate;
+import de.cyface.utils.Validate;
 
 /**
  * The InformationViewFragment handles the view of the pages linked in the sidebar.
