@@ -44,10 +44,6 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
-    // Load credentials
-    def properties = new Properties()
-    file("../local.properties").withInputStream { properties.load(it) }
-
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -74,7 +70,7 @@ android {
         missingDimensionStrategy 'mode', 'full'
 
         // Load Google Maps API key
-        manifestPlaceholders = [ googleMapsApiKey:"${properties.getProperty('google.maps_api_key')}"]
+        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
     }
 
     buildTypes {
@@ -85,28 +81,28 @@ android {
             // Select one of the APIs below, depending on your needs
 
             // Phone - to local collector - ! only if iptables allow connection from outside
-            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.local_api')}\""
-            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.local_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.local_password')}\""
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.local_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.local_password')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // EMULATOR - to local collector
-            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
-            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.emulator_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.emulator_password')}\""
+            //buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.emulator_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.emulator_password')}\""
 
             // Staging
-            buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.staging_api')}\""
-            buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.staging_user')}\""
-            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.staging_password')}\""
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.staging_user')}\""
+            buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // MOCK-API - only supports login - used by UI test on CI
-            //buildConfigField "String", "cyfaceServer", "\"${properties.getProperty('cyface.demo_api')}\""
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
-            //buildConfigField "String", "guestLogin", "\"${properties.getProperty('cyface.demo_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.demo_password')}\""
+            //buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.demo_user')}\""
+            //buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.demo_password')}\""
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
@@ -117,7 +113,7 @@ android {
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", '"https://s2.cyface.de/api/v2"'
             buildConfigField "String", "guestLogin", '"guest"'
-            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.guest_password')}\""
+            buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.guest_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }

@@ -28,11 +28,11 @@ To download the Cyface libraries (SDK, Energy Settings, Camera Service):
 [arabic]
 * You need a Github account with read-access to these Github repositories
 * Create a https://github.com/settings/tokens[personal access token on Github] with "write:packages" permissions
-* Create or adjust a `local.properties` file in the project root containing:
+* Copy `gradle.properties.template` to `gradle.properties` and adjust:
 +
 ....
-github.user=YOUR_USERNAME
-github.token=YOUR_ACCESS_TOKEN
+githubUser=YOUR_USERNAME
+githubToken=YOUR_ACCESS_TOKEN
 ....
 * Build the app `./gradlew build`
 
@@ -54,14 +54,14 @@ auth.token=SECRET_TOKEN
 
 ==== Google Maps
 
-Add the following to your `local.properties` file:
+Add the following to your `gradle.properties` file:
 ....
 google.maps_api_key=SECRET_KEY
 ....
 
 ==== Cyface Guest Credentials
 
-Add the following to your `local.properties` file:
+Add the following to your `gradle.properties` file:
 ....
 cyface.guest_password=GUEST_PASSWORD
 ....
