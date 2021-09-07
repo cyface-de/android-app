@@ -88,7 +88,6 @@ import de.cyface.datacapturing.MessageCodes;
 import de.cyface.datacapturing.ShutDownFinishedHandler;
 import de.cyface.datacapturing.StartUpFinishedHandler;
 import de.cyface.datacapturing.exception.DataCapturingException;
-import de.cyface.datacapturing.exception.MeasurementDeprecated;
 import de.cyface.datacapturing.exception.MissingPermissionException;
 import de.cyface.datacapturing.model.CapturedData;
 import de.cyface.datacapturing.ui.Reason;
@@ -680,9 +679,6 @@ public class DataCapturingButton
         } catch (final NoSuchMeasurementException | DataCapturingException | CursorIsNullException
                 | MissingPermissionException e) {
             throw new IllegalStateException(e);
-        } catch (final MeasurementDeprecated e) {
-            setButtonStatus(button, FINISHED);
-            setButtonEnabled(button);
         }
     }
 

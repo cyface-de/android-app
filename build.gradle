@@ -60,7 +60,7 @@ ext {
     cyfaceUtilsVersion = "3.2.1" // Maven dependency
     cyfaceEnergySettingsVersion = "3.1.0" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "3.0.1" // Also update submodule commit ref
-    cyfaceProtosVersion = "0.0.3" // (!) Keep in sync with `persistence/build.gradle`: `sourceSets`
+    cyfaceProtosVersion = "0.0.3"
     protobufVersion = "3.17.0"
 
     // Android SDK versions

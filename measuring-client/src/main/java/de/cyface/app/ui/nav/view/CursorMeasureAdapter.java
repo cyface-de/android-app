@@ -50,7 +50,7 @@ import de.cyface.persistence.model.Modality;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class CursorMeasureAdapter extends CursorAdapter {
@@ -111,7 +111,8 @@ public class CursorMeasureAdapter extends CursorAdapter {
         final MeasurementStatus status = MeasurementStatus
                 .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
         if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
-                || status == MeasurementStatus.SYNCED || status == MeasurementStatus.SKIPPED) {
+                || status == MeasurementStatus.SYNCED || status == MeasurementStatus.SKIPPED
+                || status == MeasurementStatus.DEPRECATED) {
             label += " - " + status.toString().toLowerCase(Locale.ENGLISH);
         }
         // Checkable
