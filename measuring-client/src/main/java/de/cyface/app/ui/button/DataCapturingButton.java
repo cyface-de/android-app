@@ -172,6 +172,7 @@ public class DataCapturingButton
      * {@code True} if the user opted-in to error reporting.
      */
     private boolean isReportingEnabled;
+    private ProgressDialog calibrationProgressDialog;
 
     public DataCapturingButton(@NonNull final MainFragment mainFragment) {
         this.listener = new HashSet<>();
@@ -574,7 +575,7 @@ public class DataCapturingButton
 
         // We use a handler to run the UI Code on the main thread as it is supposed to be
         runOnUiThread(() -> {
-            final ProgressDialog calibrationProgressDialog = createAndShowCalibrationDialog();
+            calibrationProgressDialog = createAndShowCalibrationDialog();
             scheduleProgressDialogDismissal(calibrationProgressDialog, calibrationDialogListener);
         });
 
@@ -780,14 +781,18 @@ public class DataCapturingButton
      */
     private void scheduleProgressDialogDismissal(final ProgressDialog progressDialog,
             final Collection<CalibrationDialogListener> calibrationDialogListener) {
-        new Handler().postDelayed(() -> {
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-                for (CalibrationDialogListener calibrationDialogListener1 : calibrationDialogListener) {
-                    calibrationDialogListener1.onCalibrationDialogFinished();
-                }
+        new Handler().postDelayed(() -> dismissCalibrationDialog(progressDialog, calibrationDialogListener),
+                CALIBRATION_DIALOG_TIMEOUT);
+    }
+
+    private void dismissCalibrationDialog(final ProgressDialog progressDialog,
+            final Collection<CalibrationDialogListener> calibrationDialogListener) {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            for (CalibrationDialogListener calibrationDialogListener1 : calibrationDialogListener) {
+                calibrationDialogListener1.onCalibrationDialogFinished();
             }
-        }, CALIBRATION_DIALOG_TIMEOUT);
+        }
     }
 
     /**
@@ -831,6 +836,7 @@ public class DataCapturingButton
     public void onDestroyView() {
         button.setOnClickListener(null);
         disconnect(dataCapturingService, cameraService);
+        dismissCalibrationDialog(calibrationProgressDialog, calibrationDialogListener);
     }
 
     /**
