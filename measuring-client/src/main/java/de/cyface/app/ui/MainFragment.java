@@ -70,7 +70,7 @@ import de.cyface.app.utils.Constants;
 import de.cyface.camera_service.CameraService;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.exception.SetupException;
-import de.cyface.persistence.NoSuchMeasurementException;
+import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;

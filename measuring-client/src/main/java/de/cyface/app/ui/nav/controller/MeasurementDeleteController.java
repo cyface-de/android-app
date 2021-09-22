@@ -46,7 +46,7 @@ import androidx.annotation.Nullable;
 
 import de.cyface.app.R;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.NoSuchMeasurementException;
+import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.utils.CursorIsNullException;
