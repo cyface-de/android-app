@@ -70,7 +70,7 @@ import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.GeoLocation;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
@@ -109,7 +109,7 @@ public class MeasurementOverviewFragment extends Fragment {
      */
     private boolean isEventsListShown = false;
     /**
-     * The {@link PersistenceLayer} required to retrieve the {@link Measurement} date from the {@link GeoLocation}s
+     * The {@link PersistenceLayer} required to retrieve the {@link Measurement} date from the {@link ParcelableGeoLocation}s
      */
     private PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
@@ -450,7 +450,7 @@ public class MeasurementOverviewFragment extends Fragment {
             markerLocation.setLongitude(markerPosition.longitude);
 
             // Load GeoLocations
-            final List<GeoLocation> geoLocations = new ArrayList<>();
+            final List<ParcelableGeoLocation> geoLocations = new ArrayList<>();
             try {
                 List<Track> tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaningStrategy());
                 for (final Track track : tracks) {
@@ -462,8 +462,8 @@ public class MeasurementOverviewFragment extends Fragment {
 
             // Search for the nearest GeoLocation
             Double minDistance = null;
-            GeoLocation nearestGeoLocation = null;
-            for (final GeoLocation geoLocation : geoLocations) {
+            ParcelableGeoLocation nearestGeoLocation = null;
+            for (final ParcelableGeoLocation geoLocation : geoLocations) {
                 final Location location = new Location("geoLocation");
                 location.setLatitude(geoLocation.getLat());
                 location.setLongitude(geoLocation.getLon());

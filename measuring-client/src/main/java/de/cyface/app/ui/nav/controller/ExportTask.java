@@ -52,7 +52,7 @@ import androidx.annotation.NonNull;
 
 import de.cyface.app.R;
 import de.cyface.persistence.DefaultFileAccess;
-import de.cyface.persistence.serialization.Point3dFile;
+import de.cyface.persistence.serialization.Point3DFile;
 import de.cyface.utils.Validate;
 
 /**
@@ -90,9 +90,9 @@ public class ExportTask extends AsyncTask<Void, Void, Long> {
 
         // Export sensor data
         final DefaultFileAccess fileAccess = new DefaultFileAccess();
-        final File accelerations = fileAccess.getFolderPath(context, Point3dFile.ACCELERATIONS_FOLDER_NAME);
-        final File rotations = fileAccess.getFolderPath(context, Point3dFile.ROTATIONS_FOLDER_NAME);
-        final File directions = fileAccess.getFolderPath(context, Point3dFile.DIRECTIONS_FOLDER_NAME);
+        final File accelerations = fileAccess.getFolderPath(context, Point3DFile.ACCELERATIONS_FOLDER_NAME);
+        final File rotations = fileAccess.getFolderPath(context, Point3DFile.ROTATIONS_FOLDER_NAME);
+        final File directions = fileAccess.getFolderPath(context, Point3DFile.DIRECTIONS_FOLDER_NAME);
         long bytesTransferred = 0L;
         final UUID exportIdentifier = UUID.randomUUID();
         try {

@@ -96,7 +96,7 @@ import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.GeoLocation;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
@@ -264,7 +264,7 @@ public class DataCapturingButton
      * <p>
      * When a new Capturing is started, the {@code TextView} will only show the {@link Measurement#getIdentifier()}
      * of the open {@link Measurement}. The {@link Measurement#getDistance()} is automatically updated as soon as the
-     * first {@link GeoLocation}s are captured. This way the user can see if the capturing actually works.
+     * first {@link ParcelableGeoLocation}s are captured. This way the user can see if the capturing actually works.
      *
      * @param status the state of the {@code DataCapturingButton}
      */
@@ -899,7 +899,7 @@ public class DataCapturingButton
     }
 
     @Override
-    public void onNewGeoLocationAcquired(GeoLocation geoLocation) {
+    public void onNewGeoLocationAcquired(ParcelableGeoLocation geoLocation) {
         Log.d(TAG, "onNewGeoLocationAcquired");
         final Measurement measurement;
         try {
@@ -948,7 +948,7 @@ public class DataCapturingButton
         }
     }
 
-    private void addLocationToCachedTrack(@NonNull final GeoLocation location) {
+    private void addLocationToCachedTrack(@NonNull final ParcelableGeoLocation location) {
         Validate.notNull(currentMeasurementsTracks, "onNewGeoLocation - cached track is null");
 
         if (!location.isValid()) {
