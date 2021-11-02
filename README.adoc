@@ -44,7 +44,8 @@ The credentials are usually injected by the CI:
 
 ==== Sentry
 
-Create a file `sentry.properties` with the following credentials:
+Create a file `sentry.properties` with the following credentials,
+the `auth.token` can be found on `Sentry > Settings > Account > API > Auth Tokens`.
 
 ....
 defaults.project=android-app

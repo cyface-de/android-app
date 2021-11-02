@@ -63,9 +63,7 @@ public class MeasuringClient extends MultiDexApplication {
      */
     private final ErrorHandler.ErrorListener errorListener = (errorCode, errorMessage) -> {
         // All other errors are shown by the LoginActivity
-        if (errorCode != UNAUTHORIZED) {
-            Toast.makeText(MeasuringClient.this, errorMessage, Toast.LENGTH_LONG).show();
-        }
+        Toast.makeText(MeasuringClient.this, errorMessage, Toast.LENGTH_LONG).show();
 
         // There are two cases we can have network errors
         // 1. during authentication (AuthTokenRequest), ether login or before upload
