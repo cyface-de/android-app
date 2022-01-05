@@ -59,7 +59,7 @@ ext {
     cyfaceAndroidBackendVersion = "7.0.0" // Also update submodule commit ref
     cyfaceUtilsVersion = "3.2.2" // Maven dependency
     cyfaceEnergySettingsVersion = "3.1.1" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.0.0-beta1" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.0.0" // Also update submodule commit ref
     cyfaceSerializationVersion = "1.0.2" // Keep im sync with version in submodule `backend`
 
     // Android SDK versions
@@ -101,8 +101,8 @@ ext {
     // Android-frontend
     sentryAndroidVersion = "5.0.1"
     sentryAndroidGradlePluginVersion = "2.0.1"
-    mapPlayServicesVersion = "17.0.1"
-    locationPlayServicesVersion = "18.0.0"
+    mapPlayServicesVersion = "18.0.1"
+    locationPlayServicesVersion = "19.0.0"
     materialVersion = "1.4.0"
     circelProgressVersion = "1.1.0" // Version > 1.1.0 (1.2.1) is currently not available
     androidxRecyclerViewVersion = "1.2.1"
