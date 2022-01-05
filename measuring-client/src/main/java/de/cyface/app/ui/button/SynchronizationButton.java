@@ -121,6 +121,7 @@ public class SynchronizationButton implements AbstractButton {
     private void setDeactivated() {
         button.setVisibility(View.VISIBLE);
         progressView.setVisibility(View.INVISIBLE);
+        progressView.setProgress(0); // Or else last progress is shown upon restart
         isActivated = false;
     }
 

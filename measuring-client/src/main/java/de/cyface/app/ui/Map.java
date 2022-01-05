@@ -63,7 +63,7 @@ import de.cyface.app.R;
 import de.cyface.app.ui.nav.view.CursorMeasureAdapter;
 import de.cyface.app.utils.Constants;
 import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.GeoLocation;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.Validate;
@@ -176,10 +176,10 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         int positions = 0;
 
         // Iterate through the sub tracks and their points
-        final List<GeoLocation> allLocations = new ArrayList<>();
+        final List<ParcelableGeoLocation> allLocations = new ArrayList<>();
         for (final Track track : tracks) {
             final PolylineOptions subTrack = new PolylineOptions();
-            for (final GeoLocation location : track.getGeoLocations()) {
+            for (final ParcelableGeoLocation location : track.getGeoLocations()) {
                 allLocations.add(location);
                 final LatLng position = new LatLng(location.getLat(), location.getLon());
                 subTrack.add(position);
@@ -207,12 +207,12 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         }
     }
 
-    private void renderEvents(@NonNull final List<GeoLocation> allLocations, @NonNull final List<Event> events) {
+    private void renderEvents(@NonNull final List<ParcelableGeoLocation> allLocations, @NonNull final List<Event> events) {
 
         // Iterate through the events and select GeoLocations for each event to be rendered on the map
-        final Iterator<GeoLocation> locationIterator = allLocations.iterator();
-        GeoLocation previousLocation = null;
-        GeoLocation nextLocation = null;
+        final Iterator<ParcelableGeoLocation> locationIterator = allLocations.iterator();
+        ParcelableGeoLocation previousLocation = null;
+        ParcelableGeoLocation nextLocation = null;
         for (final Event event : events) {
             MarkerOptions markerOptions = null;
             final String markerTitle = applicationContext.getString(R.string.modality_type) + ": "
@@ -226,7 +226,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
             } else {
                 // Iterate until Event's nextLocation is reached
                 while (locationIterator.hasNext()) {
-                    final GeoLocation location = locationIterator.next();
+                    final ParcelableGeoLocation location = locationIterator.next();
                     if (location.getTimestamp() < event.getTimestamp()) {
                         previousLocation = location;
                         continue;

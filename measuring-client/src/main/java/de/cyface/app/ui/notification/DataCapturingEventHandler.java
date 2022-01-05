@@ -38,6 +38,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.MainActivity;
 import de.cyface.datacapturing.EventHandlingStrategy;
@@ -58,7 +59,7 @@ public class DataCapturingEventHandler implements EventHandlingStrategy {
     /**
      * The <code>Parcelable</code> creator as required by the Android Parcelable specification.
      */
-    public static final Creator<DataCapturingEventHandler> CREATOR = new Creator<DataCapturingEventHandler>() {
+    public static final Creator<DataCapturingEventHandler> CREATOR = new Creator<>() {
         @Override
         public DataCapturingEventHandler createFromParcel(final Parcel in) {
             return new DataCapturingEventHandler(in);
@@ -98,7 +99,7 @@ public class DataCapturingEventHandler implements EventHandlingStrategy {
         }
 
         final NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Validate.notNull("Manager for service notifications not available.", manager);
+        Validate.notNull(manager, "Manager for service notifications not available.");
 
         if (manager.getNotificationChannel(channelId) == null) {
             final NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
@@ -164,7 +165,7 @@ public class DataCapturingEventHandler implements EventHandlingStrategy {
     @Override
     @NonNull
     public Notification buildCapturingNotification(@NonNull final DataCapturingBackgroundService context) {
-        Validate.notNull("No context provided!", context);
+        Validate.notNull(context, "No context provided!");
         final String channelId = NOTIFICATION_CHANNEL_ID_RUNNING;
 
         // Open Activity when the notification is clicked

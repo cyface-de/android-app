@@ -63,6 +63,7 @@ public class MeasuringClient extends MultiDexApplication {
      */
     private final ErrorHandler.ErrorListener errorListener = (errorCode, errorMessage) -> {
         // All other errors are shown by the LoginActivity
+        // Without this check "unauthorized" toast appears even when the app is in background
         if (errorCode != UNAUTHORIZED) {
             Toast.makeText(MeasuringClient.this, errorMessage, Toast.LENGTH_LONG).show();
         }

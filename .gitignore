@@ -16,3 +16,6 @@ local.properties
 
 # keystore file, when copied into this project for manual (test) deployment of "release" variant
 /release-upload-key.jks
+
+# Only version gradle.properties.template
+/gradle.properties

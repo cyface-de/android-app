@@ -70,12 +70,12 @@ import de.cyface.app.utils.Constants;
 import de.cyface.camera_service.CameraService;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.exception.SetupException;
-import de.cyface.persistence.NoSuchMeasurementException;
+import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.synchronization.ConnectionStatusListener;
-import de.cyface.synchronization.SynchronisationException;
+import de.cyface.synchronization.exception.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
@@ -372,7 +372,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
     private void selectModalityTab() {
         final TabLayout tabLayout = fragmentRoot.findViewById(R.id.tab_layout);
         final String modality = preferences.getString(PREFERENCES_MODALITY_KEY, null);
-        Validate.notNull("Modality should already be set but isn't.", modality);
+        Validate.notNull(modality, "Modality should already be set but isn't.");
 
         // Select the Modality tab
         final TabLayout.Tab tab;
