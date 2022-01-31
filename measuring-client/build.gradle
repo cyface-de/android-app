@@ -111,8 +111,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // signingConfig is set by the CI
-            buildConfigField "String", "cyfaceServer", '"https://s2.cyface.de/api/v2"'
-            buildConfigField "String", "guestLogin", '"guest"'
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.guest_user')}\""
             buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.guest_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
