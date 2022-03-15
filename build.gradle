@@ -26,7 +26,7 @@
  */
 
 buildscript {
-    ext.gradle_version = "7.0.4"
+    ext.gradle_version = '7.1.2'
     ext.kotlin_version = "1.6.10"
     ext.matcher_version = "1.2.2"
 

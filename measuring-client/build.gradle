@@ -125,22 +125,17 @@ android {
         }
     }
 
-    lintOptions {
+    lint {
         abortOnError false
     }
 
-    // Avoids error when importing jackson
     packagingOptions {
-        pickFirst 'META-INF/LICENSE.txt'
-        pickFirst 'META-INF/NOTICE.txt'
-        pickFirst 'META-INF/license.txt'
-        pickFirst 'META-INF/notice.txt'
-        pickFirst 'META-INF/ASL2.0'
-        pickFirst 'META-INF/LICENSE'
-        pickFirst 'META-INF/NOTICE'
-
-        // To resolve the conflict warning after adding google-api-client dependency
-        exclude 'META-INF/DEPENDENCIES'
+        resources {
+            // Avoids error when importing jackson
+            pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/license.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE']
+            // To resolve the conflict warning after adding google-api-client dependency
+            excludes += ['META-INF/DEPENDENCIES']
+        }
     }
 
     // Enabling desugaring to support Java 8 and Java 11 features
