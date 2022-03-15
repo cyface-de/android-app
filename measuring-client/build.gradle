@@ -82,27 +82,21 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
-            //buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.local_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.local_password')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
-            //buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.emulator_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.emulator_password')}\""
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
-            buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.staging_user')}\""
-            buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.staging_password')}\""
+            buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
+            buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
-            //buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.demo_user')}\""
-            //buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.demo_password')}\""
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
@@ -112,8 +106,6 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
-            buildConfigField "String", "guestLogin", "\"${project.findProperty('cyface.guest_user')}\""
-            buildConfigField "String", "guestPassword", "\"${project.findProperty('cyface.guest_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }

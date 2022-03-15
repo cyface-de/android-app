@@ -34,12 +34,13 @@
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/appCompatImageButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="54dp"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:contentDescription="@string/logo_content_description"
             android:scaleType="fitXY"
-            custom:srcCompat="@drawable/ic_logo_vector"
+            android:layout_gravity="bottom"
+            custom:srcCompat="@drawable/ic_logo_text_only"
             tools:ignore="MissingPrefix" />
     </LinearLayout>
 
@@ -64,7 +65,9 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_login"
@@ -79,7 +82,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_password"
@@ -109,25 +114,16 @@
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="@string/username" />
 
             <TextView
-                android:id="@+id/login_link_contact_us"
+                android:id="@+id/login_link_registration"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/no_login_contact_us"
-                android:textSize="16sp" />
-
-            <!-- Login button -->
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/guest_login_button"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:text="@string/no_login_register"
                 android:layout_marginTop="16dp"
-                android:text="@string/guest_login_button" />
+                android:textSize="16sp" />
 
         </LinearLayout>
     </ScrollView>

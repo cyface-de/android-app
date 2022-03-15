@@ -33,11 +33,10 @@
   <string name="password">Passwort</string>
   <string name="username">Anmelden</string>
   <string name="your_request">Ihre Anfrage</string>
-  <string name="no_login_contact_us">Bei Problemen bitte <font color="#3f8730">Kontakt</font> aufnehmen.</string>
-  <string name="guest_login_button">Als Gast einloggen</string>
-  <string name="title_activity_login">Einloggen</string>
-  <string name="error_message_field_required">Bitte ausfüllen</string>
-  <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
+    <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
+    <string name="title_activity_login">Einloggen</string>
+    <string name="error_message_field_required">Bitte ausfüllen</string>
+    <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
   <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
   <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 

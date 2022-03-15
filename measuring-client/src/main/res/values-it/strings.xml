@@ -33,8 +33,7 @@
   <string name="password">Password</string>
   <string name="username">Login</string>
   <string name="your_request">La tua richiesta</string>
-  <string name="no_login_contact_us">Problemi col login? Per favore <font color="#3f8730">contattaci</font>.</string>
-  <string name="guest_login_button">Prova ad accedere come ospite</string>
+  <string name="no_login_register">Nessuna credenziale? <font color="#3f8730">Registrati ora</font></string>
   <string name="title_activity_login">Accedi</string>
   <string name="error_message_field_required">This Quest ocampo è richiesto</string>
   <string name="error_message_invalid_email">Questa email non è valida</string>
