@@ -61,7 +61,7 @@ import de.cyface.utils.Validate;
  * A login screen that offers login via email/password.
  *
  * @author Armin Schnabel
- * @version 3.2.5
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class LoginActivity extends AccountAuthenticatorActivity {
