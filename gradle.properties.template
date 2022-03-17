@@ -6,21 +6,11 @@ android.enableJetifier=true
 githubUser=
 githubToken=
 
-cyface.guest_password=
-
 google.maps_api_key=
 
 cyface.demo_api=
-cyface.demo_user=
-cyface.demo_password=
-
 cyface.local_api=
-cyface.local_user=
-cyface.local_password=
-
 cyface.emulator_api=
-cyface.emulator_user=
-cyface.emulator_password=
 
 cyface.staging_api=
 cyface.staging_user=
