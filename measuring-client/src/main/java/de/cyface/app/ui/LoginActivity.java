@@ -115,7 +115,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         loginButton.setOnClickListener(view -> attemptLogin());
 
         progressBar = findViewById(R.id.login_progress_bar);
-        registerFeedbackLink();
+        registerRegistrationLink();
 
         MeasuringClient.getErrorHandler().addListener(errorListener);
     }
@@ -258,11 +258,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    private void registerFeedbackLink() {
+    private void registerRegistrationLink() {
         final var browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://app.cyface.de/registration"));
         final var registrationLink = findViewById(R.id.login_link_registration);
-        registrationLink.setOnClickListener(
-                v -> startActivity(Intent.createChooser(browserIntent, getString(R.string.feedback_choose_email_app))));
+        registrationLink.setOnClickListener(v -> startActivity(browserIntent));
     }
 
     /**
