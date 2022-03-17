@@ -6,6 +6,8 @@ android.enableJetifier=true
 githubUser=
 githubToken=
 
+cyface.api=
+
 google.maps_api_key=
 
 cyface.demo_api=
