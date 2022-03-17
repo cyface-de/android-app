@@ -195,8 +195,8 @@ public class CapturingNotificationTest {
             UiObject2 passwordTextBox = device.findObject(passwordTextBoxSelector);
             UiObject2 loginButton = device.findObject(By.res(CYFACE_APP_PACKAGE, "login_button"));
 
-            loginTextBox.setText(BuildConfig.guestLogin);
-            passwordTextBox.setText(BuildConfig.guestPassword);
+            loginTextBox.setText(BuildConfig.testLogin);
+            passwordTextBox.setText(BuildConfig.testPassword);
 
             Log.i(TAG, "Clicking login button and waiting up to  " + DEFAULT_TIMEOUT + " ms");
             loginButton.clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT);

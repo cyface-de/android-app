@@ -125,14 +125,13 @@ $ git push
 See https://github.com/cyface-de/android-backend#release-a-new-version[Cyface Android SDK Readme]
 
 * `versionCode` is automatically incremented by the CI
-* After pushing the release tag to Github out CI builds the Android Bundle now automatically
+* After pushing the release tag to Github the CI builds the Android Bundle now automatically
 * Checkout this build, copy the bundle from the artifacts and upload it to Play Store
-* Manually mark the released version as 'new Release' on https://github.com/cyface-de/android-app/releases[Github].
 
 
 [[license]]
 == License
-Copyright 2017-2021 Cyface GmbH
+Copyright 2017-2022 Cyface GmbH
 
 This file is part of the Cyface App for Android.
 
