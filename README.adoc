@@ -127,6 +127,7 @@ See https://github.com/cyface-de/android-backend#release-a-new-version[Cyface An
 * `versionCode` is automatically incremented by the CI
 * After pushing the release tag to Github the CI builds the Android Bundle now automatically
 * Checkout this build, copy the bundle from the artifacts and upload it to Play Store
+* Mark the release as release manually on Github, as we currently do only have Bitrise workflows
 
 
 [[license]]
