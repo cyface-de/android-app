@@ -21,7 +21,7 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.0.3
+ * @version 1.0.4
  * @since 1.0.0
  */
 apply plugin: 'com.android.library'
@@ -37,7 +37,13 @@ android {
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
     }
 
-    lintOptions {
+    // Enabling desugaring to support Java 8 and Java 11 features
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceCompatibility
+        targetCompatibility rootProject.ext.targetCompatibility
+    }
+
+    lint {
         abortOnError false
     }
 

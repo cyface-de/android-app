@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -21,7 +21,7 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.8.0
+ * @version 1.9.0
  * @since 1.0.0
  */
 
@@ -43,10 +43,6 @@ buildscript {
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-
-    // Load credentials
-    def properties = new Properties()
-    file("../local.properties").withInputStream { properties.load(it) }
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -74,7 +70,7 @@ android {
         missingDimensionStrategy 'mode', 'full'
 
         // Load Google Maps API key
-        manifestPlaceholders = [ googleMapsApiKey:"${properties.getProperty('google.maps_api_key')}"]
+        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
     }
 
     buildTypes {
@@ -84,17 +80,23 @@ android {
 
             // Select one of the APIs below, depending on your needs
 
-            // Mock-api, only supports mock-login (used by UI test on CI)
-            buildConfigField "String", "cyfaceServer", '"https://demo.cyface.de/api/v2"'
-            manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
-            buildConfigField "String", "guestLogin", '"MOCKED"'
-            buildConfigField "String", "guestPassword", '"MOCKED"'
+            // Phone - to local collector - ! only if iptables allow connection from outside
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
-            // Local mock-api via emulator (see ./mock-api) - can be easily modified for testing
-            //buildConfigField "String", "cyfaceServer", '"http://10.0.2.2:8080/api/v2"'
+            // EMULATOR - to local collector
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
-            //buildConfigField "String", "guestLogin", '"guest"'
-            //buildConfigField "String", "guestPassword", '"secret"'
+
+            // Staging
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
+            buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
+            manifestPlaceholders = [usesCleartextTraffic:"false"]
+
+            // MOCK-API - only supports login - used by UI test on CI
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
@@ -103,9 +105,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // signingConfig is set by the CI
-            buildConfigField "String", "cyfaceServer", '"https://s2.cyface.de/api/v2"'
-            buildConfigField "String", "guestLogin", '"guest"'
-            buildConfigField "String", "guestPassword", "\"${properties.getProperty('cyface.guest_password')}\""
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
@@ -117,21 +117,20 @@ android {
         }
     }
 
-    lintOptions {
+    lint {
         abortOnError false
     }
 
-    // Avoids error when importing jackson
     packagingOptions {
-        pickFirst 'META-INF/LICENSE.txt'
-        pickFirst 'META-INF/NOTICE.txt'
-        pickFirst 'META-INF/license.txt'
-        pickFirst 'META-INF/notice.txt'
-        pickFirst 'META-INF/ASL2.0'
-        pickFirst 'META-INF/LICENSE'
-        pickFirst 'META-INF/NOTICE'
+        resources {
+            // Avoids error when importing jackson
+            pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/license.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE']
+            // To resolve the conflict warning after adding google-api-client dependency
+            excludes += ['META-INF/DEPENDENCIES']
+        }
     }
 
+    // Enabling desugaring to support Java 8 and Java 11 features
     compileOptions {
         sourceCompatibility rootProject.ext.sourceCompatibility
         targetCompatibility rootProject.ext.targetCompatibility
@@ -140,27 +139,22 @@ android {
 
 // Exception tracking
 sentry {
-    // Disables or enables the automatic configuration of ProGuard
-    // for Sentry.  This injects a default config for ProGuard so
-    // you don't need to do it manually.
-    autoProguardConfig true
-
     // Enables or disables the automatic upload of mapping files
     // during a build.  If you disable this, you'll need to manually
     // upload the mapping files with sentry-cli when you do a release.
-    autoUpload true
+    autoUpload = true
 
     // Disables or enables the automatic configuration of Native Symbols
     // for Sentry. This executes sentry-cli automatically so
     // you don't need to do it manually.
     // Default is disabled.
-    uploadNativeSymbols false
+    uploadNativeSymbols = false
 
     // Does or doesn't include the source code of native code for Sentry.
     // This executes sentry-cli with the --include-sources param. automatically so
     // you don't need to do it manually.
     // Default is disabled.
-    includeNativeSources false
+    includeNativeSources = false
 }
 
 dependencies {

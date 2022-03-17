@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2021 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -100,7 +100,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
         }
 
         final NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Validate.notNull("Manager for service notifications not available.", manager);
+        Validate.notNull(manager, "Manager for service notifications not available.");
 
         if (manager.getNotificationChannel(channelId) == null) {
             final NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
@@ -181,7 +181,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
                     context.getString(R.string.notification_channel_description_warning),
                     NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
         }
-        // FIXME: see if we not create two of those warnings (DCS and CS)
+        // TODO: see if we not create two of those warnings (DCS and CS)
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
                 NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
                         .setSmallIcon(R.drawable.ic_logo_only_c)
@@ -299,7 +299,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
     @NonNull
     public Notification buildCapturingNotification(@NonNull final BackgroundService context,
             final boolean isVideoModeRequested) {
-        Validate.notNull("No context provided!", context);
+        Validate.notNull(context, "No context provided!");
         final String channelId = NOTIFICATION_CHANNEL_ID_RUNNING;
 
         // Open Activity when the notification is clicked

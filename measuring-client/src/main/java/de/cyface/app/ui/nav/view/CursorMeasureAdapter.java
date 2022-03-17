@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2021 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -50,7 +50,7 @@ import de.cyface.persistence.model.Modality;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 public class CursorMeasureAdapter extends CursorAdapter {
@@ -111,8 +111,9 @@ public class CursorMeasureAdapter extends CursorAdapter {
         final MeasurementStatus status = MeasurementStatus
                 .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
         if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
-                || status == MeasurementStatus.SYNCED) {
-            label += " - " + status.toString().toLowerCase();
+                || status == MeasurementStatus.SYNCED || status == MeasurementStatus.SKIPPED
+                || status == MeasurementStatus.DEPRECATED) {
+            label += " - " + status.toString().toLowerCase(Locale.ENGLISH);
         }
         // Checkable
         itemView.setEnabled(true);
@@ -133,7 +134,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
             @NonNull final Modality modality) {
         if (contextWeakReference == null) {
             Log.w(TAG, "WeakReference is null, displaying database identifier instead of translation for modality.");
-            return modality.getDatabaseIdentifier().toLowerCase();
+            return modality.getDatabaseIdentifier().toLowerCase(Locale.ENGLISH);
         }
 
         final Context context = contextWeakReference.get();
@@ -151,7 +152,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
             case MOTORBIKE:
                 return context.getString(R.string.modality_motorbike);
             case UNKNOWN:
-                return modality.getDatabaseIdentifier().toLowerCase();
+                return modality.getDatabaseIdentifier().toLowerCase(Locale.ENGLISH);
             default:
                 throw new IllegalArgumentException("Unknown modality type: " + modality);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -19,7 +19,6 @@
 package de.cyface.app;
 
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.synchronization.ErrorHandler.ErrorCode.UNAUTHORIZED;
 
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -43,7 +42,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.5.0
+ * @version 1.5.1
  * @since 1.0.0
  */
 public class MeasuringClient extends MultiDexApplication {
@@ -62,10 +61,8 @@ public class MeasuringClient extends MultiDexApplication {
      * Reports error events to the user via UI and to Sentry, if opted-in.
      */
     private final ErrorHandler.ErrorListener errorListener = (errorCode, errorMessage) -> {
-        // All other errors are shown by the LoginActivity
-        if (errorCode != UNAUTHORIZED) {
-            Toast.makeText(MeasuringClient.this, errorMessage, Toast.LENGTH_LONG).show();
-        }
+        final var appName = getApplicationContext().getString(R.string.app_name);
+        Toast.makeText(MeasuringClient.this, String.format("%s - %s", errorMessage, appName), Toast.LENGTH_LONG).show();
 
         // There are two cases we can have network errors
         // 1. during authentication (AuthTokenRequest), ether login or before upload

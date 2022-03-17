@@ -93,10 +93,10 @@ import de.cyface.datacapturing.model.CapturedData;
 import de.cyface.datacapturing.ui.Reason;
 import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.NoSuchMeasurementException;
+import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.GeoLocation;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
@@ -172,6 +172,7 @@ public class DataCapturingButton
      * {@code True} if the user opted-in to error reporting.
      */
     private boolean isReportingEnabled;
+    private ProgressDialog calibrationProgressDialog;
 
     public DataCapturingButton(@NonNull final MainFragment mainFragment) {
         this.listener = new HashSet<>();
@@ -263,7 +264,7 @@ public class DataCapturingButton
      * <p>
      * When a new Capturing is started, the {@code TextView} will only show the {@link Measurement#getIdentifier()}
      * of the open {@link Measurement}. The {@link Measurement#getDistance()} is automatically updated as soon as the
-     * first {@link GeoLocation}s are captured. This way the user can see if the capturing actually works.
+     * first {@link ParcelableGeoLocation}s are captured. This way the user can see if the capturing actually works.
      *
      * @param status the state of the {@code DataCapturingButton}
      */
@@ -574,7 +575,7 @@ public class DataCapturingButton
 
         // We use a handler to run the UI Code on the main thread as it is supposed to be
         runOnUiThread(() -> {
-            final ProgressDialog calibrationProgressDialog = createAndShowCalibrationDialog();
+            calibrationProgressDialog = createAndShowCalibrationDialog();
             scheduleProgressDialogDismissal(calibrationProgressDialog, calibrationDialogListener);
         });
 
@@ -780,14 +781,18 @@ public class DataCapturingButton
      */
     private void scheduleProgressDialogDismissal(final ProgressDialog progressDialog,
             final Collection<CalibrationDialogListener> calibrationDialogListener) {
-        new Handler().postDelayed(() -> {
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-                for (CalibrationDialogListener calibrationDialogListener1 : calibrationDialogListener) {
-                    calibrationDialogListener1.onCalibrationDialogFinished();
-                }
+        new Handler().postDelayed(() -> dismissCalibrationDialog(progressDialog, calibrationDialogListener),
+                CALIBRATION_DIALOG_TIMEOUT);
+    }
+
+    private void dismissCalibrationDialog(final ProgressDialog progressDialog,
+            final Collection<CalibrationDialogListener> calibrationDialogListener) {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            for (CalibrationDialogListener calibrationDialogListener1 : calibrationDialogListener) {
+                calibrationDialogListener1.onCalibrationDialogFinished();
             }
-        }, CALIBRATION_DIALOG_TIMEOUT);
+        }
     }
 
     /**
@@ -831,6 +836,7 @@ public class DataCapturingButton
     public void onDestroyView() {
         button.setOnClickListener(null);
         disconnect(dataCapturingService, cameraService);
+        dismissCalibrationDialog(calibrationProgressDialog, calibrationDialogListener);
     }
 
     /**
@@ -893,7 +899,7 @@ public class DataCapturingButton
     }
 
     @Override
-    public void onNewGeoLocationAcquired(GeoLocation geoLocation) {
+    public void onNewGeoLocationAcquired(ParcelableGeoLocation geoLocation) {
         Log.d(TAG, "onNewGeoLocationAcquired");
         final Measurement measurement;
         try {
@@ -942,8 +948,8 @@ public class DataCapturingButton
         }
     }
 
-    private void addLocationToCachedTrack(@NonNull final GeoLocation location) {
-        Validate.notNull("onNewGeoLocation - cached track is null", currentMeasurementsTracks);
+    private void addLocationToCachedTrack(@NonNull final ParcelableGeoLocation location) {
+        Validate.notNull(currentMeasurementsTracks, "onNewGeoLocation - cached track is null");
 
         if (!location.isValid()) {
             Log.d(TAG, "updateCachedTrack: ignoring invalid point");

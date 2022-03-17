@@ -33,11 +33,10 @@
   <string name="password">Passwort</string>
   <string name="username">Anmelden</string>
   <string name="your_request">Ihre Anfrage</string>
-  <string name="no_login_contact_us">Bei Problemen bitte <font color="#3f8730">Kontakt</font> aufnehmen.</string>
-  <string name="guest_login_button">Als Gast einloggen</string>
-  <string name="title_activity_login">Einloggen</string>
-  <string name="error_message_field_required">Bitte ausfüllen</string>
-  <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
+    <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
+    <string name="title_activity_login">Einloggen</string>
+    <string name="error_message_field_required">Bitte ausfüllen</string>
+    <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
   <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
   <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 
@@ -122,7 +121,7 @@
   <string name="publisher">Herausgeber</string>
   <string name="publisher_content">
         Cyface GmbH
-        \nBehringstraße 46
+        \nFröbelstr. 49
         \n01159 Dresden\n
 
         \nVertreten durch:
@@ -131,7 +130,7 @@
         \nDirk Ackner\n
 
         \nE-Mail: mail@cyface.de
-        \nTelefon: 0351 481 877 30\n
+        \nTelefon: +49 351 658 6363 9\n
 
         \nAmtsgericht Dresden
         \nHRB: 36726
@@ -169,10 +168,10 @@
         \n\nDer Verantwortliche im Sinne der Datenschutz-Grundverordnung und anderer nationaler Datenschutzgesetze der Mitgliedsstaaten sowie sonstiger datenschutzrechtlicher Bestimmungen ist die:
 
         \n\nCyface GmbH
-        \nBehringstraße 46
+        \nFröbelstr. 49
         \n01159 Dresden
         \nDeutschland
-        \nTel.: 0351 48187730
+        \nTel.: +49 351 658 6363 9
         \nE-Mail: mail@cyface.de
         \nWebsite: https://cyface.de
 

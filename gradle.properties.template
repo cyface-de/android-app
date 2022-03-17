@@ -1,0 +1,17 @@
+org.gradle.jvmargs=-Xmx2049M
+android.builder.sdkDownload=true
+android.useAndroidX=true
+android.enableJetifier=true
+
+githubUser=
+githubToken=
+
+google.maps_api_key=
+
+cyface.demo_api=
+cyface.local_api=
+cyface.emulator_api=
+
+cyface.staging_api=
+cyface.staging_user=
+cyface.staging_password=

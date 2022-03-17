@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -21,30 +21,32 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.1.0
+ * @version 2.1.1
  * @since 1.0.0
  */
 
 buildscript {
-    ext.kotlin_version = "1.4.21"
-    ext.java_version = JavaVersion.VERSION_1_8
+    ext.gradle_version = '7.1.2'
+    ext.kotlin_version = "1.6.10"
+    ext.matcher_version = "1.2.2"
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        classpath "com.android.tools.build:gradle:$gradle_version"
         // Required for versioning Google play services.
-        classpath "com.google.android.gms:strict-version-matcher-plugin:1.2.2"
+        classpath "com.google.android.gms:strict-version-matcher-plugin:$matcher_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 ext {
-    // This app
+    // This app's version
     applicationId = "de.cyface.app"
-    versionName = "2.15.0" // Version shown to the user. Only increase this on the release branch.
+    versionName = "3.0.0" // Version shown to the user
     versionCode = 1 // Automatically incremented by CI. Required for Play Store releases
 
     /*
@@ -53,69 +55,72 @@ ext {
      * prevents you from the creation of an incompatible fork and enables us to work standalone on the submodules.
      */
 
-    cyfaceBackendVersion = "6.2.0" // Also update submodule commit ref
-    cyfaceUtilsVersion = "2.0.1" // Maven dependency
-    cyfaceEnergySettingsVersion = "3.0.0" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "3.0.0" // Also update submodule commit ref
+    // Cyface dependencies
+    cyfaceAndroidBackendVersion = "7.1.0" // Also update submodule commit ref
+    cyfaceUtilsVersion = "3.2.2" // Maven dependency
+    cyfaceEnergySettingsVersion = "3.1.1" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.0.0" // Also update submodule commit ref
+    cyfaceSerializationVersion = "1.0.2" // Keep im sync with version in submodule `backend`
 
+    // Android SDK versions
     minSdkVersion = 21
     targetSdkVersion = 30
     compileSdkVersion = 30
     buildToolsVersion = '30.0.3'
 
+    // Android dependencies
     multidexVersion = "2.0.1"
-    androidxAnnotationVersion = "1.0.0"
-    androidxAppCompatVersion = "1.2.0"
+    androidxAnnotationVersion = "1.3.0"
+    androidxAppCompatVersion = "1.3.1" // 1.4.0 leads to an error in `gradle verifyReleaseResources`
     androidPreferencesVersion = "1.1.1"
     localbroadcastmanagerVersion = "1.0.0"
     exifinterfaceVersion = "1.3.2" // Required by Camera Service submodule
 
-    kotlinCoreVersion = "1.3.2"
+    // Other dependencies
+    kotlinCoreVersion = "1.6.0" // 1.7.0 leads to an error in `gradle verifyReleaseResources`
     materialDialogsVersion = "3.1.1"
+    googleApiClientVersion = '1.31.5' // transmission protocol
 
-    // testing
-    junitVersion = "1.1.2"
+    // Testing
+    junitVersion = "1.1.3"
     mockitoVersion = "3.3.3"
     hamcrestVersion = "1.3"
-    rulesVersion = "1.3.0"
-    robolectricVersion = "4.3.1"
+    rulesVersion = "1.4.0"
+    robolectricVersion = "4.6.1"
     androidxTestCoreVersion = "1.1.0"
-    runnerVersion = "1.3.0"
+    runnerVersion = "1.4.0"
     uiAutomatorVersion = "2.2.0"
     constrantLayoutVersion = "1.3.2"
-
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-    // android-frontend dependencies
-    sentryAndroidVersion = "3.1.1"
-    sentryAndroidGradlePluginVersion = "1.7.36"
-    mapPlayServicesVersion = "17.0.0"
-    locationPlayServicesVersion = "17.1.0"
-    materialVersion = "1.3.0-rc01" // Beta because we need version >= 1.2.0 for the slider
-    circelProgressVersion = "1.1.0" // Version > 1.1.0 (1.2.1) is currently not available
-    androidxRecyclerViewVersion = "1.1.0"
+    // Java version
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    kotlinTargetJavaVersion = "11"
 
+    // Android-frontend
+    sentryAndroidVersion = "5.0.1"
+    sentryAndroidGradlePluginVersion = "2.0.1"
+    mapPlayServicesVersion = "18.0.1"
+    locationPlayServicesVersion = "19.0.0"
+    materialVersion = "1.4.0"
+    circelProgressVersion = "1.1.0" // Version > 1.1.0 (1.2.1) is currently not available
+    androidxRecyclerViewVersion = "1.2.1"
 }
 
 // Attention: Overwrites also the repositories used to retrieve the transitive dependencies in the submodules
 allprojects {
 
-    // Load credentials
-    def properties = new Properties()
-    properties.load(new FileInputStream("local.properties"))
-
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
         // Required by submodules: camera_service, energy_settings, measuring-client, backend
         maven {
             url "https://maven.pkg.github.com/cyface-de/android-utils"
             credentials {
-                username = properties.getProperty("github.user")
-                password = properties.getProperty("github.token")
+                username = project.findProperty("githubUser")
+                password = project.findProperty("githubToken")
             }
         }
     }

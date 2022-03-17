@@ -21,9 +21,7 @@ package de.cyface.app.ui;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PREFERENCES_SERVER_KEY;
-import static de.cyface.app.utils.Constants.SUPPORT_EMAIL;
 import static de.cyface.app.utils.Constants.TAG;
-import static de.cyface.energy_settings.TrackingSettings.generateFeedbackEmailIntent;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
 
 import java.util.regex.Pattern;
@@ -37,6 +35,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -45,7 +44,6 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -63,7 +61,7 @@ import de.cyface.utils.Validate;
  * A login screen that offers login via email/password.
  *
  * @author Armin Schnabel
- * @version 3.2.5
+ * @version 3.3.0
  * @since 1.0.0
  */
 public class LoginActivity extends AccountAuthenticatorActivity {
@@ -81,10 +79,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
      * A {@code Button} which is used to confirm the entered credentials.
      */
     private Button loginButton;
-    /**
-     * A {@code Button} which is used to use guest credentials to log in.
-     */
-    private Button guestLoginButton;
     /**
      * Needs to be resettable for testing. That's the only way to mock a single method of Android's Activity's
      */
@@ -118,12 +112,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         loginInput = findViewById(R.id.input_login);
         passwordInput = findViewById(R.id.input_password);
         loginButton = findViewById(R.id.login_button);
-        loginButton.setOnClickListener(view -> attemptLogin(false));
-        guestLoginButton = findViewById(R.id.guest_login_button);
-        guestLoginButton.setOnClickListener(view -> attemptLogin(true));
+        loginButton.setOnClickListener(view -> attemptLogin());
 
         progressBar = findViewById(R.id.login_progress_bar);
-        registerFeedbackLink();
+        registerRegistrationLink();
 
         MeasuringClient.getErrorHandler().addListener(errorListener);
     }
@@ -135,13 +127,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
+     * Attempts to sign in with the account specified by the login form.
+     * <p>
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
-     *
-     * @param isGuestLogin {@code True} if the user does not provide own credentials
      */
-    private void attemptLogin(final boolean isGuestLogin) {
+    private void attemptLogin() {
         if (loginTask != null) {
             Log.d(TAG, "Auth is already in progress, ignoring attemptLogin().");
             return; // Auth is already in progress
@@ -151,21 +142,15 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         loginInput.setError(null);
         passwordInput.setError(null);
         loginButton.setEnabled(false);
-        guestLoginButton.setEnabled(false);
 
-        String login = BuildConfig.guestLogin;
-        String password = BuildConfig.guestPassword;
-        if (!isGuestLogin) {
-            // Check for valid credentials
-            Validate.notNull(loginInput.getText());
-            Validate.notNull(passwordInput.getText());
-            login = loginInput.getText().toString();
-            password = passwordInput.getText().toString();
-            if (!credentialsAreValid(login, password, loginMustBeAnEmailAddress)) {
-                loginButton.setEnabled(true);
-                guestLoginButton.setEnabled(true);
-                return;
-            }
+        // Check for valid credentials
+        Validate.notNull(loginInput.getText());
+        Validate.notNull(passwordInput.getText());
+        final var login = loginInput.getText().toString();
+        final var password = passwordInput.getText().toString();
+        if (!credentialsAreValid(login, password, loginMustBeAnEmailAddress)) {
+            loginButton.setEnabled(true);
+            return;
         }
 
         // Update view
@@ -190,7 +175,6 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                     // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
                     deleteAccount(this.getContext().get(), params.getAccount());
                     loginButton.setEnabled(true);
-                    guestLoginButton.setEnabled(true);
                     return;
                 }
 
@@ -274,11 +258,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    private void registerFeedbackLink() {
-        final Intent emailIntent = generateFeedbackEmailIntent(this, getString(R.string.your_request), SUPPORT_EMAIL);
-        final TextView feedbackLink = findViewById(R.id.login_link_contact_us);
-        feedbackLink.setOnClickListener(
-                v -> startActivity(Intent.createChooser(emailIntent, getString(R.string.feedback_choose_email_app))));
+    private void registerRegistrationLink() {
+        final var browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://app.cyface.de/registration"));
+        final var registrationLink = findViewById(R.id.login_link_registration);
+        registrationLink.setOnClickListener(v -> startActivity(browserIntent));
     }
 
     /**

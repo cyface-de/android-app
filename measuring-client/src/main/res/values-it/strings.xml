@@ -33,8 +33,7 @@
   <string name="password">Password</string>
   <string name="username">Login</string>
   <string name="your_request">La tua richiesta</string>
-  <string name="no_login_contact_us">Problemi col login? Per favore <font color="#3f8730">contattaci</font>.</string>
-  <string name="guest_login_button">Prova ad accedere come ospite</string>
+  <string name="no_login_register">Nessuna credenziale? <font color="#3f8730">Registrati ora</font></string>
   <string name="title_activity_login">Accedi</string>
   <string name="error_message_field_required">This Quest ocampo è richiesto</string>
   <string name="error_message_invalid_email">Questa email non è valida</string>
@@ -122,7 +121,7 @@
   <string name="publisher">Editore</string>
   <string name="publisher_content">
         Cyface GmbH
-        \nBehringstraße 46
+        \nFröbelstr. 49
         \n01159 Dresden
         \nGermany\n
 
@@ -132,7 +131,7 @@
         \nDirk Ackner\n
 
         \nEmail: mail@cyface.de
-        \nPhone: +49 351 481 877 30\n
+        \nTelefon: +49 351 658 6363 9\n
 
         \nAmtsgericht Dresden
         \nHRB: 36726
@@ -169,10 +168,10 @@
         \n\nL\'entità responsabile ai sensi del regolamento generale sulla protezione dei dati e di altre leggi nazionali in materia di protezione dei dati degli Stati membri, nonché di altre disposizioni in materia di protezione dei dati è la seguente:
 
         \n\nCyface GmbH
-        \nBehringstraße 46
+        \nFröbelstr. 49
         \n01159 Dresden
         \nGermania
-        \nTelefono: 0351 48187730
+        \nTelefono: +49 351 658 6363 9
         \nE-Mail: mail@cyface.de
         \nSito web: https://cyface.de
 

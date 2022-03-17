@@ -42,14 +42,16 @@
       tools:ignore="ScopedStorage" />
 
     <!-- allowBackup=false as we did not yet define what we really want to backup-->
+    <!-- usesCleartextTraffic only API 23+, ignored below. only for debugging -->
+    <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
     <application
         android:name=".MeasuringClient"
         android:allowBackup="false"
         android:icon="@drawable/ic_logo_vector"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:usesCleartextTraffic="${usesCleartextTraffic}"><!-- only > API 23 ok, only for debugging -->
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
+        android:usesCleartextTraffic="${usesCleartextTraffic}">
 
         <!-- Sentry DSN. This ids the account but is not a secret. -->
         <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
@@ -67,7 +69,9 @@
             android:required="false" />
 
         <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
-        <activity android:name=".ui.TermsOfUseActivity">
+        <!-- `exported="true"` or else the app cannot be launched after installation! -->
+        <activity android:name=".ui.TermsOfUseActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

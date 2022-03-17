@@ -52,13 +52,13 @@ import androidx.annotation.NonNull;
 
 import de.cyface.app.R;
 import de.cyface.persistence.DefaultFileAccess;
-import de.cyface.persistence.serialization.Point3dFile;
+import de.cyface.persistence.serialization.Point3DFile;
 import de.cyface.utils.Validate;
 
 /**
  * Async task which exports the measurement data without the image data.
  *
- * FIXME: AsyncTasks all run on the same thread this is only for short running operations!!
+ * TODO: AsyncTasks all run on the same thread this is only for short running operations!!
  * this will block e.g. authRequest and delete- async tasks!
  * see min 3:45 for alternatives:
  * https://www.youtube.com/watch?v=jtlRNNhane0&list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE&index=4
@@ -71,7 +71,7 @@ import de.cyface.utils.Validate;
  */
 public class ExportTask extends AsyncTask<Void, Void, Long> {
 
-    private WeakReference<Context> contextReference;
+    private final WeakReference<Context> contextReference;
     private final String targetPathTimestamp;
 
     public ExportTask(@NonNull final Context context) {
@@ -90,9 +90,9 @@ public class ExportTask extends AsyncTask<Void, Void, Long> {
 
         // Export sensor data
         final DefaultFileAccess fileAccess = new DefaultFileAccess();
-        final File accelerations = fileAccess.getFolderPath(context, Point3dFile.ACCELERATIONS_FOLDER_NAME);
-        final File rotations = fileAccess.getFolderPath(context, Point3dFile.ROTATIONS_FOLDER_NAME);
-        final File directions = fileAccess.getFolderPath(context, Point3dFile.DIRECTIONS_FOLDER_NAME);
+        final File accelerations = fileAccess.getFolderPath(context, Point3DFile.ACCELERATIONS_FOLDER_NAME);
+        final File rotations = fileAccess.getFolderPath(context, Point3DFile.ROTATIONS_FOLDER_NAME);
+        final File directions = fileAccess.getFolderPath(context, Point3DFile.DIRECTIONS_FOLDER_NAME);
         long bytesTransferred = 0L;
         final UUID exportIdentifier = UUID.randomUUID();
         try {
