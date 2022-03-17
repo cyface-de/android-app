@@ -100,6 +100,8 @@ public class CapturingNotificationTest {
 
     /**
      * Tests that the notification is shown after a click on play.
+     * <p>
+     * This test is flaky on the Bitrise CI.
      */
     @Test
     public void test() {

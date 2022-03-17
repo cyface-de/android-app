@@ -122,11 +122,12 @@ $ git push
 [[release-a-new-version]]
 === Release a new version
 
-See https://github.com/cyface-de/android-backend#release-a-new-version[Cyface Android SDK Readme]
+See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
 
 * `versionCode` is automatically incremented by the CI
-* After pushing the release tag to Github the CI builds the Android Bundle now automatically
-* Checkout this build, copy the bundle from the artifacts and upload it to Play Store
+* After pushing the release tag to Github the Bitrise CI builds the Android Bundle automatically
+* Mark the release as release manually on Github, as we currently do only have Bitrise workflows
+* Checkout this build, copy the `measuring-client-release-bitrise-signed.aab` bundle from the artifacts and upload it to Play Store
 
 
 [[license]]
