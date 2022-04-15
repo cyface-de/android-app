@@ -486,6 +486,8 @@ public class DataCapturingButton
             dataCapturingService.pause(new ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                 @Override
                 public void shutDownFinished(final long measurementIdentifier) {
+                    // The measurement id should always be set [STAD-333]
+                    Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                     setButtonStatus(button, PAUSED);
                     setButtonEnabled(button);
                     Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
@@ -526,6 +528,8 @@ public class DataCapturingButton
             dataCapturingService.stop(new ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                 @Override
                 public void shutDownFinished(final long measurementIdentifier) {
+                    // The measurement id should always be set [STAD-333]
+                    Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                     currentMeasurementsTracks = null;
                     setButtonStatus(button, FINISHED);
                     setButtonEnabled(button);
@@ -591,6 +595,8 @@ public class DataCapturingButton
                     new StartUpFinishedHandler(MessageCodes.getServiceStartedActionId(context.getPackageName())) {
                         @Override
                         public void startUpFinished(final long measurementIdentifier) {
+                            // The measurement id should always be set [STAD-333]
+                            Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                             Log.v(TAG, "startUpFinished");
                             setButtonStatus(button, OPEN);
                             setButtonEnabled(button);
@@ -659,6 +665,8 @@ public class DataCapturingButton
                     new StartUpFinishedHandler(MessageCodes.getServiceStartedActionId(context.getPackageName())) {
                         @Override
                         public void startUpFinished(final long measurementIdentifier) {
+                            // The measurement id should always be set [STAD-333]
+                            Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                             Log.v(TAG, "resumeCapturing: startUpFinished");
                             setButtonStatus(button, OPEN);
                             setButtonEnabled(button);
