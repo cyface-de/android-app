@@ -46,7 +46,7 @@ buildscript {
 ext {
     // This app's version
     applicationId = "de.cyface.app"
-    versionName = "3.0.1" // Version shown to the user
+    versionName = "3.0.2" // Version shown to the user
     versionCode = 1 // Automatically incremented by CI. Required for Play Store releases
 
     /*
@@ -56,11 +56,11 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.1.0" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.2.0" // Also update submodule commit ref
     cyfaceUtilsVersion = "3.2.2" // Maven dependency
     cyfaceEnergySettingsVersion = "3.1.1" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "4.0.0" // Also update submodule commit ref
-    cyfaceSerializationVersion = "1.0.2" // Keep im sync with version in submodule `backend`
+    cyfaceSerializationVersion = "2.0.0" // Keep im sync with version in submodule `backend`
 
     // Android SDK versions
     minSdkVersion = 21
