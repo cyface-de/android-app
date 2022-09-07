@@ -124,7 +124,8 @@ $ git push
 
 See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
 
-* `versionCode` is automatically incremented by the CI
+* Increase `versionName` in root `build.gradle`, `versionCode` is automatically incremented by the CI
+* Tag the release and push the branch and tag
 * After pushing the release tag to Github the Bitrise CI builds the Android Bundle automatically
 * Mark the release as release manually on Github, as we currently do only have Bitrise workflows
 * Checkout this build, copy the `measuring-client-release-bitrise-signed.aab` bundle from the artifacts and upload it to Play Store
