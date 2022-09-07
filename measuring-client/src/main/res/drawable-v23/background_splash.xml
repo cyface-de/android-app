@@ -9,7 +9,7 @@
 
     <!-- Logo - this only works on API 23+ ! -->
     <item
-        android:drawable="@drawable/ic_logo_vector"
+        android:drawable="@mipmap/ic_logo"
         android:gravity="center"
         android:width="192dp"
         android:height="192dp" />
