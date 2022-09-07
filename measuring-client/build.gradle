@@ -84,6 +84,11 @@ android {
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
+            // Phone - to local production - ! only if iptables allow connection from outside
+            // CertPathValidatorException: Trust anchor for certification path not found.
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"false"]
+
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
