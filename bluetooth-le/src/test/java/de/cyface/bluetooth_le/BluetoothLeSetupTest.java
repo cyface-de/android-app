@@ -18,8 +18,8 @@
  */
 package de.cyface.bluetooth_le;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyDouble;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -47,7 +47,7 @@ import android.content.pm.PackageManager;
  * Unit tests for the Bluetooth LE setup process. All dependencies to the Android framework are mocked.
  *
  * @author Klemens Muthmann
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 @RunWith(MockitoJUnitRunner.class)
