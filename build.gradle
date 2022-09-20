@@ -60,7 +60,7 @@ ext {
     cyfaceUtilsVersion = "3.2.2" // Maven dependency
     cyfaceEnergySettingsVersion = "3.1.1" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "4.0.0" // Also update submodule commit ref
-    cyfaceSerializationVersion = "2.0.0" // Keep im sync with version in submodule `backend`
+    cyfaceSerializationVersion = "2.2.1" // Keep im sync with version in submodule `backend`
 
     // Android SDK versions
     minSdkVersion = 21 // device support
