@@ -46,6 +46,9 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import de.cyface.app.BuildConfig;
 import de.cyface.app.MeasuringClient;
@@ -187,6 +190,13 @@ public class LoginActivity extends AccountAuthenticatorActivity {
                 // Return the information back to the Authenticator
                 setAccountAuthenticatorResult(intent.getExtras());
                 setResult(RESULT_OK, intent);
+
+                // Hide the keyboard or else it can overlap the permission request
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    loginButton.getWindowInsetsController().hide(WindowInsetsCompat.Type.ime());
+                } else {
+                    ViewCompat.getWindowInsetsController(loginButton).hide(WindowInsetsCompat.Type.ime());
+                }
                 finish();
             }
 

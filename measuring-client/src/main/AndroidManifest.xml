@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="de.cyface.app">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- (!) We do *not* need ACCESS_BACKGROUND_LOCATION as we only need location in Foreground Service-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- On Android 12+ we must request both FINE and COARSE, but add a handle to explicitly request FINE -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Until API 22 we need this permission to delete the deprecated generic pro account -->
     <uses-permission
         android:name="android.permission.MANAGE_ACCOUNTS"

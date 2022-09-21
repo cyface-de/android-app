@@ -5,7 +5,7 @@
     <application android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true" android:theme="@style/AppTheme">
-        <activity android:name="de.cyface.ItActivity">
+        <activity android:name="de.cyface.ItActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

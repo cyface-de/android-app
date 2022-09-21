@@ -18,9 +18,9 @@
  */
 package de.cyface.bluetooth_le;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -46,7 +46,7 @@ import android.content.Context;
  * Tests whether the process of measuring speed with a CSC-sensor works correctly.
  *
  * @author Klemens Muthmann
- * @version 1.0.1
+ * @version 1.0.2
  * @since 1.0.0
  */
 @RunWith(MockitoJUnitRunner.class)

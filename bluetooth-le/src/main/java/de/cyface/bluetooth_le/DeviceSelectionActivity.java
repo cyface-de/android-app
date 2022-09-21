@@ -18,7 +18,7 @@
  */
 package de.cyface.bluetooth_le;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.BLUETOOTH_SCAN;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.app.Activity;
@@ -36,6 +36,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
 /**
  * Activity presenting a dialog for choosing a CSC sensor device and entering the wheel
@@ -66,9 +67,13 @@ public class DeviceSelectionActivity extends Activity {
     public final static int RESULT_CANCEL = 2;
     /**
      * Request code issued via an intent so the system asks the user for coarse location
-     * permission.
+     * permission. TODO: should not be necessary, targeting Android 12+
      */
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 3;
+    /**
+     * Request code issued via an intent so the system asks the user for bluetooth scan permission.
+     */
+    private static final int PERMISSION_REQUEST_BLUETOOTH_SCAN = 4;
     /**
      * The identifier used to identify the selected device in the extras of the intent returned
      * upon successful device selection.
@@ -164,11 +169,14 @@ public class DeviceSelectionActivity extends Activity {
         if (!mScanning) {
             // Request necessary permissions if not available and start scan after receiving those. If permissions are
             // already granted start scan directly.
-            if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED) {
-                requestPermissions(new String[] {ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
-            } else {
-                scanForDevices();
-            }
+            // TODO: should not be required anymore targeting Android 12+, thus, disabled
+            /*
+             * if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED) {
+             * requestPermissions(new String[] {ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+             * } else {
+             */
+            scanForDevices();
+            // }
         }
     }
 
@@ -190,6 +198,12 @@ public class DeviceSelectionActivity extends Activity {
             Thread scanThread = new Thread(() -> {
                 scanResultHandler.postDelayed(() -> {
                     mScanning = false;
+                    if (ActivityCompat.checkSelfPermission(this, BLUETOOTH_SCAN) != PERMISSION_GRANTED) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            requestPermissions(new String[] {BLUETOOTH_SCAN}, PERMISSION_REQUEST_BLUETOOTH_SCAN);
+                        }
+                        return;
+                    }
                     adapter.stopLeScan(scanCallback);
                 }, SCAN_PERIOD);
 
@@ -203,9 +217,10 @@ public class DeviceSelectionActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions,
             @NonNull final int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_COARSE_LOCATION) {
+        if (requestCode == /* PERMISSION_REQUEST_COARSE_LOCATION */PERMISSION_REQUEST_BLUETOOTH_SCAN) {
             for (int i = 0; i < permissions.length; i++) {
-                if (permissions[i].equals(ACCESS_COARSE_LOCATION) && grantResults[i] == PERMISSION_GRANTED) {
+                if (permissions[i].equals(/* ACCESS_COARSE_LOCATION */BLUETOOTH_SCAN)
+                        && grantResults[i] == PERMISSION_GRANTED) {
                     scanForDevices();
                 }
             }

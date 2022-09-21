@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+
   <!-- Other -->
   <string name="accept_terms">Accetta condizioni</string>
   <string name="accept_reports_details">Trasmettere automaticamente i messaggi di errore e l\'utilizzo delle app</string>
@@ -9,7 +11,7 @@
   <string name="notification_channel_name_warning">Avvisi</string>
   <string name="notification_channel_description_info">Notifiche informative, ad esempio quando l\'upload ha avuto successo.</string>
   <string name="notification_channel_description_warning">Messaggi di avviso, ad es. quando la memoria è piena e la misurazione ha dovuto essere annullata. Questa notifica non deve essere disabilitata.</string>
-  <string name="toast_last_tracking_crashed">Il tracciamento del tuo ultimo tracking si è interrotto inaspettatamente. Si consideri di seguire la \`Guida all\'installazione\` nella barra laterale o di inviarci un feedback</string>
+  <string name="toast_last_tracking_crashed">Il tracciamento del tuo ultimo tracking si è interrotto inaspettatamente.</string>
 
   <!-- Dialogs -->
   <string name="dialog_modality_title">Scegliere il tipo di veicolo</string>
@@ -46,14 +48,14 @@
   <string name="measurement_id">Identificativo misura</string>
   <string name="title_dialog_starting_data_capture">Inizio acquisizione dati</string>
   <string name="text_button_start">Avvia l\'acquisizione dei dati</string>
-  <string name="error_message_capturing_canceled_no_space">Hai bisogno di liberare un po\' di memoria per iniziare a registrare i dati.</string>
+  <string name="error_message_capturing_canceled_no_space">È necessario liberare spazio per iniziare l\'acquisizione.</string>
   <string name="notification_title_capturing_stopped">La registrazione dei dati è stata bloccata</string>
   <string name="msg_calibrating">Calibrazione</string>
   <string name="capturing_active">Registrazione dati in corso</string>
 
   <!-- Synchronization -->
   <string name="error_message_sync_canceled_no_wifi">È necessaria una connessione Wi-Fi per registrare i dati.</string>
-  <string name="error_message_sync_canceled_disabled">La sincronizzazione è attualmente disabilitata tramite le impostazioni dell\'applicazione.</string>
+  <string name="error_message_sync_canceled_disabled">La sincronizzazione è disattivata dalle impostazioni.</string>
 
   <!-- Navigation bar -->
   <string name="settings">Impostazioni</string>
@@ -67,8 +69,8 @@
   <string name="drawer_setting_synchronize">Sincronizzazione</string>
   <string name="drawer_setting_speed_sensor">External sensor</string>
   <string name="drawer_setting_pictures">Camera mode</string>
-  <string name="sync_disabled_toast">Se si catturano le misurazioni senza sincronizzarsi su Wi-Fi per troppo tempo, l\'applicazione utilizzerà molto spazio di archiviazione fino a quando i dati vengono sincronizzati o cancellati.</string>
-  <string name="zoom_to_location_enabled_toast">Attenzione: Quando si attiva questa opzione e si lascia l\'applicazione aperta durante i lunghi viaggi, l\'applicazione utilizzerà molti dati mobili per scaricare i dati di qualità per l\'intero percorso.</string>
+  <string name="sync_disabled_toast">Senza sincronizzazione, viene utilizzato più spazio di archiviazione.</string>
+  <string name="zoom_to_location_enabled_toast">Quando lo schermo è attivo, viene caricato più materiale della mappa.</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
@@ -82,14 +84,15 @@
   <string name="measurement">Misurazione</string>
   <string name="toast_export">Esporta:</string>
   <string name="title_menu_item_export">Esporta tutto</string>
-  <string name="export_data">Esportazione dati …\n(questo potrebbe richiedere qualche minuto)</string>
-  <string name="export_data_no_permission">Questa applicazione ha bisogno di permessi per scrivere su una memoria esterna per esportare i dati.</string>
+    <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+  <string name="export_data">Esportazione dati …</string>
+  <string name="export_data_no_permission">È richiesto l\'accesso alla memoria esterna (SD).</string>
   <string name="delete_data">Cancellazione delle misure contrassegnate …</string>
-  <string name="delete_data_non_selected">Selezionare le misure da cancellare. Premere a lungo una misura per selezionare più voci.</string>
+  <string name="delete_data_non_selected">Non è stata selezionata alcuna misura. Selezione multipla mediante pressione prolungata.</string>
   <string name="toast_selection_mode_enabled">Selezione delle misure abilitato</string>
   <string name="toast_selection_mode_disabled">Selezione delle misure disabilitato</string>
   <string name="toast_no_locations_found">Nessun dato di posizione registrato</string>
-  <string name="toast_measurement_deletion_success">Le misure selezionate sono state cancellate da questo dispositivo. I dati sincronizzati sul servere non risultano compromessi.</string>
+  <string name="toast_measurement_deletion_success">Le copie delle misure sul server non sono interessate.</string>
   <string name="toast_item_deletion_success">Le voci selezionate sono state cancellate.</string>
   <string name="toast_measurement_paused">Viaggio in pausa</string>
   <string name="toast_measurement_resumed">Il viaggio riprende</string>
@@ -101,7 +104,7 @@
   <string name="camera_status_connected">camera: ready</string>
   <string name="camera_status_paused">camera: paused</string>
   <string name="camera_capturing_active">Camera capturing ongoing</string>
-  <string name="experimental_feature_warning">Attention: This is an experimental feature which needs manual adjustment and evaluation. Do not enable this if you do not exactly know what it does.</string>
+  <string name="experimental_feature_warning">Attenzione: impostazione sperimentale</string>
   <string name="camera_settings_JPEG_settings">JPEG picture-mode</string>
   <string name="camera_settings_title_supported_features">Supported Features (main camera)</string>
   <string name="camera_feature_camera2_support_level"> \'camera2\' support level: </string>

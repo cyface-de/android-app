@@ -56,6 +56,7 @@ android {
         // Required so that logging methods do not throw not mocked exceptions in junit tests.
         unitTests.returnDefaultValues = true
     }
+    namespace 'de.cyface.bluetooth_le'
 }
 
 dependencies {

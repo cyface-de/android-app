@@ -140,6 +140,7 @@ android {
         sourceCompatibility rootProject.ext.sourceCompatibility
         targetCompatibility rootProject.ext.targetCompatibility
     }
+    namespace 'de.cyface.app'
 }
 
 // Exception tracking

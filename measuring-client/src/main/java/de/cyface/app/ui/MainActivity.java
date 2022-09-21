@@ -257,7 +257,9 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
         super.onCreate(savedInstanceState);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+            // Targeting Android 12+ we always need to request coarse together with fine location
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     Constants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -341,6 +343,10 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
                     mainFragment.necessaryPermissionsGranted();
                 } else {
                     // Close Cyface if permission has not been granted.
+                    // When the user repeatedly denies the location permission, the app won't start
+                    // and only starts again if the permissions are granted manually.
+                    // It was always like this, but if this is a problem we need to add a screen
+                    // which explains the user that this can happen.
                     this.finish();
                 }
                 break;
