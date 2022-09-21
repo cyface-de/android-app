@@ -4,6 +4,8 @@
 
     <!-- (!) We do *not* need ACCESS_BACKGROUND_LOCATION as we only need location in Foreground Service-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- On Android 12+ we must request both FINE and COARSE, but add a handle to explicitly request FINE -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Until API 22 we need this permission to delete the deprecated generic pro account -->
     <uses-permission
         android:name="android.permission.MANAGE_ACCOUNTS"
