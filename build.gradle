@@ -46,7 +46,7 @@ buildscript {
 ext {
     // This app's version
     applicationId = "de.cyface.app"
-    versionName = "3.0.3" // Version shown to the user
+    versionName = "3.1.0-alpha1" // Version shown to the user
     versionCode = 1 // Automatically incremented by CI. Required for Play Store releases
 
     /*
