@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+
   <!-- Other -->
   <string name="accept_terms">Bedingungen akzeptieren</string>
   <string name="accept_reports_details">Fehlermeldungen und App-Nutzung automatisch übermitteln</string>
@@ -9,7 +11,7 @@
   <string name="notification_channel_name_warning">Warnungen</string>
   <string name="notification_channel_description_info">Informative Benachrichtigung, z.B. wenn der Upload erfolgreich beendet wurde.</string>
   <string name="notification_channel_description_warning">Warnungen, z.B. wenn der Speicher voll ist und die Messung abgebrochen werden musste. Diese Benachrichtigung sollte nicht deaktiviert werden.</string>
-  <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet. Möglicherweise hilft der Punkt `Einrichtung` in the Seitenleiste oder hinterlassen Sie uns `Feedback`.</string>
+  <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet.</string>
 
   <!-- Dialogs -->
   <string name="dialog_modality_title">Fortbewegungsart auswählen</string>
@@ -46,14 +48,14 @@
   <string name="measurement_id">Messungs-Id</string>
   <string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
   <string name="text_button_start">Beginne Aufnahme</string>
-  <string name="error_message_capturing_canceled_no_space">Sie benötigen mehr Speicherplatz um mit dem Messen zu beginnen.</string>
+  <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
   <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
   <string name="msg_calibrating">Kalibriere</string>
   <string name="capturing_active">Datenerfassung aktiv</string>
 
   <!-- Synchronization -->
   <string name="error_message_sync_canceled_no_wifi">Für den Upload muss eine WLAN-Verbindung bestehen.</string>
-  <string name="error_message_sync_canceled_disabled">Die Synchronisation ist momentan über die App Einstellungen deaktiviert.</string>
+  <string name="error_message_sync_canceled_disabled">Die Synchronisation ist über die Einstellungen deaktiviert.</string>
 
   <!-- Navigation bar -->
   <string name="settings">Einstellungen</string>
@@ -67,10 +69,10 @@
   <string name="drawer_setting_synchronize">Synchronisation</string>
   <string name="drawer_setting_speed_sensor">Externer Sensor</string>
   <string name="drawer_setting_pictures">Kameramodus</string>
-  <string name="sync_disabled_toast">Wenn über einen längeren Zeitraum Messungen aufgenommen werden ohne diese über WLAN zu synchronisieren belegt diese App viel Speicherplatz bis die Daten gesynct oder gelöscht werden</string>
-  <string name="zoom_to_location_enabled_toast">Achtung: Wenn Sie diese Option aktiviert haben und die App während einer längeren Fahrt geöffnet lassen, wird ein größeres Volumen an mobilen Daten verwendet um die Qualitätsdaten der ganzen Strecke anzuzeigen</string>
-  <string name="no_camera_available_toast">Es wurde keine Kamera gefunden die benutzt werden kann.</string>
-  <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente.</string>
+  <string name="sync_disabled_toast">Ohne Synchronisation wird mehr Speicherplatz belegt</string>
+  <string name="zoom_to_location_enabled_toast">Bei aktiven Bildschirm wird mehr Kartenmaterial geladen</string>
+  <string name="no_camera_available_toast">Es wurde keine Kamera gefunden die benutzt werden kann</string>
+  <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente</string>
   <string name="drawer_setting_camera_focus_distance">Kamera Fokus Distanz</string>
   <string name="drawer_settings">Einstellungen</string>
   <string name="settings_sensor_frequency">Sensorfrequenz</string>
@@ -82,14 +84,15 @@
   <string name="measurement">Messung</string>
   <string name="toast_export">Exportiert:</string>
   <string name="title_menu_item_export">Alles exportieren</string>
-  <string name="export_data">Exportiere Daten …\n(dies kann wenige Minuten dauern)</string>
-  <string name="export_data_no_permission">Diese App benötigt die Berechtigung auf externen Speicher (SD) zuzugreifen um Daten zu exportieren.</string>
+  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+  <string name="export_data">Exportiere Daten …</string>
+  <string name="export_data_no_permission">Zugriff auf externen Speicher (SD) benötigt.</string>
   <string name="delete_data">Lösche markierte Messungen …</string>
-  <string name="delete_data_non_selected">Bitte erst Messungen zum Löschen markieren. Um mehrere zu markieren eine Messung lange gedrückt halten.</string>
+  <string name="delete_data_non_selected">Keine Messungen ausgewählt. Mehrfachauswahl per Lang-Druck.</string>
   <string name="toast_selection_mode_enabled">Markierungmodus aktiviert</string>
   <string name="toast_selection_mode_disabled">Markierungmodus deaktiviert</string>
   <string name="toast_no_locations_found">Keine Positionsdaten gefunden</string>
-  <string name="toast_measurement_deletion_success">Die markierten Messungen wurden vom Gerät entfernt. Kopien synchronisierter Daten auf dem Server sind davon nicht betroffen.</string>
+  <string name="toast_measurement_deletion_success">Kopien der Messungen auf dem Server sind nicht betroffen.</string>
   <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
   <string name="toast_measurement_paused">Fahrt pausiert</string>
   <string name="toast_measurement_resumed">Fahrt fortgesetzt</string>
@@ -101,7 +104,7 @@
   <string name="camera_status_connected">Kamera: bereit</string>
   <string name="camera_status_paused">Kamera: pausiert</string>
   <string name="camera_capturing_active">Kamera Datenerfassung aktiv</string>
-  <string name="experimental_feature_warning">Achtung: Dies ist eine experimentelle Einstellung. Bitte aktivieren Sie diese nur, wenn Sie genau wissen, was diese Einstellung bewirkt.</string>
+  <string name="experimental_feature_warning">Achtung: Experimentelle Einstellung</string>
   <string name="camera_settings_JPEG_settings">JPEG Einzelbild-Modus</string>
   <string name="camera_settings_title_supported_features">Unterstützte Funktionen (Hauptkamera)</string>
   <string name="camera_feature_camera2_support_level"> \'camera2\' Support Level: </string>

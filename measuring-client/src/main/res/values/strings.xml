@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+
   <!-- Other -->
   <string name="accept_terms">Accept terms</string>
   <string name="accept_reports_details">Automatically transmit error messages and app usage</string>
@@ -10,7 +12,7 @@
   <string name="notification_channel_name_warning">Warnings</string>
   <string name="notification_channel_description_info">Informative notifications, e.g. when the upload finished successful.</string>
   <string name="notification_channel_description_warning">Warning messages, e.g. when the storage is full and the measuring had to be canceled. This notification should not be disabled.</string>
-  <string name="toast_last_tracking_crashed">Your last tracking stopped unexpectedly. Consider following the `Setup Guide` in the Sidebar or sending us feedback.</string>
+  <string name="toast_last_tracking_crashed">Your last tracking stopped unexpectedly.</string>
 
   <!-- Dialogs -->
   <string name="dialog_modality_title">Choose modality type</string>
@@ -48,14 +50,14 @@
   <string name="measurement_id">Measurement Id</string>
   <string name="title_dialog_starting_data_capture">Starting Data Capture</string>
   <string name="text_button_start">Start Capturing</string>
-  <string name="error_message_capturing_canceled_no_space">You need to free some space in order to start capturing.</string>
+  <string name="error_message_capturing_canceled_no_space">You need to free some space to start capturing.</string>
   <string name="notification_title_capturing_stopped">Stopped Capturing</string>
   <string name="msg_calibrating">Calibrating</string>
   <string name="capturing_active">Capturing ongoing</string>
 
   <!-- Synchronization -->
   <string name="error_message_sync_canceled_no_wifi">You need a Wi-Fi connection to upload data.</string>
-  <string name="error_message_sync_canceled_disabled">The synchronisation is currently disabled via the app settings.</string>
+  <string name="error_message_sync_canceled_disabled">The synchronisation is disabled via the settings.</string>
 
   <!-- Navigation bar -->
   <string name="app_slogan" translatable="false">EASY RIDING</string>
@@ -70,8 +72,8 @@
   <string name="drawer_setting_synchronize">Synchronisation</string>
   <string name="drawer_setting_speed_sensor">External sensor</string>
   <string name="drawer_setting_pictures">Camera mode</string>
-  <string name="sync_disabled_toast">If you capture measurements without syncing over Wi-Fi for too long the app will use much storage space until the data is synced or deleted</string>
-  <string name="zoom_to_location_enabled_toast">Attention: When you activate this option and leave the app opened during long drives the app will use much mobile data to download the quality data for the whole route</string>
+  <string name="sync_disabled_toast">Without synchronization more space is used.</string>
+  <string name="zoom_to_location_enabled_toast">When the screen is active, more map material is loaded</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
@@ -86,14 +88,15 @@
   <string name="measurement">Measurement</string>
   <string name="toast_export">Exported:</string>
   <string name="title_menu_item_export">Export all</string>
-  <string name="export_data">Exporting data …\n(this could take a few minutes)</string>
-  <string name="export_data_no_permission">This app needs permissions to write to external storage to export data.</string>
+    <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+  <string name="export_data">Exporting data …</string>
+  <string name="export_data_no_permission">Access to external memory (SD) required.</string>
   <string name="delete_data">Deleting marked measurements …</string>
-  <string name="delete_data_non_selected">Please select measurements to delete. Long press a measurement to select multiple entries.</string>
+  <string name="delete_data_non_selected">No measurements selected. Multiple selection by long press.</string>
   <string name="toast_selection_mode_enabled">Selection mode enabled</string>
   <string name="toast_selection_mode_disabled">Selection mode disabled</string>
   <string name="toast_no_locations_found">No locations found</string>
-  <string name="toast_measurement_deletion_success">The selected measurements were deleted from this device. The copy of the synchronized data on the server are not affected.</string>
+  <string name="toast_measurement_deletion_success">Copies of the measurements on the server are not affected.</string>
   <string name="toast_item_deletion_success">The selected items were deleted.</string>
   <string name="toast_measurement_paused">Trip paused</string>
   <string name="toast_measurement_resumed">Trip resumed</string>
@@ -105,7 +108,7 @@
   <string name="camera_status_connected">camera: ready</string>
   <string name="camera_status_paused">camera: paused</string>
   <string name="camera_capturing_active">Camera capturing ongoing</string>
-  <string name="experimental_feature_warning">Attention: This is an experimental feature which needs manual adjustment and evaluation. Do not enable this if you do not exactly know what it does.</string>
+  <string name="experimental_feature_warning">Attention: Experimental setting</string>
   <string name="camera_settings_JPEG_settings">JPEG picture-mode</string>
   <string name="camera_settings_title_supported_features">Supported Features (main camera)</string>
   <string name="camera_feature_camera2_support_level"> \'camera2\' support level:</string>
