@@ -71,7 +71,7 @@ ext {
     // Android dependencies
     multidexVersion = "2.0.1"
     androidxAnnotationVersion = '1.4.0'
-    androidxAppCompatVersion = "1.5.1"
+    androidxAppCompatVersion = "1.6.0-rc01" // RC needed to fix duplicate lifecycle dependency issue
     androidPreferencesVersion = '1.2.0'
     localbroadcastmanagerVersion = '1.1.0'
     exifinterfaceVersion = "1.3.2" // Required by Camera Service submodule
