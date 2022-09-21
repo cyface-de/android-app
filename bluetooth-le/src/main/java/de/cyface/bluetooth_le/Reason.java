@@ -36,6 +36,7 @@ public enum Reason {
     , BLUETOOTH_PERMISSION_DENIED
     /**
      *     The user denied permission to access the devices coarse location.
+     *     TODO: should not be required targeting Android 12 using neverForLocation
      */
     , ACCESS_COARSE_LOCATION_DENIED
     /**
