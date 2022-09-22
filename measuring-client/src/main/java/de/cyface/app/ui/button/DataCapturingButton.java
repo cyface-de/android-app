@@ -84,7 +84,6 @@ import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
 import de.cyface.datacapturing.IsRunningCallback;
-import de.cyface.datacapturing.MessageCodes;
 import de.cyface.datacapturing.ShutDownFinishedHandler;
 import de.cyface.datacapturing.StartUpFinishedHandler;
 import de.cyface.datacapturing.exception.DataCapturingException;
@@ -93,13 +92,13 @@ import de.cyface.datacapturing.model.CapturedData;
 import de.cyface.datacapturing.ui.Reason;
 import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.PersistenceLayer;
+import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.DiskConsumption;
@@ -371,8 +370,7 @@ public class DataCapturingButton
         try {
             if (persistenceLayer.hasMeasurement(PAUSED)) {
                 setButtonStatus(button, PAUSED);
-                // mainFragment.
-                // showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
+                // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
             } else {
                 setButtonStatus(button, FINISHED);
             }
@@ -483,7 +481,7 @@ public class DataCapturingButton
      */
     private void pauseCapturing() {
         try {
-            dataCapturingService.pause(new ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+            dataCapturingService.pause(new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                 @Override
                 public void shutDownFinished(final long measurementIdentifier) {
                     // The measurement id should always be set [STAD-333]
@@ -525,7 +523,7 @@ public class DataCapturingButton
      */
     private void stopCapturing() {
         try {
-            dataCapturingService.stop(new ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+            dataCapturingService.stop(new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                 @Override
                 public void shutDownFinished(final long measurementIdentifier) {
                     // The measurement id should always be set [STAD-333]
@@ -592,7 +590,7 @@ public class DataCapturingButton
             currentMeasurementsTracks.add(new Track());
 
             dataCapturingService.start(modality,
-                    new StartUpFinishedHandler(MessageCodes.getServiceStartedActionId(context.getPackageName())) {
+                    new StartUpFinishedHandler(de.cyface.datacapturing.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                         @Override
                         public void startUpFinished(final long measurementIdentifier) {
                             // The measurement id should always be set [STAD-333]
@@ -662,7 +660,7 @@ public class DataCapturingButton
 
         try {
             dataCapturingService.resume(
-                    new StartUpFinishedHandler(MessageCodes.getServiceStartedActionId(context.getPackageName())) {
+                    new StartUpFinishedHandler(de.cyface.datacapturing.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                         @Override
                         public void startUpFinished(final long measurementIdentifier) {
                             // The measurement id should always be set [STAD-333]
@@ -739,8 +737,7 @@ public class DataCapturingButton
         cameraService.start(measurementId, videoModeSelected, rawModeSelected, staticFocusSelected,
                 staticFocusDistance, staticExposureTimeSelected, staticExposureTime, exposureValueIso100,
                 distanceBasedTriggeringSelected, triggeringDistance,
-                new StartUpFinishedHandler(
-                        de.cyface.camera_service.MessageCodes.getServiceStartedActionId(context.getPackageName())) {
+                new StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     @Override
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
@@ -759,7 +756,7 @@ public class DataCapturingButton
                 context.getString(R.string.msg_calibrating), true, false, dialog -> {
                     try {
                         dataCapturingService
-                                .stop(new ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+                                .stop(new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                                     @Override
                                     public void shutDownFinished(final long l) {
                                         // nothing to do

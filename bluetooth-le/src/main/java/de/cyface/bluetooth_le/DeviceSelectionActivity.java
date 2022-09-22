@@ -151,6 +151,8 @@ public class DeviceSelectionActivity extends Activity {
             double wheelCircumference = Double.parseDouble(wheelCircumferenceText);
             if (wheelCircumference > 0.0 && selectedDevice != null) {
                 Intent data = new Intent(SELECTION_FINISHED);
+                // Binding the intent to the package of the app which runs this SDK [DAT-1509].
+                data.setPackage(this.getPackageName());
                 data.putExtra(EXTRA_RESULT, RESULT_OK);
                 data.putExtra(EXTRA_SELECTED_DEVICE, selectedDevice);
                 data.putExtra(EXTRA_WHEEL_CIRCUMFERENCE, wheelCircumference);
@@ -240,6 +242,8 @@ public class DeviceSelectionActivity extends Activity {
      */
     private void cancel() {
         Intent data = new Intent(SELECTION_FINISHED);
+        // Binding the intent to the package of the app which runs this SDK [DAT-1509].
+        data.setPackage(this.getPackageName());
         data.putExtra(EXTRA_RESULT, RESULT_CANCEL);
         sendBroadcast(data);
         setResult(RESULT_CANCEL);
