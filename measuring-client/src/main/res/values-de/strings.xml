@@ -33,7 +33,7 @@
   <!-- Login -->
   <string name="login_name">Login</string>
   <string name="password">Passwort</string>
-  <string name="username">Anmelden</string>
+  <string name="log_in">Anmelden</string>
   <string name="your_request">Ihre Anfrage</string>
     <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
     <string name="title_activity_login">Einloggen</string>
