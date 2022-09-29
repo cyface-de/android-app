@@ -36,7 +36,7 @@ public class Constants {
 
     public final static String PACKAGE = "de.cyface.app";
     public final static String TAG = PACKAGE; // This can be references as default TAG for this app
-    public final static String SUPPORT_EMAIL = "mail@cyface.de";
+    public final static String SUPPORT_EMAIL = "support@cyface.de";
     /**
      * Identifies the accepted terms version in the preferences.
      */
