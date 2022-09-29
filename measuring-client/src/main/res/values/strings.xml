@@ -126,8 +126,7 @@
 
   <!-- Imprint page -->
   <string name="publisher">Publisher</string>
-  <string name="publisher_content">
-        Cyface GmbH
+  <string name="publisher_content">Cyface GmbH
         \nFröbelstr. 49
         \n01159 Dresden
         \nGermany\n
@@ -146,8 +145,7 @@
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <string name="reports">Error tracking by Sentry</string>
-  <string name="reports_content">
-        We are constantly improving and developing our app. Nevertheless, we cannot guarantee error-free operation of the app. In order to keep possible programming errors to a minimum, we use Sentry, a service provided by Functional Software Inc, 132 Hawthorne St, San Francisco, CA 94107, USA (hereinafter "Sentry"). Sentry monitors errors that occur within our App and informs us of them. In the event of a software error, the following information is automatically transmitted to Sentry:
+  <string name="reports_content">We are constantly improving and developing our app. Nevertheless, we cannot guarantee error-free operation of the app. In order to keep possible programming errors to a minimum, we use Sentry, a service provided by Functional Software Inc, 132 Hawthorne St, San Francisco, CA 94107, USA (hereinafter "Sentry"). Sentry monitors errors that occur within our App and informs us of them. In the event of a software error, the following information is automatically transmitted to Sentry:
 
         \n\n- Error messages that occur while using the App
         \n- Information about the use of the app immediately before the error occurred
@@ -170,8 +168,7 @@
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <!-- Version 2.1.1 -->
   <string name="privacy">Privacy Policy</string>
-  <string name="privacy_content">
-        <b>1. Name and address of the responsible party</b>
+  <string name="privacy_content"><b>1. Name and address of the responsible party</b>
         \n\nThe entity responsible within the meaning of the General Data Protection Regulation and other national data protection laws of the member states as well as other data protection provisions is the:
 
         \n\nCyface GmbH

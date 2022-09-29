@@ -122,8 +122,7 @@
 
   <!-- Imprint page -->
   <string name="publisher">Editore</string>
-  <string name="publisher_content">
-        Cyface GmbH
+  <string name="publisher_content">Cyface GmbH
         \nFröbelstr. 49
         \n01159 Dresden
         \nGermany\n
@@ -142,8 +141,7 @@
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <string name="reports">Tracciamento degli errori attraverso Sentry</string>
-  <string name="reports_content">
-        Miglioriamo e sviluppiamo costantemente la nostra app. Tuttavia, non possiamo garantire un funzionamento senza errori dell\'app. Al fine di mantenere i possibili errori di programmazione al minimo, utilizziamo Sentry, un servizio di Functional Software Inc., 132 Hawthorne St., San Francisco, CA 94107, USA (di seguito "Sentry"). La sentinella controlla gli errori che si verificano all\'interno della nostra App e ci informa su di essi. In caso di errore del software, le seguenti informazioni vengono trasmesse automaticamente a Sentry:
+  <string name="reports_content">Miglioriamo e sviluppiamo costantemente la nostra app. Tuttavia, non possiamo garantire un funzionamento senza errori dell\'app. Al fine di mantenere i possibili errori di programmazione al minimo, utilizziamo Sentry, un servizio di Functional Software Inc., 132 Hawthorne St., San Francisco, CA 94107, USA (di seguito "Sentry"). La sentinella controlla gli errori che si verificano all\'interno della nostra App e ci informa su di essi. In caso di errore del software, le seguenti informazioni vengono trasmesse automaticamente a Sentry:
 
         \n \n- Messaggi di errore che si verificano quando si utilizza l\'app
         \n- Informazioni sull\'utilizzo dell\'app immediatamente prima del verificarsi dell\'errore
@@ -166,8 +164,7 @@
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <!-- Version 2.1.1 -->
   <string name="privacy">Consenso al trattamento dei dati</string>
-  <string name="privacy_content">
-        <b>1. Nome e indirizzo della persona responsabile</b>
+  <string name="privacy_content"><b>1. Nome e indirizzo della persona responsabile</b>
         \n\nL\'entità responsabile ai sensi del regolamento generale sulla protezione dei dati e di altre leggi nazionali in materia di protezione dei dati degli Stati membri, nonché di altre disposizioni in materia di protezione dei dati è la seguente:
 
         \n\nCyface GmbH
