@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -62,6 +62,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -110,7 +111,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.8.0
+ * @version 3.8.1
  * @since 1.0.0
  */
 public class DataCapturingButton
@@ -481,41 +482,61 @@ public class DataCapturingButton
      */
     private void pauseCapturing() {
         try {
-            dataCapturingService.pause(new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
-                @Override
-                public void shutDownFinished(final long measurementIdentifier) {
+            dataCapturingService.pause(
+                    new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+                        @Override
+                        public void shutDownFinished(final long measurementIdentifier) {
+                            // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
+                            if (Build.VERSION.SDK_INT < 33) {
+
+                                // The measurement id should always be set [STAD-333]
+                                Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
+                                setButtonStatus(button, PAUSED);
+                                setButtonEnabled(button);
+                                Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+            // Workaround for flaky `rebind` on Android 13+ [RFR-246]
+            // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
+            // - Use a static 500ms delay to give the measurement some time to stop.
+            if (Build.VERSION.SDK_INT >= 33) {
+                setButtonStatus(button, PAUSED); // avoids button to flip to "stopped" before "paused"
+                final var timeoutHandler = new Handler(context.getMainLooper());
+                timeoutHandler.postAtTime(() -> {
                     // The measurement id should always be set [STAD-333]
-                    Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    setButtonStatus(button, PAUSED);
+                    // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
+                    // Avoids button to flip to "stopped" before "paused"
+                    // setButtonStatus(button, PAUSED);
                     setButtonEnabled(button);
                     Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
-
-                    // Also pause CameraService
-                    // TODO: this way we don't notice when the camera was stopped unexpectedly
-                    cameraService.isRunning(IS_RUNNING_CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS,
-                            new IsRunningCallback() {
-                                @Override
-                                public void isRunning() {
-                                    cameraService.pause(
-                                            new ShutDownFinishedHandler(
-                                                    de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
-                                                @Override
-                                                public void shutDownFinished(long measurementIdentifier) {
-                                                    Log.d(TAG, "pauseCapturing: CameraService stopped");
-                                                }
-                                            });
-                                }
-
-                                @Override
-                                public void timedOut() {
-                                    Log.d(Constants.TAG, "pauseCapturing: no CameraService running, nothing to do");
-                                }
-                            });
-                }
-            });
+                }, SystemClock.uptimeMillis() + 500L);
+            }
         } catch (final NoSuchMeasurementException | CursorIsNullException e) {
             throw new IllegalStateException(e);
         }
+
+        // Pause camera capturing if it is running (even is DCS is not running)
+        // TODO: this way we don't notice when the camera was stopped unexpectedly
+        cameraService.isRunning(IS_RUNNING_CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS,
+                new IsRunningCallback() {
+                    @Override
+                    public void isRunning() {
+                        cameraService.pause(new ShutDownFinishedHandler(
+                                de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+                            @Override
+                            public void shutDownFinished(long measurementIdentifier) {
+                                Log.d(TAG, "pauseCapturing: CameraService stopped");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void timedOut() {
+                        Log.d(Constants.TAG, "pauseCapturing: no CameraService running, nothing to do");
+                    }
+                });
     }
 
     /**
@@ -523,22 +544,41 @@ public class DataCapturingButton
      */
     private void stopCapturing() {
         try {
-            dataCapturingService.stop(new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
-                @Override
-                public void shutDownFinished(final long measurementIdentifier) {
+            dataCapturingService.stop(
+                    new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+                        @Override
+                        public void shutDownFinished(final long measurementIdentifier) {
+                            // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
+                            if (Build.VERSION.SDK_INT < 33) {
+
+                                // The measurement id should always be set [STAD-333]
+                                Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
+                                currentMeasurementsTracks = null;
+                                setButtonStatus(button, FINISHED);
+                                setButtonEnabled(button);
+                            }
+                        }
+                    });
+            runOnUiThread(() -> map.clearMap());
+
+            // Workaround for flaky `rebind` on Android 13+ [RFR-246]
+            // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
+            // - Use a static 500ms delay to give the measurement some time to stop.
+            if (Build.VERSION.SDK_INT >= 33) {
+                final var timeoutHandler = new Handler(context.getMainLooper());
+                timeoutHandler.postAtTime(() -> {
                     // The measurement id should always be set [STAD-333]
-                    Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
+                    // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                     currentMeasurementsTracks = null;
                     setButtonStatus(button, FINISHED);
                     setButtonEnabled(button);
-                }
-            });
-            runOnUiThread(() -> map.clearMap());
+                }, SystemClock.uptimeMillis() + 500L);
+            }
         } catch (final NoSuchMeasurementException | CursorIsNullException e) {
             throw new IllegalStateException(e);
         }
 
-        // Stop camera capturing if it is running
+        // Stop camera capturing if it is running (even is DCS is not running)
         // TODO: this way we don't notice when the camera was stopped unexpectedly
         cameraService.isRunning(IS_RUNNING_CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS, new IsRunningCallback() {
             @Override
@@ -756,7 +796,8 @@ public class DataCapturingButton
                 context.getString(R.string.msg_calibrating), true, false, dialog -> {
                     try {
                         dataCapturingService
-                                .stop(new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+                                .stop(new ShutDownFinishedHandler(
+                                        de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                                     @Override
                                     public void shutDownFinished(final long l) {
                                         // nothing to do
