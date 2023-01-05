@@ -502,13 +502,11 @@ public class DataCapturingButton
             // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
             // - Use a static 500ms delay to give the measurement some time to stop.
             if (Build.VERSION.SDK_INT >= 33) {
-                setButtonStatus(button, PAUSED); // avoids button to flip to "stopped" before "paused"
                 final var timeoutHandler = new Handler(context.getMainLooper());
                 timeoutHandler.postAtTime(() -> {
                     // The measurement id should always be set [STAD-333]
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    // Avoids button to flip to "stopped" before "paused"
-                    // setButtonStatus(button, PAUSED);
+                    setButtonStatus(button, PAUSED);
                     setButtonEnabled(button);
                     Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
                 }, SystemClock.uptimeMillis() + 500L);
@@ -1056,7 +1054,10 @@ public class DataCapturingButton
 
     @Override
     public void onCapturingStopped() {
-        setButtonStatus(button, FINISHED);
+        // Disabled on Android 13+ for workaround, see `stop/pauseCapturing()` [RFR-246]
+        if (Build.VERSION.SDK_INT < 33) {
+            setButtonStatus(button, FINISHED);
+        }
     }
 
     /*
