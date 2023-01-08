@@ -97,15 +97,23 @@ public class CursorMeasureAdapter extends CursorAdapter {
         final double distance = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_DISTANCE));
         final int distanceMeter = (int)Math.round(distance);
         final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
-        final String distanceText = distanceKm + " km";
+        final String distanceText = Math.round(distanceKm * 10) / 10.0 + " km";
+
+        // Average speed
+        final double averageSpeedSum = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_SPEED_SUM));
+        final double averageSpeedCounter = cursor
+                .getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_SPEED_COUNTER));
+        final double averageSpeedMps = averageSpeedCounter > 0 ? averageSpeedSum / averageSpeedCounter : 0.0;
+        final double averageSpeedKmh = averageSpeedMps * 3.6;
+        final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
 
         // Retrieve modality
         final Modality modality = Modality
                 .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_MODALITY)));
 
         // Set List Item Text
-        String label = "(" + measurementId + ") " + dateText + " (" + distanceText + ") - "
-                + getTranslation(contextWeakReference, modality);
+        String label = measurementId + ") " + dateText + " (" + distanceText + ") "
+                + getTranslation(contextWeakReference, modality) + " " + averageSpeedText;
 
         // Disable synced and non-finished items to disallow deletion
         final MeasurementStatus status = MeasurementStatus
