@@ -141,7 +141,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginEnd="10dp"
-        android:contentDescription="@string/distance"
+        android:contentDescription="@string/camera_images"
         android:textColor="@color/primary_color"
         android:visibility="invisible"
         android:textSize="14sp" />
@@ -160,7 +160,7 @@
         android:id="@+id/data_capturing_distance"
         android:layout_width="150dp"
         android:layout_height="match_parent"
-        android:contentDescription="@string/camera_images"
+        android:contentDescription="@string/distance"
         android:textAlignment="textEnd"
         android:textColor="@color/primary_color"
         android:textSize="14sp" />
