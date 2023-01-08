@@ -44,6 +44,7 @@
   <!-- Capturing -->
   <string name="synchronize">Upload</string>
   <string name="distance">Distanz</string>
+  <string name="average_speed">Durchschnittsgeschwindigkeit</string>
   <string name="measurement_id">Messungs-Id</string>
   <string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
   <string name="text_button_start">Beginne Aufnahme</string>

@@ -147,6 +147,16 @@
         android:textSize="14sp" />
 
       <androidx.appcompat.widget.AppCompatTextView
+          android:id="@+id/data_capturing_average_speed"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:layout_marginEnd="10dp"
+          android:contentDescription="@string/average_speed"
+          android:textColor="@color/primary_color"
+          android:visibility="invisible"
+          android:textSize="14sp" />
+
+      <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/data_capturing_distance"
         android:layout_width="150dp"
         android:layout_height="match_parent"
