@@ -42,6 +42,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -449,7 +450,8 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
          *
          * @param context The context {@link MainActivity} for this message handler.
          */
-        IncomingMessageHandler(final MainActivity context) {
+        IncomingMessageHandler(@NonNull Looper looper, final MainActivity context) {
+            super(looper);
             this.context = new WeakReference<>(context);
         }
 
