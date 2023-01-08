@@ -145,6 +145,10 @@ public class DataCapturingButton
      */
     private TextView distanceTextView;
     /**
+     * The {@code TextView} use to show the {@link Measurement#getAverageSpeed()} ()} for an ongoing measurement
+     */
+    private TextView averageSpeedTextView;
+    /**
      * The {@code TextView} use to show the info from the {@link CameraListener} for an ongoing measurement
      */
     private TextView cameraInfoTextView;
@@ -153,8 +157,7 @@ public class DataCapturingButton
      */
     private TextView measurementIdTextView;
     /**
-     * {@link PersistenceLayer} to show the {@link Measurement#getDistance()} of the currently captured
-     * {@link Measurement}
+     * {@link PersistenceLayer} to show live metrics of the currently captured {@link Measurement}
      */
     private PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     private final MainFragment mainFragment;
@@ -189,13 +192,14 @@ public class DataCapturingButton
         this.button = button;
         this.measurementIdTextView = button.getRootView().findViewById(R.id.data_capturing_measurement_id);
         this.distanceTextView = button.getRootView().findViewById(R.id.data_capturing_distance);
+        this.averageSpeedTextView = button.getRootView().findViewById(R.id.data_capturing_average_speed);
         this.cameraInfoTextView = button.getRootView().findViewById(R.id.camera_capturing_info);
 
         // To get the vehicle
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
-        // To load the measurement distance
+        // To load live metric
         this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
                 new DefaultPersistenceBehaviour());
 
@@ -263,7 +267,7 @@ public class DataCapturingButton
      * Updates the {@code TextView}s depending on the current {@link MeasurementStatus}.
      * <p>
      * When a new Capturing is started, the {@code TextView} will only show the {@link Measurement#getIdentifier()}
-     * of the open {@link Measurement}. The {@link Measurement#getDistance()} is automatically updated as soon as the
+     * of the open {@link Measurement}. The live metrics are automatically updated as soon as the
      * first {@link GeoLocation}s are captured. This way the user can see if the capturing actually works.
      *
      * @param status the state of the {@code DataCapturingButton}
@@ -281,6 +285,7 @@ public class DataCapturingButton
         } else {
             // This way you can notice if a GeoLocation/Picture was already captured or not
             distanceTextView.setText("");
+            averageSpeedTextView.setText("");
             // Disabling or else the text is updated when JpegSafer handles image after capturing stopped
             cameraInfoTextView.setText("");
             cameraInfoTextView.setVisibility(View.INVISIBLE);
@@ -916,13 +921,17 @@ public class DataCapturingButton
         } catch (final CursorIsNullException e) {
             throw new IllegalStateException(e);
         }
+
         final int distanceMeter = (int)Math.round(measurement.getDistance());
         final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
         final String distanceText = distanceKm + " km";
         Log.d(TAG, "Distance update: " + distanceText);
         distanceTextView.setText(distanceText);
-        Log.d(TAG, "distanceTextView: " + distanceTextView.getText());
-        Log.d(TAG, "distanceTextView: " + distanceTextView.isEnabled());
+
+        final double averageSpeedKmh = measurement.getAverageSpeed() * 3.6;
+        final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
+        Log.d(TAG, "Average speed update: " + averageSpeedText);
+        averageSpeedTextView.setText(averageSpeedText);
 
         addLocationToCachedTrack(geoLocation);
         final List<Event> currentMeasurementsEvents;
