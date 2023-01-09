@@ -145,6 +145,10 @@ public class DataCapturingButton
      */
     private TextView distanceTextView;
     /**
+     * The {@code TextView} use to show the duration of an ongoing measurement.
+     */
+    private TextView durationTextView;
+    /**
      * The {@code TextView} use to show the average speed for an ongoing measurement.
      */
     private TextView averageSpeedTextView;
@@ -192,6 +196,7 @@ public class DataCapturingButton
         this.button = button;
         this.measurementIdTextView = button.getRootView().findViewById(R.id.data_capturing_measurement_id);
         this.distanceTextView = button.getRootView().findViewById(R.id.data_capturing_distance);
+        this.durationTextView = button.getRootView().findViewById(R.id.data_capturing_duration);
         this.averageSpeedTextView = button.getRootView().findViewById(R.id.data_capturing_average_speed);
         this.cameraInfoTextView = button.getRootView().findViewById(R.id.camera_capturing_info);
 
@@ -285,6 +290,7 @@ public class DataCapturingButton
         } else {
             // This way you can notice if a GeoLocation/Picture was already captured or not
             distanceTextView.setText("");
+            durationTextView.setText("");
             averageSpeedTextView.setText("");
             // Disabling or else the text is updated when JpegSafer handles image after capturing stopped
             cameraInfoTextView.setText("");
@@ -915,6 +921,17 @@ public class DataCapturingButton
             final String distanceText = distanceKm + " km";
             Log.d(TAG, "Distance update: " + distanceText);
             distanceTextView.setText(distanceText);
+
+            final long durationMillis = persistenceLayer.loadDuration(measurement.getIdentifier());
+            final long durationSeconds = durationMillis / 1000;
+            final long durationMinutes = durationSeconds / 60;
+            final long durationHours = durationMinutes / 60;
+            final String hoursText = durationHours > 0 ? durationHours + "h " : "";
+            final String minutesText = durationMinutes > 0 ? durationMinutes % 60 + "m " : "";
+            final String secondsText = durationSeconds % 60 + "s";
+            final String durationText = hoursText + minutesText + secondsText;
+            Log.d(TAG, "Duration update: " + durationMillis);
+            durationTextView.setText(durationText);
 
             final double averageSpeedKmh = persistenceLayer.loadAverageSpeed(measurement.getIdentifier(),
                     new DefaultLocationCleaningStrategy()) * 3.6;

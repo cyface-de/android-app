@@ -22,6 +22,7 @@ import static de.cyface.app.ui.MainActivity.TAG;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Locale;
 
@@ -42,6 +43,7 @@ import de.cyface.app.R;
 import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.MeasurementTable;
+import de.cyface.persistence.NoSuchMeasurementException;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
@@ -109,6 +111,17 @@ public class CursorMeasureAdapter extends CursorAdapter {
             final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
             final String distanceText = Math.round(distanceKm * 10) / 10.0 + " km";
 
+            // Measurement duration
+            //TODO: After adding measurement statistic view, only show duration there (performance)
+            final long durationMillis = persistenceLayer.loadDuration(measurementId);
+            final long durationSeconds = durationMillis / 1000;
+            final long durationMinutes = durationSeconds / 60;
+            final long durationHours = durationMinutes / 60;
+            final String hoursText = durationHours > 0 ? durationHours + "h " : "";
+            final String minutesText = durationMinutes > 0 ? durationMinutes % 60 + "m " : "";
+            final String secondsText = durationSeconds % 60 + "s";
+            final String durationText = hoursText + minutesText + secondsText;
+
             // Average speed
             //TODO: After adding measurement statistic view, only show speed there (performance)
             final double averageSpeedMps = persistenceLayer.loadAverageSpeed(measurementId, new DefaultLocationCleaningStrategy());
@@ -120,7 +133,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
                     .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_MODALITY)));
 
             // Set List Item Text
-            String label = measurementId + ") " + dateText + " (" + distanceText + ") "
+            String label = measurementId + ") " + dateText + " (" + distanceText + " "+ durationText +") "
                     + getTranslation(contextWeakReference, modality) + " " + averageSpeedText;
 
             // Disable synced and non-finished items to disallow deletion
@@ -135,7 +148,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
             itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
 
             itemView.setText(label);
-        } catch (final CursorIsNullException e) {
+        } catch (final CursorIsNullException | NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
     }
