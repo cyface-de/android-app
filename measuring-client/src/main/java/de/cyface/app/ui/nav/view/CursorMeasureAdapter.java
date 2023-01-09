@@ -39,10 +39,14 @@ import androidx.annotation.Nullable;
 import androidx.cursoradapter.widget.CursorAdapter;
 
 import de.cyface.app.R;
+import de.cyface.persistence.DefaultLocationCleaningStrategy;
+import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.MeasurementTable;
+import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
+import de.cyface.utils.CursorIsNullException;
 
 /**
  * Abstract base class for a {@code CursorAdapter} creating a mapping between a table row with one {@link Measurement}
@@ -64,11 +68,16 @@ public class CursorMeasureAdapter extends CursorAdapter {
      * context/resources.
      */
     private final WeakReference<Context> contextWeakReference;
+    /**
+     * The persistence layer to be used to load additional details of measurements, like metrics.
+     */
+    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
 
-    CursorMeasureAdapter(final Context context, final Cursor cursor, final int rowLayoutIdentifier) {
+    CursorMeasureAdapter(final Context context, final Cursor cursor, final int rowLayoutIdentifier, final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer) {
         super(context, cursor, false);
         this.contextWeakReference = new WeakReference<>(context);
         this.rowLayoutIdentifier = rowLayoutIdentifier;
+        this.persistenceLayer = persistenceLayer;
     }
 
     @Override
@@ -85,48 +94,50 @@ public class CursorMeasureAdapter extends CursorAdapter {
 
     private void mapCursorToView(final Cursor cursor, final View view) {
 
-        final TextView itemView = view.findViewById(R.id.data_row_text);
-        final int measurementId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+        try {
+            final TextView itemView = view.findViewById(R.id.data_row_text);
+            final int measurementId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 
-        // Measurement time
-        final long measurementTimestamp = cursor.getLong(cursor.getColumnIndex(MeasurementTable.COLUMN_TIMESTAMP));
-        final Date date = new Date(measurementTimestamp);
-        final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
+            // Measurement time
+            final long measurementTimestamp = cursor.getLong(cursor.getColumnIndex(MeasurementTable.COLUMN_TIMESTAMP));
+            final Date date = new Date(measurementTimestamp);
+            final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
 
-        // Retrieve distance data
-        final double distance = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_DISTANCE));
-        final int distanceMeter = (int)Math.round(distance);
-        final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
-        final String distanceText = Math.round(distanceKm * 10) / 10.0 + " km";
+            // Retrieve distance data
+            final double distance = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_DISTANCE));
+            final int distanceMeter = (int) Math.round(distance);
+            final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
+            final String distanceText = Math.round(distanceKm * 10) / 10.0 + " km";
 
-        // Average speed
-        final double averageSpeedSum = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_SPEED_SUM));
-        final double averageSpeedCounter = cursor
-                .getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_SPEED_COUNTER));
-        final double averageSpeedMps = averageSpeedCounter > 0 ? averageSpeedSum / averageSpeedCounter : 0.0;
-        final double averageSpeedKmh = averageSpeedMps * 3.6;
-        final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
+            // Average speed
+            //TODO: After adding measurement statistic view, only show speed there (performance)
+            final double averageSpeedMps = persistenceLayer.loadAverageSpeed(measurementId, new DefaultLocationCleaningStrategy());
+            final double averageSpeedKmh = averageSpeedMps * 3.6;
+            final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
 
-        // Retrieve modality
-        final Modality modality = Modality
-                .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_MODALITY)));
+            // Retrieve modality
+            final Modality modality = Modality
+                    .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_MODALITY)));
 
-        // Set List Item Text
-        String label = measurementId + ") " + dateText + " (" + distanceText + ") "
-                + getTranslation(contextWeakReference, modality) + " " + averageSpeedText;
+            // Set List Item Text
+            String label = measurementId + ") " + dateText + " (" + distanceText + ") "
+                    + getTranslation(contextWeakReference, modality) + " " + averageSpeedText;
 
-        // Disable synced and non-finished items to disallow deletion
-        final MeasurementStatus status = MeasurementStatus
-                .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
-        if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
-                || status == MeasurementStatus.SYNCED) {
-            label += " - " + status.toString().toLowerCase();
+            // Disable synced and non-finished items to disallow deletion
+            final MeasurementStatus status = MeasurementStatus
+                    .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
+            if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
+                    || status == MeasurementStatus.SYNCED) {
+                label += " - " + status.toString().toLowerCase();
+            }
+            // Checkable
+            itemView.setEnabled(true);
+            itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
+
+            itemView.setText(label);
+        } catch (final CursorIsNullException e) {
+            throw new IllegalStateException(e);
         }
-        // Checkable
-        itemView.setEnabled(true);
-        itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
-
-        itemView.setText(label);
     }
 
     /**

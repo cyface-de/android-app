@@ -145,7 +145,7 @@ public class DataCapturingButton
      */
     private TextView distanceTextView;
     /**
-     * The {@code TextView} use to show the {@link Measurement#getAverageSpeed()} ()} for an ongoing measurement
+     * The {@code TextView} use to show the average speed for an ongoing measurement.
      */
     private TextView averageSpeedTextView;
     /**
@@ -170,7 +170,7 @@ public class DataCapturingButton
      * Helps to reduce the Sentry quota used. We only want to receive this event once for each DataCapturingButton
      * instance not for each location event.
      */
-    private final boolean[] onNewGeoLocationAcquiredExceptionTriggered = new boolean[] {false, false, false};
+    private final boolean[] onNewGeoLocationAcquiredExceptionTriggered = new boolean[] {false, false};
     /**
      * {@code True} if the user opted-in to error reporting.
      */
@@ -906,52 +906,37 @@ public class DataCapturingButton
     @Override
     public void onNewGeoLocationAcquired(GeoLocation geoLocation) {
         Log.d(TAG, "onNewGeoLocationAcquired");
-        final Measurement measurement;
+
         try {
-            measurement = persistenceLayer.loadCurrentlyCapturedMeasurement();
-        } catch (final NoSuchMeasurementException e) {
-            // GeoLocations may also arrive shortly after a measurement was stopped. Thus, this may not crash.
-            // This happened on the Emulator with emulated live locations.
-            Log.w(TAG, "onNewGeoLocationAcquired: No currently captured measurement found, doing nothing.");
+            final Measurement measurement = persistenceLayer.loadCurrentlyCapturedMeasurement();
+
+            final int distanceMeter = (int)Math.round(measurement.getDistance());
+            final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
+            final String distanceText = distanceKm + " km";
+            Log.d(TAG, "Distance update: " + distanceText);
+            distanceTextView.setText(distanceText);
+
+            final double averageSpeedKmh = persistenceLayer.loadAverageSpeed(measurement.getIdentifier(),
+                    new DefaultLocationCleaningStrategy()) * 3.6;
+            final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
+            Log.d(TAG, "Average speed update: " + averageSpeedText);
+            averageSpeedTextView.setText(averageSpeedText);
+
+            addLocationToCachedTrack(geoLocation);
+            final List<Event> currentMeasurementsEvents = loadCurrentMeasurementsEvents();
+            mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
+        } catch (final CursorIsNullException e) {
+            Log.w(TAG, "onNewGeoLocationAcquired(): Cursor is null, doing nothing.");
             if (!onNewGeoLocationAcquiredExceptionTriggered[0] && isReportingEnabled) {
                 onNewGeoLocationAcquiredExceptionTriggered[0] = true;
                 Sentry.captureException(e);
             }
-            return;
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
-        }
-
-        final int distanceMeter = (int)Math.round(measurement.getDistance());
-        final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
-        final String distanceText = distanceKm + " km";
-        Log.d(TAG, "Distance update: " + distanceText);
-        distanceTextView.setText(distanceText);
-
-        final double averageSpeedKmh = measurement.getAverageSpeed() * 3.6;
-        final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
-        Log.d(TAG, "Average speed update: " + averageSpeedText);
-        averageSpeedTextView.setText(averageSpeedText);
-
-        addLocationToCachedTrack(geoLocation);
-        final List<Event> currentMeasurementsEvents;
-        try {
-            currentMeasurementsEvents = loadCurrentMeasurementsEvents();
-            mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
-        } catch (final CursorIsNullException e) {
-            Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
-                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
-                    + "the capturing already stopped.");
+        } catch (NoSuchMeasurementException e) {
+            // GeoLocations may also arrive shortly after a measurement was stopped. Thus, this may not crash.
+            // This happened on the Emulator with emulated live locations.
+            Log.w(TAG, "onNewGeoLocationAcquired(): No currently captured measurement found, doing nothing.");
             if (!onNewGeoLocationAcquiredExceptionTriggered[1] && isReportingEnabled) {
                 onNewGeoLocationAcquiredExceptionTriggered[1] = true;
-                Sentry.captureException(e);
-            }
-        } catch (NoSuchMeasurementException e) {
-            Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
-                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
-                    + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && isReportingEnabled) {
-                onNewGeoLocationAcquiredExceptionTriggered[2] = true;
                 Sentry.captureException(e);
             }
         }

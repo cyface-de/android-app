@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -122,7 +122,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         listView = parentView.findViewById(R.id.measurements_list_view);
         listView.clearChoices(); // Fixes the wrong selected item count after changing the cursor VIC-104
         // The cursor is not yet available so the adapter is reassigned in {@link #onLoadFinished()}
-        cursorAdapter = new CursorMeasureAdapter(activity, null, R.layout.data_row);
+        cursorAdapter = new CursorMeasureAdapter(activity, null, R.layout.data_row, persistenceLayer);
         listView.setAdapter(cursorAdapter);
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         Log.d(TAG, "onCreateView");
@@ -198,7 +198,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         }
 
         cursor.moveToFirst();
-        cursorAdapter = new CursorMeasureAdapter(activity, cursor, R.layout.data_row);
+        cursorAdapter = new CursorMeasureAdapter(activity, cursor, R.layout.data_row, persistenceLayer);
         listView.setAdapter(cursorAdapter);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
