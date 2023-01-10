@@ -161,7 +161,8 @@ public class DataCapturingButton
      */
     private TextView measurementIdTextView;
     /**
-     * {@link PersistenceLayer} to show live metrics of the currently captured {@link Measurement}
+     * {@link PersistenceLayer} to show live metrics like distance and average speed of the currently captured
+     * {@link Measurement}
      */
     private PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     private final MainFragment mainFragment;
@@ -204,7 +205,7 @@ public class DataCapturingButton
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
-        // To load live metric
+        // To load live metrics like distance and average speed
         this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
                 new DefaultPersistenceBehaviour());
 
@@ -272,8 +273,8 @@ public class DataCapturingButton
      * Updates the {@code TextView}s depending on the current {@link MeasurementStatus}.
      * <p>
      * When a new Capturing is started, the {@code TextView} will only show the {@link Measurement#getIdentifier()}
-     * of the open {@link Measurement}. The live metrics are automatically updated as soon as the
-     * first {@link GeoLocation}s are captured. This way the user can see if the capturing actually works.
+     * of the open {@link Measurement}. The live metrics like distance and average speed are automatically updated as
+     * soon as the first {@link GeoLocation}s are captured. This way the user can see if the capturing actually works.
      *
      * @param status the state of the {@code DataCapturingButton}
      */
