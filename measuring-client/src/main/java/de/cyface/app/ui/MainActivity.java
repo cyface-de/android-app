@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -432,7 +432,8 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
      * - We don't use Broadcasts here to reduce the amount of broadcasts.
      *
      * @author Klemens Muthmann
-     * @version 1.0.1
+     * @author Armin Schnabel
+     * @version 1.0.2
      * @since 1.0.0
      */
     private final static class IncomingMessageHandler extends Handler {
@@ -450,11 +451,12 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
          * @param context The context {@link MainActivity} for this message handler.
          */
         IncomingMessageHandler(final MainActivity context) {
+            super(context.getMainLooper());
             this.context = new WeakReference<>(context);
         }
 
         @Override
-        public void handleMessage(@SuppressWarnings("NullableProblems") final Message msg) {
+        public void handleMessage(final Message msg) {
             final MainActivity activity = context.get();
 
             if (activity == null) {
