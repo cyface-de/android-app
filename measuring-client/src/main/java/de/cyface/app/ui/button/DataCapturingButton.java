@@ -931,7 +931,7 @@ public class DataCapturingButton
             final String minutesText = durationMinutes > 0 ? durationMinutes % 60 + "m " : "";
             final String secondsText = durationSeconds % 60 + "s";
             final String durationText = hoursText + minutesText + secondsText;
-            Log.d(TAG, "Duration update: " + durationMillis);
+            Log.d(TAG, String.format("Duration update: %d ms", durationMillis));
             durationTextView.setText(durationText);
 
             final double averageSpeedKmh = persistenceLayer.loadAverageSpeed(measurement.getIdentifier(),
