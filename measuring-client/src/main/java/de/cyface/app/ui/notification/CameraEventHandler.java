@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -52,7 +52,7 @@ import de.cyface.utils.Validate;
  * {@link BackgroundService}.
  *
  * @author Armin Schnabel
- * @version 1.2.0
+ * @version 1.2.1
  * @since 1.0.0
  */
 public class CameraEventHandler implements EventHandlingStrategy {
@@ -169,8 +169,15 @@ public class CameraEventHandler implements EventHandlingStrategy {
      */
     private void showSpaceWarningNotification(final Context context) {
         final Intent onClickIntent = new Intent(context, MainActivity.class);
-        final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
         final NotificationManager notificationManager = (NotificationManager)context
                 .getSystemService(NOTIFICATION_SERVICE);
         Validate.notNull(notificationManager);
@@ -203,8 +210,15 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         // Open Activity when the notification is clicked
         final Intent onClickIntent = new Intent(context, MainActivity.class);
-        final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
         final NotificationManager notificationManager = (NotificationManager)context
                 .getSystemService(NOTIFICATION_SERVICE);
         Validate.notNull(notificationManager);
@@ -226,39 +240,46 @@ public class CameraEventHandler implements EventHandlingStrategy {
         notificationManager.notify(CAMERA_ACCESS_LOST_NOTIFICATION_ID, notificationBuilder.build());
     }
 
-  /**
-   * A {@link Notification} shown when the {@link BackgroundService} triggered the camera access lost event.
-   *
-   * @param context The context if the service used to show the {@link Notification}. It stays even
-   *            when the service is stopped as long as a unique id is used.
-   */
-  private void showCameraAccessLostNotification(final Context context) {
+    /**
+     * A {@link Notification} shown when the {@link BackgroundService} triggered the camera access lost event.
+     *
+     * @param context The context if the service used to show the {@link Notification}. It stays even
+     *            when the service is stopped as long as a unique id is used.
+     */
+    private void showCameraAccessLostNotification(final Context context) {
 
-    // Open Activity when the notification is clicked
-    final Intent onClickIntent = new Intent(context, MainActivity.class);
-    final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-      PendingIntent.FLAG_UPDATE_CURRENT);
-    final NotificationManager notificationManager = (NotificationManager)context
-      .getSystemService(NOTIFICATION_SERVICE);
-    Validate.notNull(notificationManager);
+        // Open Activity when the notification is clicked
+        final Intent onClickIntent = new Intent(context, MainActivity.class);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        final NotificationManager notificationManager = (NotificationManager) context
+                .getSystemService(NOTIFICATION_SERVICE);
+        Validate.notNull(notificationManager);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      createNotificationChannelIfNotExists(context, NOTIFICATION_CHANNEL_ID_WARNING,
-        context.getString(R.string.notification_channel_name_warning),
-        context.getString(R.string.notification_channel_description_warning),
-        NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            createNotificationChannelIfNotExists(context, NOTIFICATION_CHANNEL_ID_WARNING,
+                    context.getString(R.string.notification_channel_name_warning),
+                    context.getString(R.string.notification_channel_description_warning),
+                    NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
+        }
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
+                NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
+                .setSmallIcon(R.drawable.ic_logo_only_c)
+                .setContentTitle(context.getString(R.string.notification_title_capturing_stopped))
+                .setContentText(
+                        context.getString(R.string.notification_text_capturing_stopped_camera_disconnected))
+                .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2).setAutoCancel(true)
+                .setVibrate(new long[]{500, 1500})
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+        notificationManager.notify(CAMERA_ACCESS_LOST_NOTIFICATION_ID, notificationBuilder.build());
     }
-    final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
-      NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
-      .setSmallIcon(R.drawable.ic_logo_only_c)
-      .setContentTitle(context.getString(R.string.notification_title_capturing_stopped))
-      .setContentText(
-        context.getString(R.string.notification_text_capturing_stopped_camera_disconnected))
-      .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2).setAutoCancel(true)
-      .setVibrate(new long[] {500, 1500})
-      .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
-    notificationManager.notify(CAMERA_ACCESS_LOST_NOTIFICATION_ID, notificationBuilder.build());
-  }
 
     /**
      * A {@link Notification} shown when the {@link BackgroundService} triggered the picture capturing slowed down
@@ -271,8 +292,15 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         // Open Activity when the notification is clicked
         final Intent onClickIntent = new Intent(context, MainActivity.class);
-        final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
         final NotificationManager notificationManager = (NotificationManager)context
                 .getSystemService(NOTIFICATION_SERVICE);
         Validate.notNull(notificationManager);
@@ -304,8 +332,15 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         // Open Activity when the notification is clicked
         final Intent onClickIntent = new Intent(context, MainActivity.class);
-        final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(context, channelId, "Cyface",

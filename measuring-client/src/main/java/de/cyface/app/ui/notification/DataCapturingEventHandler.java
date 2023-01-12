@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2022 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -50,7 +50,7 @@ import de.cyface.utils.Validate;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 3.0.0
+ * @version 3.0.1
  * @since 2.5.0
  */
 public class DataCapturingEventHandler implements EventHandlingStrategy {
@@ -138,8 +138,15 @@ public class DataCapturingEventHandler implements EventHandlingStrategy {
      */
     private void showSpaceWarningNotification(final Context context) {
         final Intent onClickIntent = new Intent(context, MainActivity.class);
-        final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
         final NotificationManager notificationManager = (NotificationManager)context
                 .getSystemService(NOTIFICATION_SERVICE);
         Validate.notNull(notificationManager);
@@ -169,8 +176,15 @@ public class DataCapturingEventHandler implements EventHandlingStrategy {
 
         // Open Activity when the notification is clicked
         final Intent onClickIntent = new Intent(context, MainActivity.class);
-        final PendingIntent onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent onClickPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            // Ignore warning: immutable flag only available in API >= 23, see above
+            onClickPendingIntent = PendingIntent.getActivity(context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(context, channelId, "Cyface",
