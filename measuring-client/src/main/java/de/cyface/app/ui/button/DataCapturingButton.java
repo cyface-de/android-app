@@ -153,6 +153,10 @@ public class DataCapturingButton
      */
     private TextView averageSpeedTextView;
     /**
+     * The {@code TextView} use to show the ascend for an ongoing measurement.
+     */
+    private TextView ascendTextView;
+    /**
      * The {@code TextView} use to show the info from the {@link CameraListener} for an ongoing measurement
      */
     private TextView cameraInfoTextView;
@@ -199,6 +203,7 @@ public class DataCapturingButton
         this.distanceTextView = button.getRootView().findViewById(R.id.data_capturing_distance);
         this.durationTextView = button.getRootView().findViewById(R.id.data_capturing_duration);
         this.averageSpeedTextView = button.getRootView().findViewById(R.id.data_capturing_average_speed);
+        this.ascendTextView = button.getRootView().findViewById(R.id.data_capturing_ascend);
         this.cameraInfoTextView = button.getRootView().findViewById(R.id.camera_capturing_info);
 
         // To get the vehicle
@@ -293,6 +298,7 @@ public class DataCapturingButton
             distanceTextView.setText("");
             durationTextView.setText("");
             averageSpeedTextView.setText("");
+            ascendTextView.setText("");
             // Disabling or else the text is updated when JpegSafer handles image after capturing stopped
             cameraInfoTextView.setText("");
             cameraInfoTextView.setVisibility(View.INVISIBLE);
@@ -939,6 +945,9 @@ public class DataCapturingButton
             final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
             Log.d(TAG, "Average speed update: " + averageSpeedText);
             averageSpeedTextView.setText(averageSpeedText);
+
+            new AscendLoader(persistenceLayer)
+                    .execute(new AscendLoader.InputParameters(measurement.getIdentifier(), ascendTextView));
 
             addLocationToCachedTrack(geoLocation);
             final List<Event> currentMeasurementsEvents = loadCurrentMeasurementsEvents();

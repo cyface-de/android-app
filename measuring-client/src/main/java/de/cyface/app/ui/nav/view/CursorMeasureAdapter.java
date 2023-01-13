@@ -22,7 +22,6 @@ import static de.cyface.app.ui.MainActivity.TAG;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.Date;
 import java.util.Locale;
 
@@ -40,6 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.cursoradapter.widget.CursorAdapter;
 
 import de.cyface.app.R;
+import de.cyface.app.ui.button.AscendLoader;
 import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.MeasurementTable;
@@ -75,7 +75,8 @@ public class CursorMeasureAdapter extends CursorAdapter {
      */
     private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
 
-    CursorMeasureAdapter(final Context context, final Cursor cursor, final int rowLayoutIdentifier, final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer) {
+    CursorMeasureAdapter(final Context context, final Cursor cursor, final int rowLayoutIdentifier,
+            final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer) {
         super(context, cursor, false);
         this.contextWeakReference = new WeakReference<>(context);
         this.rowLayoutIdentifier = rowLayoutIdentifier;
@@ -107,12 +108,12 @@ public class CursorMeasureAdapter extends CursorAdapter {
 
             // Retrieve distance data
             final double distance = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_DISTANCE));
-            final int distanceMeter = (int) Math.round(distance);
+            final int distanceMeter = (int)Math.round(distance);
             final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
             final String distanceText = Math.round(distanceKm * 10) / 10.0 + " km";
 
             // Measurement duration
-            //TODO: After adding measurement statistic view, only show duration there (performance)
+            // TODO: After adding measurement statistic view, only show duration there (performance)
             final long durationMillis = persistenceLayer.loadDuration(measurementId);
             final long durationSeconds = durationMillis / 1000;
             final long durationMinutes = durationSeconds / 60;
@@ -123,8 +124,9 @@ public class CursorMeasureAdapter extends CursorAdapter {
             final String durationText = hoursText + minutesText + secondsText;
 
             // Average speed
-            //TODO: After adding measurement statistic view, only show speed there (performance)
-            final double averageSpeedMps = persistenceLayer.loadAverageSpeed(measurementId, new DefaultLocationCleaningStrategy());
+            // TODO: After adding measurement statistic view, only show speed there (performance)
+            final double averageSpeedMps = persistenceLayer.loadAverageSpeed(measurementId,
+                    new DefaultLocationCleaningStrategy());
             final double averageSpeedKmh = averageSpeedMps * 3.6;
             final String averageSpeedText = Math.round(averageSpeedKmh) + " km/h";
 
@@ -133,7 +135,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
                     .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_MODALITY)));
 
             // Set List Item Text
-            String label = measurementId + ") " + dateText + " (" + distanceText + " "+ durationText +") "
+            String label = measurementId + ") " + dateText + " (" + distanceText + " " + durationText + ") "
                     + getTranslation(contextWeakReference, modality) + " " + averageSpeedText;
 
             // Disable synced and non-finished items to disallow deletion
@@ -147,7 +149,11 @@ public class CursorMeasureAdapter extends CursorAdapter {
             itemView.setEnabled(true);
             itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
 
-            itemView.setText(label);
+            // Async loader which loads ascend from Room and updates the `itemView` asynchronously
+            // TODO: After adding measurement statistic view, only show speed there (performance)
+            new AscendLoader(persistenceLayer)
+                    .execute(new AscendLoader.InputParameters(measurementId, itemView, label));
+            // itemView.setText(label);
         } catch (final CursorIsNullException | NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
