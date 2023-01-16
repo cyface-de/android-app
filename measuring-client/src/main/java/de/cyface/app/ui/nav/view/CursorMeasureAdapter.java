@@ -150,10 +150,10 @@ public class CursorMeasureAdapter extends CursorAdapter {
             itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
 
             // Async loader which loads ascend from Room and updates the `itemView` asynchronously
+            itemView.setText(label);
             // TODO: After adding measurement statistic view, only show speed there (performance)
             new AscendLoader(persistenceLayer)
                     .execute(new AscendLoader.InputParameters(measurementId, itemView, label));
-            // itemView.setText(label);
         } catch (final CursorIsNullException | NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
