@@ -105,10 +105,6 @@ ext {
 // Attention: Overwrites also the repositories used to retrieve the transitive dependencies in the submodules
 allprojects {
 
-    // Load credentials
-    def properties = new Properties()
-    properties.load(new FileInputStream("local.properties"))
-
     repositories {
         google()
         mavenCentral()
@@ -117,8 +113,8 @@ allprojects {
         maven {
             url "https://maven.pkg.github.com/cyface-de/android-utils"
             credentials {
-                username = properties.getProperty("github.user")
-                password = properties.getProperty("github.token")
+                username = project.findProperty("githubUser")
+                password = project.findProperty("githubToken")
             }
         }
     }
