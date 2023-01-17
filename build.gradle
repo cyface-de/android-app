@@ -54,16 +54,15 @@ ext {
      * prevents you from the creation of an incompatible fork and enables us to work standalone on the submodules.
      */
 
-    cyfaceBackendVersion = "6.3.0-beta1" // Also update submodule commit ref
+    cyfaceBackendVersion = "6.3.0-beta2" // Also update submodule commit ref
     cyfaceUtilsVersion = "2.0.2" // Maven dependency
     cyfaceEnergySettingsVersion = "3.0.2" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "3.0.1" // Also update submodule commit ref
 
     minSdkVersion = 21
-    // TODO: Should be fine to use `targetVersion 31` here, but could be adjusted to 32 (SR)
-    targetSdkVersion = 31 // 30 FIXME - 31 required for Room, follow migration guide / commit from main branch
-    compileSdkVersion = 33 // 30 FIXME - 31 required for Room, follow migration guide / commit from main branch
-    buildToolsVersion = '30.0.3' //'30.0.3' FIXME - 31 required for Room, follow migration guide / commit from main branch
+    targetSdkVersion = 31
+    compileSdkVersion = 33
+    buildToolsVersion = '30.0.3'
 
     multidexVersion = "2.0.1"
     androidxAnnotationVersion = "1.2.0"
