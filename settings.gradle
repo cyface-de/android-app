@@ -41,6 +41,7 @@ include ':energy_settings'
 include ':camera_service'
 include ':bluetooth-le'
 include ':measuring-client'
+include ':ui:r4r'
 project(':persistence').projectDir = new File('backend/persistence')
 project(':synchronization').projectDir = new File('backend/synchronization')
 project(':datacapturing').projectDir = new File('backend/datacapturing')
