@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
 
     @Override
     public void feedbackSelected() {
-        startActivity(Intent.createChooser(emailIntent, getString(R.string.feedback_choose_email_app)));
+        startActivity(Intent.createChooser(emailIntent, getString(de.cyface.energy_settings.R.string.feedback_choose_email_app)));
     }
 
     @Override
@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
         navDrawer.addNavDrawerListener(this);
 
         // Setting up feedback email template
-        emailIntent = generateFeedbackEmailIntent(this, getString(R.string.feedback_error_description), SUPPORT_EMAIL);
+        emailIntent = generateFeedbackEmailIntent(this, getString(de.cyface.energy_settings.R.string.feedback_error_description), SUPPORT_EMAIL);
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
         showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL);
@@ -357,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
                     // Deactivate camera service and inform user about this
                     navDrawer.deactivateCameraService();
                     Toast.makeText(getApplicationContext(),
-                            getApplicationContext().getString(R.string.camera_service_off_missing_permissions),
+                            getApplicationContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
                             Toast.LENGTH_LONG).show();
                 } else {
                     // Ask used which camera mode to use, video or default (shutter image)

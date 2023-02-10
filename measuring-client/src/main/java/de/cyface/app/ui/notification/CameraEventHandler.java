@@ -274,7 +274,7 @@ public class CameraEventHandler implements EventHandlingStrategy {
                         .setSmallIcon(R.drawable.ic_logo_only_c)
                         .setContentTitle(context.getString(R.string.notification_title_capturing_stopped))
                         .setContentText(
-                                context.getString(R.string.notification_text_capturing_stopped_camera_disconnected))
+                                context.getString(de.cyface.camera_service.R.string.notification_text_capturing_stopped_camera_disconnected))
                         .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2).setAutoCancel(true)
                         .setVibrate(new long[] {500, 1500})
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
