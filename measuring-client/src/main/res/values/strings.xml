@@ -47,6 +47,7 @@
   <string name="synchronize">Upload</string>
   <string name="distance">Distance</string>
   <string name="average_speed">Average Speed</string>
+  <string name="ascend">Ascend</string>
   <string name="duration">Duration</string>
   <string name="measurement_id">Measurement Id</string>
   <string name="title_dialog_starting_data_capture">Starting Data Capture</string>

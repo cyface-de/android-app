@@ -45,6 +45,7 @@
   <string name="synchronize">Carica</string>
   <string name="distance">Distanza</string>
   <string name="average_speed">Velocità media</string>
+  <string name="ascend">Ascendere</string>
   <string name="duration">Durata</string>
   <string name="measurement_id">Identificativo misura</string>
   <string name="title_dialog_starting_data_capture">Inizio acquisizione dati</string>
