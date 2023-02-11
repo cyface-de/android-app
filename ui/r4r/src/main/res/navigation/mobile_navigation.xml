@@ -3,23 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_capturing">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="de.cyface.app.r4r.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_capturing"
+        android:name="de.cyface.app.r4r.ui.capturing.CapturingFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_capturing" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="de.cyface.app.r4r.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+      android:id="@+id/navigation_trips"
+      android:name="de.cyface.app.r4r.ui.trips.TripsFragment"
+      android:label="@string/title_trips"
+      tools:layout="@layout/fragment_trips" />
 
-    <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="de.cyface.app.r4r.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+    <!--fragment
+      android:id="@+id/navigation_sync"
+      android:name="de.cyface.app.r4r.ui.sync.SyncFragment"
+      android:label="@string/title_sync"
+      tools:layout="@layout/fragment_sync" /-->
+
 </navigation>

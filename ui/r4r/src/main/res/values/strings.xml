@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Ready for Robots</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+
+    <string name="title_capturing">Capturing</string>
+    <string name="title_start">Start</string>
+    <string name="title_pause">Pause</string>
+    <string name="title_resume">Resume</string>
+    <string name="title_stop">Stop</string>
+    <string name="title_trips">Trips</string>
+    <string name="title_sync">Sync</string>
+
+    <string name="title_map">Map</string>
+    <string name="title_speed">Speed</string>
 </resources>
