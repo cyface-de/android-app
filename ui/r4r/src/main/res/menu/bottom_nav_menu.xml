@@ -3,6 +3,11 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+      android:id="@+id/navigation_trips"
+      android:icon="@drawable/ic_baseline_format_list_bulleted_24"
+      android:title="@string/title_trips" />
+
+    <item
       android:id="@+id/navigation_capturing"
       android:icon="@drawable/ic_baseline_location_searching_24"
       android:title="@string/title_capturing" />
@@ -10,7 +15,7 @@
     <!-- To change `app:IconTint="@color/red_700"` enable `vectorDrawables.useSupportLibrary`
     and use a selector, see: https://stackoverflow.com/a/68915308/5815054 -->
 
-    <item
+    <!--item
       android:id="@+id/navigation_start"
       android:icon="@drawable/ic_baseline_play_arrow_24"
       android:title="@string/title_start" />
@@ -18,12 +23,12 @@
     <item
       android:id="@+id/navigation_stop"
       android:icon="@drawable/ic_baseline_stop_24"
-      android:title="@string/title_stop" />
+      android:title="@string/title_stop" /-->
 
     <item
-      android:id="@+id/navigation_trips"
-      android:icon="@drawable/ic_baseline_format_list_bulleted_24"
-      android:title="@string/title_trips" />
+      android:id="@id/navigation_statistics"
+      android:icon="@drawable/ic_baseline_show_chart_24"
+      android:title="@string/title_statistics" />
 
     <!--item
       android:id="@+id/navigation_sync"

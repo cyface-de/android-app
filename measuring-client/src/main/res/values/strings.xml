@@ -54,6 +54,8 @@
   <string name="notification_title_capturing_stopped">Stopped Capturing</string>
   <string name="msg_calibrating">Calibrating</string>
   <string name="capturing_active">Capturing ongoing</string>
+  <string name="toast_measurement_paused">Trip paused</string>
+  <string name="toast_measurement_resumed">Trip resumed</string>
 
   <!-- Synchronization -->
   <string name="error_message_sync_canceled_no_wifi">You need a Wi-Fi connection to upload data.</string>
@@ -98,8 +100,6 @@
   <string name="toast_no_locations_found">No locations found</string>
   <string name="toast_measurement_deletion_success">Copies of the measurements on the server are not affected.</string>
   <string name="toast_item_deletion_success">The selected items were deleted.</string>
-  <string name="toast_measurement_paused">Trip paused</string>
-  <string name="toast_measurement_resumed">Trip resumed</string>
   <string name="toast_select_location">Please select a location</string>
   <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
 
