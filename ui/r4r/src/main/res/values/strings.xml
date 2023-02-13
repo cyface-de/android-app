@@ -1,14 +1,41 @@
 <resources>
     <string name="app_name">Ready for Robots</string>
 
+    <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
+    <string name="title_trips">Trips</string>
     <string name="title_capturing">Capturing</string>
+    <string name="title_statistics">Statistics</string>
+
+    <!-- Action buttons in capturing view -->
     <string name="title_start">Start</string>
     <string name="title_pause">Pause</string>
     <string name="title_resume">Resume</string>
     <string name="title_stop">Stop</string>
-    <string name="title_trips">Trips</string>
-    <string name="title_sync">Sync</string>
 
+    <!-- AppBar Actions -->
+    <string name="action_sync">Sync</string>
+
+    <!-- Capturing Fragment -->
     <string name="title_map">Map</string>
     <string name="title_speed">Speed</string>
+
+    <!-- Trips Fragment -->
+    <string name="mark_all_menu_item">Select all items</string>
+    <string name="delete_marked_menu_item">Delete marked</string>
+    <string name="toast_export">Exported:</string>
+    <string name="title_menu_item_export">Export all</string>
+    <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+    <string name="export_data">Exporting data …</string>
+    <string name="export_data_no_permission">Access to external memory (SD) required.</string>
+    <string name="delete_data">Deleting marked measurements …</string>
+    <string name="delete_data_non_selected">No measurements selected. Multiple selection by long press.</string>
+    <string name="toast_selection_mode_enabled">Selection mode enabled</string>
+    <string name="toast_selection_mode_disabled">Selection mode disabled</string>
+    <string name="toast_no_locations_found">No locations found</string>
+    <string name="toast_measurement_deletion_success">Copies of the measurements on the server are not affected.</string>
+    <string name="toast_item_deletion_success">The selected items were deleted.</string>
+    <string name="toast_select_location">Please select a location</string>
+    <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
+
+    <!-- Statistics Fragment -->
 </resources>

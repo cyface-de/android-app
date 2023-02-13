@@ -1,4 +1,4 @@
-package de.cyface.app.r4r.ui.sync
+package de.cyface.app.r4r.ui.statistics
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.app.r4r.databinding.FragmentSyncBinding
+import de.cyface.app.r4r.databinding.FragmentStatisticsBinding
 
-class SyncFragment : Fragment() {
+class StatisticsFragment : Fragment() {
 
-    private var _binding: FragmentSyncBinding? = null
+    private var _binding: FragmentStatisticsBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -23,12 +23,12 @@ class SyncFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val syncViewModel =
-            ViewModelProvider(this).get(SyncViewModel::class.java)
+            ViewModelProvider(this).get(StatisticsViewModel::class.java)
 
-        _binding = FragmentSyncBinding.inflate(inflater, container, false)
+        _binding = FragmentStatisticsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textSync
+        val textView: TextView = binding.textStatistics
         syncViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }

@@ -2,11 +2,18 @@ package de.cyface.app.r4r.ui.trips
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentTripsBinding
 
 class TripsFragment : Fragment() {
@@ -32,6 +39,18 @@ class TripsFragment : Fragment() {
         uploadViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.trips, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                TODO("Not yet implemented")
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
         return root
     }
 
