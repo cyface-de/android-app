@@ -1,0 +1,57 @@
+# This workflow ensures the building step works
+#
+# @author Armin Schnabel
+# @version 1.0.0
+# @since 3.2.0
+name: Gradle Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        # Does not work out of the box with a private repository
+        # see https://github.com/actions/checkout/issues/287
+        #with:
+        #  submodules: true
+      - name: Add SSH private keys for submodule repositories
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          # This allows to add multiple individual deploy keys for multiple private submodules
+          # for a guide, see https://github.com/marketplace/actions/webfactory-ssh-agent
+          ssh-private-key: |
+            ${{ secrets.SSH_DEPLOY_KEY_CAMERA_SERVICE }}
+      - run: git submodule update --init --recursive
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Add gradle.properties
+        run: |
+          # Use a personal read token to install the Cyface Utils package
+          cp gradle.properties.template gradle.properties
+          echo "githubUser=${{ secrets.GH_READ_ACCOUNT }}" >> gradle.properties
+          echo "githubToken=${{ secrets.GH_READ_TOKEN }}" >> gradle.properties
+          # This mock API accepts all credentials and allows the UI test to skip the login
+          echo "cyface.staging_api=https://demo.cyface.de/api/v2" >> gradle.properties
+          echo "cyface.staging_user=guestLogin" >> gradle.properties
+          echo "cyface.staging_password=guestPassword" >> gradle.properties
+
+      # Executing build here on Ubuntu stack (1/10th costs of MacOS stack)
+      # Not using "gradle build" as we don't want to run the tests of all dependencies (e.g. backend)
+      - name: Assemble with Gradle
+        run: ./gradlew :measuring-client:assembleDebug
+      - name: Test with Gradle
+        run: ./gradlew :measuring-client:testDebugUnitTest

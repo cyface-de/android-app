@@ -1,6 +1,7 @@
 = Cyface Android Client
 
-image:https://app.bitrise.io/app/c7da6c56a123928f/status.svg?token=RcVITFZtTSw7Yf5MjCQWvQ[Build Status,link="https://app.bitrise.io/app/c7da6c56a123928f"]
+image:https://github.com/cyface-de/android-app/actions/workflows/gradle_build.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_build.yml"]
+image:https://github.com/cyface-de/android-app/actions/workflows/gradle_connected-tests.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_connected-tests.yml"]
 
 This project contains the Cyface Android Client.
 
@@ -133,7 +134,7 @@ See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Col
 
 [[license]]
 == License
-Copyright 2017-2022 Cyface GmbH
+Copyright 2017-2023 Cyface GmbH
 
 This file is part of the Cyface App for Android.
 

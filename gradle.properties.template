@@ -46,3 +46,5 @@ cyface.emulator_api=
 cyface.staging_api=
 cyface.staging_user=
 cyface.staging_password=
+
+# keep an empty line at the end for the CI to inject new lines easily

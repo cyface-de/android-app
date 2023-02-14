@@ -151,7 +151,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
     }
 
     @Override
-    public void onMapReady(final GoogleMap googleMap) {
+    public void onMapReady(@NonNull final GoogleMap googleMap) {
         Validate.notNull(googleMap);
         this.googleMap = googleMap;
         googleMap.setMaxZoomPreference(2.0f);
