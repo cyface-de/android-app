@@ -65,7 +65,7 @@ jobs:
       - name: Set versionCode and versionName
         run: |
           sed -i "s/versionName = \"0.0.0\"/versionName = \"${{ github.ref_name }}\"/g" build.gradle
-          sed -i "s/versionCode = 1/versionCode = ${{ env.VERSION_CODE }}/g build.gradle
+          sed -i "s/versionCode = 1/versionCode = ${{ env.VERSION_CODE }}/g" build.gradle
 
       - name: Build App
         run: ./gradlew bundleRelease
