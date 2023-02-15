@@ -1,6 +1,8 @@
 = Cyface Android Client
 
-image:https://app.bitrise.io/app/c7da6c56a123928f/status.svg?token=RcVITFZtTSw7Yf5MjCQWvQ[Build Status,link="https://app.bitrise.io/app/c7da6c56a123928f"]
+image:https://github.com/cyface-de/android-app/actions/workflows/gradle_build.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_build.yml"]
+image:https://github.com/cyface-de/android-app/actions/workflows/gradle_connected-tests.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_connected-tests.yml"]
+image:https://github.com/cyface-de/android-app/actions/workflows/gradle_publish.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_publish.yml"]
 
 This project contains the Cyface Android Client.
 
@@ -124,16 +126,16 @@ $ git push
 
 See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
 
-* Increase `versionName` in root `build.gradle`, `versionCode` is automatically incremented by the CI
-* Tag the release and push the branch and tag
-* After pushing the release tag to Github the Bitrise CI builds the Android Bundle automatically
-* Mark the release as release manually on Github, as we currently do only have Bitrise workflows
-* Checkout this build, copy the `measuring-client-release-bitrise-signed.aab` bundle from the artifacts and upload it to Play Store
+* `versionName` and `versionCode` in root `build.gradle` are automatically set by the CI
+* Just tag the release and push the tag to Github
+* After pushing the release tag the CI builds and signs the App Bundle automatically
+* Checkout that build, copy the `measuring-client-release.aab` from the artifacts and upload it to Play Store
+* The tag is automatically marked as a 'new Release' on https://github.com/cyface-de/android-app/releases[Github]
 
 
 [[license]]
 == License
-Copyright 2017-2022 Cyface GmbH
+Copyright 2017-2023 Cyface GmbH
 
 This file is part of the Cyface App for Android.
 
