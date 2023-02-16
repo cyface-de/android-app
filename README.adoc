@@ -133,6 +133,22 @@ See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Col
 * The tag is automatically marked as a 'new Release' on https://github.com/cyface-de/android-app/releases[Github]
 
 
+[[known-issues]]]
+== Known Issues
+
+The AVD Cache leads to `Install_failed_Update_Incompatible` after a few builds.
+- we opened an issue here: https://github.com/ReactiveCircus/android-emulator-runner/issues/319
+- we could try to make the AVD cache only be used on main branch like
+- see https://github.com/ankidroid/Anki-Android/pull/11032/files?diff=split&w=0
+- but for now, we just disabled the AVD cache for the CI to be usable
+
+The CI tests are flaky due to emulator-instability on the CI:
+- examples for this, see e.g. https://github.com/leancodepl/patrol/issues/765
+- or https://github.com/ReactiveCircus/android-emulator-runner/issues/192
+- we could add auto-repeat to the CI workflow, but this is only a workaround
+- see https://github.com/ankidroid/Anki-Android/pull/11032/files?diff=split&w=0
+
+
 [[license]]
 == License
 Copyright 2017-2023 Cyface GmbH
