@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         api-level: [ 28 ]
-        target: [ default ] #[ google_apis ] # required as the app uses google maps
+        target: [ google_apis ] # required to avoid NPE in `Maps` at `GoogleMap.clear()`
 
     steps:
       - name: Checkout Repository
