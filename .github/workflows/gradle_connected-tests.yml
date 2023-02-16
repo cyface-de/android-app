@@ -73,6 +73,7 @@ jobs:
       # Add caching to speed up connected tests below (see `actions/android-emulator-runner`)
       - name: Gradle cache
         uses: gradle/gradle-build-action@v2
+
       #- name: AVD cache
       #  uses: actions/cache@v3
       #  id: avd-cache
@@ -80,7 +81,8 @@ jobs:
       #    path: |
       #      ~/.android/avd/*
       #      ~/.android/adb*
-      #    key: avd-${{ matrix.api-level }}
+      #    key: avd-${{ matrix.api-level }}-${{ matrix.target }} #-${{ matrix.arch }}
+
       #- name: Create AVD and generate snapshot for caching
       #  if: steps.avd-cache.outputs.cache-hit != 'true'
       #  uses: reactivecircus/android-emulator-runner@v2
