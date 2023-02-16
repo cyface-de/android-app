@@ -87,6 +87,7 @@ jobs:
       #  with:
       #    api-level: ${{ matrix.api-level }}
       #    target: ${{ matrix.target }}
+      #    profile: Pixel 2
       #    force-avd-creation: false
       ## the recommended options by the Actions did not work here?
       ## - emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -100,6 +101,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
+          profile: Pixel 2
           force-avd-creation: false
           # default options are: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           # Action recommendation: -no-snapshot-save -camera-back none
