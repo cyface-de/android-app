@@ -98,7 +98,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           force-avd-creation: false
-          emulator-options: -no-snapshot-save
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew :measuring-client:connectedDebugAndroidTest
           # To execute a single test class
