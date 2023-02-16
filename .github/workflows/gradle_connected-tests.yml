@@ -88,6 +88,9 @@ jobs:
       #    api-level: ${{ matrix.api-level }}
       #    target: ${{ matrix.target }}
       #    force-avd-creation: false
+      ## the recommended options by the Actions did not work here?
+      ## - emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+      ## Actions guide uses: `disable-animations: false` but this didn't work here?
       #    disable-animations: true
       #    script: echo "Generated AVD snapshot for caching."
 
@@ -99,9 +102,10 @@ jobs:
           target: ${{ matrix.target }}
           force-avd-creation: false
           # default options are: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          # Action recommendation: -no-snapshot-save
+          # Action recommendation: -no-snapshot-save -camera-back none
           # To support future camera capturing tests: -camera-back emulated
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim # -camera-back emulated
+          #   but this lead to `Timeout waiting for emulator` error
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew :measuring-client:connectedDebugAndroidTest
           # To execute a single test class
