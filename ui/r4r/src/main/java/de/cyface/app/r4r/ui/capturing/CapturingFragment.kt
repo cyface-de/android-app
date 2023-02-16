@@ -18,7 +18,16 @@ import de.cyface.app.r4r.databinding.FragmentCapturingBinding
 import de.cyface.app.r4r.ui.capturing.map.MapFragment
 import de.cyface.app.r4r.ui.capturing.speed.SpeedFragment
 
-
+/**
+ * This is the UI controller class for the capturing fragment.
+ *
+ * It holds the [Observer] objects which control what happens when the [LiveData] changes.
+ * The [ViewModel]s are responsible for holding the [LiveData] data.
+ *
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 3.2.0
+ */
 class CapturingFragment : Fragment() {
 
     private var _binding: FragmentCapturingBinding? = null
@@ -42,16 +51,23 @@ class CapturingFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val capturingViewModel =
-            ViewModelProvider(this).get(CapturingViewModel::class.java)
-
         _binding = FragmentCapturingBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        // Subscribe to the LiveData and update UI when the data changes
+        val capturingViewModel = ViewModelProvider(this)[CapturingViewModel::class.java]
         val textView: TextView = binding.textView9
         capturingViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+
+        // Update LiveData upon user interaction, network responses, or data loading completion.
+        // `setValue must be called from the main thread, use `postValue()` from worker threads.
+        /*button.setOnClickListener {
+            val anotherName = "John Doe"
+            model.currentName.setValue(anotherName)
+        }*/
+
         return root
     }
 
