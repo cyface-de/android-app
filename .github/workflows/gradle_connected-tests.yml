@@ -101,7 +101,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
-          profile: Pixel 2
+          profile: Nexus 6
           force-avd-creation: false
           # default options are: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           # Action recommendation: -no-snapshot-save -camera-back none
