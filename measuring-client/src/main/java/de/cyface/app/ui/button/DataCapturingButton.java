@@ -19,7 +19,6 @@
 package de.cyface.app.ui.button;
 
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
@@ -40,6 +39,7 @@ import static de.cyface.energy_settings.TrackingSettings.isProblematicManufactur
 import static de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog;
 import static de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog;
 import static de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog;
+import static de.cyface.persistence.model.EventType.MODALITY_TYPE_CHANGE;
 import static de.cyface.persistence.model.MeasurementStatus.FINISHED;
 import static de.cyface.persistence.model.MeasurementStatus.OPEN;
 import static de.cyface.persistence.model.MeasurementStatus.PAUSED;
@@ -111,7 +111,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.8.1
+ * @version 3.8.2
  * @since 1.0.0
  */
 public class DataCapturingButton
@@ -149,7 +149,7 @@ public class DataCapturingButton
      */
     private TextView cameraInfoTextView;
     /**
-     * The {@code TextView} use to show the {@link Measurement#getIdentifier()} for an ongoing measurement
+     * The {@code TextView} use to show the {@link Measurement#getId()} for an ongoing measurement
      */
     private TextView measurementIdTextView;
     /**
@@ -196,8 +196,7 @@ public class DataCapturingButton
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
         // To load the measurement distance
-        this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
-                new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new PersistenceLayer<>(context, new DefaultPersistenceBehaviour());
 
         button.setOnClickListener(this);
         button.setOnLongClickListener(this);
@@ -262,7 +261,7 @@ public class DataCapturingButton
     /**
      * Updates the {@code TextView}s depending on the current {@link MeasurementStatus}.
      * <p>
-     * When a new Capturing is started, the {@code TextView} will only show the {@link Measurement#getIdentifier()}
+     * When a new Capturing is started, the {@code TextView} will only show the {@link Measurement#getId()}
      * of the open {@link Measurement}. The {@link Measurement#getDistance()} is automatically updated as soon as the
      * first {@link ParcelableGeoLocation}s are captured. This way the user can see if the capturing actually works.
      *
@@ -272,7 +271,7 @@ public class DataCapturingButton
         if (status == OPEN) {
             try {
                 final String measurementIdText = context.getString(R.string.measurement) + " "
-                        + persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier();
+                        + persistenceLayer.loadCurrentlyCapturedMeasurement().getId();
                 measurementIdTextView.setText(measurementIdText);
                 cameraInfoTextView.setVisibility(View.VISIBLE);
             } catch (CursorIsNullException | NoSuchMeasurementException e) {
@@ -856,7 +855,7 @@ public class DataCapturingButton
 
             Log.d(TAG, "updateCachedTrack: Unfinished measurement found, loading track from database.");
             final Measurement measurement = dataCapturingService.loadCurrentlyCapturedMeasurement();
-            final List<Track> loadedList = persistenceLayer.loadTracks(measurement.getIdentifier(),
+            final List<Track> loadedList = persistenceLayer.loadTracks(measurement.getId(),
                     new DefaultLocationCleaningStrategy());
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
@@ -872,8 +871,7 @@ public class DataCapturingButton
 
     public List<Event> loadCurrentMeasurementsEvents() throws CursorIsNullException, NoSuchMeasurementException {
         final Measurement measurement = dataCapturingService.loadCurrentlyCapturedMeasurement();
-        return persistenceLayer.loadEvents(measurement.getIdentifier(),
-                Event.EventType.MODALITY_TYPE_CHANGE);
+        return persistenceLayer.loadEvents(measurement.getId(), MODALITY_TYPE_CHANGE);
     }
 
     @Override
@@ -1006,7 +1004,7 @@ public class DataCapturingButton
             currentMeasurementsTracks.add(new Track());
         }
 
-        currentMeasurementsTracks.get(currentMeasurementsTracks.size() - 1).add(location);
+        currentMeasurementsTracks.get(currentMeasurementsTracks.size() - 1).addLocation(location);
     }
 
     @Override

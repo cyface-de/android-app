@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -19,7 +19,6 @@
 package de.cyface.app.ui.nav.view;
 
 import static de.cyface.app.ui.Map.TEMPORARY_EVENT_MARKER_ID;
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PACKAGE;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.UNKNOWN;
@@ -69,11 +68,10 @@ import de.cyface.app.utils.Constants;
 import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.PersistenceLayer;
-import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.ParcelableGeoLocation;
+import de.cyface.persistence.model.EventType;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.Modality;
-import de.cyface.persistence.model.Track;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 
@@ -82,7 +80,7 @@ import de.cyface.utils.Validate;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 4.5.5
+ * @version 4.5.6
  * @since 1.0.0
  */
 public class MeasurementOverviewFragment extends Fragment {
@@ -94,22 +92,23 @@ public class MeasurementOverviewFragment extends Fragment {
     /**
      * The {@link MeasurementDataList} containing the {@link Measurement}s.
      */
-    private MeasurementDataList measurementDataList;
+    //private MeasurementDataList measurementDataList; FIXME
     /**
      * A {@link Map} fragment which is used to visualize {@link Measurement}s.
      */
     private Map map;
     /**
-     * The {@link EventDataList} containing the {@link Event.EventType#MODALITY_TYPE_CHANGE}s of a {@link Measurement}.
+     * The {@link EventDataList} containing the {@link EventType#MODALITY_TYPE_CHANGE}s of a {@link Measurement}.
      */
-    private EventDataList eventDataList;
+    //private EventDataList eventDataList;
     /**
      * {@code True} if the {@code ListView} below the {@code Map} currently shows the {@code Event}s of a
      * {@code Measurement}.
      */
     private boolean isEventsListShown = false;
     /**
-     * The {@link PersistenceLayer} required to retrieve the {@link Measurement} date from the {@link ParcelableGeoLocation}s
+     * The {@link PersistenceLayer} required to retrieve the {@link Measurement} date from the
+     * {@link ParcelableGeoLocation}s
      */
     private PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
@@ -135,7 +134,7 @@ public class MeasurementOverviewFragment extends Fragment {
     private boolean isAddEventActionActive = false;
     /**
      * The identifier for the {@link ModalityDialog} request which asks the user to select a {@link Modality} when he
-     * adds a new {@link Event.EventType#MODALITY_TYPE_CHANGE} via UI.
+     * adds a new {@link EventType#MODALITY_TYPE_CHANGE} via UI.
      */
     public final static int DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE = 201909193;
     /**
@@ -160,9 +159,9 @@ public class MeasurementOverviewFragment extends Fragment {
                     dialog.setTargetFragment(MeasurementOverviewFragment.this,
                             DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE);
 
-                    final Long measurementId = eventDataList.getMeasurementId();
-                    Validate.notNull(measurementId);
-                    dialog.setMeasurementId(measurementId);
+                    //final Long measurementId = eventDataList.getMeasurementId();
+                    /*Validate.notNull(measurementId);
+                    dialog.setMeasurementId(measurementId);*/
                     dialog.setCancelable(true);
                     dialog.show(fragmentManager, "MODALITY_DIALOG");
                     return;
@@ -196,8 +195,8 @@ public class MeasurementOverviewFragment extends Fragment {
         final FragmentActivity fragmentActivity = getActivity();
         Validate.notNull(fragmentActivity);
 
-        final LoaderManager loaderManager = LoaderManager.getInstance(this);
-        loaderManager.initLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
+        /*final LoaderManager loaderManager = LoaderManager.getInstance(this);
+        loaderManager.initLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);*/
         Log.d(TAG, "onActivityCreated() done");
     }
 
@@ -206,19 +205,17 @@ public class MeasurementOverviewFragment extends Fragment {
             final Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_measurements, container, false);
-        persistenceLayer = new PersistenceLayer<>(
-                inflater.getContext(), inflater.getContext().getContentResolver(),
-                AUTHORITY, new DefaultPersistenceBehaviour());
+        persistenceLayer = new PersistenceLayer<>(inflater.getContext(), new DefaultPersistenceBehaviour());
 
         map = new Map(view.findViewById(R.id.mapView), savedInstanceState, () -> {
             // Nothing to do
         });
 
-        measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
-        measurementDataList.onCreateView(view);
+        /*measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
+        measurementDataList.onCreateView(view);*/
 
-        eventDataList = new EventDataList(getActivity(), persistenceLayer, null, map);
-        eventDataList.onCreateView(view);
+        //eventDataList = new EventDataList(getActivity(), persistenceLayer, null, map);
+        //eventDataList.onCreateView(view);
 
         listView = view.findViewById(R.id.measurements_list_view);
         addButton = view.findViewById(R.id.add_button);
@@ -260,11 +257,11 @@ public class MeasurementOverviewFragment extends Fragment {
             final boolean missingPermissions = ContextCompat.checkSelfPermission(fragmentActivity,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(fragmentActivity,
-                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+                            Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
             if (requiresWritePermission && missingPermissions) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     requestPermissions(
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                     Manifest.permission.READ_EXTERNAL_STORAGE},
                             Constants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT);
                 } else {
@@ -280,9 +277,9 @@ public class MeasurementOverviewFragment extends Fragment {
             return true;
         } else if (item.getItemId() == R.id.delete_measurement_item) {
             if (isEventsListShown) {
-                deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
+                //deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
             } else {
-                deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView());
+                //deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView()); FIXME
             }
             return true;
         } else {
@@ -323,8 +320,8 @@ public class MeasurementOverviewFragment extends Fragment {
      */
     private void selectAllItems() {
 
-        final ListView listView = isEventsListShown ? eventDataList.getListView()
-                : measurementDataList.getListView();
+        /*final ListView listView = isEventsListShown ? eventDataList.getListView()
+                : measurementDataList.getListView();*/
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         final ListAdapter adapter = listView.getAdapter();
         if (adapter != null) {
@@ -375,8 +372,8 @@ public class MeasurementOverviewFragment extends Fragment {
             map.clearMap();
 
             // Without this the listView.getCheckedItemCount() shows too many (i.e. is not updated)
-            measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
-            measurementDataList.onCreateView(view);
+            //measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
+            //measurementDataList.onCreateView(view);
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
             final AppCompatActivity activity = ((AppCompatActivity)getActivity());
@@ -384,7 +381,7 @@ public class MeasurementOverviewFragment extends Fragment {
             final ActionBar actionBar = activity.getSupportActionBar();
             Validate.notNull(actionBar);
             actionBar.setTitle(getString(R.string.drawer_title_measurements));
-            LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
+            //LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
             return true;
         }
         return false;
@@ -410,23 +407,23 @@ public class MeasurementOverviewFragment extends Fragment {
         addButton.show();
 
         Log.d(TAG, "showEvents() of mid " + measurementId);
-        eventDataList.setMeasurementId(measurementId);
+        //eventDataList.setMeasurementId(measurementId);
 
         // Without this the listView.getCheckedItemCount() shows too many (i.e. is not updated)
-        eventDataList = new EventDataList(getActivity(), persistenceLayer, measurementId, map);
-        eventDataList.onCreateView(view);
+        //eventDataList = new EventDataList(getActivity(), persistenceLayer, measurementId, map);
+        //eventDataList.onCreateView(view);
 
         final AppCompatActivity activity = ((AppCompatActivity)getActivity());
         Validate.notNull(activity);
         final ActionBar actionBar = activity.getSupportActionBar();
         Validate.notNull(actionBar);
         actionBar.setTitle(getString(R.string.measurement) + " " + measurementId);
-        LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
+        //LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
     }
 
     /**
      * Called when a {@link Modality} was selected in the {@link ModalityDialog}. This happens when the user adds a new
-     * {@link Event.EventType#MODALITY_TYPE_CHANGE} via the UI, see {@link #addButtonClickListener}.
+     * {@link EventType#MODALITY_TYPE_CHANGE} via the UI, see {@link #addButtonClickListener}.
      *
      * @param data an intent which may contain result data
      */
@@ -452,8 +449,8 @@ public class MeasurementOverviewFragment extends Fragment {
             // Load GeoLocations
             final List<ParcelableGeoLocation> geoLocations = new ArrayList<>();
             try {
-                List<Track> tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaningStrategy());
-                for (final Track track : tracks) {
+                var tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaningStrategy());
+                for (final var track : tracks) {
                     geoLocations.addAll(track.getGeoLocations());
                 }
             } catch (final CursorIsNullException e) {
@@ -487,7 +484,8 @@ public class MeasurementOverviewFragment extends Fragment {
             final long eventId;
             try {
                 measurement = persistenceLayer.loadMeasurement(measurementId);
-                eventId = persistenceLayer.logEvent(Event.EventType.MODALITY_TYPE_CHANGE, measurement,
+                eventId = persistenceLayer.logEvent(
+                        EventType.MODALITY_TYPE_CHANGE, measurement,
                         nearestGeoLocation.getTimestamp(), modality.getDatabaseIdentifier());
                 Log.d(TAG, "Event added, id: " + eventId + " timestamp: " + nearestGeoLocation.getTimestamp());
             } catch (final CursorIsNullException e) {

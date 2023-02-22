@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -41,7 +41,6 @@ import androidx.loader.content.CursorLoader;
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.EventTable;
 import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Event;
 import de.cyface.utils.Validate;
@@ -50,7 +49,7 @@ import de.cyface.utils.Validate;
  * A selectable list which is bound to a {@code Event} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 1.0.3
+ * @version 1.0.4
  * @since 2.4.0
  */
 class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,
@@ -152,12 +151,12 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
         // Move map camera to marker and focus it
         final Cursor cursor = cursorAdapter.getCursor();
         cursor.moveToPosition(position);
-        final long eventId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-        final Marker marker = map.getEventMarker().get(eventId);
+        //final long eventId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+        //final Marker marker = map.getEventMarker().get(eventId);
         // Can be null when no positions are available and, thus, no events can be positioned
-        if (marker != null) {
+        /*if (marker != null) {
             map.focusMarker(marker);
-        }
+        }*/
 
         // The Setting options "mark all" and "delete marked" handle the marked items
     }
@@ -167,11 +166,11 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        final Uri eventUri = persistenceLayer.getEventUri();
-        return new CursorLoader(fragmentActivity, eventUri, null,
+        //final Uri eventUri = persistenceLayer.getEventUri();
+        return null; /*new CursorLoader(fragmentActivity, eventUri, null,
                 EventTable.COLUMN_MEASUREMENT_FK + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
                 new String[] {String.valueOf(measurementId), String.valueOf(Event.EventType.MODALITY_TYPE_CHANGE)},
-                EventTable.COLUMN_TIMESTAMP + " ASC");
+                EventTable.COLUMN_TIMESTAMP + " ASC");*/
     }
 
     @Override

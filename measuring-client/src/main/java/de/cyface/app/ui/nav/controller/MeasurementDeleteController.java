@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -19,7 +19,6 @@
 package de.cyface.app.ui.nav.controller;
 
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.externalCyfaceFolderPath;
 import static de.cyface.utils.Utils.informMediaScanner;
@@ -59,7 +58,7 @@ import io.sentry.Sentry;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.0.2
+ * @version 2.0.3
  * @since 1.0.0
  */
 public final class MeasurementDeleteController extends AsyncTask<ListView, Void, ListView> {
@@ -79,8 +78,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
      */
     public MeasurementDeleteController(@NonNull final Context context) {
         this.contextReference = new WeakReference<>(context);
-        this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
-                new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new PersistenceLayer<>(context, new DefaultPersistenceBehaviour());
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
     }
@@ -100,7 +98,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             if (attachmentsFolder != null) {
                 deleteRecursively(context, attachmentsFolder);
             }
-            persistenceLayer.delete(measurement.getIdentifier());
+            persistenceLayer.delete(measurement.getId());
         }
         return view;
     }
@@ -148,7 +146,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
     private File findMeasurementAttachmentsFolder(@NonNull final Measurement measurement) {
         // If the app was reinstalled the pictures of the old installation were automatically deleted
         final File[] results = new File(externalCyfaceFolderPath(contextReference.get()))
-                .listFiles(pathname -> pathname.getName().endsWith("_" + measurement.getIdentifier()));
+                .listFiles(pathname -> pathname.getName().endsWith("_" + measurement.getId()));
         if (results != null && results.length > 0) {
             Arrays.sort(results);
             return results[results.length - 1];
@@ -197,7 +195,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             final long selectedMeasurementId = cursor.getLong(identifierColumnIndex);
 
             // Ignoring the ongoing measurement
-            if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getIdentifier()) {
+            if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getId()) {
                 final Measurement measurement;
                 try {
                     measurement = persistenceLayer.loadMeasurement(selectedMeasurementId);

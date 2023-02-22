@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -56,7 +56,7 @@ import io.sentry.Sentry;
  * A selectable list which is bound to a {@code Measurement} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 2.0.4
+ * @version 2.0.5
  * @since 2.0.0
  */
 class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,
@@ -159,8 +159,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         // Show track on map
         if (!isMultiSelectionModeEnabled && listView.isItemChecked(position)) {
 
-            // Load track
-            final Cursor cursor = cursorAdapter.getCursor();
+            // Load track FIXME
+            /*final Cursor cursor = cursorAdapter.getCursor();
             cursor.moveToPosition(position);
             final long measurementId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
             final List<Track> tracks;
@@ -178,7 +178,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
             map.renderMeasurement(tracks, events, true);
 
             // Show Modality type changes in the ListView
-            measurementOverviewFragment.showEvents(measurementId);
+            measurementOverviewFragment.showEvents(measurementId);*/
         }
     }
 
@@ -187,8 +187,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        final Uri measurementUri = persistenceLayer.getMeasurementUri();
-        return new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns._ID + " DESC");
+        //final Uri measurementUri = persistenceLayer.getMeasurementUri();
+        return null; //new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns._ID + " DESC");
     }
 
     @Override

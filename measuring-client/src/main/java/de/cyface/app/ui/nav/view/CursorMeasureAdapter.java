@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -39,7 +39,6 @@ import androidx.annotation.Nullable;
 import androidx.cursoradapter.widget.CursorAdapter;
 
 import de.cyface.app.R;
-import de.cyface.persistence.MeasurementTable;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
@@ -50,7 +49,7 @@ import de.cyface.persistence.model.Modality;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.0.1
+ * @version 3.0.2
  * @since 1.0.0
  */
 public class CursorMeasureAdapter extends CursorAdapter {
@@ -85,7 +84,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
 
     private void mapCursorToView(final Cursor cursor, final View view) {
 
-        final TextView itemView = view.findViewById(R.id.data_row_text);
+        /*final TextView itemView = view.findViewById(R.id.data_row_text);
         final int measurementId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
 
         // Measurement time
@@ -119,7 +118,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
         itemView.setEnabled(true);
         itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
 
-        itemView.setText(label);
+        itemView.setText(label);*/
     }
 
     /**

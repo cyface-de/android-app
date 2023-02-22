@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,7 +18,6 @@
  */
 package de.cyface.app.ui.nav.controller;
 
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.lang.ref.WeakReference;
@@ -50,8 +49,8 @@ import de.cyface.utils.Validate;
  * We use an {@code AsyncTask} because this is blocking but should only run for a short time.
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 2.4.0-beta4
+ * @version 2.0.2
+ * @since 2.4.0
  */
 public final class EventDeleteController
         extends AsyncTask<EventDeleteController.EventDeleteControllerParameters, Void, ListView> {
@@ -69,8 +68,7 @@ public final class EventDeleteController
      */
     public EventDeleteController(@NonNull final Context context) {
         this.contextReference = new WeakReference<>(context);
-        this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
-                new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new PersistenceLayer<>(context, new DefaultPersistenceBehaviour());
     }
 
     @Override
@@ -81,7 +79,7 @@ public final class EventDeleteController
 
         final List<Event> selectedItems = getSelectedItems(view);
         for (final Event item : selectedItems) {
-            final long eventId = item.getIdentifier();
+            final long eventId = item.getId();
             // use getContext only on high APIs
             final Context context = contextReference.get();
             Validate.notNull(context);

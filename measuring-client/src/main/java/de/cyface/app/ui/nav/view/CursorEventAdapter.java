@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -33,7 +33,6 @@ import android.widget.TextView;
 import androidx.cursoradapter.widget.CursorAdapter;
 
 import de.cyface.app.R;
-import de.cyface.persistence.EventTable;
 import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Modality;
 
@@ -42,7 +41,7 @@ import de.cyface.persistence.model.Modality;
  * and a row as part of a {@code ListView} displaying such an element.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 2.4.0
  */
 public class CursorEventAdapter extends CursorAdapter {
@@ -80,21 +79,21 @@ public class CursorEventAdapter extends CursorAdapter {
         final TextView itemView = view.findViewById(R.id.data_row_text);
 
         // Event time
-        final long timestamp = cursor.getLong(cursor.getColumnIndex(EventTable.COLUMN_TIMESTAMP));
-        final Date date = new Date(timestamp);
-        final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
+        //final long timestamp = cursor.getLong(cursor.getColumnIndex(EventTable.COLUMN_TIMESTAMP));
+        //final Date date = new Date(timestamp);
+        //final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
 
         // Modality type
-        final Modality modality = Modality.valueOf(cursor.getString(cursor.getColumnIndex(EventTable.COLUMN_VALUE)));
+        //final Modality modality = Modality.valueOf(cursor.getString(cursor.getColumnIndex(EventTable.COLUMN_VALUE)));
 
         // Set List Item Text
-        final String label = dateText + " (" + CursorMeasureAdapter.getTranslation(contextWeakReference, modality)
-                + ")";
+        /*final String label = dateText + " (" + CursorMeasureAdapter.getTranslation(contextWeakReference, modality)
+                + ")";*/
 
         // Checkable
         itemView.setEnabled(true);
         itemView.setClickable(false); // Does not make sense but works -.- same in the inverted scenario
 
-        itemView.setText(label);
+        //itemView.setText(label);
     }
 }

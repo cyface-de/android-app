@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -63,8 +63,9 @@ import de.cyface.app.R;
 import de.cyface.app.ui.nav.view.CursorMeasureAdapter;
 import de.cyface.app.utils.Constants;
 import de.cyface.persistence.model.Event;
-import de.cyface.persistence.model.ParcelableGeoLocation;
+import de.cyface.persistence.model.EventType;
 import de.cyface.persistence.model.Modality;
+import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -73,7 +74,7 @@ import io.sentry.Sentry;
  * The Map class handles everything around the GoogleMap view of {@link MainFragment}.
  *
  * @author Armin Schnabel
- * @version 3.0.2
+ * @version 3.0.3
  * @since 1.0.0
  */
 public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
@@ -176,7 +177,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         int positions = 0;
 
         // Iterate through the sub tracks and their points
-        final List<ParcelableGeoLocation> allLocations = new ArrayList<>();
+        final var allLocations = new ArrayList<ParcelableGeoLocation>();
         for (final Track track : tracks) {
             final PolylineOptions subTrack = new PolylineOptions();
             for (final ParcelableGeoLocation location : track.getGeoLocations()) {
@@ -207,7 +208,8 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
         }
     }
 
-    private void renderEvents(@NonNull final List<ParcelableGeoLocation> allLocations, @NonNull final List<Event> events) {
+    private void renderEvents(@NonNull final List<ParcelableGeoLocation> allLocations,
+            @NonNull final List<Event> events) {
 
         // Iterate through the events and select GeoLocations for each event to be rendered on the map
         final Iterator<ParcelableGeoLocation> locationIterator = allLocations.iterator();
@@ -243,7 +245,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
             // Add Event to map
             if (markerOptions != null) {
                 final Marker marker = googleMap.addMarker(markerOptions);
-                eventMarker.put(event.getIdentifier(), marker);
+                eventMarker.put(event.getId(), marker);
                 continue; // with next event
             }
 
@@ -255,7 +257,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
                 markerOptions = new MarkerOptions()
                         .position(new LatLng(previousLocation.getLat(), previousLocation.getLon())).title(markerTitle);
                 final Marker marker = googleMap.addMarker(markerOptions);
-                eventMarker.put(event.getIdentifier(), marker);
+                eventMarker.put(event.getId(), marker);
                 continue; // with next event
             }
 
@@ -424,13 +426,13 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
     }
 
     /**
-     * Adds a {@link Event.EventType#MODALITY_TYPE_CHANGE} {@code Event} {@code Marker} to the {@code Map}.
+     * Adds a {@link EventType#MODALITY_TYPE_CHANGE} {@code Event} {@code Marker} to the {@code Map}.
      *
      * @param eventId the identifier of the {@code Event} or {@link #TEMPORARY_EVENT_MARKER_ID} if this is only a
      *            temporary marker
      *            until the {@param eventId} is known.
      * @param latLng the {@code LatLng} of the marker to be added
-     * @param modality the new {@code Modality} of the {@link Event.EventType#MODALITY_TYPE_CHANGE} marker to be added
+     * @param modality the new {@code Modality} of the {@link EventType#MODALITY_TYPE_CHANGE} marker to be added
      * @param isMarkerToBeFocused {@code True} if the newly added {@code Marker} is to be focused after creation
      */
     public void addMarker(final long eventId, @NonNull final LatLng latLng, @NonNull final Modality modality,
