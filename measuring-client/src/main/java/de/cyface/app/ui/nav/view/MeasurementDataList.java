@@ -160,8 +160,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         // Show track on map
         if (!isMultiSelectionModeEnabled && listView.isItemChecked(position)) {
 
-            // Load track
-            final Cursor cursor = cursorAdapter.getCursor();
+            // Load track FIXME
+            /*final Cursor cursor = cursorAdapter.getCursor();
             cursor.moveToPosition(position);
             final long measurementId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns.ID));
             final List<Track> tracks;
@@ -188,8 +188,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        final Uri measurementUri = persistenceLayer.measurementUri();
-        return new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns.ID + " DESC");
+        final Uri measurementUri = persistenceLayer.getMeasurementUri();
+        return new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns._ID + " DESC");
     }
 
     @Override

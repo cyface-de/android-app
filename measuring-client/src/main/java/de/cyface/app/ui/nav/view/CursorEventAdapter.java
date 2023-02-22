@@ -89,13 +89,13 @@ public class CursorEventAdapter extends CursorAdapter {
         final var modality = Modality.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(EventTable.COLUMN_VALUE)));
 
         // Set List Item Text
-        final String label = dateText + " (" + CursorMeasureAdapter.getTranslation(contextWeakReference, modality)
-                + ")";
+        /*final String label = dateText + " (" + CursorMeasureAdapter.getTranslation(contextWeakReference, modality)
+                + ")";*/
 
         // Checkable
         itemView.setEnabled(true);
         itemView.setClickable(false); // Does not make sense but works -.- same in the inverted scenario
 
-        itemView.setText(label);
+        //itemView.setText(label);
     }
 }

@@ -19,7 +19,6 @@
 package de.cyface.app.ui.nav.view;
 
 import static de.cyface.app.ui.Map.TEMPORARY_EVENT_MARKER_ID;
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PACKAGE;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.UNKNOWN;
@@ -92,7 +91,7 @@ public class MeasurementOverviewFragment extends Fragment {
     /**
      * The {@link MeasurementDataList} containing the {@link Measurement}s.
      */
-    private MeasurementDataList measurementDataList;
+    //private MeasurementDataList measurementDataList; FIXME
     /**
      * A {@link Map} fragment which is used to visualize {@link Measurement}s.
      */
@@ -100,7 +99,7 @@ public class MeasurementOverviewFragment extends Fragment {
     /**
      * The {@link EventDataList} containing the {@link EventType#MODALITY_TYPE_CHANGE}s of a {@link Measurement}.
      */
-    private EventDataList eventDataList;
+    //private EventDataList eventDataList;
     /**
      * {@code True} if the {@code ListView} below the {@code Map} currently shows the {@code Event}s of a
      * {@code Measurement}.
@@ -159,9 +158,9 @@ public class MeasurementOverviewFragment extends Fragment {
                     dialog.setTargetFragment(MeasurementOverviewFragment.this,
                             DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE);
 
-                    final Long measurementId = eventDataList.getMeasurementId();
-                    Validate.notNull(measurementId);
-                    dialog.setMeasurementId(measurementId);
+                    //final Long measurementId = eventDataList.getMeasurementId();
+                    /*Validate.notNull(measurementId);
+                    dialog.setMeasurementId(measurementId);*/
                     dialog.setCancelable(true);
                     dialog.show(fragmentManager, "MODALITY_DIALOG");
                     return;
@@ -195,8 +194,8 @@ public class MeasurementOverviewFragment extends Fragment {
         final FragmentActivity fragmentActivity = getActivity();
         Validate.notNull(fragmentActivity);
 
-        final LoaderManager loaderManager = LoaderManager.getInstance(this);
-        loaderManager.initLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
+        /*final LoaderManager loaderManager = LoaderManager.getInstance(this);
+        loaderManager.initLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);*/
         Log.d(TAG, "onActivityCreated() done");
     }
 
@@ -211,11 +210,11 @@ public class MeasurementOverviewFragment extends Fragment {
             // Nothing to do
         });
 
-        measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
-        measurementDataList.onCreateView(view);
+        /*measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
+        measurementDataList.onCreateView(view);*/
 
-        eventDataList = new EventDataList(getActivity(), persistenceLayer, null, map);
-        eventDataList.onCreateView(view);
+        //eventDataList = new EventDataList(getActivity(), persistenceLayer, null, map);
+        //eventDataList.onCreateView(view);
 
         listView = view.findViewById(R.id.measurements_list_view);
         addButton = view.findViewById(R.id.add_button);
@@ -277,9 +276,9 @@ public class MeasurementOverviewFragment extends Fragment {
             return true;
         } else if (item.getItemId() == R.id.delete_measurement_item) {
             if (isEventsListShown) {
-                deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
+                //deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
             } else {
-                deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView());
+                //deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView()); FIXME
             }
             return true;
         } else {
@@ -320,8 +319,8 @@ public class MeasurementOverviewFragment extends Fragment {
      */
     private void selectAllItems() {
 
-        final ListView listView = isEventsListShown ? eventDataList.getListView()
-                : measurementDataList.getListView();
+        /*final ListView listView = isEventsListShown ? eventDataList.getListView()
+                : measurementDataList.getListView();*/
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         final ListAdapter adapter = listView.getAdapter();
         if (adapter != null) {
@@ -372,8 +371,8 @@ public class MeasurementOverviewFragment extends Fragment {
             map.clearMap();
 
             // Without this the listView.getCheckedItemCount() shows too many (i.e. is not updated)
-            measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
-            measurementDataList.onCreateView(view);
+            //measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
+            //measurementDataList.onCreateView(view);
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
             final AppCompatActivity activity = ((AppCompatActivity)getActivity());
@@ -381,7 +380,7 @@ public class MeasurementOverviewFragment extends Fragment {
             final ActionBar actionBar = activity.getSupportActionBar();
             Validate.notNull(actionBar);
             actionBar.setTitle(getString(R.string.drawer_title_measurements));
-            LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
+            //LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
             return true;
         }
         return false;
@@ -407,18 +406,18 @@ public class MeasurementOverviewFragment extends Fragment {
         addButton.show();
 
         Log.d(TAG, "showEvents() of mid " + measurementId);
-        eventDataList.setMeasurementId(measurementId);
+        //eventDataList.setMeasurementId(measurementId);
 
         // Without this the listView.getCheckedItemCount() shows too many (i.e. is not updated)
-        eventDataList = new EventDataList(getActivity(), persistenceLayer, measurementId, map);
-        eventDataList.onCreateView(view);
+        //eventDataList = new EventDataList(getActivity(), persistenceLayer, measurementId, map);
+        //eventDataList.onCreateView(view);
 
         final AppCompatActivity activity = ((AppCompatActivity)getActivity());
         Validate.notNull(activity);
         final ActionBar actionBar = activity.getSupportActionBar();
         Validate.notNull(actionBar);
         actionBar.setTitle(getString(R.string.measurement) + " " + measurementId);
-        LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
+        //LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
     }
 
     /**

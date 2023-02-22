@@ -19,7 +19,6 @@
 package de.cyface.app.ui.nav.controller;
 
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.externalCyfaceFolderPath;
 import static de.cyface.utils.Utils.informMediaScanner;
