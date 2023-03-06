@@ -80,9 +80,6 @@ ext {
     // Kotlin components
     coroutinesVersion = "1.6.4"
 
-    // Kotlin components
-    coroutinesVersion = "1.6.4"
-
     // Other dependencies
     materialDialogsVersion = "3.3.0"
     googleApiClientVersion = '1.31.5' // transmission protocol
