@@ -18,6 +18,7 @@
  */
 package de.cyface.app.ui.nav.controller;
 
+import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.lang.ref.WeakReference;
@@ -49,7 +50,7 @@ import de.cyface.utils.Validate;
  * We use an {@code AsyncTask} because this is blocking but should only run for a short time.
  *
  * @author Armin Schnabel
- * @version 2.0.2
+ * @version 2.0.1
  * @since 2.4.0
  */
 public final class EventDeleteController

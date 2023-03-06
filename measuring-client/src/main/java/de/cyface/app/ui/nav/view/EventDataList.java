@@ -167,11 +167,11 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        //final Uri eventUri = persistenceLayer.getEventUri();
-        return null; /*new CursorLoader(fragmentActivity, eventUri, null,
-                EventTable.COLUMN_MEASUREMENT_FK + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
-                new String[] {String.valueOf(measurementId), String.valueOf(Event.EventType.MODALITY_TYPE_CHANGE)},
-                EventTable.COLUMN_TIMESTAMP + " ASC");*/
+        final Uri eventUri = persistenceLayer.eventUri();
+        return new CursorLoader(fragmentActivity, eventUri, null,
+                BaseColumns.MEASUREMENT_ID + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
+                new String[] {String.valueOf(measurementId), String.valueOf(EventType.MODALITY_TYPE_CHANGE)},
+                BaseColumns.TIMESTAMP + " ASC");
     }
 
     @Override

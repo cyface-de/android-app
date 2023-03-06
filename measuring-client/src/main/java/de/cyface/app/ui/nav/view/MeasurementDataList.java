@@ -160,8 +160,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         // Show track on map
         if (!isMultiSelectionModeEnabled && listView.isItemChecked(position)) {
 
-            // Load track FIXME
-            /*final Cursor cursor = cursorAdapter.getCursor();
+            // Load track
+            final Cursor cursor = cursorAdapter.getCursor();
             cursor.moveToPosition(position);
             final long measurementId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns.ID));
             final List<Track> tracks;
