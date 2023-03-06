@@ -56,10 +56,10 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.4.0" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.5.0-alpha1" // Also update submodule commit ref
     cyfaceUtilsVersion = "3.3.4" // Maven dependency
     cyfaceEnergySettingsVersion = "3.2.5" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.1.6" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.1.7-alpha1" // Also update submodule commit ref
     cyfaceSerializationVersion = "2.3.3" // Keep im sync with version in submodule `backend`
 
     // Android SDK versions
@@ -74,7 +74,7 @@ ext {
     androidxAppCompatVersion = "1.6.0-rc01" // RC to fix duplicate lifecycle dependency issue in app
     androidPreferencesVersion = '1.2.0'
     localbroadcastmanagerVersion = '1.1.0'
-    exifinterfaceVersion = "1.3.3" // Required by Camera Service submodule
+    exifinterfaceVersion = "1.3.6" // Required by Camera Service submodule
     roomVersion = "2.5.0"
 
     // Kotlin components
@@ -88,7 +88,7 @@ ext {
     junitVersion = "1.1.5"
     mockitoVersion = '4.8.0'
     hamcrestVersion = "1.3"
-    rulesVersion = "1.4.0"
+    rulesVersion = "1.5.0"
     robolectricVersion = "4.8.2"
     androidxTestCoreVersion = '1.4.0'
     runnerVersion = "1.4.0"
