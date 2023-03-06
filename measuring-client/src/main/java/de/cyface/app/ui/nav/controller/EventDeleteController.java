@@ -18,6 +18,7 @@
  */
 package de.cyface.app.ui.nav.controller;
 
+import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.lang.ref.WeakReference;
@@ -27,7 +28,6 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.ListView;
@@ -38,7 +38,8 @@ import androidx.annotation.NonNull;
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.PersistenceLayer;
+import de.cyface.persistence.DefaultPersistenceLayer;
+import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.model.Event;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
@@ -49,7 +50,7 @@ import de.cyface.utils.Validate;
  * We use an {@code AsyncTask} because this is blocking but should only run for a short time.
  *
  * @author Armin Schnabel
- * @version 2.0.2
+ * @version 2.0.1
  * @since 2.4.0
  */
 public final class EventDeleteController
@@ -59,7 +60,7 @@ public final class EventDeleteController
     /**
      * The data persistenceLayer used by this controller.
      */
-    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     private Map map;
     private List<Long> eventIds = new ArrayList<>();
 
@@ -68,7 +69,7 @@ public final class EventDeleteController
      */
     public EventDeleteController(@NonNull final Context context) {
         this.contextReference = new WeakReference<>(context);
-        this.persistenceLayer = new PersistenceLayer<>(context, new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
     }
 
     @Override
@@ -126,8 +127,7 @@ public final class EventDeleteController
             }
             final int checkedRowNumber = checkedItemPositions.keyAt(itemPosition);
             final Cursor cursor = (Cursor)view.getItemAtPosition(checkedRowNumber);
-            final int identifierColumnIndex = cursor.getColumnIndex(BaseColumns._ID);
-            final long selectedEventId = cursor.getLong(identifierColumnIndex);
+            final long selectedEventId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns.ID));
 
             final Event event;
             try {

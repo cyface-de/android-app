@@ -91,7 +91,7 @@
 
         <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
         <provider
-            android:name="de.cyface.persistence.v1.MeasuringPointsContentProvider"
+            android:name="de.cyface.persistence.content.MeasurementProvider"
             android:authorities="de.cyface.app.provider"
             android:exported="false"
             android:process=":persistence_process"

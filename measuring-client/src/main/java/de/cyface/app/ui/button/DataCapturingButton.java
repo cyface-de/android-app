@@ -19,6 +19,7 @@
 package de.cyface.app.ui.button;
 
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
@@ -91,9 +92,9 @@ import de.cyface.datacapturing.exception.DataCapturingException;
 import de.cyface.datacapturing.exception.MissingPermissionException;
 import de.cyface.datacapturing.model.CapturedData;
 import de.cyface.datacapturing.ui.Reason;
-import de.cyface.persistence.DefaultLocationCleaningStrategy;
+import de.cyface.persistence.strategy.DefaultLocationCleaning;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.PersistenceLayer;
+import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Measurement;
@@ -153,10 +154,10 @@ public class DataCapturingButton
      */
     private TextView measurementIdTextView;
     /**
-     * {@link PersistenceLayer} to show the {@link Measurement#getDistance()} of the currently captured
+     * {@link DefaultPersistenceLayer} to show the {@link Measurement#getDistance()} of the currently captured
      * {@link Measurement}
      */
-    private PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     private final MainFragment mainFragment;
     /**
      * Caching the {@link Track}s of the current {@link Measurement}, so we do not need to ask the database each time
@@ -196,7 +197,7 @@ public class DataCapturingButton
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
         // To load the measurement distance
-        this.persistenceLayer = new PersistenceLayer<>(context, new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
 
         button.setOnClickListener(this);
         button.setOnLongClickListener(this);
@@ -367,15 +368,11 @@ public class DataCapturingButton
 
         // PAUSED or FINISHED capturing
         Log.d(TAG, "onResume: reconnecting timed out");
-        try {
-            if (persistenceLayer.hasMeasurement(PAUSED)) {
-                setButtonStatus(button, PAUSED);
-                // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
-            } else {
-                setButtonStatus(button, FINISHED);
-            }
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
+        if (persistenceLayer.hasMeasurement(PAUSED)) {
+            setButtonStatus(button, PAUSED);
+            // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
+        } else {
+            setButtonStatus(button, FINISHED);
         }
         setButtonEnabled(button);
 
@@ -420,18 +417,12 @@ public class DataCapturingButton
             public void timedOut() {
                 Validate.isTrue(buttonStatus != OPEN, "DataCapturingButton is out of sync.");
 
-                try {
-                    // If Measurement is paused, resume the measurement on a normal click
-                    if (persistenceLayer.hasMeasurement(PAUSED)) {
-                        resumeCapturing();
-                        return;
-                    }
-                    startCapturing();
-
-                } catch (final CursorIsNullException e) {
-                    throw new IllegalStateException(e);
+                // If Measurement is paused, resume the measurement on a normal click
+                if (persistenceLayer.hasMeasurement(PAUSED)) {
+                    resumeCapturing();
+                    return;
                 }
-
+                startCapturing();
             }
         });
     }
@@ -459,17 +450,12 @@ public class DataCapturingButton
             public void timedOut() {
                 Validate.isTrue(buttonStatus != OPEN, "DataCapturingButton is out of sync.");
 
-                try {
-                    // If Measurement is paused, stop the measurement on long press
-                    if (persistenceLayer.hasMeasurement(PAUSED)) {
-                        stopCapturing();
-                        return;
-                    }
-                    startCapturing();
-
-                } catch (final CursorIsNullException e) {
-                    throw new IllegalStateException(e);
+                // If Measurement is paused, stop the measurement on long press
+                if (persistenceLayer.hasMeasurement(PAUSED)) {
+                    stopCapturing();
+                    return;
                 }
+                startCapturing();
             }
         });
 
@@ -602,14 +588,10 @@ public class DataCapturingButton
     private void startCapturing() {
 
         // Measurement is stopped, so we start a new measurement
-        try {
-            if (persistenceLayer.hasMeasurement(OPEN) && isProblematicManufacturer()) {
-                showToastOnMainThread(
-                        context.getString(R.string.toast_last_tracking_crashed),
-                        true);
-            }
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
+        if (persistenceLayer.hasMeasurement(OPEN) && isProblematicManufacturer()) {
+            showToastOnMainThread(
+                    context.getString(R.string.toast_last_tracking_crashed),
+                    true);
         }
 
         // We use a handler to run the UI Code on the main thread as it is supposed to be
@@ -856,7 +838,7 @@ public class DataCapturingButton
             Log.d(TAG, "updateCachedTrack: Unfinished measurement found, loading track from database.");
             final Measurement measurement = dataCapturingService.loadCurrentlyCapturedMeasurement();
             final List<Track> loadedList = persistenceLayer.loadTracks(measurement.getId(),
-                    new DefaultLocationCleaningStrategy());
+                    new DefaultLocationCleaning());
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
             currentMeasurementsTracks = new ArrayList<>(loadedList);

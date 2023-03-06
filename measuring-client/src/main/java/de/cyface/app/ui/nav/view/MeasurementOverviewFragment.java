@@ -19,6 +19,7 @@
 package de.cyface.app.ui.nav.view;
 
 import static de.cyface.app.ui.Map.TEMPORARY_EVENT_MARKER_ID;
+import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PACKAGE;
 import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.UNKNOWN;
@@ -65,14 +66,13 @@ import de.cyface.app.ui.nav.controller.EventDeleteController;
 import de.cyface.app.ui.nav.controller.ExportTask;
 import de.cyface.app.ui.nav.controller.MeasurementDeleteController;
 import de.cyface.app.utils.Constants;
-import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.PersistenceLayer;
+import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.model.EventType;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
-import de.cyface.utils.CursorIsNullException;
+import de.cyface.persistence.strategy.DefaultLocationCleaning;
 import de.cyface.utils.Validate;
 
 /**
@@ -92,7 +92,7 @@ public class MeasurementOverviewFragment extends Fragment {
     /**
      * The {@link MeasurementDataList} containing the {@link Measurement}s.
      */
-    //private MeasurementDataList measurementDataList; FIXME
+    private MeasurementDataList measurementDataList;
     /**
      * A {@link Map} fragment which is used to visualize {@link Measurement}s.
      */
@@ -100,17 +100,17 @@ public class MeasurementOverviewFragment extends Fragment {
     /**
      * The {@link EventDataList} containing the {@link EventType#MODALITY_TYPE_CHANGE}s of a {@link Measurement}.
      */
-    //private EventDataList eventDataList;
+    private EventDataList eventDataList;
     /**
      * {@code True} if the {@code ListView} below the {@code Map} currently shows the {@code Event}s of a
      * {@code Measurement}.
      */
     private boolean isEventsListShown = false;
     /**
-     * The {@link PersistenceLayer} required to retrieve the {@link Measurement} date from the
+     * The {@link DefaultPersistenceLayer} required to retrieve the {@link Measurement} date from the
      * {@link ParcelableGeoLocation}s
      */
-    private PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
      * The id used to identify the {@code Loader} responsible for the {@code Measurement}s.
      */
@@ -159,9 +159,9 @@ public class MeasurementOverviewFragment extends Fragment {
                     dialog.setTargetFragment(MeasurementOverviewFragment.this,
                             DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE);
 
-                    //final Long measurementId = eventDataList.getMeasurementId();
-                    /*Validate.notNull(measurementId);
-                    dialog.setMeasurementId(measurementId);*/
+                    final Long measurementId = eventDataList.getMeasurementId();
+                    Validate.notNull(measurementId);
+                    dialog.setMeasurementId(measurementId);
                     dialog.setCancelable(true);
                     dialog.show(fragmentManager, "MODALITY_DIALOG");
                     return;
@@ -195,8 +195,8 @@ public class MeasurementOverviewFragment extends Fragment {
         final FragmentActivity fragmentActivity = getActivity();
         Validate.notNull(fragmentActivity);
 
-        /*final LoaderManager loaderManager = LoaderManager.getInstance(this);
-        loaderManager.initLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);*/
+        final LoaderManager loaderManager = LoaderManager.getInstance(this);
+        loaderManager.initLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
         Log.d(TAG, "onActivityCreated() done");
     }
 
@@ -205,17 +205,17 @@ public class MeasurementOverviewFragment extends Fragment {
             final Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_measurements, container, false);
-        persistenceLayer = new PersistenceLayer<>(inflater.getContext(), new DefaultPersistenceBehaviour());
+        persistenceLayer = new DefaultPersistenceLayer<>(inflater.getContext(), AUTHORITY, new DefaultPersistenceBehaviour());
 
         map = new Map(view.findViewById(R.id.mapView), savedInstanceState, () -> {
             // Nothing to do
         });
 
-        /*measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
-        measurementDataList.onCreateView(view);*/
+        measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
+        measurementDataList.onCreateView(view);
 
-        //eventDataList = new EventDataList(getActivity(), persistenceLayer, null, map);
-        //eventDataList.onCreateView(view);
+        eventDataList = new EventDataList(getActivity(), persistenceLayer, null, map);
+        eventDataList.onCreateView(view);
 
         listView = view.findViewById(R.id.measurements_list_view);
         addButton = view.findViewById(R.id.add_button);
@@ -277,9 +277,9 @@ public class MeasurementOverviewFragment extends Fragment {
             return true;
         } else if (item.getItemId() == R.id.delete_measurement_item) {
             if (isEventsListShown) {
-                //deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
+                deleteSelectedEvents(fragmentActivity, eventDataList.getListView());
             } else {
-                //deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView()); FIXME
+                deleteSelectedMeasurements(fragmentActivity, measurementDataList.getListView());
             }
             return true;
         } else {
@@ -320,8 +320,8 @@ public class MeasurementOverviewFragment extends Fragment {
      */
     private void selectAllItems() {
 
-        /*final ListView listView = isEventsListShown ? eventDataList.getListView()
-                : measurementDataList.getListView();*/
+        final ListView listView = isEventsListShown ? eventDataList.getListView()
+                : measurementDataList.getListView();
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         final ListAdapter adapter = listView.getAdapter();
         if (adapter != null) {
@@ -372,8 +372,8 @@ public class MeasurementOverviewFragment extends Fragment {
             map.clearMap();
 
             // Without this the listView.getCheckedItemCount() shows too many (i.e. is not updated)
-            //measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
-            //measurementDataList.onCreateView(view);
+            measurementDataList = new MeasurementDataList(getActivity(), persistenceLayer, this, map);
+            measurementDataList.onCreateView(view);
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
             final AppCompatActivity activity = ((AppCompatActivity)getActivity());
@@ -381,7 +381,7 @@ public class MeasurementOverviewFragment extends Fragment {
             final ActionBar actionBar = activity.getSupportActionBar();
             Validate.notNull(actionBar);
             actionBar.setTitle(getString(R.string.drawer_title_measurements));
-            //LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
+            LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, measurementDataList);
             return true;
         }
         return false;
@@ -407,18 +407,18 @@ public class MeasurementOverviewFragment extends Fragment {
         addButton.show();
 
         Log.d(TAG, "showEvents() of mid " + measurementId);
-        //eventDataList.setMeasurementId(measurementId);
+        eventDataList.setMeasurementId(measurementId);
 
         // Without this the listView.getCheckedItemCount() shows too many (i.e. is not updated)
-        //eventDataList = new EventDataList(getActivity(), persistenceLayer, measurementId, map);
-        //eventDataList.onCreateView(view);
+        eventDataList = new EventDataList(getActivity(), persistenceLayer, measurementId, map);
+        eventDataList.onCreateView(view);
 
         final AppCompatActivity activity = ((AppCompatActivity)getActivity());
         Validate.notNull(activity);
         final ActionBar actionBar = activity.getSupportActionBar();
         Validate.notNull(actionBar);
         actionBar.setTitle(getString(R.string.measurement) + " " + measurementId);
-        //LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
+        LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
     }
 
     /**
@@ -448,13 +448,9 @@ public class MeasurementOverviewFragment extends Fragment {
 
             // Load GeoLocations
             final List<ParcelableGeoLocation> geoLocations = new ArrayList<>();
-            try {
-                var tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaningStrategy());
-                for (final var track : tracks) {
-                    geoLocations.addAll(track.getGeoLocations());
-                }
-            } catch (final CursorIsNullException e) {
-                throw new IllegalStateException(e);
+            var tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaning());
+            for (final var track : tracks) {
+                geoLocations.addAll(track.getGeoLocations());
             }
 
             // Search for the nearest GeoLocation
@@ -482,15 +478,11 @@ public class MeasurementOverviewFragment extends Fragment {
             // Add new Event to database
             final Measurement measurement;
             final long eventId;
-            try {
-                measurement = persistenceLayer.loadMeasurement(measurementId);
-                eventId = persistenceLayer.logEvent(
-                        EventType.MODALITY_TYPE_CHANGE, measurement,
-                        nearestGeoLocation.getTimestamp(), modality.getDatabaseIdentifier());
-                Log.d(TAG, "Event added, id: " + eventId + " timestamp: " + nearestGeoLocation.getTimestamp());
-            } catch (final CursorIsNullException e) {
-                throw new IllegalStateException(e);
-            }
+            measurement = persistenceLayer.loadMeasurement(measurementId);
+            eventId = persistenceLayer.logEvent(
+                    EventType.MODALITY_TYPE_CHANGE, measurement,
+                    nearestGeoLocation.getTimestamp(), modality.getDatabaseIdentifier());
+            Log.d(TAG, "Event added, id: " + eventId + " timestamp: " + nearestGeoLocation.getTimestamp());
 
             // Add new Marker to map
             final LatLng latLng = new LatLng(nearestGeoLocation.getLat(), nearestGeoLocation.getLon());

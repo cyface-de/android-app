@@ -33,6 +33,8 @@ import android.widget.TextView;
 import androidx.cursoradapter.widget.CursorAdapter;
 
 import de.cyface.app.R;
+import de.cyface.persistence.content.BaseColumns;
+import de.cyface.persistence.content.EventTable;
 import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Modality;
 
@@ -79,21 +81,21 @@ public class CursorEventAdapter extends CursorAdapter {
         final TextView itemView = view.findViewById(R.id.data_row_text);
 
         // Event time
-        //final long timestamp = cursor.getLong(cursor.getColumnIndex(EventTable.COLUMN_TIMESTAMP));
-        //final Date date = new Date(timestamp);
-        //final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
+        final var timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns.TIMESTAMP));
+        final Date date = new Date(timestamp);
+        final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
 
         // Modality type
-        //final Modality modality = Modality.valueOf(cursor.getString(cursor.getColumnIndex(EventTable.COLUMN_VALUE)));
+        final var modality = Modality.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(EventTable.COLUMN_VALUE)));
 
         // Set List Item Text
-        /*final String label = dateText + " (" + CursorMeasureAdapter.getTranslation(contextWeakReference, modality)
-                + ")";*/
+        final String label = dateText + " (" + CursorMeasureAdapter.getTranslation(contextWeakReference, modality)
+                + ")";
 
         // Checkable
         itemView.setEnabled(true);
         itemView.setClickable(false); // Does not make sense but works -.- same in the inverted scenario
 
-        //itemView.setText(label);
+        itemView.setText(label);
     }
 }

@@ -21,14 +21,11 @@ package de.cyface.app.ui.nav.view;
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 
-import java.util.List;
-
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -41,13 +38,17 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 
+import java.util.List;
+
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
-import de.cyface.persistence.DefaultLocationCleaningStrategy;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.PersistenceLayer;
+import de.cyface.persistence.DefaultPersistenceLayer;
+import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.model.Event;
+import de.cyface.persistence.model.EventType;
 import de.cyface.persistence.model.Track;
+import de.cyface.persistence.strategy.DefaultLocationCleaning;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -77,7 +78,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
     /**
      * The {@code PersistenceLayer} required to link the data stored persistently with adapters and cursors.
      */
-    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
      * The {@code MeasurementOverviewFragment} required to {@link MeasurementOverviewFragment#showEvents(long)}
      * when a {@code Measurement} is selected.
@@ -103,8 +104,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
      * @param map The {@code Map} on which the {@code Measurement}s are shown.
      */
     MeasurementDataList(FragmentActivity activity,
-            PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer,
-            MeasurementOverviewFragment measurementOverviewFragment, Map map) {
+                        DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer,
+                        MeasurementOverviewFragment measurementOverviewFragment, Map map) {
         this.activity = activity;
         this.persistenceLayer = persistenceLayer;
         this.measurementOverviewFragment = measurementOverviewFragment;
@@ -159,15 +160,15 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         // Show track on map
         if (!isMultiSelectionModeEnabled && listView.isItemChecked(position)) {
 
-            // Load track FIXME
-            /*final Cursor cursor = cursorAdapter.getCursor();
+            // Load track
+            final Cursor cursor = cursorAdapter.getCursor();
             cursor.moveToPosition(position);
-            final long measurementId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+            final long measurementId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns.ID));
             final List<Track> tracks;
             final List<Event> events;
             try {
-                tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaningStrategy());
-                events = persistenceLayer.loadEvents(measurementId, Event.EventType.MODALITY_TYPE_CHANGE);
+                tracks = persistenceLayer.loadTracks(measurementId, new DefaultLocationCleaning());
+                events = persistenceLayer.loadEvents(measurementId, EventType.MODALITY_TYPE_CHANGE);
             } catch (final CursorIsNullException e) {
                 Log.w(TAG, "Ignored onItemClick.loadTracks() because of null Cursor.");
                 if (isReportingEnabled) {
@@ -178,7 +179,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
             map.renderMeasurement(tracks, events, true);
 
             // Show Modality type changes in the ListView
-            measurementOverviewFragment.showEvents(measurementId);*/
+            measurementOverviewFragment.showEvents(measurementId);
         }
     }
 
@@ -187,8 +188,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        //final Uri measurementUri = persistenceLayer.getMeasurementUri();
-        return null; //new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns._ID + " DESC");
+        final Uri measurementUri = persistenceLayer.measurementUri();
+        return new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns.ID + " DESC");
     }
 
     @Override

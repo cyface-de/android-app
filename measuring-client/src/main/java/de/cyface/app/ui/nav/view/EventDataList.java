@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.Marker;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +40,10 @@ import androidx.loader.content.CursorLoader;
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.PersistenceLayer;
-import de.cyface.persistence.model.Event;
+import de.cyface.persistence.DefaultPersistenceLayer;
+import de.cyface.persistence.content.BaseColumns;
+import de.cyface.persistence.content.EventTable;
+import de.cyface.persistence.model.EventType;
 import de.cyface.utils.Validate;
 
 /**
@@ -70,7 +71,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
     /**
      * The {@code PersistenceLayer} required to link the {@link CursorEventAdapter} to the data stored persistently.
      */
-    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
      * The id of the {@code Measurement} linked to the {@code Events} handled by this {@code EventDataList}.
      * <p>
@@ -100,7 +101,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
      *            Marker can be focused.
      */
     EventDataList(FragmentActivity activity,
-            PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer, @Nullable final Long measurementId,
+            DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer, @Nullable final Long measurementId,
             @NonNull final Map map) {
         this.activity = activity;
         this.persistenceLayer = persistenceLayer;
@@ -151,12 +152,12 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
         // Move map camera to marker and focus it
         final Cursor cursor = cursorAdapter.getCursor();
         cursor.moveToPosition(position);
-        //final long eventId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-        //final Marker marker = map.getEventMarker().get(eventId);
+        final var eventId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns.ID));
+        final Marker marker = map.getEventMarker().get(eventId);
         // Can be null when no positions are available and, thus, no events can be positioned
-        /*if (marker != null) {
+        if (marker != null) {
             map.focusMarker(marker);
-        }*/
+        }
 
         // The Setting options "mark all" and "delete marked" handle the marked items
     }
@@ -166,11 +167,11 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        //final Uri eventUri = persistenceLayer.getEventUri();
-        return null; /*new CursorLoader(fragmentActivity, eventUri, null,
-                EventTable.COLUMN_MEASUREMENT_FK + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
-                new String[] {String.valueOf(measurementId), String.valueOf(Event.EventType.MODALITY_TYPE_CHANGE)},
-                EventTable.COLUMN_TIMESTAMP + " ASC");*/
+        final Uri eventUri = persistenceLayer.eventUri();
+        return new CursorLoader(fragmentActivity, eventUri, null,
+                BaseColumns.MEASUREMENT_ID + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
+                new String[] {String.valueOf(measurementId), String.valueOf(EventType.MODALITY_TYPE_CHANGE)},
+                BaseColumns.TIMESTAMP + " ASC");
     }
 
     @Override

@@ -19,6 +19,7 @@
 package de.cyface.app.ui.nav.controller;
 
 import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.externalCyfaceFolderPath;
 import static de.cyface.utils.Utils.informMediaScanner;
@@ -34,7 +35,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.ListView;
@@ -45,8 +45,9 @@ import androidx.annotation.Nullable;
 
 import de.cyface.app.R;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
+import de.cyface.persistence.DefaultPersistenceLayer;
+import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
-import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
@@ -67,7 +68,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
     /**
      * The data persistenceLayer used by this controller.
      */
-    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
      * {@code True} if the user opted-in to error reporting.
      */
@@ -78,7 +79,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
      */
     public MeasurementDeleteController(@NonNull final Context context) {
         this.contextReference = new WeakReference<>(context);
-        this.persistenceLayer = new PersistenceLayer<>(context, new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
     }
@@ -191,17 +192,11 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             final int checkedRowNumber = checkedItemPositions.keyAt(itemPosition);
             // TODO [CY-4572]: final Measurement measurement = (Measurement)view.getItemAtPosition(checkedRowNumber);
             final Cursor cursor = (Cursor)view.getItemAtPosition(checkedRowNumber);
-            final int identifierColumnIndex = cursor.getColumnIndex(BaseColumns._ID);
-            final long selectedMeasurementId = cursor.getLong(identifierColumnIndex);
+            final long selectedMeasurementId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns.ID));
 
             // Ignoring the ongoing measurement
             if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getId()) {
-                final Measurement measurement;
-                try {
-                    measurement = persistenceLayer.loadMeasurement(selectedMeasurementId);
-                } catch (final CursorIsNullException e) {
-                    throw new IllegalStateException(e);
-                }
+                final var measurement= persistenceLayer.loadMeasurement(selectedMeasurementId);
                 ret.add(measurement);
             }
         }

@@ -27,7 +27,6 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +38,8 @@ import androidx.annotation.Nullable;
 import androidx.cursoradapter.widget.CursorAdapter;
 
 import de.cyface.app.R;
+import de.cyface.persistence.content.BaseColumns;
+import de.cyface.persistence.content.MeasurementTable;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
@@ -84,31 +85,31 @@ public class CursorMeasureAdapter extends CursorAdapter {
 
     private void mapCursorToView(final Cursor cursor, final View view) {
 
-        /*final TextView itemView = view.findViewById(R.id.data_row_text);
-        final int measurementId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+        final TextView itemView = view.findViewById(R.id.data_row_text);
+        final var measurementId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns.ID));
 
         // Measurement time
-        final long measurementTimestamp = cursor.getLong(cursor.getColumnIndex(MeasurementTable.COLUMN_TIMESTAMP));
+        final var measurementTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns.TIMESTAMP));
         final Date date = new Date(measurementTimestamp);
         final String dateText = new SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date);
 
         // Retrieve distance data
-        final double distance = cursor.getDouble(cursor.getColumnIndex(MeasurementTable.COLUMN_DISTANCE));
+        final var distance = cursor.getDouble(cursor.getColumnIndexOrThrow(MeasurementTable.COLUMN_DISTANCE));
         final int distanceMeter = (int)Math.round(distance);
         final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
         final String distanceText = distanceKm + " km";
 
         // Retrieve modality
-        final Modality modality = Modality
-                .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_MODALITY)));
+        final var modality = Modality
+                .valueOf(cursor.getString(cursor.getColumnIndexOrThrow(MeasurementTable.COLUMN_MODALITY)));
 
         // Set List Item Text
         String label = "(" + measurementId + ") " + dateText + " (" + distanceText + ") - "
                 + getTranslation(contextWeakReference, modality);
 
         // Disable synced and non-finished items to disallow deletion
-        final MeasurementStatus status = MeasurementStatus
-                .valueOf(cursor.getString(cursor.getColumnIndex(MeasurementTable.COLUMN_STATUS)));
+        final var status = MeasurementStatus
+                .valueOf(cursor.getString(cursor.getColumnIndexOrThrow(MeasurementTable.COLUMN_STATUS)));
         if (status == MeasurementStatus.OPEN || status == MeasurementStatus.PAUSED
                 || status == MeasurementStatus.SYNCED || status == MeasurementStatus.SKIPPED
                 || status == MeasurementStatus.DEPRECATED) {
@@ -118,7 +119,7 @@ public class CursorMeasureAdapter extends CursorAdapter {
         itemView.setEnabled(true);
         itemView.setClickable(false); // Does not make sense but works. same in the inverted scenario
 
-        itemView.setText(label);*/
+        itemView.setText(label);
     }
 
     /**
