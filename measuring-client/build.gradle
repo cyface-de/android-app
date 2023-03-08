@@ -24,7 +24,6 @@
  * @version 1.10.0
  * @since 1.0.0
  */
-
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
@@ -49,7 +48,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        applicationId rootProject.ext.applicationId
+        applicationId = "de.cyface.app"
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
 
@@ -145,6 +144,11 @@ android {
     kotlinOptions {
         jvmTarget = rootProject.ext.kotlinTargetJavaVersion
     }
+
+    /* Required when switching to MVVM
+    buildFeatures {
+        viewBinding true
+    }*/
 }
 
 // Exception tracking
