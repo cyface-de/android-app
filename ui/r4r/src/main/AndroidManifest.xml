@@ -2,30 +2,114 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
 
-  <application
-    android:allowBackup="true"
+  <!-- (!) We do *not* need ACCESS_BACKGROUND_LOCATION as we only need location in Foreground Service-->
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <!-- On Android 12+ we must request both FINE and COARSE, but add a handle to explicitly request FINE -->
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <!-- Until API 22 we need this permission to delete the deprecated generic pro account -->
+  <uses-permission
+    android:name="android.permission.MANAGE_ACCOUNTS"
+    android:maxSdkVersion="22" />
+
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.INTERNET" />
+
+  <!-- Needed to check if wifi is available -->
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+  <!-- Google Maps Android API permission -->
+  <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
+  <!-- The accounts permissions are the reason why "contacts" permissions are requested -->
+  <!-- Allows the app to create accounts and getting / setting their passwords. -->
+  <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+  <!-- Apps need "GET_ACCOUNTS" permission to read information about accounts. -->
+  <uses-permission
+    android:name="android.permission.GET_ACCOUNTS" />
+  <!-- Allows applications to write & read the sync settings. -->
+  <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+  <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+  <!-- sync stats permissions are needed to check if the data sync is currently active -->
+  <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+
+  <!-- Android 10+: No longer required see https://developer.android.com/training/data-storage/shared/media -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="28"/>
+
+  <!-- Android 10+: Permission no longer provides write access -->
+  <!-- Android 10+: Write to MediaStore.Download without permissions -->
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    android:maxSdkVersion="28"
+    tools:ignore="ScopedStorage" />
+
+  <!-- allowBackup=false as we did not yet define what we really want to backup-->
+  <!-- usesCleartextTraffic only API 23+, ignored below. only for debugging -->
+  <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
+  <!-- FIXME: we set allowBackup to false, the generated code had it to true with:
     android:dataExtractionRules="@xml/data_extraction_rules"
-    android:fullBackupContent="@xml/backup_rules"
+    android:fullBackupContent="@xml/backup_rules" -->
+  <application
+    android:name=".Application"
+    android:allowBackup="false"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
-    android:supportsRtl="true"
     android:theme="@style/Theme.R4R"
-    tools:targetApi="31">
-    <activity
-      android:name=".MainActivity"
-      android:exported="true"
-      android:label="@string/app_name">
+    tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
+    android:usesCleartextTraffic="${usesCleartextTraffic}">
+    <!--tools:targetApi="31"> targetApi 31 was added by the generated code, not sure why -->
+
+    <!-- Sentry DSN. This ids the account but is not a secret. -->
+    <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
+
+    <!-- Google Maps for Android requirements -->
+    <meta-data
+      android:name="com.google.android.gms.version"
+      android:value="@integer/google_play_services_version" />
+    <meta-data
+      android:name="com.google.android.geo.API_KEY"
+      android:value="${googleMapsApiKey}" />
+
+    <!-- FIXME: see if this is still necessary
+    uses-library
+      android:name="org.apache.http.legacy"
+      android:required="false" /-->
+
+    <!-- added by generated code
+    meta-data
+      android:name="android.app.lib_name"
+      android:value="" /-->
+
+    <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
+    <!-- `exported="true"` or else the app cannot be launched after installation! -->
+    <activity android:name=".ui.TermsOfUseActivity"
+      android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
-
-      <meta-data
-        android:name="android.app.lib_name"
-        android:value="" />
     </activity>
+
+    <activity
+      android:name=".MainActivity"
+      android:exported="true">
+      <!--android:label="@string/app_name" ... FIXME: generated code ... should not be necessary-->
+      <!-- FIXME: see if this is still necessary ... android:launchMode="singleTop"> needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
+    </activity>
+
+    <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
+    <activity
+      android:name=".ui.LoginActivity"
+      android:label="@string/title_activity_login" />
+
+    <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
+    <provider
+      android:name="de.cyface.persistence.content.MeasurementProvider"
+      android:authorities="de.cyface.app.rfr.provider"
+      android:exported="false"
+      android:process=":persistence_process"
+      android:syncable="true"
+      tools:replace="android:authorities" />
   </application>
 
 </manifest>

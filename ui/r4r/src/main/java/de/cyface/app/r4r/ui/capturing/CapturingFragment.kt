@@ -7,19 +7,23 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.R
+import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
 import de.cyface.app.r4r.ui.capturing.map.MapFragment
 import de.cyface.app.r4r.ui.capturing.speed.SpeedFragment
+import de.cyface.datacapturing.CyfaceDataCapturingService
+import kotlin.math.roundToInt
 
 /**
- * This is the UI controller class for the capturing fragment.
+ * This is the UI controller/element, responsible for displaying the data from the [CapturingViewModel].
  *
  * It holds the [Observer] objects which control what happens when the [LiveData] changes.
  * The [ViewModel]s are responsible for holding the [LiveData] data.
@@ -36,6 +40,8 @@ class CapturingFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private lateinit var capturingService: CyfaceDataCapturingService
+
     // When requested, this adapter returns a DemoObjectFragment,
     // representing an object in the collection.
     private lateinit var pagerAdapter: PagerAdapter
@@ -46,6 +52,20 @@ class CapturingFragment : Fragment() {
      */
     private lateinit var viewPager: ViewPager2
 
+    private val capturingViewModel: CapturingViewModel by viewModels {
+        CapturingViewModelFactory(capturingService.persistenceLayer.measurementRepository!!)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (activity is ServiceProvider) {
+            capturingService = (activity as ServiceProvider).capturingService
+        } else {
+            throw RuntimeException("Context does not support the Fragment, implement MyDependencies")
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,11 +74,10 @@ class CapturingFragment : Fragment() {
         _binding = FragmentCapturingBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // Subscribe to the LiveData and update UI when the data changes
-        val capturingViewModel = ViewModelProvider(this)[CapturingViewModel::class.java]
-        val textView: TextView = binding.textView9
-        capturingViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        // Update UI element with the updates from the ViewModel
+        val distance: TextView = binding.distanceValue
+        capturingViewModel.measurement.observe(viewLifecycleOwner) {
+            distance.text = "LIVE: ${(it!!.distance * 100).roundToInt() / 100.0} km"
         }
 
         // Update LiveData upon user interaction, network responses, or data loading completion.

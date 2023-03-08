@@ -36,7 +36,6 @@
   <string name="login_name">Login</string>
   <string name="password">Password</string>
   <string name="log_in">Log in</string>
-  <string name="your_request">Your request</string>
   <string name="no_login_register">No credentials? <font color="#3f8730">Register now</font></string>
   <string name="title_activity_login">Sign in</string>
   <string name="error_message_field_required">This field is required</string>

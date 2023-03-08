@@ -22,12 +22,11 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val capturingViewModel =
-            ViewModelProvider(this).get(CapturingViewModel::class.java)
-
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        // FIXME: see CapturingFragment how to initialize the ViewModel with a repository
+        //val mapViewModel = ViewModelProvider(this)[MapViewModel::class.java]
         /*val textView: TextView = binding.textView9
         capturingViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it

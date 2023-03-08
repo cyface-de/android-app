@@ -1,127 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Other -->
+    <string name="accept_terms">Bedingungen akzeptieren</string>
+    <string name="accept_reports_details">Fehlermeldungen und App-Nutzung automatisch übermitteln</string>
+    <string name="accept_terms_details">Ich habe den Disclaimer und die Datenschutzbedingungen gelesen und akzeptiere diese.</string>
+    <string name="notification_channel_name_info">Information</string>
+    <string name="notification_channel_name_warning">Warnungen</string>
+    <string name="notification_channel_description_info">Informative Benachrichtigung, z.B. wenn der Upload erfolgreich beendet wurde.</string>
+    <string name="notification_channel_description_warning">Warnungen, z.B. wenn der Speicher voll ist und die Messung abgebrochen werden musste. Diese Benachrichtigung sollte nicht deaktiviert werden.</string>
+    <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet.</string>
 
-  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
+    <!-- Login Activity -->
+    <string name="login_name">Login</string>
+    <string name="password">Passwort</string>
+    <string name="log_in">Anmelden</string>
+    <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
+    <string name="title_activity_login">Einloggen</string>
+    <string name="error_message_field_required">Bitte ausfüllen</string>
+    <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
+    <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
+    <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 
-  <!-- Other -->
-  <string name="accept_terms">Bedingungen akzeptieren</string>
-  <string name="accept_reports_details">Fehlermeldungen und App-Nutzung automatisch übermitteln</string>
-  <string name="accept_terms_details">Ich habe den Disclaimer und die Datenschutzbedingungen gelesen und akzeptiere diese.</string>
-  <string name="notification_channel_name_info">Information</string>
-  <string name="notification_channel_name_warning">Warnungen</string>
-  <string name="notification_channel_description_info">Informative Benachrichtigung, z.B. wenn der Upload erfolgreich beendet wurde.</string>
-  <string name="notification_channel_description_warning">Warnungen, z.B. wenn der Speicher voll ist und die Messung abgebrochen werden musste. Diese Benachrichtigung sollte nicht deaktiviert werden.</string>
-  <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet.</string>
+    <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
+    <string name="title_trips">Fahrten</string>
+    <string name="title_capturing">Aufzeichnen</string>
+    <string name="title_statistics">Statistiken</string>
 
-  <!-- Dialogs -->
-  <string name="dialog_modality_title">Fortbewegungsart auswählen</string>
-  <!-- synchronize the order of the items with Modality enum type and tab selection -->
-  <string-array name="dialog_modality">
-    <item>Auto</item>
-    <item>Fahrrad</item>
-    <item>Zu Fuß</item>
-    <item>Bus</item>
-    <item>Zug</item>
-  </string-array>
-  <string name="modality_car">Auto</string>
-  <string name="modality_bicycle">Fahrrad</string>
-  <string name="modality_walking">Zu Fuß</string>
-  <string name="modality_bus">Bus</string>
-  <string name="modality_train">Zug</string>
-  <string name="modality_motorbike">Motorrad</string>
+    <!-- Action buttons in capturing view -->
+    <string name="title_start">Start</string>
+    <string name="title_pause">Pause</string>
+    <string name="title_resume">Fortsetzen</string>
+    <string name="title_stop">Stop</string>
 
-  <!-- Login -->
-  <string name="login_name">Login</string>
-  <string name="password">Passwort</string>
-  <string name="log_in">Anmelden</string>
-  <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
-  <string name="title_activity_login">Einloggen</string>
-  <string name="error_message_field_required">Bitte ausfüllen</string>
-  <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
-  <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
-  <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
+    <!-- AppBar Actions -->
+    <string name="action_sync">Hochladen</string>
 
-  <!-- Capturing -->
-  <string name="synchronize">Upload</string>
-  <string name="distance">Distanz</string>
-  <string name="measurement_id">Messungs-Id</string>
-  <string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
-  <string name="text_button_start">Beginne Aufnahme</string>
-  <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
-  <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
-  <string name="msg_calibrating">Kalibriere</string>
-  <string name="capturing_active">Datenerfassung aktiv</string>
+    <!-- Capturing Fragment -->
+    <string name="title_map">Karte</string>
+    <string name="title_speed">Geschwindigkeit</string>
+    <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
+    <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
 
-  <!-- Synchronization -->
-  <string name="error_message_sync_canceled_no_wifi">Für den Upload muss eine WLAN-Verbindung bestehen.</string>
-  <string name="error_message_sync_canceled_disabled">Die Synchronisation ist über die Einstellungen deaktiviert.</string>
+    <!-- Trips Fragment -->
+    <string name="mark_all_menu_item">Alles Markieren</string>
+    <string name="delete_marked_menu_item">Markierte löschen</string>
+    <string name="toast_export">Exportiert:</string>
+    <string name="title_menu_item_export">Alles exportieren</string>
+    <string name="export_data">Exportiere Daten …</string>
+    <string name="export_data_no_permission">Zugriff auf externen Speicher (SD) benötigt.</string>
+    <string name="delete_data">Lösche markierte Messungen …</string>
+    <string name="delete_data_non_selected">Keine Messungen ausgewählt. Mehrfachauswahl per Lang-Druck.</string>
+    <string name="toast_selection_mode_enabled">Markierungmodus aktiviert</string>
+    <string name="toast_selection_mode_disabled">Markierungmodus deaktiviert</string>
+    <string name="toast_no_locations_found">Keine Positionsdaten gefunden</string>
+    <string name="toast_measurement_deletion_success">Kopien der Messungen auf dem Server sind nicht betroffen.</string>
+    <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
+    <string name="toast_select_location">Bitte wählen Sie einen Standort aus</string>
+    <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
 
-  <!-- Navigation bar -->
-  <string name="settings">Einstellungen</string>
-  <string name="drawer_title_home">Start</string>
-  <string name="drawer_title_measurements">Messungen</string>
-  <string name="drawer_title_feedback">Feedback</string>
-  <string name="drawer_title_guide">Einrichtung</string>
-  <string name="drawer_title_imprint">Impressum</string>
-  <string name="drawer_title_logout">Ausloggen</string>
-  <string name="drawer_setting_zoom_to_location">Karte immer zentrieren</string>
-  <string name="drawer_setting_synchronize">Synchronisation</string>
-  <string name="drawer_setting_speed_sensor">Externer Sensor</string>
-  <string name="drawer_setting_pictures">Kameramodus</string>
-  <string name="sync_disabled_toast">Ohne Synchronisation wird mehr Speicherplatz belegt</string>
-  <string name="zoom_to_location_enabled_toast">Bei aktiven Bildschirm wird mehr Kartenmaterial geladen</string>
-  <string name="no_camera_available_toast">Es wurde keine Kamera gefunden die benutzt werden kann</string>
-  <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente</string>
-  <string name="drawer_setting_camera_focus_distance">Kamera Fokus Distanz</string>
-  <string name="drawer_settings">Einstellungen</string>
-  <string name="settings_sensor_frequency">Sensorfrequenz</string>
+    <!-- Statistics Fragment -->
 
-  <!-- Measurement page -->
-  <string name="modality_type">Fortbewegungsart</string>
-  <string name="mark_all_menu_item">Alles Markieren</string>
-  <string name="delete_marked_menu_item">Markierte löschen</string>
-  <string name="measurement">Messung</string>
-  <string name="toast_export">Exportiert:</string>
-  <string name="title_menu_item_export">Alles exportieren</string>
-  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
-  <string name="export_data">Exportiere Daten …</string>
-  <string name="export_data_no_permission">Zugriff auf externen Speicher (SD) benötigt.</string>
-  <string name="delete_data">Lösche markierte Messungen …</string>
-  <string name="delete_data_non_selected">Keine Messungen ausgewählt. Mehrfachauswahl per Lang-Druck.</string>
-  <string name="toast_selection_mode_enabled">Markierungmodus aktiviert</string>
-  <string name="toast_selection_mode_disabled">Markierungmodus deaktiviert</string>
-  <string name="toast_no_locations_found">Keine Positionsdaten gefunden</string>
-  <string name="toast_measurement_deletion_success">Kopien der Messungen auf dem Server sind nicht betroffen.</string>
-  <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
-  <string name="toast_measurement_paused">Fahrt pausiert</string>
-  <string name="toast_measurement_resumed">Fahrt fortgesetzt</string>
-  <string name="toast_select_location">Bitte wählen Sie einen Standort aus</string>
-  <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
 
-  <!-- Camera Service -->
-  <string name="camera_status">Kamera Status</string>
-  <string name="camera_status_connected">Kamera: bereit</string>
-  <string name="camera_status_paused">Kamera: pausiert</string>
-  <string name="camera_capturing_active">Kamera Datenerfassung aktiv</string>
-  <string name="experimental_feature_warning">Achtung: Experimentelle Einstellung</string>
-  <string name="camera_settings_JPEG_settings">JPEG Einzelbild-Modus</string>
-  <string name="camera_settings_title_supported_features">Unterstützte Funktionen (Hauptkamera)</string>
-  <string name="camera_feature_camera2_support_level"> \'camera2\' Support Level: </string>
-  <string name="camera_feature_manual_sensor">Manuelle Steuerung: </string>
-  <string name="camera_feature_focus_distance_calibration">Fokus Distanz: </string>
-  <string name="camera_feature_focus_distance_minimum">Kürzeste Fokus Distanz: </string>
-  <string name="camera_feature_hyper_focal_distance">Hyperfokale Distanz: </string>
-  <string name="static_camera_focus_distance">Statische Kamera Fokus Distanz</string>
-  <string name="static_camera_exposure_time">Statische Kamera Belichtungszeit (\"S-/Tv-Modus\")</string>
-  <string name="static_camera_exposure_value">Belichtungswert (für S-/Tv-Modus)</string>
-  <string name="distance_based_capturing">Weg-basiertes Auslösen</string>
-  <string name="camera_images">Bilder: </string>
-  <string name="notification_title_picture_capturing_decreased">Reduzierte Bilderfassungsrate</string>
-  <string name="notification_text_picture_capturing_decreased">Es wurde weniger Bildmaterial erfasst als erwartet.</string>
-
-  <!-- Imprint page -->
-  <string name="publisher">Herausgeber</string>
-  <string name="publisher_content">Cyface GmbH
+    <!-- FIXME: check the string below:
+    - can imprint be reached by the app?
+    - is the text correct for the RFR app? -->
+    <!-- Imprint page -->
+    <string name="publisher">Herausgeber</string>
+    <string name="publisher_content">Cyface GmbH
         \nFröbelstr. 49
         \n01159 Dresden\n
 
@@ -137,9 +81,9 @@
         \nHRB: 36726
         \nUSt.-Id.: DE-312598748</string>
 
-  <!-- Attention: The legal text should be updated first in Confluence! -->
-  <string name="reports">Fehler-Tracking durch Sentry</string>
-  <string name="reports_content">Wir verbessern und entwickeln unsere App ständig weiter. Trotzdem können wir keinen fehlerfreien Betrieb der App garantieren. Um mögliche Programmierfehler so gering wie möglich zu halten, verwenden wir Sentry, ein Service von Functional Software Inc., 132 Hawthorne St, San Francisco, CA 94107, USA (nachfolgend "Sentry"). Sentry überwacht Fehler die innerhalb unserer App auftreten und informiert uns über diese. Im Falle eines Software-Fehlers werden automatisch folgende Informationen an Sentry übermittelt:
+    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <string name="reports">Fehler-Tracking durch Sentry</string>
+    <string name="reports_content">Wir verbessern und entwickeln unsere App ständig weiter. Trotzdem können wir keinen fehlerfreien Betrieb der App garantieren. Um mögliche Programmierfehler so gering wie möglich zu halten, verwenden wir Sentry, ein Service von Functional Software Inc., 132 Hawthorne St, San Francisco, CA 94107, USA (nachfolgend "Sentry"). Sentry überwacht Fehler die innerhalb unserer App auftreten und informiert uns über diese. Im Falle eines Software-Fehlers werden automatisch folgende Informationen an Sentry übermittelt:
 
         \n\n- Fehlermeldungen, die bei der Verwendung der App auftreten
         \n- Informationen über die Verwendung der App unmittelbar vor dem Auftreten des Fehlers
@@ -153,16 +97,16 @@
 
         \n\nZweck der Verarbeitung ist ausschließlich die Verbessung der Stabilität und Nutzbarkeit der App. Weitere Informationen bzgl. der Datenverarbeitung durch Sentry finden Sie in den Datenschutzrichtlinien von Sentry: https://sentry.io/privacy/</string>
 
-  <!-- Attention: The legal text should be updated first in Confluence! -->
-  <string name="disclaimer">Disclaimer</string>
-  <string name="disclaimer_content">Die Anwendung \"Cyface\" (im Folgenden auch \„App\") befindet sich in der <b>Betaphase</b>. Sie wurde nach bestem Wissen mit größt möglicher Sorgfalt von ausgebildeten Softwareentwicklern erstellt. Wir testen die Anwendung regelmäßig und ausführlich auf unseren eigenen mobilen Endgeräten.
+    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <string name="disclaimer">Disclaimer</string>
+    <string name="disclaimer_content">Die Anwendung \"Cyface\" (im Folgenden auch \„App\") befindet sich in der <b>Betaphase</b>. Sie wurde nach bestem Wissen mit größt möglicher Sorgfalt von ausgebildeten Softwareentwicklern erstellt. Wir testen die Anwendung regelmäßig und ausführlich auf unseren eigenen mobilen Endgeräten.
         \nDerzeit ist es uns aber unmöglich die Haftung für mögliche Schäden zu übernehmen die Ihnen während der Benutzung der App entstehen. Gleichzeitig übernehmen wir keine Garantie für die ständige Verfügbarkeit der an die App geknüpften Dienste, wie Datenupload, Datenverarbeitung und Datenvisualisierung.
         \n<b>Mit der Verwendung dieser App akzeptieren Sie die hier aufgeführten Bedingungen und unten stehende Datenschutzerklärung.</b></string>
 
-  <!-- Attention: The legal text should be updated first in Confluence! -->
-  <!-- Version 2.1.1 -->
-  <string name="privacy">Datenschutzerklärung</string>
-  <string name="privacy_content"><b>1. Name und Anschrift des Verantwortlichen</b>
+    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <!-- Version 2.1.1 -->
+    <string name="privacy">Datenschutzerklärung</string>
+    <string name="privacy_content"><b>1. Name und Anschrift des Verantwortlichen</b>
         \n\nDer Verantwortliche im Sinne der Datenschutz-Grundverordnung und anderer nationaler Datenschutzgesetze der Mitgliedsstaaten sowie sonstiger datenschutzrechtlicher Bestimmungen ist die:
 
         \n\nCyface GmbH

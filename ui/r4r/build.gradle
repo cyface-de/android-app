@@ -1,36 +1,144 @@
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
+/*
+ * Copyright 2023 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ */
+/**
+ * Gradle's build file for the app.
+ *
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 7.5.0
+ */
+apply plugin: 'com.android.application'
+//apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
+apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
+apply plugin: 'org.jetbrains.kotlin.android'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // Exception tracking when using proguard
+        classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
+    }
 }
 
 android {
     namespace 'de.cyface.app.r4r'
-    compileSdk 33
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdk 21
-        targetSdk 32
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
 
         applicationId "de.cyface.app.r4r"
-        versionCode 1
-        versionName "0.0.0"
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner rootProject.ext.testInstrumentationRunner
 
+        //multiDexEnabled true
         // To support `app:iconTint` on API <= 26
         //vectorDrawables.useSupportLibrary = true
+
+        //buildConfigField("String", "localHostIp", '"10.0.2.2"')
+        //buildConfigField "String", "GitHash", '"${getGitHash()}"'
+        // we don't describe this provider build variable in the README so it's probably deprecated
+        // buildConfigField("String", "provider", '"de.cyface.app.provider"')
+
+        // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
+        buildConfigField "int", "currentTerms", "4"
+
+        // Ensure that the backend's "CyfaceFull" flavor is always used
+        missingDimensionStrategy 'project', 'cyface'
+        missingDimensionStrategy 'mode', 'full'
+
+        // Load Google Maps API key
+        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
     }
 
     buildTypes {
+        debug {
+            // Run code coverage reports by default on debug builds.
+            testCoverageEnabled = true
+
+            // Select one of the APIs below, depending on your needs
+
+            // Phone - to local collector - ! only if iptables allow connection from outside
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"true"]
+
+            // Phone - to local production - ! only if iptables allow connection from outside
+            // CertPathValidatorException: Trust anchor for certification path not found.
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"false"]
+
+            // EMULATOR - to local collector
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
+
+            // Staging
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
+            buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
+            manifestPlaceholders = [usesCleartextTraffic:"false"]
+
+            // MOCK-API - only supports login - used by UI test on CI
+            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
+        }
         release {
-            minifyEnabled false
+            // mapping.xml file required to decode stack traces, but it's included in the bundle
+            minifyEnabled true
+            // https://developer.android.com/studio/build/shrink-code.html
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            // signingConfig is set by the CI
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
 
+    /*testOptions {
+        unitTests {
+            // Required so that logging methods do not throw not mocked exceptions in junit tests.
+            returnDefaultValues = true
+        }
+    }
+
+    lint {
+        abortOnError false
+    }
+
+    packagingOptions {
+        resources {
+            // Avoids error when importing jackson
+            pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/license.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE']
+            // To resolve the conflict warning after adding google-api-client dependency
+            excludes += ['META-INF/DEPENDENCIES']
+        }
+    }*/
+
+    // Enabling desugaring to support Java 8 and Java 11 features
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility rootProject.ext.sourceCompatibility
+        targetCompatibility rootProject.ext.targetCompatibility
     }
 
     kotlinOptions {
@@ -42,19 +150,73 @@ android {
     }
 }
 
+// Exception tracking
+// FIXME: we should probably add something to see that these crashes come from the RFR app!
+sentry {
+    // Enables or disables the automatic upload of mapping files
+    // during a build.  If you disable this, you'll need to manually
+    // upload the mapping files with sentry-cli when you do a release.
+    autoUpload = true
+
+    // Disables or enables the automatic configuration of Native Symbols
+    // for Sentry. This executes sentry-cli automatically so
+    // you don't need to do it manually.
+    // Default is disabled.
+    uploadNativeSymbols = false
+
+    // Does or doesn't include the source code of native code for Sentry.
+    // This executes sentry-cli with the --include-sources param. automatically so
+    // you don't need to do it manually.
+    // Default is disabled.
+    includeNativeSources = false
+}
+
 dependencies {
+    // Exception tracking
+    implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.7.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
-    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    // To change the material design
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
+    // To use material elements (tabs, nav bar, slider, etc.)
+    implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
+    // To use Google Map
+    implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
+    implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
+    // Generated by the RFR-UI
+    //implementation 'androidx.core:core-ktx:1.7.0'
+    //implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // FIXME: version
+    // To stream data changes via LiveData and ViewModel to the UI
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1' // FIXME: version $lifecycle_version
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1' // FIXME: version
+    // To use the navigation graph
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3' // FIXME: version
+    // For the action bar (at the bottom of the screen)
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3' // FIXME: version
+
+
+    // Cyface dependencies
+    implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
+    implementation project(':datacapturing')
+    implementation project(':synchronization')
+    implementation project(':persistence')
+    //implementation project(':energy_settings')
+
+    // Dependencies for instrumentation tests
+    // Resolve conflicts between main and test APK (which is used in the integration-test module):
+    //androidTestImplementation "androidx.annotation:annotation:$rootProject.ext.androidxAnnotationVersion"
+    //androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
+    //androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
+    // UiAutomator Testing
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // FIXME: version
+    //androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"
+    //androidTestImplementation "org.hamcrest:hamcrest-integration:$rootProject.ext.hamcrestVersion"
+
+    // Dependencies for local unit tests
+    // - If Junit symbols are not resolvable in IntelliJ, make sure Build Variant is set to debug
+    // - Loading another dependency (e.g. module) only it's production dependencies (compile) are loaded but not other dependencies (e.g. testCompile)
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
+    //testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+    // Optional - For better debuggable asserts
+    //testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
 }

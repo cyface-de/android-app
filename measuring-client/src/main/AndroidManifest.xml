@@ -75,10 +75,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.MainActivity"
             android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
