@@ -103,10 +103,10 @@
       app:layout_constraintTop_toTopOf="@+id/textView2" />
 
     <TextView
-      android:id="@+id/textView9"
+      android:id="@+id/distance_value"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="7,4 km"
+      android:text="N/A km"
       app:layout_constraintEnd_toEndOf="@+id/textView8"
       app:layout_constraintTop_toTopOf="@+id/textView3" />
 
@@ -115,7 +115,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="21 m 4 s"
-      app:layout_constraintEnd_toEndOf="@+id/textView9"
+      app:layout_constraintEnd_toEndOf="@+id/distance_value"
       app:layout_constraintTop_toTopOf="@+id/textView4" />
 
     <TextView
