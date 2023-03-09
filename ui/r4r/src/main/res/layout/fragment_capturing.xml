@@ -32,145 +32,144 @@
       android:layout_width="0dp"
       android:layout_height="0dp"
       android:layout_marginBottom="8dp"
-      app:layout_constraintBottom_toTopOf="@+id/tripTextView"
+      app:layout_constraintBottom_toTopOf="@+id/tripTitle"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/tabLayout" />
 
     <TextView
-      android:id="@+id/tripTextView"
+      android:id="@+id/tripTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:layout_marginBottom="8dp"
       android:text="Fahrt 23 (pausiert)"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-      app:layout_constraintBottom_toTopOf="@+id/textView2"
+      app:layout_constraintBottom_toTopOf="@+id/speedTitle"
       app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-      android:id="@+id/textView2"
+      android:id="@+id/speedTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="Geschwindigkeit"
-      app:layout_constraintBottom_toTopOf="@+id/textView3"
-      app:layout_constraintStart_toStartOf="@+id/tripTextView" />
+      app:layout_constraintBottom_toTopOf="@+id/distanceTitle"
+      app:layout_constraintStart_toStartOf="@+id/tripTitle" />
 
     <TextView
-      android:id="@+id/textView3"
+      android:id="@+id/distanceTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="Strecke"
-      app:layout_constraintBottom_toTopOf="@+id/textView4"
-      app:layout_constraintStart_toStartOf="@+id/textView2" />
+      app:layout_constraintBottom_toTopOf="@+id/durationTitle"
+      app:layout_constraintStart_toStartOf="@+id/speedTitle" />
 
     <TextView
-      android:id="@+id/textView4"
+      android:id="@+id/durationTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="Fahrtzeit"
-      app:layout_constraintBottom_toTopOf="@+id/textView5"
-      app:layout_constraintStart_toStartOf="@+id/textView3" />
+      app:layout_constraintBottom_toTopOf="@+id/ascendTitle"
+      app:layout_constraintStart_toStartOf="@+id/distanceTitle" />
 
     <TextView
-      android:id="@+id/textView5"
+      android:id="@+id/ascendTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="Anstieg"
-      app:layout_constraintBottom_toTopOf="@+id/textView6"
-      app:layout_constraintStart_toStartOf="@+id/textView4" />
+      app:layout_constraintBottom_toTopOf="@+id/co2Title"
+      app:layout_constraintStart_toStartOf="@+id/durationTitle" />
 
     <TextView
-      android:id="@+id/textView6"
+      android:id="@+id/co2Title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="Vermiedenes CO²"
-      app:layout_constraintBottom_toTopOf="@+id/floatingActionButton"
-      app:layout_constraintStart_toStartOf="@+id/textView5" />
+      app:layout_constraintBottom_toTopOf="@+id/startResumeButton"
+      app:layout_constraintStart_toStartOf="@+id/ascendTitle" />
 
     <TextView
-      android:id="@+id/textView8"
+      android:id="@+id/speedView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginEnd="16dp"
-      android:text="21 km/h (Ø 15 km/h)"
+      android:text="N/A km/h (Ø N/A km/h)"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/textView2" />
+      app:layout_constraintTop_toTopOf="@+id/speedTitle" />
 
     <TextView
-      android:id="@+id/distance_value"
+      android:id="@+id/distanceView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="N/A km"
-      app:layout_constraintEnd_toEndOf="@+id/textView8"
-      app:layout_constraintTop_toTopOf="@+id/textView3" />
+      app:layout_constraintEnd_toEndOf="@+id/speedView"
+      app:layout_constraintTop_toTopOf="@+id/distanceTitle" />
 
     <TextView
-      android:id="@+id/textView10"
+      android:id="@+id/durationView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="21 m 4 s"
-      app:layout_constraintEnd_toEndOf="@+id/distance_value"
-      app:layout_constraintTop_toTopOf="@+id/textView4" />
+      android:text="N/A m N/A s"
+      app:layout_constraintEnd_toEndOf="@+id/distanceView"
+      app:layout_constraintTop_toTopOf="@+id/durationTitle" />
 
     <TextView
-      android:id="@+id/textView11"
+      android:id="@+id/ascendView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="732 m"
-      app:layout_constraintEnd_toEndOf="@+id/textView10"
-      app:layout_constraintTop_toTopOf="@+id/textView5" />
+      android:text="N/A m"
+      app:layout_constraintEnd_toEndOf="@+id/durationView"
+      app:layout_constraintTop_toTopOf="@+id/ascendTitle" />
 
     <TextView
       android:id="@+id/textView12"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="0.7 kg"
-      app:layout_constraintEnd_toEndOf="@+id/textView11"
-      app:layout_constraintTop_toTopOf="@+id/textView6" />
+      android:text="N/A kg"
+      app:layout_constraintEnd_toEndOf="@+id/ascendView"
+      app:layout_constraintTop_toTopOf="@+id/co2Title" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/floatingActionButton"
+      android:id="@+id/startResumeButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="64dp"
-      android:clickable="true"
       android:src="@drawable/ic_baseline_play_arrow_24"
       app:tint="@color/white"
-      app:backgroundTint="@color/green_700"
+      app:backgroundTint="@color/button"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/floatingActionButton2"
+      android:id="@+id/stopButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
-      android:clickable="true"
+      android:enabled="false"
       android:src="@drawable/ic_baseline_stop_24"
-      app:backgroundTint="@color/green_700"
+      app:backgroundTint="@color/button"
       app:fabSize="mini"
-      app:layout_constraintBottom_toBottomOf="@+id/floatingActionButton"
-      app:layout_constraintStart_toEndOf="@+id/floatingActionButton"
+      app:layout_constraintBottom_toBottomOf="@+id/startResumeButton"
+      app:layout_constraintStart_toEndOf="@+id/startResumeButton"
       app:tint="@color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/floatingActionButton3"
+      android:id="@+id/pauseButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginEnd="16dp"
-      android:clickable="true"
+      android:enabled="false"
       android:src="@drawable/ic_baseline_pause_24"
-      app:backgroundTint="@color/grey_500"
+      app:backgroundTint="@color/button"
       app:fabSize="mini"
-      app:layout_constraintBottom_toBottomOf="@+id/floatingActionButton"
-      app:layout_constraintEnd_toStartOf="@+id/floatingActionButton"
+      app:layout_constraintBottom_toBottomOf="@+id/startResumeButton"
+      app:layout_constraintEnd_toStartOf="@+id/startResumeButton"
       app:tint="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
