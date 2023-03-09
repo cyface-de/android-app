@@ -46,7 +46,7 @@ object Constants {
      */
     const val ACCEPTED_REPORTING_KEY = "$PACKAGE.accepted_reporting"
     const val PREFERENCES_SERVER_KEY: String = SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY
-    const val PREFERENCES_MODALITY_KEY = "$PACKAGE.modality"
+    // Modality is always BICYCLE here: const val PREFERENCES_MODALITY_KEY = "$PACKAGE.modality"
     const val PREFERENCES_MOVE_TO_LOCATION_KEY = "$PACKAGE.zoom_to_location"
     const val PREFERENCES_SYNCHRONIZATION_KEY = "$PACKAGE.synchronization_enabled"
 

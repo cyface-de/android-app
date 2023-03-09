@@ -37,12 +37,15 @@
     <!-- Capturing Fragment -->
     <string name="title_map">Karte</string>
     <string name="title_speed">Geschwindigkeit</string>
+    <string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
     <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
     <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
+    <string name="msg_calibrating">Kalibriere</string>
 
     <!-- Trips Fragment -->
     <string name="mark_all_menu_item">Alles Markieren</string>
     <string name="delete_marked_menu_item">Markierte löschen</string>
+    <string name="measurement">Messung</string>
     <string name="toast_export">Exportiert:</string>
     <string name="title_menu_item_export">Alles exportieren</string>
     <string name="export_data">Exportiere Daten …</string>

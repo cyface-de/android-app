@@ -92,9 +92,8 @@
 
     <activity
       android:name=".MainActivity"
-      android:exported="true">
-      <!--android:label="@string/app_name" ... FIXME: generated code ... should not be necessary-->
-      <!-- FIXME: see if this is still necessary ... android:launchMode="singleTop"> needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
+      android:exported="true"
+      android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
     </activity>
 
     <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->

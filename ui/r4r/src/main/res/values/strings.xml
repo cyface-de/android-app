@@ -39,12 +39,15 @@
     <!-- Capturing Fragment -->
     <string name="title_map">Map</string>
     <string name="title_speed">Speed</string>
+    <string name="title_dialog_starting_data_capture">Starting Data Capture</string>
     <string name="error_message_capturing_canceled_no_space">You need to free some space to start capturing.</string>
     <string name="notification_title_capturing_stopped">Stopped Capturing</string>
+    <string name="msg_calibrating">Calibrating</string>
 
     <!-- Trips Fragment -->
     <string name="mark_all_menu_item">Select all items</string>
     <string name="delete_marked_menu_item">Delete marked</string>
+    <string name="measurement">Measurement</string>
     <string name="toast_export">Exported:</string>
     <string name="title_menu_item_export">Export all</string>
     <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->

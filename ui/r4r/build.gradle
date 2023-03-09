@@ -193,13 +193,16 @@ dependencies {
     // For the action bar (at the bottom of the screen)
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3' // FIXME: version
 
+    // Kotlin components
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
     implementation project(':datacapturing')
     implementation project(':synchronization')
     implementation project(':persistence')
-    //implementation project(':energy_settings')
+    implementation project(':energy_settings')
 
     // Dependencies for instrumentation tests
     // Resolve conflicts between main and test APK (which is used in the integration-test module):
