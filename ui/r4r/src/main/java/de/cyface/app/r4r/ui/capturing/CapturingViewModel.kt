@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import de.cyface.persistence.model.Measurement
+import de.cyface.persistence.model.Track
 import de.cyface.persistence.repository.MeasurementRepository
 import kotlinx.coroutines.launch
 
@@ -55,6 +56,24 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
 
     // Expose the data state to the UI layer
     val text: LiveData<String> = _text
+
+    /**
+     * Caching the [Track]s of the current [Measurement], so we do not need to ask the database each time
+     * the updated track is requested. This is `null` if there is no unfinished measurement.
+     */
+    var currentMeasurementsTracks: ArrayList<Track>? = null
+
+    fun initializeCurrentMeasurementsTracks() {
+        currentMeasurementsTracks = ArrayList()
+    }
+
+    fun resetCurrentMeasurementsTracks() {
+        currentMeasurementsTracks = null
+    }
+
+    fun addToCurrentMeasurementsTracks(track: Track) {
+        (currentMeasurementsTracks as ArrayList<Track>).add(track)
+    }
 }
 
 /**

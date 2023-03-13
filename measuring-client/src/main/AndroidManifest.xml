@@ -65,6 +65,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}" />
 
+        <!-- This workaround is required to use GoogleMaps with API 28.
+        From https://issuetracker.google.com/issues/79478779 -->
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />

@@ -63,14 +63,17 @@
     <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
 
     <!-- Google Maps for Android requirements -->
-    <meta-data
+    <!-- FIXME: See if this is still necessary
+    meta-data
       android:name="com.google.android.gms.version"
-      android:value="@integer/google_play_services_version" />
+      android:value="@integer/google_play_services_version" /-->
     <meta-data
       android:name="com.google.android.geo.API_KEY"
       android:value="${googleMapsApiKey}" />
 
     <!-- FIXME: see if this is still necessary
+    < ! This workaround is required to use GoogleMaps with API 28.
+    From https://issuetracker.google.com/issues/79478779 >
     uses-library
       android:name="org.apache.http.legacy"
       android:required="false" /-->
