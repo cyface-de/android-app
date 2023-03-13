@@ -70,7 +70,7 @@ android {
         missingDimensionStrategy 'mode', 'full'
 
         // Load Google Maps API key
-        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
+        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key.r4r')}"]
     }
 
     buildTypes {

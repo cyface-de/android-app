@@ -42,6 +42,14 @@
     <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
     <string name="msg_calibrating">Kalibriere</string>
 
+    <!-- Map Fragment -->
+    <string name="modality_car">Auto</string>
+    <string name="modality_bicycle">Fahrrad</string>
+    <string name="modality_walking">Zu Fuß</string>
+    <string name="modality_bus">Bus</string>
+    <string name="modality_train">Zug</string>
+    <string name="modality_motorbike">Motorrad</string>
+
     <!-- Trips Fragment -->
     <string name="mark_all_menu_item">Alles Markieren</string>
     <string name="delete_marked_menu_item">Markierte löschen</string>

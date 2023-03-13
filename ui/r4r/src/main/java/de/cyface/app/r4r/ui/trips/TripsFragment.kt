@@ -12,14 +12,10 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentTripsBinding
-import de.cyface.app.r4r.ui.capturing.CapturingViewModel
-import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.datacapturing.CyfaceDataCapturingService
 
 class TripsFragment : Fragment() {

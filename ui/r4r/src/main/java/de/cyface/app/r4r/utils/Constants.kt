@@ -18,7 +18,12 @@
  */
 package de.cyface.app.r4r.utils
 
+import android.content.Context
+import android.util.Log
+import de.cyface.app.r4r.R
+import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.SyncService
+import java.lang.ref.WeakReference
 
 /**
  * This class holds all constants required by multiple classes. This avoids unnecessary dependencies

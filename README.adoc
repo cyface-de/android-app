@@ -60,6 +60,7 @@ auth.token=SECRET_TOKEN
 Add the following to your `gradle.properties` file:
 ....
 google.maps_api_key=SECRET_KEY
+google.maps_api_key.r4f=SECRET_KEY
 ....
 
 ==== Cyface Guest Credentials

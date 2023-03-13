@@ -23,7 +23,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.R
@@ -110,12 +109,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private lateinit var stopButton: FloatingActionButton
     private lateinit var pauseButton: FloatingActionButton
 
-    /**
-     * Caching the [Track]s of the current [Measurement], so we do not need to ask the database each time
-     * the updated track is requested. This is `null` if there is no unfinished measurement.
-     */
-    private var currentMeasurementsTracks: ArrayList<Track>? = null
-
     @Suppress("PrivatePropertyName")
     private val CALIBRATION_DIALOG_TIMEOUT = 1500L
     private var calibrationDialogListener: Collection<CalibrationDialogListener>? = null
@@ -130,7 +123,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // Update LiveData upon user interaction, network responses, or data loading completion.
         // `setValue must be called from the main thread, use `postValue()` from worker threads.
         // capturingViewModel.insert(measurement)
-
 
         // Disables the button. This is used to avoid a duplicate start command which crashes the SDK
         // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
@@ -281,12 +273,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        // Change active tab when swiping
-        viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                tabLayout.selectTab(tabLayout.getTabAt(position))
-            }
-        })
+        // Tab Swiping disabled to ease touch-control in the Google Map
+        viewPager.isUserInputEnabled = false
 
         // FIXME: This did not happen in the old UI, not sure when the view is recreated there
         // but maybe this is the cause for the rebinding bug? but is the bug connected to the UI?
@@ -381,7 +369,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 // We re-sync the button here as the data capturing can be canceled while the app is closed
                 setCapturingStatus(MeasurementStatus.OPEN)
                 //setButtonEnabled(button)
-                // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
+                // Was disabled before, too: mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
 
                 // Also try to reconnect to CameraService if it's alive
                 /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
@@ -398,7 +386,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             Log.d(TAG, "onResume: reconnecting timed out")
             if (persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)) {
                 setCapturingStatus(MeasurementStatus.PAUSED)
-                // mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
+                // Was disabled before, too:  mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
             } else {
                 setCapturingStatus(MeasurementStatus.FINISHED)
             }
@@ -619,7 +607,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                             // The measurement id should always be set [STAD-333]
                             Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                            currentMeasurementsTracks = null
+                            capturingViewModel.resetCurrentMeasurementsTracks()
                             setCapturingStatus(MeasurementStatus.FINISHED)
                             //setButtonEnabled(button)
                         }
@@ -636,7 +624,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                     // The measurement id should always be set [STAD-333]
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    currentMeasurementsTracks = null
+                    capturingViewModel.resetCurrentMeasurementsTracks()
                     setCapturingStatus(MeasurementStatus.FINISHED)
                     //setButtonEnabled(button)
                 }, SystemClock.uptimeMillis() + 500L)
@@ -699,8 +687,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            currentMeasurementsTracks = ArrayList()
-            (currentMeasurementsTracks as ArrayList<Track>).add(Track())
+            capturingViewModel.initializeCurrentMeasurementsTracks()
+            capturingViewModel.addToCurrentMeasurementsTracks(Track())
             capturingService.start(Modality.BICYCLE,
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
@@ -739,7 +727,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun resumeCapturing() {
         Log.d(TAG, "resumeCachedTrack: Adding new sub track to existing cached track")
-        currentMeasurementsTracks!!.add(Track())
+        capturingViewModel.addToCurrentMeasurementsTracks(Track())
         try {
             capturingService.resume(
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
@@ -895,7 +883,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 && !persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)
             ) {
                 Log.d(TAG, "updateCachedTrack: No unfinished measurement found, un-setting cache.")
-                currentMeasurementsTracks = null
+                capturingViewModel.resetCurrentMeasurementsTracks()
                 return
             }
             Log.d(TAG,"updateCachedTrack: Unfinished measurement found, loading track from database.")
@@ -906,7 +894,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             )
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
-            currentMeasurementsTracks = java.util.ArrayList(loadedList)
+            capturingViewModel.currentMeasurementsTracks = java.util.ArrayList(loadedList)
         } catch (e: NoSuchMeasurementException) {
             throw java.lang.RuntimeException(e)
         } catch (e: CursorIsNullException) {

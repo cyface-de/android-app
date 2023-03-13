@@ -44,7 +44,16 @@
     <string name="notification_title_capturing_stopped">Stopped Capturing</string>
     <string name="msg_calibrating">Calibrating</string>
 
+    <!-- Map Fragment -->
+    <string name="modality_car">Car</string>
+    <string name="modality_bicycle">Bicycle</string>
+    <string name="modality_walking">Walking</string>
+    <string name="modality_bus">Bus</string>
+    <string name="modality_train">Train</string>
+    <string name="modality_motorbike">Motorbike</string>
+
     <!-- Trips Fragment -->
+    <string name="modality_type">Modality type</string>
     <string name="mark_all_menu_item">Select all items</string>
     <string name="delete_marked_menu_item">Delete marked</string>
     <string name="measurement">Measurement</string>
