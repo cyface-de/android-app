@@ -298,6 +298,7 @@ class Map(
         }
     }
 
+    @Suppress("unused")
     fun removeEventMarker(eventId: Long) {
         val marker = eventMarker[eventId]
         marker?.remove()

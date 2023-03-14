@@ -17,13 +17,11 @@ import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.EventType
 import de.cyface.persistence.model.Track
-import de.cyface.utils.CursorIsNullException
 import io.sentry.Sentry
 
 class MapFragment : Fragment() {
@@ -59,16 +57,6 @@ class MapFragment : Fragment() {
             currentMeasurementsEvents = loadCurrentMeasurementsEvents()
             map!!.renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false)
         } catch (e: NoSuchMeasurementException) {
-            val isReportingEnabled: Boolean =
-                preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
-                Sentry.captureException(e)
-            }
-            Log.w(
-                TAG,
-                "onMapReadyRunnable failed to loadCurrentMeasurementsEvents. Thus, map.renderMeasurement() is not executed. This should only happen when the capturing already stopped."
-            )
-        } catch (e: CursorIsNullException) {
             val isReportingEnabled: Boolean =
                 preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
@@ -132,7 +120,7 @@ class MapFragment : Fragment() {
         _binding = null
     }
 
-    @Throws(CursorIsNullException::class, NoSuchMeasurementException::class)
+    @Throws(NoSuchMeasurementException::class)
     fun loadCurrentMeasurementsEvents(): List<Event> {
         val (id) = capturingService.loadCurrentlyCapturedMeasurement()
         return persistenceLayer.loadEvents(id, EventType.MODALITY_TYPE_CHANGE)!!
