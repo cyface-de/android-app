@@ -43,7 +43,6 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:layout_marginBottom="8dp"
-      android:text="Fahrt 23 (pausiert)"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"
       app:layout_constraintBottom_toTopOf="@+id/speedTitle"
       app:layout_constraintStart_toStartOf="parent" />
@@ -54,6 +53,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="Geschwindigkeit"
+      android:visibility="invisible"
       app:layout_constraintBottom_toTopOf="@+id/distanceTitle"
       app:layout_constraintStart_toStartOf="@+id/tripTitle" />
 
@@ -105,7 +105,6 @@
       android:id="@+id/distanceView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="N/A km"
       app:layout_constraintEnd_toEndOf="@+id/speedView"
       app:layout_constraintTop_toTopOf="@+id/distanceTitle" />
 
@@ -113,7 +112,6 @@
       android:id="@+id/durationView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="N/A m N/A s"
       app:layout_constraintEnd_toEndOf="@+id/distanceView"
       app:layout_constraintTop_toTopOf="@+id/durationTitle" />
 
@@ -121,7 +119,6 @@
       android:id="@+id/ascendView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="N/A m"
       app:layout_constraintEnd_toEndOf="@+id/durationView"
       app:layout_constraintTop_toTopOf="@+id/ascendTitle" />
 
@@ -129,7 +126,7 @@
       android:id="@+id/textView12"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="N/A kg"
+      android:text="\? kg"
       app:layout_constraintEnd_toEndOf="@+id/ascendView"
       app:layout_constraintTop_toTopOf="@+id/co2Title" />
 
