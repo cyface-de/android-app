@@ -6,15 +6,19 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.cyface.app.r4r.databinding.ActivityMainBinding
+import de.cyface.app.r4r.ui.capturing.CapturingViewModel
+import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.DEFAULT_SENSOR_FREQUENCY
@@ -24,11 +28,13 @@ import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
 import de.cyface.datacapturing.model.CapturedData
+import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
+import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.utils.DiskConsumption
 
@@ -37,6 +43,15 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private lateinit var binding: ActivityMainBinding
 
     override lateinit var capturingService: CyfaceDataCapturingService
+
+    private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
+
+    /**
+     * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
+     */
+    val capturingViewModel: CapturingViewModel by viewModels {
+        CapturingViewModelFactory(persistenceLayer.measurementRepository!!)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +137,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 },
                 DEFAULT_SENSOR_FREQUENCY
             )
+            persistenceLayer = capturingService.persistenceLayer
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             //startSynchronization(fragmentRoot.getContext())

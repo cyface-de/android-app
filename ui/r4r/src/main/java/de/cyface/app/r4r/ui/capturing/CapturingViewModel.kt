@@ -42,20 +42,10 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
     /**
      * The cached, latest location or `null` if capturing is inactive.
      */
-    private var _location = MutableLiveData<ParcelableGeoLocation?>()
+    private val _location = MutableLiveData<ParcelableGeoLocation?>()
 
     // Expose the data state to the UI layer
     val location: LiveData<ParcelableGeoLocation?> = _location
-
-    /**
-     * The observed, current distance.
-     */
-    private val _distance = MutableLiveData<String>().apply {
-        value = "${if (measurement.value == null) "N/A" else measurement.value!!.distance} km"
-    }
-
-    // Expose the data state to the UI layer
-    val distance: LiveData<String> = _distance
 
     /**
      * Caching the [Track]s of the current [Measurement], so we do not need to ask the database each time
