@@ -12,6 +12,8 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
@@ -19,15 +21,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
-import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
@@ -96,7 +95,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
     // Get shared `ViewModel` instance from Activity
-    private val capturingViewModel: CapturingViewModel by activityViewModels { CapturingViewModelFactory(persistenceLayer.measurementRepository!!)}
+    private val capturingViewModel: CapturingViewModel by activityViewModels {
+        CapturingViewModelFactory(
+            persistenceLayer.measurementRepository!!
+        )
+    }
 
     //private val preferences: SharedPreferences? = null
 
@@ -240,14 +243,65 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // Update UI element with the updates from the ViewModel
         capturingViewModel.measurement.observe(viewLifecycleOwner) {
-            binding.distanceView.text =
-                "LIVE: ${if (it == null) "N/A" else (it!!.distance * 100).roundToInt() / 100.0} km"
+            val visibility = if (it == null) INVISIBLE else VISIBLE
+            // FIXME: The speed title could also reflect the GNSS fix / show a hint about it
+            binding.speedTitle.visibility = visibility
+            binding.distanceTitle.visibility = visibility
+            binding.durationTitle.visibility = visibility
+            binding.ascendTitle.visibility = visibility
+            binding.co2Title.visibility = visibility
+
+            val distanceMeter = it?.distance
+            val distanceKm = distanceMeter?.div(1000.0)
+            val distanceText =
+                if (distanceKm == null) null else "${(distanceKm * 100).roundToInt() / 100.0} km"
+            binding.distanceView.text = distanceText ?: ""
+
+            val durationMillis = if (it == null) null else persistenceLayer.loadDuration(it.id)
+            val durationSeconds = durationMillis?.div(1000)
+            val durationMinutes = durationSeconds?.div(60)
+            val durationHours = durationMinutes?.div(60)
+            val hoursText =
+                if (durationHours == null) null else if (durationHours > 0) durationHours.toString() + "h " else ""
+            val minutesText =
+                if (durationMinutes == null) null else if (durationMinutes > 0) (durationMinutes % 60).toString() + "m " else ""
+            val secondsText =
+                if (durationSeconds == null) null else (durationSeconds % 60).toString() + "s"
+            val durationText =
+                if (hoursText == null) null else hoursText + minutesText + secondsText
+            binding.durationView.text = durationText ?: ""
+
+            // FIXME: This could also reflect "currentlyCapturedMeasurement" and the other fields the Room LiveData
+            // FIXME: use parameterized resource like: textView.setText(String.format("%s %s",params.prefix, ascendText));
+            val tripTitle = if (it == null) null else "Fahrt ${it.id}"
+            binding.tripTitle.text = tripTitle ?: ""
         }
         capturingViewModel.location.observe(viewLifecycleOwner) {
+            var averageSpeedText: String? = null
+            var ascendText: String? = null
+            try {
+                // FIXME: we only need to cache the current measurement id and then observe that measurement
+                val measurement = persistenceLayer.loadCurrentlyCapturedMeasurement()
+                val averageSpeedKmh =
+                    persistenceLayer.loadAverageSpeed(
+                        measurement.id,
+                        DefaultLocationCleaning()
+                    ) * 3.6
+                averageSpeedText = averageSpeedKmh.roundToInt().toString() + " km/h"
+
+                val ascend = if (measurement.status == MeasurementStatus.OPEN) persistenceLayer.loadAscend(measurement.id) else null
+                ascendText = if (ascend == null) null else "+ ${ascend.roundToInt()} m"
+            } catch (e: NoSuchMeasurementException) {
+                // Happen when locations arrive late
+                Log.d(TAG, "Position changed while no capturing is active, ignoring.")
+            }
             val speedMps = it?.speed
             val speedKmPh = speedMps?.times(3.6)?.roundToInt()
-            val speedText = if (speedKmPh == null) null else "$speedKmPh km/h (Ø N/A km/h)"
+            val speedText = if (speedKmPh == null) null else "$speedKmPh km/h (Ø $averageSpeedText)"
             binding.speedView.text = speedText ?: ""
+            binding.ascendView.text = ascendText ?: ""
+
+            // FIXME: See more stuff from `DataCapturingButton.onNewGeoLocationAcquired` if not called in `onNewGeoLocation` in this class
         }
 
         startResumeButton.setOnClickListener(onStartResume)

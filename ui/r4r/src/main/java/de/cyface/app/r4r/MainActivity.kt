@@ -49,7 +49,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    val capturingViewModel: CapturingViewModel by viewModels {
+    @Suppress("unused") // Used by Fragments
+    private val capturingViewModel: CapturingViewModel by viewModels {
         CapturingViewModelFactory(persistenceLayer.measurementRepository!!)
     }
 
