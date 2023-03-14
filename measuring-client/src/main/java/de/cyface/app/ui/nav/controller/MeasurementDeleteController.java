@@ -49,7 +49,6 @@ import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.model.Measurement;
-import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
@@ -180,8 +179,6 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             if (isReportingEnabled) {
                 Sentry.captureException(e);
             }
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
         }
 
         for (int itemPosition = 0; itemPosition < checkedItemPositions.size(); itemPosition++) {
@@ -196,7 +193,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
 
             // Ignoring the ongoing measurement
             if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getId()) {
-                final var measurement= persistenceLayer.loadMeasurement(selectedMeasurementId);
+                final var measurement = persistenceLayer.loadMeasurement(selectedMeasurementId);
                 ret.add(measurement);
             }
         }

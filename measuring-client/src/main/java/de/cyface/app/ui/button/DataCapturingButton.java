@@ -56,7 +56,6 @@ import com.github.lzyzsd.circleprogress.DonutProgress;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ContentProvider;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
@@ -102,7 +101,6 @@ import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
-import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -275,7 +273,7 @@ public class DataCapturingButton
                         + persistenceLayer.loadCurrentlyCapturedMeasurement().getId();
                 measurementIdTextView.setText(measurementIdText);
                 cameraInfoTextView.setVisibility(View.VISIBLE);
-            } catch (CursorIsNullException | NoSuchMeasurementException e) {
+            } catch (NoSuchMeasurementException e) {
                 throw new IllegalStateException(e);
             }
         } else {
@@ -496,7 +494,7 @@ public class DataCapturingButton
                     Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
                 }, SystemClock.uptimeMillis() + 500L);
             }
-        } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+        } catch (final NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
 
@@ -557,7 +555,7 @@ public class DataCapturingButton
                     setButtonEnabled(button);
                 }, SystemClock.uptimeMillis() + 500L);
             }
-        } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+        } catch (final NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
 
@@ -623,14 +621,13 @@ public class DataCapturingButton
                                 Log.d(Constants.TAG, "CameraServiceRequested");
                                 try {
                                     startCameraService(measurementIdentifier);
-                                } catch (DataCapturingException | MissingPermissionException
-                                        | CursorIsNullException e) {
+                                } catch (DataCapturingException | MissingPermissionException e) {
                                     throw new IllegalStateException(e);
                                 }
                             }
                         }
                     });
-        } catch (final DataCapturingException | CursorIsNullException | MissingPermissionException e) {
+        } catch (final DataCapturingException | MissingPermissionException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -694,15 +691,13 @@ public class DataCapturingButton
                                 Log.d(Constants.TAG, "CameraServiceRequested");
                                 try {
                                     startCameraService(measurementIdentifier);
-                                } catch (DataCapturingException | MissingPermissionException
-                                        | CursorIsNullException e) {
+                                } catch (DataCapturingException | MissingPermissionException e) {
                                     throw new IllegalStateException(e);
                                 }
                             }
                         }
                     });
-        } catch (final NoSuchMeasurementException | DataCapturingException | CursorIsNullException
-                | MissingPermissionException e) {
+        } catch (final NoSuchMeasurementException | DataCapturingException | MissingPermissionException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -724,13 +719,12 @@ public class DataCapturingButton
      * @param measurementId the id of the measurement for which camera data is to be captured
      * @throws DataCapturingException If the asynchronous background service did not start successfully or no valid
      *             Android context was available.
-     * @throws CursorIsNullException If {@link ContentProvider} was inaccessible.
      * @throws MissingPermissionException If no Android <code>ACCESS_FINE_LOCATION</code> has been granted. You may
      *             register a {@link UIListener} to ask the user for this permission and prevent the
      *             <code>Exception</code>. If the <code>Exception</code> was thrown the service does not start.
      */
     private void startCameraService(final long measurementId)
-            throws DataCapturingException, MissingPermissionException, CursorIsNullException {
+            throws DataCapturingException, MissingPermissionException {
 
         final boolean rawModeSelected = preferences.getBoolean(PREFERENCES_CAMERA_RAW_MODE_ENABLED_KEY, false);
         final boolean videoModeSelected = preferences.getBoolean(PREFERENCES_CAMERA_VIDEO_MODE_ENABLED_KEY, false);
@@ -791,7 +785,7 @@ public class DataCapturingButton
                                 }
                             });
                         }
-                    } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+                    } catch (final NoSuchMeasurementException e) {
                         throw new IllegalStateException(e);
                     }
                 });
@@ -842,7 +836,7 @@ public class DataCapturingButton
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
             currentMeasurementsTracks = new ArrayList<>(loadedList);
-        } catch (NoSuchMeasurementException | CursorIsNullException e) {
+        } catch (NoSuchMeasurementException e) {
             throw new RuntimeException(e);
         }
     }
@@ -851,7 +845,7 @@ public class DataCapturingButton
         return currentMeasurementsTracks;
     }
 
-    public List<Event> loadCurrentMeasurementsEvents() throws CursorIsNullException, NoSuchMeasurementException {
+    public List<Event> loadCurrentMeasurementsEvents() throws NoSuchMeasurementException {
         final Measurement measurement = dataCapturingService.loadCurrentlyCapturedMeasurement();
         return persistenceLayer.loadEvents(measurement.getId(), MODALITY_TYPE_CHANGE);
     }
@@ -937,8 +931,6 @@ public class DataCapturingButton
                 Sentry.captureException(e);
             }
             return;
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
         }
         final int distanceMeter = (int)Math.round(measurement.getDistance());
         final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
@@ -953,14 +945,6 @@ public class DataCapturingButton
         try {
             currentMeasurementsEvents = loadCurrentMeasurementsEvents();
             mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
-        } catch (final CursorIsNullException e) {
-            Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
-                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
-                    + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[1] && isReportingEnabled) {
-                onNewGeoLocationAcquiredExceptionTriggered[1] = true;
-                Sentry.captureException(e);
-            }
         } catch (NoSuchMeasurementException e) {
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
                     + "Thus, map.renderMeasurement() is ignored. This should only happen id "

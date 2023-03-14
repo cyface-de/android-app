@@ -42,7 +42,6 @@ import de.cyface.datacapturing.StartUpFinishedHandler
 import de.cyface.datacapturing.exception.DataCapturingException
 import de.cyface.datacapturing.exception.MissingPermissionException
 import de.cyface.datacapturing.model.CapturedData
-import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.isBackgroundProcessingRestricted
 import de.cyface.energy_settings.TrackingSettings.isEnergySaferActive
@@ -59,7 +58,6 @@ import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
-import de.cyface.utils.CursorIsNullException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
@@ -464,17 +462,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun updateOngoingCapturingInfo(status: MeasurementStatus) {
         if (status === MeasurementStatus.OPEN) {
-            try {
-                // FIXME: We used `DefaultBehavior` before, but now `CapturingBehavior` is used
-                val measurementIdText = (getString(R.string.measurement) + " "
-                        + persistenceLayer.loadCurrentlyCapturedMeasurement().id)
-                binding.tripTitle.text = measurementIdText
-                // FIXME: cameraInfoTextView.setVisibility(View.VISIBLE)
-            } catch (e: CursorIsNullException) {
-                throw java.lang.IllegalStateException(e)
-            } catch (e: NoSuchMeasurementException) {
-                throw java.lang.IllegalStateException(e)
-            }
+            // FIXME: We used `DefaultBehavior` before, but now `CapturingBehavior` is used
+            val measurementIdText = (getString(R.string.measurement) + " "
+                    + persistenceLayer.loadCurrentlyCapturedMeasurement().id)
+            binding.tripTitle.text = measurementIdText
+            // FIXME: cameraInfoTextView.setVisibility(View.VISIBLE)
         } else {
             // This way you can notice if a GeoLocation/Picture was already captured or not
             binding.distanceView.text = ""
@@ -563,8 +555,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             }
         } catch (e: NoSuchMeasurementException) {
             throw IllegalStateException(e)
-        } catch (e: CursorIsNullException) {
-            throw IllegalStateException(e)
         }
 
         // Pause camera capturing if it is running (even is DCS is not running)
@@ -630,8 +620,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 }, SystemClock.uptimeMillis() + 500L)
             }
         } catch (e: NoSuchMeasurementException) {
-            throw IllegalStateException(e)
-        } catch (e: CursorIsNullException) {
             throw IllegalStateException(e)
         }
 
@@ -707,15 +695,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                                 throw IllegalStateException(e)
                             } catch (e: MissingPermissionException) {
                                 throw IllegalStateException(e)
-                            } catch (e: CursorIsNullException) {
-                                throw IllegalStateException(e)
                             }
                         }*/
                     }
                 })
         } catch (e: DataCapturingException) {
-            throw IllegalStateException(e)
-        } catch (e: CursorIsNullException) {
             throw IllegalStateException(e)
         } catch (e: MissingPermissionException) {
             throw IllegalStateException(e)
@@ -747,8 +731,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                                 throw java.lang.IllegalStateException(e)
                             } catch (e: MissingPermissionException) {
                                 throw java.lang.IllegalStateException(e)
-                            } catch (e: CursorIsNullException) {
-                                throw java.lang.IllegalStateException(e)
                             }
                         }*/
                     }
@@ -756,8 +738,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         } catch (e: NoSuchMeasurementException) {
             throw java.lang.IllegalStateException(e)
         } catch (e: DataCapturingException) {
-            throw java.lang.IllegalStateException(e)
-        } catch (e: CursorIsNullException) {
             throw java.lang.IllegalStateException(e)
         } catch (e: MissingPermissionException) {
             throw java.lang.IllegalStateException(e)
@@ -835,8 +815,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 }*/
             } catch (e: NoSuchMeasurementException) {
                 throw java.lang.IllegalStateException(e)
-            } catch (e: CursorIsNullException) {
-                throw java.lang.IllegalStateException(e)
             }
         }
     }
@@ -896,8 +874,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
             capturingViewModel.currentMeasurementsTracks = java.util.ArrayList(loadedList)
         } catch (e: NoSuchMeasurementException) {
-            throw java.lang.RuntimeException(e)
-        } catch (e: CursorIsNullException) {
             throw java.lang.RuntimeException(e)
         }
     }

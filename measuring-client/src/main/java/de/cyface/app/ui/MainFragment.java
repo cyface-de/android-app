@@ -77,7 +77,6 @@ import de.cyface.persistence.model.Track;
 import de.cyface.synchronization.ConnectionStatusListener;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.synchronization.exception.SynchronisationException;
-import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
@@ -142,7 +141,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
             try {
                 currentMeasurementsEvents = dataCapturingButton.loadCurrentMeasurementsEvents();
                 map.renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
-            } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+            } catch (final NoSuchMeasurementException e) {
                 final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
                 if (isReportingEnabled) {
                     Sentry.captureException(e);
@@ -179,9 +178,9 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
             startSynchronization(fragmentRoot.getContext());
             dataCapturingService.addConnectionStatusListener(this);
 
-            cameraService = new CameraService(fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
-                    AUTHORITY, new CameraEventHandler(), dataCapturingButton);
-        } catch (final SetupException | CursorIsNullException e) {
+            cameraService = new CameraService(fragmentRoot.getContext(), AUTHORITY, new CameraEventHandler(),
+                    dataCapturingButton);
+        } catch (final SetupException e) {
             throw new IllegalStateException(e);
         }
 

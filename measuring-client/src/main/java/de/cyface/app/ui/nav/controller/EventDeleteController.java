@@ -41,7 +41,6 @@ import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.model.Event;
-import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 
 /**
@@ -56,13 +55,13 @@ import de.cyface.utils.Validate;
 public final class EventDeleteController
         extends AsyncTask<EventDeleteController.EventDeleteControllerParameters, Void, ListView> {
 
-    private WeakReference<Context> contextReference;
+    private final WeakReference<Context> contextReference;
     /**
      * The data persistenceLayer used by this controller.
      */
     private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     private Map map;
-    private List<Long> eventIds = new ArrayList<>();
+    private final List<Long> eventIds = new ArrayList<>();
 
     /**
      * Creates a new completely initialized object of this class with the current context.
@@ -130,11 +129,7 @@ public final class EventDeleteController
             final long selectedEventId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns.ID));
 
             final Event event;
-            try {
-                event = persistenceLayer.loadEvent(selectedEventId);
-            } catch (final CursorIsNullException e) {
-                throw new IllegalStateException(e);
-            }
+            event = persistenceLayer.loadEvent(selectedEventId);
             ret.add(event);
         }
         return ret;
