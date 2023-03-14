@@ -42,6 +42,7 @@ import de.cyface.datacapturing.StartUpFinishedHandler
 import de.cyface.datacapturing.exception.DataCapturingException
 import de.cyface.datacapturing.exception.MissingPermissionException
 import de.cyface.datacapturing.model.CapturedData
+import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.isBackgroundProcessingRestricted
 import de.cyface.energy_settings.TrackingSettings.isEnergySaferActive
@@ -220,7 +221,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             capturingService = (activity as ServiceProvider).capturingService
             persistenceLayer = capturingService.persistenceLayer
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement MyDependencies")
+            throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
         }
     }
 
@@ -237,7 +238,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // Update UI element with the updates from the ViewModel
         capturingViewModel.measurement.observe(viewLifecycleOwner) {
-            binding.distanceView.text = "LIVE: ${if (it == null) "N/A" else (it!!.distance * 100).roundToInt() / 100.0} km"
+            binding.distanceView.text =
+                "LIVE: ${if (it == null) "N/A" else (it!!.distance * 100).roundToInt() / 100.0} km"
         }
 
         startResumeButton.setOnClickListener(onStartResume)
@@ -274,10 +276,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // Tab Swiping disabled to ease touch-control in the Google Map
         viewPager.isUserInputEnabled = false
 
-        // FIXME: This did not happen in the old UI, not sure when the view is recreated there
-        // but maybe this is the cause for the rebinding bug? but is the bug connected to the UI?
-        // If we do this there, too, update `setButtonStatus` see the implementation here
-        reconnect()
+        // `reconnect()` is called in `onResume()` which is called after `onViewCreated`
     }
 
     override fun onPause() {
@@ -300,6 +299,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         super.onDestroyView()
         _binding = null
     }
+
     override fun onFixAcquired() {
         // Nothing to do
     }
@@ -348,8 +348,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun reconnect() {
         updateCachedTrack()
-        // FIXME: When re-enabling this we need to ensure not to register the same listener
-        // in onResume and onViewCreated as it's only unregistered in `onPause`.
         // FIXME: capturingService.addDataCapturingListener(this)
         // FIXME: cameraService.addCameraListener(this)
 
@@ -358,9 +356,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         startResumeButton.isEnabled = false
         pauseButton.isEnabled = false
         stopButton.isEnabled = false
-
-        // OPEN: running capturing
         GlobalScope.launch {
+            // OPEN: running capturing
             if (capturingService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.d(TAG, "onResume: reconnecting DCS succeeded")
                 // FIXME: setLocationListener()
@@ -864,7 +861,10 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 capturingViewModel.resetCurrentMeasurementsTracks()
                 return
             }
-            Log.d(TAG,"updateCachedTrack: Unfinished measurement found, loading track from database.")
+            Log.d(
+                TAG,
+                "updateCachedTrack: Unfinished measurement found, loading track from database."
+            )
             val (id) = capturingService.loadCurrentlyCapturedMeasurement()
             val loadedList = persistenceLayer.loadTracks(
                 id,

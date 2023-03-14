@@ -4,8 +4,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context=".ui.capturing.CapturingFragment"
-  android:background="@android:drawable/ic_menu_mapmode">
+  tools:context=".ui.capturing.CapturingFragment">
 
     <com.google.android.gms.maps.MapView
       android:id="@+id/mapView"

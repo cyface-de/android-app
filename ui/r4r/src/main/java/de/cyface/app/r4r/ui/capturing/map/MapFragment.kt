@@ -17,6 +17,7 @@ import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
