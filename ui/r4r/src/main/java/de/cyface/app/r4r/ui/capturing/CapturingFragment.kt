@@ -18,13 +18,16 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
@@ -92,6 +95,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
     private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
+    // Get shared `ViewModel` instance from Activity
+    private val capturingViewModel: CapturingViewModel by activityViewModels { CapturingViewModelFactory(persistenceLayer.measurementRepository!!)}
+
     //private val preferences: SharedPreferences? = null
 
     // When requested, this adapter returns a DemoObjectFragment,
@@ -112,10 +118,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private val CALIBRATION_DIALOG_TIMEOUT = 1500L
     private var calibrationDialogListener: Collection<CalibrationDialogListener>? = null
     private var calibrationProgressDialog: ProgressDialog? = null
-
-    private val capturingViewModel: CapturingViewModel by viewModels {
-        CapturingViewModelFactory(persistenceLayer.measurementRepository!!)
-    }
 
     private val onStartResume: View.OnClickListener = View.OnClickListener {
         // From examples:
@@ -241,6 +243,12 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             binding.distanceView.text =
                 "LIVE: ${if (it == null) "N/A" else (it!!.distance * 100).roundToInt() / 100.0} km"
         }
+        capturingViewModel.location.observe(viewLifecycleOwner) {
+            val speedMps = it?.speed
+            val speedKmPh = speedMps?.times(3.6)?.roundToInt()
+            val speedText = if (speedKmPh == null) null else "$speedKmPh km/h (Ø N/A km/h)"
+            binding.speedView.text = speedText ?: ""
+        }
 
         startResumeButton.setOnClickListener(onStartResume)
         pauseButton.setOnClickListener(onPause)
@@ -281,8 +289,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
     override fun onPause() {
         super.onPause()
+        //FIXME: move the code below to `disconnect()` like `reconnect()`
         //FIXME: unsetLocationListener()
-        //FIXME: capturingService.removeDataCapturingListener(this)
+        capturingService.removeDataCapturingListener(this)
         //FIXME: cameraService.removeCameraListener(this)
     }
 
@@ -310,7 +319,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
     override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) {
         // FIXME: See DataCapturingButton
-        // SEE https://developer.android.com/guide/fragments/communicate
+        capturingViewModel.setLocation(position)
     }
 
     override fun onNewSensorDataAcquired(data: CapturedData?) {
@@ -338,8 +347,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
     override fun onCapturingStopped() {
         // Disabled on Android 13+ for workaround, see `stop/pauseCapturing()` [RFR-246]
-        //if (Build.VERSION.SDK_INT < 33) {
-        //FIXME: CapturingFragment.setCapturingStatus(MeasurementStatus.FINISHED)
+        //if (Build.VERSION.SDK_INT < 33) { FIXME: see if bug is still here before uncommenting this
+        setCapturingStatus(MeasurementStatus.FINISHED)
+        capturingViewModel.setLocation(null)
         //}
     }
 
@@ -348,7 +358,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun reconnect() {
         updateCachedTrack()
-        // FIXME: capturingService.addDataCapturingListener(this)
+        capturingService.addDataCapturingListener(this)
         // FIXME: cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
