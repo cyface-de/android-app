@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import de.cyface.persistence.model.Measurement
+import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.repository.MeasurementRepository
 import kotlinx.coroutines.launch
@@ -39,6 +40,30 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
     val measurement: LiveData<Measurement?> = repository.observeById(43L /* FIXME*/).asLiveData()
 
     /**
+     * The cached, latest location or `null` if capturing is inactive.
+     */
+    private var _location = MutableLiveData<ParcelableGeoLocation?>()
+
+    // Expose the data state to the UI layer
+    val location: LiveData<ParcelableGeoLocation?> = _location
+
+    /**
+     * The observed, current distance.
+     */
+    private val _distance = MutableLiveData<String>().apply {
+        value = "${if (measurement.value == null) "N/A" else measurement.value!!.distance} km"
+    }
+
+    // Expose the data state to the UI layer
+    val distance: LiveData<String> = _distance
+
+    /**
+     * Caching the [Track]s of the current [Measurement], so we do not need to ask the database each time
+     * the updated track is requested. This is `null` if there is no unfinished measurement.
+     */
+    var currentMeasurementsTracks: ArrayList<Track>? = null
+
+    /**
      * Launch a new coroutine to update the data in a non-blocking way.
      *
      * Encapsulates the `Repository` interface from the UI.
@@ -47,21 +72,9 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
         repository.update(measurement)
     }
 
-    /**
-     * The observed, current state of ***.
-     */
-    private val _text = MutableLiveData<String>().apply {
-        value = "{live} ${if (measurement.value == null) "N/A" else measurement.value!!.distance} km"
+    fun setLocation(location: ParcelableGeoLocation?) {
+        _location.value = location
     }
-
-    // Expose the data state to the UI layer
-    val text: LiveData<String> = _text
-
-    /**
-     * Caching the [Track]s of the current [Measurement], so we do not need to ask the database each time
-     * the updated track is requested. This is `null` if there is no unfinished measurement.
-     */
-    var currentMeasurementsTracks: ArrayList<Track>? = null
 
     fun initializeCurrentMeasurementsTracks() {
         currentMeasurementsTracks = ArrayList()

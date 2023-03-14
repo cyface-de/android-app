@@ -50,6 +50,9 @@
     <string name="modality_train">Zug</string>
     <string name="modality_motorbike">Motorrad</string>
 
+    <!-- Speed Fragment -->
+    <string name="capturing_inactive">Datenerfassung inaktiv</string>
+
     <!-- Trips Fragment -->
     <string name="mark_all_menu_item">Alles Markieren</string>
     <string name="delete_marked_menu_item">Markierte löschen</string>

@@ -7,10 +7,10 @@
     tools:context=".ui.capturing.speed.SpeedFragment">
 
     <TextView
-      android:id="@+id/textView7"
+      android:id="@+id/liveSpeedView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="21 km/h"
+      android:text="@string/capturing_inactive"
       android:textAppearance="@style/TextAppearance.AppCompat.Display1"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"

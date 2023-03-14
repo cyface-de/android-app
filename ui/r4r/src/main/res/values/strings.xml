@@ -52,6 +52,9 @@
     <string name="modality_train">Train</string>
     <string name="modality_motorbike">Motorbike</string>
 
+    <!-- Speed Fragment -->
+    <string name="capturing_inactive">capturing inactive</string>
+
     <!-- Trips Fragment -->
     <string name="modality_type">Modality type</string>
     <string name="mark_all_menu_item">Select all items</string>
