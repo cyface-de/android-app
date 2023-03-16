@@ -186,8 +186,8 @@ dependencies {
     //implementation 'androidx.core:core-ktx:1.7.0'
     //implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // FIXME: version
     // To stream data changes via LiveData and ViewModel to the UI
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1' // FIXME: version $lifecycle_version
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1' // FIXME: version
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.0' // FIXME: version $lifecycle_version
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0' // FIXME: version
     // To use the navigation graph
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3' // FIXME: version
     // For the action bar (at the bottom of the screen)

@@ -61,6 +61,7 @@ abstract class AuthTokenRequest protected constructor(contextReference: Context)
         context = WeakReference(contextReference)
     }
 
+    @Deprecated("Use the standard java.util.concurrent or Kotlin concurrency utilities instead.")
     override fun doInBackground(vararg voids: Void?): AuthTokenRequestParams? {
         val context = context.get()
         if (context == null) {

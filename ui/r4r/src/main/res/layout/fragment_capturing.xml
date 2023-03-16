@@ -123,10 +123,9 @@
       app:layout_constraintTop_toTopOf="@+id/ascendTitle" />
 
     <TextView
-      android:id="@+id/textView12"
+      android:id="@+id/co2View"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="\? kg"
       app:layout_constraintEnd_toEndOf="@+id/ascendView"
       app:layout_constraintTop_toTopOf="@+id/co2Title" />
 
