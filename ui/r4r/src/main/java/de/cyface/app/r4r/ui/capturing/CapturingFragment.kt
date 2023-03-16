@@ -241,7 +241,12 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         stopButton = binding.stopButton
         pauseButton = binding.pauseButton
 
-        // Update UI element with the updates from the ViewModel
+        // Update UI elements with the updates from the ViewModel
+        capturingViewModel.measurementId.observe(viewLifecycleOwner) {
+            // FIXME: use parameterized resource like: textView.setText(String.format("%s %s",params.prefix, ascendText));
+            val tripTitle = if (it == null) null else "Fahrt ${it}"
+            binding.tripTitle.text = tripTitle ?: ""
+        }
         capturingViewModel.measurement.observe(viewLifecycleOwner) {
             val visibility = if (it == null) INVISIBLE else VISIBLE
             // FIXME: The speed title could also reflect the GNSS fix / show a hint about it
@@ -257,6 +262,13 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 if (distanceKm == null) null else "${(distanceKm * 100).roundToInt() / 100.0} km"
             binding.distanceView.text = distanceText ?: ""
 
+            // 95 g / km
+            // https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/
+            val co2Gram = distanceKm?.times(95)
+            val co2Kg = co2Gram?.div(1000)
+            val co2Text = if (co2Kg == null) null else "${(co2Kg * 10).roundToInt() / 10.0} kg"
+            binding.co2View.text = co2Text ?: ""
+
             val durationMillis = if (it == null) null else persistenceLayer.loadDuration(it.id)
             val durationSeconds = durationMillis?.div(1000)
             val durationMinutes = durationSeconds?.div(60)
@@ -270,11 +282,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             val durationText =
                 if (hoursText == null) null else hoursText + minutesText + secondsText
             binding.durationView.text = durationText ?: ""
-
-            // FIXME: This could also reflect "currentlyCapturedMeasurement" and the other fields the Room LiveData
-            // FIXME: use parameterized resource like: textView.setText(String.format("%s %s",params.prefix, ascendText));
-            val tripTitle = if (it == null) null else "Fahrt ${it.id}"
-            binding.tripTitle.text = tripTitle ?: ""
         }
         capturingViewModel.location.observe(viewLifecycleOwner) {
             var averageSpeedText: String? = null
@@ -299,7 +306,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             val speedKmPh = speedMps?.times(3.6)?.roundToInt()
             val speedText = if (speedKmPh == null) null else "$speedKmPh km/h (Ø $averageSpeedText)"
             binding.speedView.text = speedText ?: ""
-            binding.ascendView.text = ascendText ?: ""
+            binding.ascendView.text = if (speedText == null) "" else ascendText ?: "+ 0 m"
 
             // FIXME: See more stuff from `DataCapturingButton.onNewGeoLocationAcquired` if not called in `onNewGeoLocation` in this class
         }
@@ -347,6 +354,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         //FIXME: unsetLocationListener()
         capturingService.removeDataCapturingListener(this)
         //FIXME: cameraService.removeCameraListener(this)
+        capturingViewModel.setMeasurementId(null) // FIXME: experimental, might influence other Fragments
     }
 
     /**
@@ -404,6 +412,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         //if (Build.VERSION.SDK_INT < 33) { FIXME: see if bug is still here before uncommenting this
         setCapturingStatus(MeasurementStatus.FINISHED)
         capturingViewModel.setLocation(null)
+        capturingViewModel.setMeasurementId(null)
         //}
     }
 
@@ -411,7 +420,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      * Checks the current capturing state and refreshes the UI elements accordingly.
      */
     private fun reconnect() {
-        updateCachedTrack()
+        // moved further down as this did not check async if the capturing is actually running
+        //val (id) = capturingService.loadCurrentlyCapturedMeasurement()
+        //updateCachedTrack(id)
         capturingService.addDataCapturingListener(this)
         // FIXME: cameraService.addCameraListener(this)
 
@@ -425,8 +436,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             if (capturingService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.d(TAG, "onResume: reconnecting DCS succeeded")
                 // FIXME: setLocationListener()
+                val (id) = capturingService.loadCurrentlyCapturedMeasurement()
+                capturingViewModel.setMeasurementId(id)
                 // We re-sync the button here as the data capturing can be canceled while the app is closed
                 setCapturingStatus(MeasurementStatus.OPEN)
+                updateCachedTrack(id)
                 //setButtonEnabled(button)
                 // Was disabled before, too: mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
 
@@ -445,9 +459,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             Log.d(TAG, "onResume: reconnecting timed out")
             if (persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)) {
                 setCapturingStatus(MeasurementStatus.PAUSED)
+                capturingViewModel.setMeasurementId(null)
                 // Was disabled before, too:  mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
             } else {
                 setCapturingStatus(MeasurementStatus.FINISHED)
+                capturingViewModel.setMeasurementId(null)
             }
             //setButtonEnabled(button)
 
@@ -597,6 +613,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                             // The measurement id should always be set [STAD-333]
                             Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                             setCapturingStatus(MeasurementStatus.PAUSED)
+                            capturingViewModel.setMeasurementId(null)
                             //setButtonEnabled(button)
                         }
                     }
@@ -611,6 +628,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                     // The measurement id should always be set [STAD-333]
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                     setCapturingStatus(MeasurementStatus.PAUSED)
+                    capturingViewModel.setMeasurementId(null)
                     //setButtonEnabled(button)
                 }, SystemClock.uptimeMillis() + 500L)
             }
@@ -660,6 +678,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                             Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                             capturingViewModel.resetCurrentMeasurementsTracks()
                             setCapturingStatus(MeasurementStatus.FINISHED)
+                            capturingViewModel.setMeasurementId(null)
                             //setButtonEnabled(button)
                         }
                     }
@@ -677,6 +696,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                     capturingViewModel.resetCurrentMeasurementsTracks()
                     setCapturingStatus(MeasurementStatus.FINISHED)
+                    capturingViewModel.setMeasurementId(null)
                     //setButtonEnabled(button)
                 }, SystemClock.uptimeMillis() + 500L)
             }
@@ -744,6 +764,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                         // The measurement id should always be set [STAD-333]
                         Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                         Log.v(TAG, "startUpFinished")
+                        capturingViewModel.setMeasurementId(measurementIdentifier)
+                        // FIXME: Status should also be in ViewModel (maybe via currMId and observed M)
+                        // the button should then just change on itself based on the live data measurement
                         setCapturingStatus(MeasurementStatus.OPEN)
                         //setButtonEnabled(button)
 
@@ -780,6 +803,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                         // The measurement id should always be set [STAD-333]
                         Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                         Log.v(TAG, "resumeCapturing: startUpFinished")
+                        capturingViewModel.setMeasurementId(measurementIdentifier)
                         setCapturingStatus(MeasurementStatus.OPEN)
                         //setButtonEnabled(button)
 
@@ -912,11 +936,12 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     /**
      * Loads the track of the currently captured measurement from the database.
      *
-     *
      * This is required when the app is resumed after being in background and probably missing locations
      * and when the app is restarted.
+     *
+     * @param measurementId The id of the currently active measurement.
      */
-    private fun updateCachedTrack() {
+    private fun updateCachedTrack(measurementId: Long) {
         try {
             if (!persistenceLayer.hasMeasurement(MeasurementStatus.OPEN)
                 && !persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)
@@ -929,9 +954,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 TAG,
                 "updateCachedTrack: Unfinished measurement found, loading track from database."
             )
-            val (id) = capturingService.loadCurrentlyCapturedMeasurement()
             val loadedList = persistenceLayer.loadTracks(
-                id,
+                measurementId,
                 DefaultLocationCleaning()
             )
             // We need to make sure we return a list which supports "add" even when an empty list is returned

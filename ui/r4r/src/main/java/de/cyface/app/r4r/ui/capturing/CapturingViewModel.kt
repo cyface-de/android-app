@@ -2,6 +2,7 @@ package de.cyface.app.r4r.ui.capturing
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -33,11 +34,25 @@ import kotlinx.coroutines.launch
 class CapturingViewModel(private val repository: MeasurementRepository) : ViewModel() {
 
     /**
+     * The cached id of the currently active measurement or `null` if capturing is inactive.
+     */
+    private val _measurementId = MutableLiveData<Long?>()
+
+    val measurementId: LiveData<Long?> = _measurementId
+
+    /**
      * Caching the `Repository`'s `Flow` data as [LiveData] to separate the `Repository` from the UI.
      *
      * Additionally, [LiveData] is lifecycle-aware and only observes changes while the UI is active.
      */
-    val measurement: LiveData<Measurement?> = repository.observeById(43L /* FIXME*/).asLiveData()
+    //private val _measurement = MutableLiveData<Measurement?>()
+    var measurement: LiveData<Measurement?> = Transformations.switchMap(measurementId) { id ->
+        if (id != null) {
+            observeMeasurementById(id)
+        } else {
+            observeMeasurementById(-1)
+        }
+    }
 
     /**
      * The cached, latest location or `null` if capturing is inactive.
@@ -52,6 +67,14 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
     var currentMeasurementsTracks: ArrayList<Track>? = null
+
+    fun setMeasurementId(id: Long?) {
+        _measurementId.postValue(id)
+    }
+
+    private fun observeMeasurementById(id: Long): LiveData<Measurement?> {
+        return repository.observeById(id).asLiveData()
+    }
 
     /**
      * Launch a new coroutine to update the data in a non-blocking way.
