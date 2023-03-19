@@ -1,5 +1,6 @@
 package de.cyface.app.r4r.ui.capturing
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -7,10 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
+import de.cyface.persistence.repository.EventRepository
 import de.cyface.persistence.repository.MeasurementRepository
+import de.cyface.utils.Validate
 import kotlinx.coroutines.launch
 
 /**
@@ -31,7 +36,10 @@ import kotlinx.coroutines.launch
  * @version 1.0.0
  * @since 3.2.0
  */
-class CapturingViewModel(private val repository: MeasurementRepository) : ViewModel() {
+class CapturingViewModel(
+    private val repository: MeasurementRepository,
+    eventRepository: EventRepository
+) : ViewModel() {
 
     /**
      * The cached id of the currently active measurement or `null` if capturing is inactive.
@@ -45,12 +53,19 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
      *
      * Additionally, [LiveData] is lifecycle-aware and only observes changes while the UI is active.
      */
-    //private val _measurement = MutableLiveData<Measurement?>()
     var measurement: LiveData<Measurement?> = Transformations.switchMap(measurementId) { id ->
         if (id != null) {
-            observeMeasurementById(id)
+            repository.observeById(id).asLiveData()
         } else {
-            observeMeasurementById(-1)
+            repository.observeById(-1).asLiveData()
+        }
+    }
+
+    var events: LiveData<List<Event>?> = Transformations.switchMap(measurementId) { measurementId ->
+        if (measurementId != null) {
+            eventRepository.observeAllByMeasurementId(measurementId).asLiveData()
+        } else {
+            eventRepository.observeAllByMeasurementId(-1).asLiveData()
         }
     }
 
@@ -62,18 +77,20 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
     // Expose the data state to the UI layer
     val location: LiveData<ParcelableGeoLocation?> = _location
 
+    private val _tracks = MutableLiveData<ArrayList<Track>?>()
+
     /**
      * Caching the [Track]s of the current [Measurement], so we do not need to ask the database each time
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
-    var currentMeasurementsTracks: ArrayList<Track>? = null
+    val tracks: LiveData<ArrayList<Track>?> = _tracks
+
+    /*val title = tracks.combineWith(events) { tracks, events ->
+        "${tracks.job} ${events.name}"
+    }*/
 
     fun setMeasurementId(id: Long?) {
         _measurementId.postValue(id)
-    }
-
-    private fun observeMeasurementById(id: Long): LiveData<Measurement?> {
-        return repository.observeById(id).asLiveData()
     }
 
     /**
@@ -86,20 +103,49 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
     }
 
     fun setLocation(location: ParcelableGeoLocation?) {
-        _location.value = location
+        _location.postValue(location)
     }
 
-    fun initializeCurrentMeasurementsTracks() {
-        currentMeasurementsTracks = ArrayList()
+    fun setTracks(tracks: ArrayList<Track>?) {
+        _tracks.postValue(tracks)
     }
 
-    fun resetCurrentMeasurementsTracks() {
-        currentMeasurementsTracks = null
+    fun addTrack(track: Track) {
+        _tracks.value!!.add(track)
     }
 
-    fun addToCurrentMeasurementsTracks(track: Track) {
-        (currentMeasurementsTracks as ArrayList<Track>).add(track)
+    fun addToTrack(location: ParcelableGeoLocation) {
+        Validate.notNull(_tracks.value, "onNewGeoLocation - cached track is null")
+        if (!location.isValid) {
+            Log.d(TAG, "addToTrack: ignoring invalid point")
+            return
+        }
+        if (_tracks.value!!.isEmpty()) {
+            Log.d(TAG, "addToTrack: Loaded track is empty, adding empty sub track")
+            _tracks.postValue(arrayListOf(Track(mutableListOf(location), mutableListOf())))
+        } else {
+            val tracks = _tracks.value
+            tracks!![_tracks.value!!.size - 1].addLocation(location)
+            _tracks.postValue(tracks)
+        }
     }
+
+    /**
+     * TODO
+     * /
+    fun <T, K, R> LiveData<T>.combineWith(
+    liveData: LiveData<K>,
+    block: (T?, K?) -> R
+    ): LiveData<R> {
+    val result = MediatorLiveData<R>()
+    result.addSource(this) {
+    result.value = block(this.value, liveData.value)
+    }
+    result.addSource(liveData) {
+    result.value = block(this.value, liveData.value)
+    }
+    return result
+    }*/
 }
 
 /**
@@ -111,12 +157,15 @@ class CapturingViewModel(private val repository: MeasurementRepository) : ViewMo
  * @version 1.0.0
  * @since 3.2.0
  */
-class CapturingViewModelFactory(private val repository: MeasurementRepository) :
+class CapturingViewModelFactory(
+    private val repository: MeasurementRepository,
+    private val eventRepository: EventRepository
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CapturingViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CapturingViewModel(repository) as T
+            return CapturingViewModel(repository, eventRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

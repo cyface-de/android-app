@@ -4,12 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
-import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentSpeedBinding
@@ -32,7 +28,12 @@ class SpeedFragment : Fragment() {
     private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
     // Get shared `ViewModel` instance from Activity
-    private val capturingViewModel: CapturingViewModel by activityViewModels { CapturingViewModelFactory(persistenceLayer.measurementRepository!!)}
+    private val capturingViewModel: CapturingViewModel by activityViewModels {
+        CapturingViewModelFactory(
+            persistenceLayer.measurementRepository!!,
+            persistenceLayer.eventRepository!!
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
