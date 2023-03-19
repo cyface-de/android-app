@@ -97,7 +97,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     // Get shared `ViewModel` instance from Activity
     private val capturingViewModel: CapturingViewModel by activityViewModels {
         CapturingViewModelFactory(
-            persistenceLayer.measurementRepository!!
+            persistenceLayer.measurementRepository!!,
+            persistenceLayer.eventRepository!!
         )
     }
 
@@ -379,9 +380,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // Nothing to do
     }
 
-    override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) {
-        // FIXME: See DataCapturingButton
+    override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation) {
         capturingViewModel.setLocation(position)
+        capturingViewModel.addToTrack(position)
     }
 
     override fun onNewSensorDataAcquired(data: CapturedData?) {
@@ -676,14 +677,14 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                             // The measurement id should always be set [STAD-333]
                             Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                            capturingViewModel.resetCurrentMeasurementsTracks()
+                            capturingViewModel.setTracks(null)
                             setCapturingStatus(MeasurementStatus.FINISHED)
                             capturingViewModel.setMeasurementId(null)
                             //setButtonEnabled(button)
                         }
                     }
                 })
-            // FIXME: runOnUiThread { map.clearMap() }
+            // FIXME: runOnUiThread { map.clearMap() } => probably not necessary because we do this in tracks.observe
 
             // Workaround for flaky `rebind` on Android 13+ [RFR-246]
             // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
@@ -694,7 +695,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                     // The measurement id should always be set [STAD-333]
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    capturingViewModel.resetCurrentMeasurementsTracks()
+                    capturingViewModel.setTracks(null)
                     setCapturingStatus(MeasurementStatus.FINISHED)
                     capturingViewModel.setMeasurementId(null)
                     //setButtonEnabled(button)
@@ -756,8 +757,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            capturingViewModel.initializeCurrentMeasurementsTracks()
-            capturingViewModel.addToCurrentMeasurementsTracks(Track())
+            capturingViewModel.setTracks(arrayListOf(Track()))
             capturingService.start(Modality.BICYCLE,
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
@@ -795,7 +795,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun resumeCapturing() {
         Log.d(TAG, "resumeCachedTrack: Adding new sub track to existing cached track")
-        capturingViewModel.addToCurrentMeasurementsTracks(Track())
+        capturingViewModel.addTrack(Track())
         try {
             capturingService.resume(
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
@@ -947,7 +947,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 && !persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)
             ) {
                 Log.d(TAG, "updateCachedTrack: No unfinished measurement found, un-setting cache.")
-                capturingViewModel.resetCurrentMeasurementsTracks()
+                capturingViewModel.setTracks(null)
                 return
             }
             Log.d(
@@ -960,7 +960,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             )
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
-            capturingViewModel.currentMeasurementsTracks = java.util.ArrayList(loadedList)
+            capturingViewModel.setTracks(ArrayList(loadedList))
         } catch (e: NoSuchMeasurementException) {
             throw java.lang.RuntimeException(e)
         }

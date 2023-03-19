@@ -7,14 +7,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import com.google.android.gms.maps.MapsInitializer
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentMapBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
-import de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
@@ -23,7 +24,6 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.EventType
 import de.cyface.persistence.model.Track
-import io.sentry.Sentry
 
 class MapFragment : Fragment() {
 
@@ -43,30 +43,48 @@ class MapFragment : Fragment() {
 
     private var preferences: SharedPreferences? = null
 
-    private val capturingViewModel: CapturingViewModel by viewModels {
-        CapturingViewModelFactory(persistenceLayer.measurementRepository!!)
+    private var activityResultLauncher: ActivityResultLauncher<Array<String>>
+
+    private val capturingViewModel: CapturingViewModel by activityViewModels {
+        CapturingViewModelFactory(
+            persistenceLayer.measurementRepository!!,
+            persistenceLayer.eventRepository!!
+        )
     }
 
     /**
      * The `Runnable` triggered when the `Map` is loaded and ready.
      */
     private val onMapReadyRunnable = Runnable {
-        val currentMeasurementsTracks: List<Track> =
-            capturingViewModel.currentMeasurementsTracks ?: return@Runnable
-        val currentMeasurementsEvents: List<Event>
         try {
-            currentMeasurementsEvents = loadCurrentMeasurementsEvents()
-            map!!.renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false)
-        } catch (e: NoSuchMeasurementException) {
-            val isReportingEnabled: Boolean =
-                preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
-                Sentry.captureException(e)
+            val measurement = persistenceLayer.loadCurrentlyCapturedMeasurement()
+            val tracks: List<Track> = persistenceLayer.loadTracks(measurement.id)
+            capturingViewModel.setTracks(tracks as ArrayList<Track>) // FIXME: we did not do this before here
+            //val events: List<Event> = loadCurrentMeasurementsEvents()
+            //map!!.renderMeasurement(tracks, arrayListOf()/* events FIXME*/, false)
+
+            capturingViewModel.tracks.observe(viewLifecycleOwner) {
+                if (it != null) {
+                    map!!.renderMeasurement(it, ArrayList()/*FIXME*/, false)
+                } else {
+                    map!!.clearMap()
+                }
             }
-            Log.w(
-                TAG,
-                "onMapReadyRunnable failed to loadCurrentMeasurementsEvents. Thus, map.renderMeasurement() is not executed. This should only happen when the capturing already stopped."
+        } catch (e: NoSuchMeasurementException) {
+            Log.d(
+                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
             )
+        }
+    }
+
+    init {
+        // Ensure onMapReadyRunnable is called after permissions are newly granted
+        this.activityResultLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val allGranted = result.values.none { !it }
+            if (allGranted) {
+                map!!.onMapReady()
+            }
         }
     }
 
@@ -97,12 +115,6 @@ class MapFragment : Fragment() {
         preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable)
 
-        // FIXME: see CapturingFragment how to initialize the ViewModel with a repository
-        //val mapViewModel = ViewModelProvider(this)[MapViewModel::class.java]
-        /*val textView: TextView = binding.textView9
-        capturingViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }*/
         return root
     }
 

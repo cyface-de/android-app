@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      */
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
-        CapturingViewModelFactory(persistenceLayer.measurementRepository!!)
+        CapturingViewModelFactory(persistenceLayer.measurementRepository!!, persistenceLayer.eventRepository!!)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -30,6 +30,7 @@ import android.os.Looper
 import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -48,6 +49,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import de.cyface.app.r4r.R
+import de.cyface.app.r4r.utils.Constants
 import de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.r4r.utils.Constants.PREFERENCES_MOVE_TO_LOCATION_KEY
 import de.cyface.app.r4r.utils.Constants.TAG
@@ -143,6 +145,7 @@ class Map(
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000).build()
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
+                // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
                 if (locationResult.locations.size > 0) {
                     moveToLocation(true,
                         locationResult.locations[locationResult.locations.size - 1]
@@ -169,21 +172,26 @@ class Map(
     override fun onMapReady(googleMap: GoogleMap) {
         Validate.notNull(googleMap)
         this.googleMap = googleMap
+        onMapReady()
+    }
+
+    fun onMapReady() {
         if (ActivityCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 applicationContext,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
-            throw java.lang.IllegalStateException("Missing permissions")
+            googleMap!!.setMaxZoomPreference(2.0f)
+            googleMap!!.setMaxZoomPreference(20.0f)
+            requestLocationUpdates()
+            showAndMoveToCurrentLocation(false)
+            onMapReadyRunnable.run()
+        } else {
+            Log.d(TAG, "onMapReady: permissions not granted, skipping")
         }
-        googleMap.setMaxZoomPreference(2.0f)
-        googleMap.setMaxZoomPreference(20.0f)
-        requestLocationUpdates()
-        showAndMoveToCurrentLocation(false)
-        onMapReadyRunnable.run()
     }
 
     /**
@@ -194,7 +202,7 @@ class Map(
      * @param moveCameraToBounds `True` if the camera of the map should be moved to the track boundaries
      */
     fun renderMeasurement(
-        tracks: List<Track>, events: List<Event>,
+        tracks: ArrayList<Track>, events: List<Event>,
         moveCameraToBounds: Boolean
     ) {
         googleMap!!.clear()
@@ -220,7 +228,7 @@ class Map(
                 googleMap!!.addPolyline(subTrack)
             }
         }
-        renderEvents(allLocations, events)
+        // FIXME: renderEvents(allLocations, events)
         if (moveCameraToBounds && positions <= 1) {
             Toast.makeText(
                 applicationContext,
@@ -380,7 +388,8 @@ class Map(
             return
         }
         requestLocationUpdates()
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
+        //FIXME: preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY, false)
+        isAutoCenterMapEnabled = true
     }
 
     fun onPause() {
