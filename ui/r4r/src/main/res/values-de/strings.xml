@@ -54,6 +54,8 @@
     <string name="capturing_inactive">Datenerfassung inaktiv</string>
 
     <!-- Trips Fragment -->
+    <string name="title_completed_trips">Abgeschlossene Fahrten</string>
+    <string name="trip_title">Fahrt %d</string>
     <string name="mark_all_menu_item">Alles Markieren</string>
     <string name="delete_marked_menu_item">Markierte löschen</string>
     <string name="measurement">Messung</string>

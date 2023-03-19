@@ -56,6 +56,9 @@
     <string name="capturing_inactive">capturing inactive</string>
 
     <!-- Trips Fragment -->
+    <string name="title_completed_trips">Completed trips</string>
+    <string name="trip_title">Trip %d</string>
+    <string name="trip_details" translatable="false">%1$d) %2$s (%3$.3f km)%4$s</string>
     <string name="modality_type">Modality type</string>
     <string name="mark_all_menu_item">Select all items</string>
     <string name="delete_marked_menu_item">Delete marked</string>

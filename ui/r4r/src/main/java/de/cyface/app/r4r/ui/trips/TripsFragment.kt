@@ -12,6 +12,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
@@ -51,13 +52,20 @@ class TripsFragment : Fragment() {
 
         // Bind the UI element to the adapter
         val tripsList = binding.tripsList
-        val adapter = TripListAdapter()
-        tripsList.adapter = adapter
+        val adapterToday = TripListAdapter()
+        tripsList.adapter = adapterToday
         tripsList.layoutManager = LinearLayoutManager(context)
 
-        // Update adapter with the updates from the ViewModel
+        // Add divider between list items
+        val divider = DividerItemDecoration(
+            context,
+            (tripsList.layoutManager as LinearLayoutManager).orientation
+        )
+        tripsList.addItemDecoration(divider)
+
+        // Update adapters with the updates from the ViewModel
         tripsViewModel.measurements.observe(viewLifecycleOwner) { measurements ->
-            measurements?.let { adapter.submitList(it) }
+            measurements?.let { adapterToday.submitList(it) }
         }
 
         val menuHost: MenuHost = requireActivity()
