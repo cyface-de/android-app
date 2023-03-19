@@ -5,7 +5,14 @@
   android:layout_height="wrap_content">
 
   <TextView
-    android:id="@+id/textView"
+    android:id="@+id/titleView"
+    style="@style/trips_title"
+    android:paddingBottom="4dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+
+  <TextView
+    android:id="@+id/detailsView"
     style="@style/trips_title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />

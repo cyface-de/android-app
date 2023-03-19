@@ -24,7 +24,7 @@ class TripsViewModel(private val repository: MeasurementRepository) : ViewModel(
      *
      * Additionally, [LiveData] is lifecycle-aware and only observes changes while the UI is active.
      */
-    val measurements: LiveData<List<Measurement>> = repository.observeAll().asLiveData()
+    val measurements: LiveData<List<Measurement>> = repository.observeAllCompleted().asLiveData()
 
     private val _text = MutableLiveData<String>().apply {
         value = "${if (measurements.value == null) "N/A" else measurements.value!!.size} trips found"
