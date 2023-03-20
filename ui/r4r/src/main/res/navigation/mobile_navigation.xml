@@ -15,7 +15,20 @@
       android:id="@+id/navigation_trips"
       android:name="de.cyface.app.r4r.ui.trips.TripsFragment"
       android:label="@string/title_completed_trips"
-      tools:layout="@layout/fragment_trips" />
+      tools:layout="@layout/fragment_trips">
+      <action android:id="@+id/action_trips_to_details"
+        app:destination="@id/navigation_trips_details">
+        <argument
+          android:name="measurementId"
+          app:argType="long" />
+      </action>
+    </fragment>
+
+    <fragment
+      android:id="@+id/navigation_trips_details"
+      android:name="de.cyface.app.r4r.ui.trips.DetailsFragment"
+      android:label="Trip details"
+      tools:layout="@layout/fragment_trips_details" />
 
     <fragment
       android:id="@+id/navigation_statistics"
