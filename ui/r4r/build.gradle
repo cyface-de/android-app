@@ -179,6 +179,8 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
+    // FIXME: Recyclerview-selection - maybe removable after switching to material
+    implementation "androidx.recyclerview:recyclerview-selection:1.1.0"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"

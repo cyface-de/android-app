@@ -11,6 +11,9 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -18,6 +21,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.core.view.MenuHost
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
@@ -318,6 +322,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         calibrationDialogListener = HashSet()
         locationManager =
             requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // Add items to menu (top right)
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(MenuProvider(), viewLifecycleOwner, Lifecycle.State.RESUMED)
+
         return root
     }
 
@@ -998,6 +1007,24 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         override fun getItemCount(): Int {
             // List size
             return 2
+        }
+    }
+
+    private class MenuProvider : androidx.core.view.MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.capturing, menu)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            return when (menuItem.itemId) {
+                R.id.action_sync -> {
+                    TODO("Not yet implemented")
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
         }
     }
 }
