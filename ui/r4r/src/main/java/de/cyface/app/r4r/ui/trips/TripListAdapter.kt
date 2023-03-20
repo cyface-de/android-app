@@ -5,6 +5,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import androidx.navigation.Navigation
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
@@ -36,6 +38,11 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
 
     override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
         val current = getItem(position)
+        holder.itemView.setOnClickListener {
+            // not passing complex data, as recommended: https://developer.android.com/guide/navigation/navigation-pass-data
+            val action = TripsFragmentDirections.actionTripsToDetails(current.id)
+            Navigation.findNavController(it).navigate(action)
+        }
         tracker?.let {
             holder.bind(current, it.isSelected(position.toLong()))
         }
@@ -53,7 +60,6 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
         for (i in 0 until itemCount) {
             tracker!!.select(i.toLong())
         }
-        notifyDataSetChanged()
     }
 
     /**
