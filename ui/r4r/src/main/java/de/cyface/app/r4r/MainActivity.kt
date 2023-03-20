@@ -167,7 +167,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         setSupportActionBar(findViewById(R.id.toolbar))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-        addMenuProvider(MenuProvider())
 
         // Setting up feedback email template
         /*emailIntent = generateFeedbackEmailIntent(
@@ -234,15 +233,5 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         /* FIXME: if (fragmentRoot != null && fragmentRoot.isShown()) {
             map.showAndMoveToCurrentLocation(true)
         }*/
-    }
-
-    private class MenuProvider : androidx.core.view.MenuProvider {
-        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-            menuInflater.inflate(R.menu.capturing, menu)
-        }
-
-        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-            TODO("Not yet implemented")
-        }
     }
 }
