@@ -301,7 +301,10 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                     ) * 3.6
                 averageSpeedText = averageSpeedKmh.roundToInt().toString() + " km/h"
 
-                val ascend = if (measurement.status == MeasurementStatus.OPEN) persistenceLayer.loadAscend(measurement.id) else null
+                val ascend =
+                    if (measurement.status == MeasurementStatus.OPEN) persistenceLayer.loadAscend(
+                        measurement.id
+                    ) else null
                 ascendText = if (ascend == null) null else "+ ${ascend.roundToInt()} m"
             } catch (e: NoSuchMeasurementException) {
                 // Happen when locations arrive late

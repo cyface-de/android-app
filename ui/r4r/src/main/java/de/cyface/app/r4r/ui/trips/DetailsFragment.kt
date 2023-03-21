@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
+import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentTripsDetailsBinding
 
 class DetailsFragment : Fragment() {
@@ -29,7 +29,8 @@ class DetailsFragment : Fragment() {
 
         val textView: TextView = binding.tripTitle
         val measurementId = requireArguments().getLong("measurementId")
-        textView.text = "measurement ${measurementId}"
+        textView.text = requireContext().getString(R.string.trip_title, measurementId)
+
         return root
     }
 

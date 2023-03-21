@@ -3,14 +3,12 @@ package de.cyface.app.r4r
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -177,6 +175,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
         showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL)
+    }
+
+    /**
+     * Fixes "home" (back) button in the top action bar when in the fragment details fragment.
+     */
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
     override fun onRequestPermissionsResult(
