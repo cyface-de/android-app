@@ -197,6 +197,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3' // FIXME: version
     // For the action bar (at the bottom of the screen)
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.3' // FIXME: version
+    // Charts
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
     // Kotlin components
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"

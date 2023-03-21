@@ -36,7 +36,7 @@
 
     <!-- Capturing Fragment -->
     <string name="title_map">Karte</string>
-    <string name="title_speed">Geschwindigkeit</string>
+    <string name="speed">Geschwindigkeit</string>
     <string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
     <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
     <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
@@ -72,6 +72,18 @@
     <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
     <string name="toast_select_location">Bitte wählen Sie einen Standort aus</string>
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
+
+    <!-- Trip Details Fragment -->
+    <string name="title_trip_details">Fahrtdetails</string>
+    <string name="chart_label">Höhe [m]</string>
+    <string name="maximum">Maximal</string>
+    <string name="length">Länge</string>
+    <string name="distance">Strecke</string>
+    <string name="duration">Fahrzeit</string>
+    <string name="elevation_profile">Höhenprofil</string>
+    <string name="ascend">Anstieg</string>
+    <string name="avoided_co2">Vermiedener CO² Ausstoß</string>
+    <string name="compared_to_car">Im Vergleich zum Auto</string>
 
     <!-- Statistics Fragment -->
 

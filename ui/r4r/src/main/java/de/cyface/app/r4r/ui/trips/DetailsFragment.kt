@@ -6,8 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentTripsDetailsBinding
+
 
 class DetailsFragment : Fragment() {
 
@@ -30,6 +35,24 @@ class DetailsFragment : Fragment() {
         val textView: TextView = binding.tripTitle
         val measurementId = requireArguments().getLong("measurementId")
         textView.text = requireContext().getString(R.string.trip_title, measurementId)
+
+        // Chart
+        val values = arrayOf(401, 402, 405, 402, 407, 406, 406, 412, 412, 416, 418, 424, 433, 432, 411, 410)
+        val entries = ArrayList<Entry>()
+        var x = 1
+        values.forEach {
+            entries.add(Entry(x.toFloat(), it.toFloat()))
+            x++
+        }
+        val resources = requireContext().resources
+        val chart = root.findViewById(R.id.chart) as LineChart
+        val dataSet = LineDataSet(entries, resources.getString(R.string.chart_label))
+        dataSet.color = resources.getColor(R.color.green_700)
+        dataSet.circleColors = arrayListOf(resources.getColor(R.color.green_700))
+        chart.data = LineData(dataSet)
+        val description = chart.description
+        description.isEnabled = false
+        chart.xAxis.isEnabled = false
 
         return root
     }

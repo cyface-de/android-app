@@ -27,7 +27,7 @@
     <fragment
       android:id="@+id/navigation_trips_details"
       android:name="de.cyface.app.r4r.ui.trips.DetailsFragment"
-      android:label="Trip details"
+      android:label="@string/title_trip_details"
       tools:layout="@layout/fragment_trips_details" />
 
     <fragment
