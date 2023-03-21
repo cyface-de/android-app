@@ -39,12 +39,12 @@
           android:text="@string/maximum"
           android:textAppearance="?attr/textAppearanceSubtitle1"/>
         <TextView
+          android:id="@+id/speedView"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           app:layout_constraintTop_toTopOf="@id/max_speed"
           app:layout_constraintRight_toRightOf="parent"
           android:layout_marginEnd="@dimen/activity_horizontal_margin"
-          android:text="21 km/h (Ø 15 km/h)"
           android:textAppearance="?attr/textAppearanceSubtitle1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -73,12 +73,12 @@
           android:text="@string/distance"
           android:textAppearance="?attr/textAppearanceSubtitle1"/>
         <TextView
+          android:id="@+id/distanceView"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           app:layout_constraintTop_toTopOf="@id/distance"
           app:layout_constraintRight_toRightOf="parent"
           android:layout_marginEnd="@dimen/activity_horizontal_margin"
-          android:text="214,2 km"
           android:textAppearance="?attr/textAppearanceSubtitle1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -97,12 +97,12 @@
           android:text="@string/duration"
           android:textAppearance="?attr/textAppearanceSubtitle1"/>
         <TextView
+          android:id="@+id/durationView"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           app:layout_constraintTop_toTopOf="@id/duration"
           app:layout_constraintRight_toRightOf="parent"
           android:layout_marginEnd="@dimen/activity_horizontal_margin"
-          android:text="2 T 14 h 12 min"
           android:textAppearance="?attr/textAppearanceSubtitle1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -138,12 +138,12 @@
           android:text="@string/ascend"
           android:textAppearance="?attr/textAppearanceSubtitle1"/>
         <TextView
+          android:id="@+id/ascendView"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           app:layout_constraintTop_toTopOf="@id/ascent"
           app:layout_constraintRight_toRightOf="parent"
           android:layout_marginEnd="@dimen/activity_horizontal_margin"
-          android:text="2104 m"
           android:textAppearance="?attr/textAppearanceSubtitle1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -172,12 +172,12 @@
           android:text="@string/compared_to_car"
           android:textAppearance="?attr/textAppearanceSubtitle1"/>
         <TextView
+          android:id="@+id/co2View"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           app:layout_constraintTop_toTopOf="@id/co2"
           app:layout_constraintRight_toRightOf="parent"
           android:layout_marginEnd="@dimen/activity_horizontal_margin"
-          android:text="1,3 kg"
           android:textAppearance="?attr/textAppearanceSubtitle1" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
