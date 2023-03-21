@@ -52,7 +52,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
-      android:text="Geschwindigkeit"
+      android:text="@string/speed"
       android:visibility="invisible"
       app:layout_constraintBottom_toTopOf="@+id/distanceTitle"
       app:layout_constraintStart_toStartOf="@+id/tripTitle" />
@@ -62,7 +62,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
-      android:text="Strecke"
+      android:text="@string/distance"
       app:layout_constraintBottom_toTopOf="@+id/durationTitle"
       app:layout_constraintStart_toStartOf="@+id/speedTitle" />
 
@@ -71,7 +71,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
-      android:text="Fahrtzeit"
+      android:text="@string/duration"
       app:layout_constraintBottom_toTopOf="@+id/ascendTitle"
       app:layout_constraintStart_toStartOf="@+id/distanceTitle" />
 
@@ -80,7 +80,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
-      android:text="Anstieg"
+      android:text="@string/ascend"
       app:layout_constraintBottom_toTopOf="@+id/co2Title"
       app:layout_constraintStart_toStartOf="@+id/durationTitle" />
 
@@ -89,7 +89,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
-      android:text="Vermiedenes CO²"
+      android:text="@string/avoided_co2"
       app:layout_constraintBottom_toTopOf="@+id/startResumeButton"
       app:layout_constraintStart_toStartOf="@+id/ascendTitle" />
 

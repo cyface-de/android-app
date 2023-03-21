@@ -105,7 +105,7 @@ ext {
     sentryAndroidGradlePluginVersion = "2.0.1"
     mapPlayServicesVersion = '18.1.0'
     locationPlayServicesVersion = '21.0.1'
-    materialVersion = '1.6.1'
+    materialVersion = '1.8.0'
     circelProgressVersion = "1.1.0" // Version > 1.1.0 (1.2.1) is currently not available
     androidxRecyclerViewVersion = "1.2.1"
 }
@@ -124,6 +124,7 @@ allprojects {
                 password = project.findProperty("githubToken")
             }
         }
+        maven { url 'https://jitpack.io' } // For MPAndroidChart
     }
 }
 

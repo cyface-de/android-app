@@ -38,7 +38,7 @@
 
     <!-- Capturing Fragment -->
     <string name="title_map">Map</string>
-    <string name="title_speed">Speed</string>
+    <string name="speed">Speed</string>
     <string name="title_dialog_starting_data_capture">Starting Data Capture</string>
     <string name="error_message_capturing_canceled_no_space">You need to free some space to start capturing.</string>
     <string name="notification_title_capturing_stopped">Stopped Capturing</string>
@@ -77,6 +77,19 @@
     <string name="toast_item_deletion_success">The selected items were deleted.</string>
     <string name="toast_select_location">Please select a location</string>
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
+
+    <!-- Trip Details Fragment -->
+    <string name="title_trip_details">Trip details</string>
+    <string name="chart_label">elevation [m]</string>
+    <string name="maximum">Maximum</string>
+    <string name="length">Length</string>
+    <string name="distance">Distance</string>
+    <string name="duration">Duration</string>
+    <string name="elevation_profile">Elevation profile</string>
+    <string name="ascend">Ascend</string>
+    <string name="avoided_co2">Avoided CO² emission</string>
+    <string name="compared_to_car">Compared to a car</string>
+
 
     <!-- Statistics Fragment -->
 
