@@ -20,7 +20,7 @@ package de.cyface.app.ui.dialog;
 
 import static de.cyface.app.ui.MainFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
 import static de.cyface.app.ui.nav.view.MeasurementOverviewFragment.DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE;
-import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.BICYCLE;
 import static de.cyface.persistence.model.Modality.BUS;
 import static de.cyface.persistence.model.Modality.CAR;

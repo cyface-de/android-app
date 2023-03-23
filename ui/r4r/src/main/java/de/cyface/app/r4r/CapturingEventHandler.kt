@@ -31,10 +31,10 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import de.cyface.app.r4r.utils.Constants.NOTIFICATION_CHANNEL_ID_RUNNING
-import de.cyface.app.r4r.utils.Constants.NOTIFICATION_CHANNEL_ID_WARNING
-import de.cyface.app.r4r.utils.Constants.SPACE_WARNING_NOTIFICATION_ID
 import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
+import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
+import de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID
 import de.cyface.datacapturing.EventHandlingStrategy
 import de.cyface.datacapturing.backend.DataCapturingBackgroundService
 import de.cyface.utils.Validate
@@ -49,6 +49,7 @@ import de.cyface.utils.Validate
  * @since 2.5.0
  */
 class CapturingEventHandler : EventHandlingStrategy {
+    @Suppress("unused")
     constructor() {
         // Nothing to do here.
     }

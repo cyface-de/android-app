@@ -199,6 +199,7 @@ dependencies {
     implementation project(':bluetooth-le')
     implementation project(':energy_settings')
     implementation project(':camera_service')
+    implementation project(':utils')
 
     // Dependencies for instrumentation tests
     // Resolve conflicts between main and test APK (which is used in the integration-test module):

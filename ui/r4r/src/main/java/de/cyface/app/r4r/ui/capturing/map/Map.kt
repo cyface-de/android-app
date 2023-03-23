@@ -49,9 +49,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import de.cyface.app.r4r.R
-import de.cyface.app.r4r.utils.Constants
-import de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.r4r.utils.Constants.PREFERENCES_MOVE_TO_LOCATION_KEY
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality

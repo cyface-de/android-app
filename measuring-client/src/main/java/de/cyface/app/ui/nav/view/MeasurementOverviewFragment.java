@@ -21,7 +21,8 @@ package de.cyface.app.ui.nav.view;
 import static de.cyface.app.ui.Map.TEMPORARY_EVENT_MARKER_ID;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PACKAGE;
-import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
+import static de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT;
 import static de.cyface.persistence.model.Modality.UNKNOWN;
 import static de.cyface.synchronization.BundlesExtrasCodes.MEASUREMENT_ID;
 
@@ -263,7 +264,7 @@ public class MeasurementOverviewFragment extends Fragment {
                     requestPermissions(
                             new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                     Manifest.permission.READ_EXTERNAL_STORAGE},
-                            Constants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT);
+                            PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT);
                 } else {
                     Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data_no_permission),
                             Toast.LENGTH_LONG).show();
@@ -339,7 +340,7 @@ public class MeasurementOverviewFragment extends Fragment {
 
         // noinspection SwitchStatementWithTooFewBranches - for readability
         switch (requestCode) {
-            case Constants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT:
+            case PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data),
                             Toast.LENGTH_LONG).show();

@@ -48,3 +48,4 @@ project(':datacapturing').projectDir = new File('backend/datacapturing')
 project(':testutils').projectDir = new File('backend/testutils')
 project(':energy_settings').projectDir = new File('energy_settings/energy_settings')
 project(':camera_service').projectDir = new File('camera_service/camera_service')
+include ':utils'

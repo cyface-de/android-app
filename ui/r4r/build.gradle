@@ -21,7 +21,7 @@
  *
  * @author Armin Schnabel
  * @version 1.0.0
- * @since 7.5.0
+ * @since 3.2.0
  */
 apply plugin: 'com.android.application'
 //apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
@@ -66,6 +66,7 @@ android {
         // buildConfigField("String", "provider", '"de.cyface.app.provider"')
 
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
+        // FIXME: This can probably move to utils
         buildConfigField "int", "currentTerms", "4"
 
         // Ensure that the backend's "CyfaceFull" flavor is always used
@@ -210,6 +211,7 @@ dependencies {
     implementation project(':synchronization')
     implementation project(':persistence')
     implementation project(':energy_settings')
+    implementation project(':utils')
 
     // Dependencies for instrumentation tests
     // Resolve conflicts between main and test APK (which is used in the integration-test module):

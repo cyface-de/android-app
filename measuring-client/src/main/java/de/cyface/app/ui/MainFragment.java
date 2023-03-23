@@ -19,13 +19,13 @@
 package de.cyface.app.ui;
 
 import static de.cyface.app.ui.MainActivity.getMainActivityFromContext;
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.AUTHORITY;
-import static de.cyface.app.utils.Constants.DEFAULT_SENSOR_FREQUENCY;
-import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
-import static de.cyface.app.utils.Constants.PREFERENCES_SENSOR_FREQUENCY_KEY;
-import static de.cyface.app.utils.Constants.PREFERENCES_SYNCHRONIZATION_KEY;
+import static de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY;
 import static de.cyface.persistence.model.Modality.BICYCLE;
 import static de.cyface.persistence.model.Modality.BUS;
 import static de.cyface.persistence.model.Modality.CAR;
@@ -171,7 +171,7 @@ public class MainFragment extends Fragment implements ConnectionStatusListener {
         // Start DataCapturingService and CameraService
         try {
             dataCapturingService = new CyfaceDataCapturingService(fragmentRoot.getContext(),
-                    fragmentRoot.getContext().getContentResolver(), AUTHORITY, Constants.ACCOUNT_TYPE,
+                    AUTHORITY, Constants.ACCOUNT_TYPE,
                     BuildConfig.cyfaceServer, new DataCapturingEventHandler(), dataCapturingButton, sensorFrequency);
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.

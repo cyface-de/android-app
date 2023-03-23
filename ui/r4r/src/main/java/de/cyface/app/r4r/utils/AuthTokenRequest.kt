@@ -26,7 +26,7 @@ import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.preference.PreferenceManager
 import android.util.Log
-import de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.synchronization.Constants

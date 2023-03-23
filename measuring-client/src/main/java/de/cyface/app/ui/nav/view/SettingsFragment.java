@@ -18,9 +18,9 @@
  */
 package de.cyface.app.ui.nav.view;
 
-import static de.cyface.app.utils.Constants.DEFAULT_SENSOR_FREQUENCY;
+import static de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY;
 import static de.cyface.app.utils.Constants.PACKAGE;
-import static de.cyface.app.utils.Constants.PREFERENCES_SENSOR_FREQUENCY_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY;
 import static de.cyface.camera_service.Constants.DEFAULT_STATIC_EXPOSURE_TIME;
 import static de.cyface.camera_service.Constants.DEFAULT_STATIC_EXPOSURE_VALUE_ISO_100;
 import static de.cyface.camera_service.Constants.DEFAULT_STATIC_FOCUS_DISTANCE;
