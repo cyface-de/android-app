@@ -1,18 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- Other -->
-    <!--<string name="accept_terms">Accept terms</string>
+    <string name="accept_terms">Accept terms</string>
     <string name="accept_reports_details">Automatically transmit error messages and app usage</string>
     <string name="accept_terms_details">I have read the disclaimer and privacy policy and accept these conditions.</string>
-    <string name="app_name">Ready for Robots</string>
     <string name="notification_channel_name_info">Info</string>
     <string name="notification_channel_name_warning">Warnings</string>
     <string name="notification_channel_description_info">Informative notifications, e.g. when the upload finished successful.</string>
     <string name="notification_channel_description_warning">Warning messages, e.g. when the storage is full and the measuring had to be canceled. This notification should not be disabled.</string>
     <string name="toast_last_tracking_crashed">Your last tracking stopped unexpectedly.</string>
-    -->
 
-    <!-- Login Activity -->
-    <!--<string name="logo_content_description" translatable="false">Ready for Robots Logo</string>
+    <!-- Login -->
+    <string name="logo_content_description" translatable="false">Logo</string>
     <string name="login_name">Login</string>
     <string name="password">Password</string>
     <string name="log_in">Log in</string>
@@ -22,17 +22,35 @@
     <string name="error_message_invalid_email">This email address is invalid</string>
     <string name="error_message_password_too_short">This password is too short</string>
     <string name="error_message_login_too_short">This username is too short</string>
-    -->
 
-    <!-- Capturing Fragment -->
-    <!--
+    <!-- Capturing -->
+    <string name="upload">Upload</string>
+    <string name="distance">Distance</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
     <string name="title_dialog_starting_data_capture">Starting Data Capture</string>
     <string name="error_message_capturing_canceled_no_space">You need to free some space to start capturing.</string>
     <string name="notification_title_capturing_stopped">Stopped Capturing</string>
     <string name="msg_calibrating">Calibrating</string>
-    -->
 
-    <!-- Map Fragment -->
+    <!-- Synchronization -->
+    <string name="error_message_sync_canceled_no_wifi">You need a Wi-Fi connection to upload data.</string>
+    <string name="error_message_sync_canceled_disabled">The synchronisation is disabled via the settings.</string>
+
+    <!-- Navigation -->
+    <string name="settings">Settings</string>
+    <string name="drawer_title_feedback">Feedback</string>
+    <string name="drawer_title_guide">Setup guide</string>
+    <string name="drawer_title_imprint">Imprint</string>
+    <string name="drawer_title_logout">Logout</string>
+    <string name="drawer_setting_zoom_to_location">Always centered map</string>
+    <string name="drawer_setting_auto_upload">Auto Upload</string>
+    <string name="sync_disabled_toast">Without synchronization more space is used.</string>
+    <string name="zoom_to_location_enabled_toast">When the screen is active, more map material is loaded</string>
+
+    <!-- Map -->
     <string name="modality_car">Car</string>
     <string name="modality_bicycle">Bicycle</string>
     <string name="modality_walking">Walking</string>
@@ -40,9 +58,8 @@
     <string name="modality_train">Train</string>
     <string name="modality_motorbike">Motorbike</string>
 
-    <!-- Trips Fragment -->
+    <!-- Measurements -->
     <string name="modality_type">Modality type</string>
-    <!--
     <string name="mark_all_menu_item">Select all items</string>
     <string name="delete_marked_menu_item">Delete marked</string>
     <string name="measurement">Measurement</string>
@@ -54,20 +71,14 @@
     <string name="delete_data_non_selected">No measurements selected. Multiple selection by long press.</string>
     <string name="toast_selection_mode_enabled">Selection mode enabled</string>
     <string name="toast_selection_mode_disabled">Selection mode disabled</string>
-    -->
     <string name="toast_no_locations_found">No locations found</string>
-    <!--
     <string name="toast_measurement_deletion_success">Copies of the measurements on the server are not affected.</string>
     <string name="toast_item_deletion_success">The selected items were deleted.</string>
     <string name="toast_select_location">Please select a location</string>
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
-    -->
 
-    <!-- FIXME: check the string below:
-    - can imprint be reached by the app?
-    - is the text correct for the RFR app? -->
-    <!-- Imprint page -->
-    <!--
+
+    <!-- Imprint -->
     <string name="publisher">Publisher</string>
     <string name="publisher_content">Cyface GmbH
         \nFröbelstr. 49
@@ -85,10 +96,8 @@
         \nDistrict Court Dresden
         \nHRB: 36726
         \nUSt.-Id. (VAT no.): DE-312598748</string>
-        -->
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
-    <!--
     <string name="reports">Error tracking by Sentry</string>
     <string name="reports_content">We are constantly improving and developing our app. Nevertheless, we cannot guarantee error-free operation of the app. In order to keep possible programming errors to a minimum, we use Sentry, a service provided by Functional Software Inc, 132 Hawthorne St, San Francisco, CA 94107, USA (hereinafter "Sentry"). Sentry monitors errors that occur within our App and informs us of them. In the event of a software error, the following information is automatically transmitted to Sentry:
 
@@ -103,19 +112,15 @@
         \n\nThe information is collected anonymously, not used for personal purposes or for advertising purposes and then deleted again. The legal basis for the above-mentioned data processing is Art. 6, Paragraph 1 lit. f of the GDPR.
 
         \n\nThe sole purpose of processing is to improve the stability and usability of the app. For further information regarding data processing by Sentry, please refer to the Sentry Privacy Policy: https://sentry.io/privacy/</string>
-        -->
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
-    <!--
     <string name="disclaimer">Disclaimer</string>
     <string name="disclaimer_content">The application (hereinafter also: \"app\") is in <b>beta state</b>. It was developed to the best of our knowledge with utmost care by trained software developers. We are testing the app regularly and extensively on our own mobile devices.
         \nHowever, we currently can\'t ensure that everything works as expected and we assume no liability whatsoever for damage that may result from the use of the app. At the same time, we can\'t promise you all time availability of our servers and services such as data upload, data processing and data visualization.
         \n<b>By using this application you accept these conditions and the privacy conditions below.</b></string>
-        -->
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
     <!-- Version 2.1.1 -->
-    <!--
     <string name="privacy">Privacy Policy</string>
     <string name="privacy_content"><b>1. Name and address of the responsible party</b>
         \n\nThe entity responsible within the meaning of the General Data Protection Regulation and other national data protection laws of the member states as well as other data protection provisions is the:
@@ -297,5 +302,4 @@
         \n\nWithout prejudice to any other administrative or judicial remedy, you have the right to complain to a supervisory authority, in particular in the Member State where you reside, at your place of work or at the place where the suspected violation occurred, if you believe that the processing of your personal data is in breach of the GDPR.
         \nThe supervisory authority with which the complaint was lodged shall inform the complainant of the status and outcome of the complaint, including the possibility of a judicial remedy under Article 78 GDPR.
     </string>
-    -->
 </resources>

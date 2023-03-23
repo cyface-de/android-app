@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Ready for Robots</string>
-
     <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
     <string name="trips">Trips</string>
     <string name="capturing">Capturing</string>

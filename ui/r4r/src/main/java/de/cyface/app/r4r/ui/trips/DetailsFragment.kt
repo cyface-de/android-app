@@ -56,7 +56,7 @@ class DetailsFragment : Fragment() {
 
         // Get measurementId from calling fragment
         val measurementId = requireArguments().getLong("measurementId")
-        binding.tripTitle.text = requireContext().getString(R.string.trip_title, measurementId)
+        binding.tripTitle.text = requireContext().getString(R.string.trip_id, measurementId)
 
         // Load measurement
         val measurement = persistenceLayer.loadMeasurement(measurementId)

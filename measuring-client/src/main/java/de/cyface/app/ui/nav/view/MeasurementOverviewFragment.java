@@ -168,7 +168,7 @@ public class MeasurementOverviewFragment extends Fragment {
                 }
             }
 
-            Toast.makeText(getContext(), R.string.toast_select_location, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), de.cyface.app.utils.R.string.toast_select_location, Toast.LENGTH_SHORT).show();
             isAddEventActionActive = true;
             // Choose location on map
             googleMap.setOnMapClickListener(latLng -> {
@@ -265,7 +265,7 @@ public class MeasurementOverviewFragment extends Fragment {
                                     Manifest.permission.READ_EXTERNAL_STORAGE},
                             PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT);
                 } else {
-                    Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data_no_permission),
+                    Toast.makeText(fragmentActivity, fragmentActivity.getString(de.cyface.app.utils.R.string.export_data_no_permission),
                             Toast.LENGTH_LONG).show();
                 }
             } else {
@@ -291,7 +291,7 @@ public class MeasurementOverviewFragment extends Fragment {
             @NonNull final ListView eventsView) {
 
         if (eventsView.getCheckedItemCount() < 1) {
-            Toast.makeText(getActivity(), fragmentActivity.getString(R.string.delete_data_non_selected),
+            Toast.makeText(getActivity(), fragmentActivity.getString(de.cyface.app.utils.R.string.delete_data_non_selected),
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -304,7 +304,7 @@ public class MeasurementOverviewFragment extends Fragment {
             @NonNull final ListView measurementsView) {
 
         if (measurementsView.getCheckedItemCount() < 1) {
-            Toast.makeText(getActivity(), fragmentActivity.getString(R.string.delete_data_non_selected),
+            Toast.makeText(getActivity(), fragmentActivity.getString(de.cyface.app.utils.R.string.delete_data_non_selected),
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -341,11 +341,11 @@ public class MeasurementOverviewFragment extends Fragment {
         switch (requestCode) {
             case PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data),
+                    Toast.makeText(fragmentActivity, fragmentActivity.getString(de.cyface.app.utils.R.string.export_data),
                             Toast.LENGTH_LONG).show();
                     new ExportTask(fragmentActivity).execute();
                 } else {
-                    Toast.makeText(fragmentActivity, fragmentActivity.getString(R.string.export_data_no_permission),
+                    Toast.makeText(fragmentActivity, fragmentActivity.getString(de.cyface.app.utils.R.string.export_data_no_permission),
                             Toast.LENGTH_LONG).show();
                 }
                 break;
@@ -417,7 +417,7 @@ public class MeasurementOverviewFragment extends Fragment {
         Validate.notNull(activity);
         final ActionBar actionBar = activity.getSupportActionBar();
         Validate.notNull(actionBar);
-        actionBar.setTitle(getString(R.string.measurement) + " " + measurementId);
+        actionBar.setTitle(getString(de.cyface.app.utils.R.string.measurement) + " " + measurementId);
         LoaderManager.getInstance(this).restartLoader(MEASUREMENT_LOADER_ID, null, eventDataList);
     }
 
@@ -487,7 +487,7 @@ public class MeasurementOverviewFragment extends Fragment {
             // Add new Marker to map
             final LatLng latLng = new LatLng(nearestGeoLocation.getLat(), nearestGeoLocation.getLon());
             map.addMarker(eventId, latLng, modality, true);
-            Toast.makeText(getContext(), R.string.toast_item_created_on_tracks_nearest_position, Toast.LENGTH_LONG)
+            Toast.makeText(getContext(), de.cyface.app.utils.R.string.toast_item_created_on_tracks_nearest_position, Toast.LENGTH_LONG)
                     .show();
 
             cancelAddEventAction();

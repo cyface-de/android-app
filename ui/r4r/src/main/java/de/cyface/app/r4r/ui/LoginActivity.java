@@ -222,28 +222,28 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         boolean valid = true;
         if (login == null || login.isEmpty()) {
-            loginInput.setError(getString(R.string.error_message_field_required));
+            loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_field_required));
             loginInput.requestFocus();
             valid = false;
         } else if (login.length() < 4) {
-            loginInput.setError(getString(R.string.error_message_login_too_short));
+            loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_login_too_short));
             loginInput.requestFocus();
             valid = false;
         } else if (loginMustBeAnEmailAddress && !eMailPattern.matcher(login).matches()) {
-            loginInput.setError(getString(R.string.error_message_invalid_email));
+            loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_invalid_email));
             loginInput.requestFocus();
             valid = false;
         }
         if (password == null || password.isEmpty()) {
-            passwordInput.setError(getString(R.string.error_message_field_required));
+            passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_field_required));
             passwordInput.requestFocus();
             valid = false;
         } else if (password.length() < 4) {
-            passwordInput.setError(getString(R.string.error_message_password_too_short));
+            passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_password_too_short));
             passwordInput.requestFocus();
             valid = false;
         } else if (password.length() > 20) {
-            passwordInput.setError(getString(R.string.error_message_password_too_short));
+            passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_password_too_short));
             passwordInput.requestFocus();
             valid = false;
         }

@@ -92,7 +92,7 @@ public final class EventDeleteController
     @Override
     protected void onPostExecute(@NonNull final ListView listView) {
         super.onPostExecute(listView);
-        Toast.makeText(contextReference.get(), R.string.toast_item_deletion_success, Toast.LENGTH_LONG).show();
+        Toast.makeText(contextReference.get(), de.cyface.app.utils.R.string.toast_item_deletion_success, Toast.LENGTH_LONG).show();
         for (final long eventId : eventIds) {
             map.removeEventMarker(eventId);
         }

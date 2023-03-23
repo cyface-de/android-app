@@ -121,9 +121,9 @@ public class ExportTask extends AsyncTask<Void, Void, Long> {
         }
         try {
             // Attention: getContext() is not marked red but not supported API<23! Issue 185848
-            new AlertDialog.Builder(context).setTitle(R.string.title_menu_item_export)
+            new AlertDialog.Builder(context).setTitle(de.cyface.app.utils.R.string.title_menu_item_export)
                     .setMessage(
-                            context.getString(R.string.toast_export) + " " + humanReadableByteCount(bytesTransferred))
+                            context.getString(de.cyface.app.utils.R.string.toast_export) + " " + humanReadableByteCount(bytesTransferred))
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     }).show();
         } catch (final NullPointerException e) {

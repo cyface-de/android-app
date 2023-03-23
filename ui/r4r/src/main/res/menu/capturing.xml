@@ -4,6 +4,6 @@
   <item
     android:id="@+id/action_sync"
     android:icon="@drawable/ic_baseline_cloud_upload_24"
-    android:title="@string/action_sync"
+    android:title="@string/upload"
     app:showAsAction="ifRoom" />
 </menu>

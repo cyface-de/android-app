@@ -42,7 +42,7 @@
 
                 <item
                     android:id="@+id/drawer_setting_synchronization"
-                    android:title="@string/drawer_setting_synchronize"
+                    android:title="@string/drawer_setting_auto_upload"
                     app:actionLayout="@layout/drawer_list_switch"
                     app:showAsAction="always"
                     android:checkable="false" />

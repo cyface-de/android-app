@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
         bundle.putInt(INFORMATION_VIEW_KEY, R.layout.fragment_imprint);
         fragment.setArguments(bundle);
 
-        showFragment(fragment, getString(R.string.drawer_title_imprint), INFORMATION_VIEW_FRAGMENT_TAG);
+        showFragment(fragment, getString(de.cyface.app.utils.R.string.drawer_title_imprint), INFORMATION_VIEW_FRAGMENT_TAG);
     }
 
     @Override
