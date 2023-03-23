@@ -81,6 +81,7 @@
     <string name="distance">Strecke</string>
     <string name="duration">Fahrzeit</string>
     <string name="elevation_profile">Höhenprofil</string>
+    <string name="elevation_profile_no_data">Höhenprofil (keine Höhendaten vorhanden)</string>
     <string name="ascend">Anstieg</string>
     <string name="avoided_co2">Vermiedener CO² Ausstoß</string>
     <string name="compared_to_car">Im Vergleich zum Auto</string>
