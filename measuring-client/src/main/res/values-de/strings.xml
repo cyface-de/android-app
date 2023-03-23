@@ -14,7 +14,6 @@
 
   <!-- Capturing -->
   <string name="measurement_id">Messungs-Id</string>
-  <string name="start">Beginne Aufnahme</string>
   <string name="capturing_active">Datenerfassung aktiv</string>
   <string name="toast_measurement_paused">Fahrt pausiert</string>
   <string name="toast_measurement_resumed">Fahrt fortgesetzt</string>
