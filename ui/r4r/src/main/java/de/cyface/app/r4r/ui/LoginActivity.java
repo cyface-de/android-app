@@ -20,7 +20,6 @@ package de.cyface.app.r4r.ui;
 
 import static de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.r4r.utils.Constants.AUTHORITY;
-import static de.cyface.app.r4r.utils.Constants.PREFERENCES_SERVER_KEY;
 import static de.cyface.app.r4r.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
 
@@ -56,6 +55,7 @@ import de.cyface.app.r4r.utils.AuthTokenRequest;
 import de.cyface.app.r4r.utils.Constants;
 import de.cyface.synchronization.CyfaceAuthenticator;
 import de.cyface.synchronization.ErrorHandler;
+import de.cyface.synchronization.SyncService;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.Validate;
 
@@ -257,12 +257,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
      * effect.
      */
     private void setServerUrl() {
-        final String storedServer = preferences.getString(Constants.PREFERENCES_SERVER_KEY, null);
+        final String storedServer = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null);
         Validate.notNull(BuildConfig.cyfaceServer);
         if (storedServer == null || !storedServer.equals(BuildConfig.cyfaceServer)) {
             Log.d(TAG, "Updating Cyface Server API URL from " + storedServer + "to" + BuildConfig.cyfaceServer);
             final SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(PREFERENCES_SERVER_KEY, BuildConfig.cyfaceServer);
+            editor.putString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer);
             editor.apply();
         }
     }

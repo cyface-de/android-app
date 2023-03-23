@@ -3,10 +3,8 @@ package de.cyface.app.r4r
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
@@ -19,9 +17,9 @@ import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
-import de.cyface.app.r4r.utils.Constants.DEFAULT_SENSOR_FREQUENCY
-import de.cyface.app.r4r.utils.Constants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
+import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
+import de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException

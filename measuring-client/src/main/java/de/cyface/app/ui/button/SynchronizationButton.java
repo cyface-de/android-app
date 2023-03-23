@@ -19,7 +19,7 @@
 package de.cyface.app.ui.button;
 
 import static de.cyface.app.ui.MainFragment.accountWithTokenExists;
-import static de.cyface.app.utils.Constants.PREFERENCES_SYNCHRONIZATION_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.util.Collection;

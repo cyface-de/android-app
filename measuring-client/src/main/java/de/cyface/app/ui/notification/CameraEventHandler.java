@@ -19,11 +19,11 @@
 package de.cyface.app.ui.notification;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
-import static de.cyface.app.utils.Constants.CAMERA_ACCESS_LOST_NOTIFICATION_ID;
-import static de.cyface.app.utils.Constants.NOTIFICATION_CHANNEL_ID_RUNNING;
-import static de.cyface.app.utils.Constants.NOTIFICATION_CHANNEL_ID_WARNING;
-import static de.cyface.app.utils.Constants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID;
-import static de.cyface.app.utils.Constants.SPACE_WARNING_NOTIFICATION_ID;
+import static de.cyface.app.utils.SharedConstants.CAMERA_ACCESS_LOST_NOTIFICATION_ID;
+import static de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING;
+import static de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING;
+import static de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID;
+import static de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID;
 import static de.cyface.app.utils.Constants.TAG;
 
 import android.app.Notification;

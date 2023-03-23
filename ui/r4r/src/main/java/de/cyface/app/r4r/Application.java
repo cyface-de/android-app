@@ -18,7 +18,7 @@
  */
 package de.cyface.app.r4r;
 
-import static de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 
 import android.content.IntentFilter;
 import android.content.SharedPreferences;

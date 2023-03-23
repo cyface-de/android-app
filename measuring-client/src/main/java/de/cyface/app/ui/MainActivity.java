@@ -21,6 +21,8 @@ package de.cyface.app.ui;
 import static de.cyface.app.ui.nav.view.InformationViewFragment.INFORMATION_VIEW_KEY;
 import static de.cyface.app.utils.Constants.PACKAGE;
 import static de.cyface.app.utils.Constants.SUPPORT_EMAIL;
+import static de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY;
 import static de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
 import static de.cyface.energy_settings.Constants.DIALOG_ENERGY_SAFER_WARNING_CODE;
@@ -235,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
             return;
         }
 
-        final boolean isAutoCenterMapEnabled = preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY,
+        final boolean isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY,
                 false);
         final Map map = mainFragment.getMap();
         if (map == null) {
@@ -260,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
             // Targeting Android 12+ we always need to request coarse together with fine location
             ActivityCompat.requestPermissions(this,
                     new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    Constants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+                    PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
         }
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -338,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         switch (requestCode) {
-            case Constants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
+            case PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mainFragment.necessaryPermissionsGranted();
                 } else {

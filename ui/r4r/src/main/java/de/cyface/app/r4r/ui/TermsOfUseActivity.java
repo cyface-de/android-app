@@ -18,8 +18,8 @@
  */
 package de.cyface.app.r4r.ui;
 
-import static de.cyface.app.r4r.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.r4r.utils.Constants.ACCEPTED_TERMS_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_TERMS_KEY;
 
 import android.app.Activity;
 import android.content.Intent;

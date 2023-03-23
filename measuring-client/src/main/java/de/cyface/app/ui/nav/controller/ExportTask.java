@@ -18,7 +18,7 @@
  */
 package de.cyface.app.ui.nav.controller;
 
-import static de.cyface.app.utils.Constants.DATABASE_NAME;
+import static de.cyface.app.utils.SharedConstants.DATABASE_NAME;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.utils.Utils.informMediaScanner;
 

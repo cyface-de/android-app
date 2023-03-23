@@ -18,8 +18,9 @@
  */
 package de.cyface.app.ui;
 
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.TAG;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -148,7 +149,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
 
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
-        isAutoCenterMapEnabled = preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY, false);
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false);
     }
 
     @Override
@@ -387,7 +388,7 @@ public class Map implements OnMapReadyCallback, GoogleApiClient.ConnectionCallba
             return;
         }
 
-        isAutoCenterMapEnabled = preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY, false);
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false);
         googleMap.setMyLocationEnabled(true);
     }
 
