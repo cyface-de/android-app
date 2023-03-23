@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui.dialog;
+package de.cyface.app.utils
 
 /**
  * An interface for listeners who are interested in the calibration dialog shown when capturing is started.
@@ -25,6 +25,6 @@ package de.cyface.app.ui.dialog;
  * @version 2.0.0
  * @since 1.0.0
  */
-public interface CalibrationDialogListener {
-    void onCalibrationDialogFinished();
+interface CalibrationDialogListener {
+    fun onCalibrationDialogFinished()
 }

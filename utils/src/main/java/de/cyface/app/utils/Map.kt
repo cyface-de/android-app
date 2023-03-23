@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.capturing.map
+package de.cyface.app.utils
 
 import android.Manifest
 import android.app.Activity
@@ -26,11 +26,9 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
-import android.os.Looper
 import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -48,9 +46,8 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import de.cyface.app.r4r.R
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
@@ -61,7 +58,7 @@ import java.lang.ref.WeakReference
 
 
 /**
- * The Map class handles everything around the GoogleMap view of [MapFragment].
+ * The Map class handles everything around the GoogleMap view.
  *
  * @author Armin Schnabel
  * @version 4.0.0
@@ -77,7 +74,7 @@ class Map(
     /**
      * The visualization library in use.
      */
-    private var googleMap: GoogleMap? = null
+    var googleMap: GoogleMap? = null
 
     /**
      * The `Context` of this application.
@@ -99,7 +96,7 @@ class Map(
     /**
      * `True` if the "auto-center map" feature is currently enabled.
      */
-    private var isAutoCenterMapEnabled: Boolean
+    var isAutoCenterMapEnabled: Boolean
 
     /**
      * The `SharedPreferences` used to store the user's preferences.
@@ -115,7 +112,7 @@ class Map(
      * All currently shown `Event` `Marker`s with a reference between both required to find the Marker of a
      * Event.
      */
-    private val eventMarker = HashMap<Long, Marker?>()
+    val eventMarker = HashMap<Long, Marker?>()
 
     /**
      * `True` if the user opted-in to error reporting.
@@ -200,7 +197,7 @@ class Map(
      * @param moveCameraToBounds `True` if the camera of the map should be moved to the track boundaries
      */
     fun renderMeasurement(
-        tracks: ArrayList<Track>, events: List<Event>,
+        tracks: List<Track>, events: List<Event>,
         moveCameraToBounds: Boolean
     ) {
         googleMap!!.clear()
@@ -322,7 +319,7 @@ class Map(
      * @param permissionWereJustGranted `True` if the permissions were just granted. In this case we expect the
      * permissions to be available and track if otherwise.
      */
-    private fun showAndMoveToCurrentLocation(permissionWereJustGranted: Boolean) {
+    fun showAndMoveToCurrentLocation(permissionWereJustGranted: Boolean) {
         try {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
@@ -462,7 +459,7 @@ class Map(
      *
      * @param marker The `Marker` which is to be focused.
      */
-    private fun focusMarker(marker: Marker) {
+    fun focusMarker(marker: Marker) {
         marker.showInfoWindow()
         val markerLatLng = marker.position
         val googleMap = googleMap

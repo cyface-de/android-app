@@ -39,6 +39,7 @@ import java.util.List;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.google.android.material.tabs.TabLayout;
 
+import de.cyface.app.utils.Map;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;

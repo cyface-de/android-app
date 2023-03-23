@@ -42,14 +42,6 @@
     <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
     <string name="msg_calibrating">Kalibriere</string>
 
-    <!-- Map Fragment -->
-    <string name="modality_car">Auto</string>
-    <string name="modality_bicycle">Fahrrad</string>
-    <string name="modality_walking">Zu Fuß</string>
-    <string name="modality_bus">Bus</string>
-    <string name="modality_train">Zug</string>
-    <string name="modality_motorbike">Motorrad</string>
-
     <!-- Speed Fragment -->
     <string name="capturing_inactive">Datenerfassung inaktiv</string>
 
@@ -67,7 +59,7 @@
     <string name="delete_data_non_selected">Keine Messungen ausgewählt. Mehrfachauswahl per Lang-Druck.</string>
     <string name="toast_selection_mode_enabled">Markierungmodus aktiviert</string>
     <string name="toast_selection_mode_disabled">Markierungmodus deaktiviert</string>
-    <string name="toast_no_locations_found">Keine Positionsdaten gefunden</string>
+    <!--<string name="toast_no_locations_found">Keine Positionsdaten gefunden</string>-->
     <string name="toast_measurement_deletion_success">Kopien der Messungen auf dem Server sind nicht betroffen.</string>
     <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
     <string name="toast_select_location">Bitte wählen Sie einen Standort aus</string>

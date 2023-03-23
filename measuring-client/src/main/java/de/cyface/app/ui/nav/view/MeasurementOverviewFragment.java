@@ -18,9 +18,9 @@
  */
 package de.cyface.app.ui.nav.view;
 
-import static de.cyface.app.ui.Map.TEMPORARY_EVENT_MARKER_ID;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.PACKAGE;
+import static de.cyface.app.utils.Map.TEMPORARY_EVENT_MARKER_ID;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT;
 import static de.cyface.persistence.model.Modality.UNKNOWN;
@@ -61,12 +61,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.Map;
 import de.cyface.app.ui.dialog.ModalityDialog;
 import de.cyface.app.ui.nav.controller.EventDeleteController;
 import de.cyface.app.ui.nav.controller.ExportTask;
 import de.cyface.app.ui.nav.controller.MeasurementDeleteController;
-import de.cyface.app.utils.Constants;
+import de.cyface.app.utils.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.model.EventType;
@@ -471,7 +470,7 @@ public class MeasurementOverviewFragment extends Fragment {
 
             // Do nothing if there is no location to reference the marker to
             if (nearestGeoLocation == null) {
-                Toast.makeText(getContext(), R.string.toast_no_locations_found, Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), de.cyface.app.utils.R.string.toast_no_locations_found, Toast.LENGTH_LONG).show();
                 cancelAddEventAction();
                 return;
             }

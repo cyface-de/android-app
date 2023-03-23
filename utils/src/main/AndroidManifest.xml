@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <!-- (!) We do *not* need ACCESS_BACKGROUND_LOCATION as we only need location in Foreground Service-->
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <!-- On Android 12+ we must request both FINE and COARSE, but add a handle to explicitly request FINE -->
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+  <!-- Google Maps Android API permission -->
+  <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
+</manifest>
