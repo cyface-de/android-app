@@ -87,6 +87,9 @@
     <string name="compared_to_car">Im Vergleich zum Auto</string>
 
     <!-- Statistics Fragment -->
+    <string name="max_length">Maximale Länge</string>
+    <string name="elevation">Höhe</string>
+    <string name="total">Gesamt</string>
 
 
     <!-- FIXME: check the string below:

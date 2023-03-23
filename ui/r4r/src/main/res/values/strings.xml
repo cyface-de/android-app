@@ -93,6 +93,9 @@
 
 
     <!-- Statistics Fragment -->
+    <string name="max_length">Maximum Length</string>
+    <string name="elevation">Elevation</string>
+    <string name="total">Total</string>
 
 
     <!-- FIXME: check the string below:
