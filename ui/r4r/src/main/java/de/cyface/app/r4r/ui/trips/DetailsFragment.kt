@@ -3,9 +3,9 @@ package de.cyface.app.r4r.ui.trips
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -17,6 +17,7 @@ import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.strategy.DefaultLocationCleaning
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 
@@ -67,7 +68,8 @@ class DetailsFragment : Fragment() {
             if (distanceKm == null) null else "${(distanceKm * 100).roundToInt() / 100.0} km"
         binding.distanceView.text = distanceText ?: ""
 
-        val durationMillis = if (measurement == null) null else persistenceLayer.loadDuration(measurementId)
+        val durationMillis =
+            if (measurement == null) null else persistenceLayer.loadDuration(measurementId)
         val durationSeconds = durationMillis?.div(1000)
         val durationMinutes = durationSeconds?.div(60)
         val durationHours = durationMinutes?.div(60)
@@ -111,24 +113,45 @@ class DetailsFragment : Fragment() {
         binding.ascendView.text = ascendText ?: "+ 0 m"
 
         // Chart
-        //FIXME: val altitudes = persistenceLayer.loadAltitudes(measurementId, DefaultLocationCleaning())
-        val values =
-            arrayOf(-401, -402, -405, -402, -407, -406, -406, -412, -412, -416, -418, -424, -433, -432, -411, -410)
-        val entries = ArrayList<Entry>()
-        var x = 1
-        values.forEach {
-            entries.add(Entry(x.toFloat(), it.toFloat()))
-            x++
-        }
-        val resources = requireContext().resources
         val chart = root.findViewById(R.id.chart) as LineChart
-        val dataSet = LineDataSet(entries, resources.getString(R.string.chart_label))
-        dataSet.color = resources.getColor(R.color.green_700)
-        dataSet.circleColors = arrayListOf(resources.getColor(R.color.green_700))
-        chart.data = LineData(dataSet)
-        val description = chart.description
-        description.isEnabled = false
-        chart.xAxis.isEnabled = false
+        val altitudes = persistenceLayer.loadAltitudes(measurementId)
+        if (altitudes == null || altitudes.isEmpty()) {
+            binding.elevationProfileTitle.text = getString(R.string.elevation_profile_no_data)
+            chart.visibility = GONE
+        } else {
+            val allEntries = ArrayList<List<Entry>>()
+            var x = 1
+            val values = altitudes.sumOf { trackAltitudes -> trackAltitudes.count() }
+            altitudes.forEach { trackAltitudes ->
+                val entries = ArrayList<Entry>()
+                trackAltitudes.forEach {
+                    entries.add(Entry(x.toFloat(), it.toFloat()))
+                    x++
+                }
+                x += round(values * 0.05).roundToInt() // 5 % gap between sub-tracks
+                if (entries.isNotEmpty()) {
+                    allEntries.add(entries)
+                }
+            }
+            val textColor = resources.getColor(R.color.text)
+            val resources = requireContext().resources
+            val datasets: List<LineDataSet> = ArrayList()
+            allEntries.forEach {
+                val dataSet = LineDataSet(it, "sub-track")
+                dataSet.color = resources.getColor(R.color.green_700)
+                dataSet.setDrawCircles(false)
+                (datasets as ArrayList<LineDataSet>).add(dataSet)
+            }
+            val data = LineData(datasets)
+            data.setValueTextColor(textColor)
+            chart.data = data
+            chart.axisLeft.textColor = textColor
+            chart.axisRight.textColor = textColor
+            chart.description.text = resources.getString(R.string.chart_label)
+            chart.description.textColor = textColor
+            chart.legend.isEnabled = false
+            chart.xAxis.isEnabled = false
+        }
 
         return root
     }

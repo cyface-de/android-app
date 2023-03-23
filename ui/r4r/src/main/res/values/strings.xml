@@ -86,6 +86,7 @@
     <string name="distance">Distance</string>
     <string name="duration">Duration</string>
     <string name="elevation_profile">Elevation profile</string>
+    <string name="elevation_profile_no_data">Elevation profile (no altitude data available)</string>
     <string name="ascend">Ascend</string>
     <string name="avoided_co2">Avoided CO² emission</string>
     <string name="compared_to_car">Compared to a car</string>
