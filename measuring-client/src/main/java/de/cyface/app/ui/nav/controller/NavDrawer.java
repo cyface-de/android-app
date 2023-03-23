@@ -272,7 +272,7 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
             editor.apply();
 
             if (isChecked) {
-                Toast.makeText(applicationContext, R.string.zoom_to_location_enabled_toast, Toast.LENGTH_LONG).show();
+                Toast.makeText(applicationContext, de.cyface.app.utils.R.string.zoom_to_location_enabled_toast, Toast.LENGTH_LONG).show();
             }
 
             for (NavDrawerListener listener : NavDrawer.this.listener) {
@@ -304,7 +304,7 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
 
             // Show warning to user (storage gets filled)
             if (!isChecked) {
-                Toast.makeText(applicationContext, R.string.sync_disabled_toast, Toast.LENGTH_LONG).show();
+                Toast.makeText(applicationContext, de.cyface.app.utils.R.string.sync_disabled_toast, Toast.LENGTH_LONG).show();
             }
         }
     }

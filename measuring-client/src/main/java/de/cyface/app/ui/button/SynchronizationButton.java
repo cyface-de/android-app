@@ -143,7 +143,7 @@ public class SynchronizationButton implements AbstractButton {
         final boolean isConnected = dataCapturingService.getWiFiSurveyor().isConnected();
         Log.v(WiFiSurveyor.TAG, (isConnected ? "" : "Not ") + "connected to syncable network");
         if (!isConnected) {
-            Toast.makeText(context, context.getString(R.string.error_message_sync_canceled_no_wifi), Toast.LENGTH_SHORT)
+            Toast.makeText(context, context.getString(de.cyface.app.utils.R.string.error_message_sync_canceled_no_wifi), Toast.LENGTH_SHORT)
                     .show();
             return;
         }
@@ -154,7 +154,7 @@ public class SynchronizationButton implements AbstractButton {
         Validate.isTrue(syncEnabled == syncPreferenceEnabled, "sync " + (syncEnabled ? "enabled" : "disabled")
                 + " but syncPreference " + (syncPreferenceEnabled ? "enabled" : "disabled"));
         if (!syncEnabled) {
-            Toast.makeText(context, context.getString(R.string.error_message_sync_canceled_disabled),
+            Toast.makeText(context, context.getString(de.cyface.app.utils.R.string.error_message_sync_canceled_disabled),
                     Toast.LENGTH_SHORT).show();
             return;
         }

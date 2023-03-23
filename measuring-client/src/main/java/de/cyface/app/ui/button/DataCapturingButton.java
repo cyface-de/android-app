@@ -269,7 +269,7 @@ public class DataCapturingButton
     private void updateOngoingCapturingInfo(@NonNull final MeasurementStatus status) {
         if (status == OPEN) {
             try {
-                final String measurementIdText = context.getString(R.string.measurement) + " "
+                final String measurementIdText = context.getString(de.cyface.app.utils.R.string.measurement) + " "
                         + persistenceLayer.loadCurrentlyCapturedMeasurement().getId();
                 measurementIdTextView.setText(measurementIdText);
                 cameraInfoTextView.setVisibility(View.VISIBLE);
@@ -588,7 +588,7 @@ public class DataCapturingButton
         // Measurement is stopped, so we start a new measurement
         if (persistenceLayer.hasMeasurement(OPEN) && isProblematicManufacturer()) {
             showToastOnMainThread(
-                    context.getString(R.string.toast_last_tracking_crashed),
+                    context.getString(de.cyface.app.utils.R.string.toast_last_tracking_crashed),
                     true);
         }
 
@@ -644,7 +644,7 @@ public class DataCapturingButton
         }
 
         if (!spaceAvailable()) {
-            showToastOnMainThread(context.getString(R.string.error_message_capturing_canceled_no_space), false);
+            showToastOnMainThread(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space), false);
             setButtonEnabled(button);
             return true;
         }
@@ -765,8 +765,8 @@ public class DataCapturingButton
      * @return A reference to the ProgressDialog which can be used to dismiss it.
      */
     private ProgressDialog createAndShowCalibrationDialog() {
-        return ProgressDialog.show(context, context.getString(R.string.title_dialog_starting_data_capture),
-                context.getString(R.string.msg_calibrating), true, false, dialog -> {
+        return ProgressDialog.show(context, context.getString(de.cyface.app.utils.R.string.title_dialog_starting_data_capture),
+                context.getString(de.cyface.app.utils.R.string.msg_calibrating), true, false, dialog -> {
                     try {
                         dataCapturingService
                                 .stop(new ShutDownFinishedHandler(

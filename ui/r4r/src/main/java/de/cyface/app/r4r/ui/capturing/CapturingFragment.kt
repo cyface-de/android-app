@@ -553,7 +553,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private fun updateOngoingCapturingInfo(status: MeasurementStatus) {
         if (status === MeasurementStatus.OPEN) {
             // FIXME: We used `DefaultBehavior` before, but now `CapturingBehavior` is used
-            val measurementIdText = (getString(R.string.measurement) + " "
+            val measurementIdText = (getString(de.cyface.app.utils.R.string.measurement) + " "
                     + persistenceLayer.loadCurrentlyCapturedMeasurement().id)
             binding.tripTitle.text = measurementIdText
             // FIXME: cameraInfoTextView.setVisibility(View.VISIBLE)
@@ -753,7 +753,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // Measurement is stopped, so we start a new measurement
         if (persistenceLayer.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
             showToastOnMainThread(
-                getString(R.string.toast_last_tracking_crashed),
+                getString(de.cyface.app.utils.R.string.toast_last_tracking_crashed),
                 true
             )
         }
@@ -851,7 +851,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         }
         if (!DiskConsumption.spaceAvailable()) {
             showToastOnMainThread(
-                getString(R.string.error_message_capturing_canceled_no_space),
+                getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space),
                 false
             )
             setButtonEnabled(startResumeButton)
@@ -887,8 +887,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private fun createAndShowCalibrationDialog(): ProgressDialog? {
         return ProgressDialog.show(
             context,
-            getString(R.string.title_dialog_starting_data_capture),
-            getString(R.string.msg_calibrating),
+            getString(de.cyface.app.utils.R.string.title_dialog_starting_data_capture),
+            getString(de.cyface.app.utils.R.string.msg_calibrating),
             true,
             false
         ) {

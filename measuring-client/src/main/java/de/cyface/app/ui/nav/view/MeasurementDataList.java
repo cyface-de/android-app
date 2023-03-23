@@ -126,7 +126,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         Log.d(TAG, "onItemLongClick: isMultiSelectionModeEnabled: " + isMultiSelectionModeEnabled);
         if (!isMultiSelectionModeEnabled) {
             listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            Toast.makeText(activity.getBaseContext(), R.string.toast_selection_mode_enabled, Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity.getBaseContext(), de.cyface.app.utils.R.string.toast_selection_mode_enabled, Toast.LENGTH_SHORT).show();
         }
 
         return false;
@@ -141,7 +141,7 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
         Log.d(TAG, "onItemClick: " + checkedItems + " isMultiSelectionModeEnabled: " + isMultiSelectionModeEnabled);
         if (isMultiSelectionModeEnabled && checkedItems == 0) {
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            Toast.makeText(activity.getBaseContext(), R.string.toast_selection_mode_disabled, Toast.LENGTH_SHORT)
+            Toast.makeText(activity.getBaseContext(), de.cyface.app.utils.R.string.toast_selection_mode_disabled, Toast.LENGTH_SHORT)
                     .show();
             return;
         }

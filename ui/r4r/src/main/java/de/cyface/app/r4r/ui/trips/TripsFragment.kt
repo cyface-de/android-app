@@ -144,7 +144,7 @@ class TripsFragment : Fragment() {
         private fun deleteSelectedMeasurements() {
             if (adapter.tracker!!.selection.isEmpty) {
                 Toast.makeText(
-                    context.get(), context.get()!!.getString(R.string.delete_data_non_selected),
+                    context.get(), context.get()!!.getString(de.cyface.app.utils.R.string.delete_data_non_selected),
                     Toast.LENGTH_LONG
                 ).show()
                 return

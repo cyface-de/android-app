@@ -1,6 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- Other -->
-    <!--<string name="accept_terms">Bedingungen akzeptieren</string>
+    <string name="accept_terms">Bedingungen akzeptieren</string>
     <string name="accept_reports_details">Fehlermeldungen und App-Nutzung automatisch übermitteln</string>
     <string name="accept_terms_details">Ich habe den Disclaimer und die Datenschutzbedingungen gelesen und akzeptiere diese.</string>
     <string name="notification_channel_name_info">Information</string>
@@ -8,10 +10,9 @@
     <string name="notification_channel_description_info">Informative Benachrichtigung, z.B. wenn der Upload erfolgreich beendet wurde.</string>
     <string name="notification_channel_description_warning">Warnungen, z.B. wenn der Speicher voll ist und die Messung abgebrochen werden musste. Diese Benachrichtigung sollte nicht deaktiviert werden.</string>
     <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet.</string>
-    -->
 
-    <!-- Login Activity -->
-    <!--<string name="login_name">Login</string>
+    <!-- Login -->
+    <string name="login_name">Login</string>
     <string name="password">Passwort</string>
     <string name="log_in">Anmelden</string>
     <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
@@ -19,15 +20,36 @@
     <string name="error_message_field_required">Bitte ausfüllen</string>
     <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
     <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
-    <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>-->
+    <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 
-    <!-- Capturing Fragment -->
-    <!--<string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
+    <!-- Capturing -->
+    <string name="upload">Hochladen</string>
+    <string name="distance">Distanz</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Fortsetzen</string>
+    <string name="stop">Stop</string>
+    <string name="title_dialog_starting_data_capture">Aufnahme wird gestartet</string>
     <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
     <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
-    <string name="msg_calibrating">Kalibriere</string>-->
+    <string name="msg_calibrating">Kalibriere</string>
 
-    <!-- Map Fragment -->
+    <!-- Synchronization -->
+    <string name="error_message_sync_canceled_no_wifi">Für den Upload muss eine WLAN-Verbindung bestehen.</string>
+    <string name="error_message_sync_canceled_disabled">Die Synchronisation ist über die Einstellungen deaktiviert.</string>
+
+    <!-- Navigation -->
+    <string name="settings">Einstellungen</string>
+    <string name="drawer_title_feedback">Feedback</string>
+    <string name="drawer_title_guide">Einrichtung</string>
+    <string name="drawer_title_imprint">Impressum</string>
+    <string name="drawer_title_logout">Ausloggen</string>
+    <string name="drawer_setting_zoom_to_location">Karte immer zentrieren</string>
+    <string name="drawer_setting_auto_upload">Automatischer Upload</string>
+    <string name="sync_disabled_toast">Ohne Synchronisation wird mehr Speicherplatz belegt</string>
+    <string name="zoom_to_location_enabled_toast">Bei aktiven Bildschirm wird mehr Kartenmaterial geladen</string>
+
+    <!-- Map -->
     <string name="modality_car">Auto</string>
     <string name="modality_bicycle">Fahrrad</string>
     <string name="modality_walking">Zu Fuß</string>
@@ -35,9 +57,8 @@
     <string name="modality_train">Zug</string>
     <string name="modality_motorbike">Motorrad</string>
 
-    <!-- Trips Fragment -->
+    <!-- Measurements -->
     <string name="modality_type">Fortbewegungsart</string>
-    <!--
     <string name="mark_all_menu_item">Alles Markieren</string>
     <string name="delete_marked_menu_item">Markierte löschen</string>
     <string name="measurement">Messung</string>
@@ -49,21 +70,15 @@
     <string name="delete_data_non_selected">Keine Messungen ausgewählt. Mehrfachauswahl per Lang-Druck.</string>
     <string name="toast_selection_mode_enabled">Markierungmodus aktiviert</string>
     <string name="toast_selection_mode_disabled">Markierungmodus deaktiviert</string>
-    -->
     <string name="toast_no_locations_found">Keine Positionsdaten gefunden</string>
-    <!--
     <string name="toast_measurement_deletion_success">Kopien der Messungen auf dem Server sind nicht betroffen.</string>
     <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
     <string name="toast_select_location">Bitte wählen Sie einen Standort aus</string>
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
-    -->
 
 
-    <!-- FIXME: check the string below:
-    - can imprint be reached by the app?
-    - is the text correct for the RFR app? -->
-    <!-- Imprint page -->
-    <!--<string name="publisher">Herausgeber</string>
+    <!-- Imprint -->
+    <string name="publisher">Herausgeber</string>
     <string name="publisher_content">Cyface GmbH
         \nFröbelstr. 49
         \n01159 Dresden\n
@@ -79,10 +94,8 @@
         \nAmtsgericht Dresden
         \nHRB: 36726
         \nUSt.-Id.: DE-312598748</string>
-        -->
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
-    <!--
     <string name="reports">Fehler-Tracking durch Sentry</string>
     <string name="reports_content">Wir verbessern und entwickeln unsere App ständig weiter. Trotzdem können wir keinen fehlerfreien Betrieb der App garantieren. Um mögliche Programmierfehler so gering wie möglich zu halten, verwenden wir Sentry, ein Service von Functional Software Inc., 132 Hawthorne St, San Francisco, CA 94107, USA (nachfolgend "Sentry"). Sentry überwacht Fehler die innerhalb unserer App auftreten und informiert uns über diese. Im Falle eines Software-Fehlers werden automatisch folgende Informationen an Sentry übermittelt:
 
@@ -97,19 +110,15 @@
         \n\nDie Informationen werden anonym erhoben, nicht für persönliche Zwecke oder zu Werbezwecken verwendet und anschließend wieder gelöscht. Rechtsgrundlage für die vorgenannte Datenverarbeitung ist Art. 6, Abs. 1 lit. f der DSGVO.
 
         \n\nZweck der Verarbeitung ist ausschließlich die Verbessung der Stabilität und Nutzbarkeit der App. Weitere Informationen bzgl. der Datenverarbeitung durch Sentry finden Sie in den Datenschutzrichtlinien von Sentry: https://sentry.io/privacy/</string>
-        -->
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
-    <!--
     <string name="disclaimer">Disclaimer</string>
     <string name="disclaimer_content">Die Anwendung \"Cyface\" (im Folgenden auch \„App\") befindet sich in der <b>Betaphase</b>. Sie wurde nach bestem Wissen mit größt möglicher Sorgfalt von ausgebildeten Softwareentwicklern erstellt. Wir testen die Anwendung regelmäßig und ausführlich auf unseren eigenen mobilen Endgeräten.
         \nDerzeit ist es uns aber unmöglich die Haftung für mögliche Schäden zu übernehmen die Ihnen während der Benutzung der App entstehen. Gleichzeitig übernehmen wir keine Garantie für die ständige Verfügbarkeit der an die App geknüpften Dienste, wie Datenupload, Datenverarbeitung und Datenvisualisierung.
         \n<b>Mit der Verwendung dieser App akzeptieren Sie die hier aufgeführten Bedingungen und unten stehende Datenschutzerklärung.</b></string>
-        -->
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
     <!-- Version 2.1.1 -->
-    <!--
     <string name="privacy">Datenschutzerklärung</string>
     <string name="privacy_content"><b>1. Name und Anschrift des Verantwortlichen</b>
         \n\nDer Verantwortliche im Sinne der Datenschutz-Grundverordnung und anderer nationaler Datenschutzgesetze der Mitgliedsstaaten sowie sonstiger datenschutzrechtlicher Bestimmungen ist die:
@@ -290,5 +299,4 @@
         \n\nUnbeschadet eines anderweitigen verwaltungsrechtlichen oder gerichtlichen Rechtsbehelfs steht Ihnen das Recht auf Beschwerde bei einer Aufsichtsbehörde, insbesondere in dem Mitgliedstaat ihres Aufenthaltsorts, ihres Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes, zu, wenn Sie der Ansicht sind, dass die Verarbeitung der Sie betreffenden personenbezogenen Daten gegen die DSGVO verstößt.
         \nDie Aufsichtsbehörde, bei der die Beschwerde eingereicht wurde, unterrichtet den Beschwerdeführer über den Stand und die Ergebnisse der Beschwerde einschließlich der Möglichkeit eines gerichtlichen Rechtsbehelfs nach Art. 78 DSGVO.
     </string>
-    -->
 </resources>

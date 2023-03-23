@@ -130,7 +130,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
         final boolean isMultiSelectionModeEnabled = listView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE;
         if (!isMultiSelectionModeEnabled) {
             listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            Toast.makeText(activity.getBaseContext(), R.string.toast_selection_mode_enabled, Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity.getBaseContext(), de.cyface.app.utils.R.string.toast_selection_mode_enabled, Toast.LENGTH_SHORT).show();
         }
 
         return false;
@@ -144,7 +144,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
         final boolean isMultiSelectionModeEnabled = listView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE;
         if (isMultiSelectionModeEnabled && checkedItems == 0) {
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            Toast.makeText(activity.getBaseContext(), R.string.toast_selection_mode_disabled, Toast.LENGTH_SHORT)
+            Toast.makeText(activity.getBaseContext(), de.cyface.app.utils.R.string.toast_selection_mode_disabled, Toast.LENGTH_SHORT)
                     .show();
             return;
         }

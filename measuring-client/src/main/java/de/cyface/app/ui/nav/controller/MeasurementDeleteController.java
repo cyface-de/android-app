@@ -110,7 +110,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
         Log.d(TAG, "onPostExecute -> clearChoices & setChoiceMode to single");
         listView.clearChoices();
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        Toast.makeText(contextReference.get(), R.string.toast_measurement_deletion_success, Toast.LENGTH_LONG).show();
+        Toast.makeText(contextReference.get(), de.cyface.app.utils.R.string.toast_measurement_deletion_success, Toast.LENGTH_LONG).show();
     }
 
     /**

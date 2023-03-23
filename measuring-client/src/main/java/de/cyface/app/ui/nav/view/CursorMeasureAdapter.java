@@ -140,17 +140,17 @@ public class CursorMeasureAdapter extends CursorAdapter {
         final Context context = contextWeakReference.get();
         switch (modality) {
             case TRAIN:
-                return context.getString(R.string.modality_train);
+                return context.getString(de.cyface.app.utils.R.string.modality_train);
             case BUS:
-                return context.getString(R.string.modality_bus);
+                return context.getString(de.cyface.app.utils.R.string.modality_bus);
             case WALKING:
-                return context.getString(R.string.modality_walking);
+                return context.getString(de.cyface.app.utils.R.string.modality_walking);
             case CAR:
-                return context.getString(R.string.modality_car);
+                return context.getString(de.cyface.app.utils.R.string.modality_car);
             case BICYCLE:
-                return context.getString(R.string.modality_bicycle);
+                return context.getString(de.cyface.app.utils.R.string.modality_bicycle);
             case MOTORBIKE:
-                return context.getString(R.string.modality_motorbike);
+                return context.getString(de.cyface.app.utils.R.string.modality_motorbike);
             case UNKNOWN:
                 return modality.getDatabaseIdentifier().toLowerCase(Locale.ENGLISH);
             default:

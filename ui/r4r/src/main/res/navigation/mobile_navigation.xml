@@ -14,7 +14,7 @@
     <fragment
       android:id="@+id/navigation_trips"
       android:name="de.cyface.app.r4r.ui.trips.TripsFragment"
-      android:label="@string/title_completed_trips"
+      android:label="@string/completed_trips"
       tools:layout="@layout/fragment_trips">
       <action android:id="@+id/action_trips_to_details"
         app:destination="@id/navigation_trips_details">
@@ -27,13 +27,13 @@
     <fragment
       android:id="@+id/navigation_trips_details"
       android:name="de.cyface.app.r4r.ui.trips.DetailsFragment"
-      android:label="@string/title_trip_details"
+      android:label="@string/trip_details"
       tools:layout="@layout/fragment_trips_details" />
 
     <fragment
       android:id="@+id/navigation_statistics"
       android:name="de.cyface.app.r4r.ui.statistics.StatisticsFragment"
-      android:label="@string/title_statistics"
+      android:label="@string/statistics"
       tools:layout="@layout/fragment_statistics" />
 
 </navigation>

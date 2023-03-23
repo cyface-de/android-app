@@ -5,7 +5,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.navigation.Navigation
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
@@ -80,7 +79,7 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
                 statusText += " - " + status.databaseIdentifier.lowercase()
             }
             tripTitleView.text = itemView.context.getString(
-                R.string.trip_details,
+                R.string.trip_details_line,
                 measurement.id,
                 dateText,
                 distanceKm,
