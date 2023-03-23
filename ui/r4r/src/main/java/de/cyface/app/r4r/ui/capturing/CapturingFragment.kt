@@ -34,7 +34,7 @@ import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
-import de.cyface.app.r4r.ui.capturing.dialog.CalibrationDialogListener
+import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.r4r.ui.capturing.map.MapFragment
 import de.cyface.app.r4r.ui.capturing.speed.SpeedFragment
 import de.cyface.app.r4r.utils.Constants.TAG

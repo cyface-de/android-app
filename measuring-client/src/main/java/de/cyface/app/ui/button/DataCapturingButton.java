@@ -46,6 +46,7 @@ import static de.cyface.persistence.model.MeasurementStatus.OPEN;
 import static de.cyface.persistence.model.MeasurementStatus.PAUSED;
 import static de.cyface.utils.DiskConsumption.spaceAvailable;
 
+import de.cyface.app.utils.Map;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -75,8 +76,7 @@ import androidx.preference.PreferenceManager;
 
 import de.cyface.app.R;
 import de.cyface.app.ui.MainFragment;
-import de.cyface.app.ui.Map;
-import de.cyface.app.ui.dialog.CalibrationDialogListener;
+import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.camera_service.CameraListener;
 import de.cyface.camera_service.CameraService;
 import de.cyface.camera_service.Constants;

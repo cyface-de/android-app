@@ -38,7 +38,7 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.Map;
+import de.cyface.app.utils.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.content.BaseColumns;

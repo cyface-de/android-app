@@ -69,6 +69,7 @@ import de.cyface.app.ui.nav.view.InformationViewFragment;
 import de.cyface.app.ui.nav.view.MeasurementOverviewFragment;
 import de.cyface.app.ui.nav.view.SettingsFragment;
 import de.cyface.app.utils.Constants;
+import de.cyface.app.utils.Map;
 import de.cyface.camera_service.CameraModeDialog;
 
 /**

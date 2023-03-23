@@ -17,6 +17,7 @@ import de.cyface.app.r4r.databinding.FragmentMapBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.Map
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
