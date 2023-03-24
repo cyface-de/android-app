@@ -45,7 +45,7 @@
     <string name="drawer_title_imprint">Impressum</string>
     <string name="drawer_title_logout">Ausloggen</string>
     <string name="drawer_setting_zoom_to_location">Karte immer zentrieren</string>
-    <string name="drawer_setting_auto_upload">Automatischer Upload</string>
+    <string name="drawer_setting_upload">Upload</string>
     <string name="sync_disabled_toast">Ohne Synchronisation wird mehr Speicherplatz belegt</string>
     <string name="zoom_to_location_enabled_toast">Bei aktiven Bildschirm wird mehr Kartenmaterial geladen</string>
 

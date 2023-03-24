@@ -9,6 +9,9 @@
     <string name="map">Karte</string>
     <string name="speed">Geschwindigkeit</string>
 
+    <!-- Navigation -->
+    <string name="drawer_setting_auto_upload">Automatischer Upload</string>
+
     <!-- Speed -->
     <string name="capturing_inactive">Datenerfassung inaktiv</string>
 

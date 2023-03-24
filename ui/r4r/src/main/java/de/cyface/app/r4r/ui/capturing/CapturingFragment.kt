@@ -328,7 +328,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // Add items to menu (top right)
         val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(MenuProvider(), viewLifecycleOwner, Lifecycle.State.RESUMED)
+        menuHost.addMenuProvider(MenuProvider(capturingService), viewLifecycleOwner, Lifecycle.State.RESUMED)
 
         return root
     }
@@ -1013,7 +1013,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         }
     }
 
-    private class MenuProvider : androidx.core.view.MenuProvider {
+    private class MenuProvider(private val capturingService: CyfaceDataCapturingService) : androidx.core.view.MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.capturing, menu)
         }
@@ -1021,7 +1021,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
             return when (menuItem.itemId) {
                 R.id.action_sync -> {
-                    TODO("Not yet implemented")
+                    capturingService.scheduleSyncNow()
                     true
                 }
                 else -> {

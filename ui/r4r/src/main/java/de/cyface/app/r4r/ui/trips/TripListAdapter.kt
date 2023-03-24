@@ -1,8 +1,10 @@
 package de.cyface.app.r4r.ui.trips
 
+import android.media.Image
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -78,7 +80,7 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             val distanceKm = (measurement.distance / 1000 * 1000).roundToInt() / 1000.0
             val status = measurement.status
             var statusText = ""
-            if (status === MeasurementStatus.SYNCED || status === MeasurementStatus.SKIPPED || status === MeasurementStatus.DEPRECATED) {
+            if (status === MeasurementStatus.SKIPPED || status === MeasurementStatus.DEPRECATED) {
                 statusText += " - " + status.databaseIdentifier.lowercase()
             }
             tripTitleView.text = itemView.context.getString(R.string.trip_id,measurement.id)
@@ -89,9 +91,15 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
                 statusText
             )
             val textColor = if (isActivated) itemView.resources.getColor(R.color.white) else itemView.resources.getColor(R.color.text)
+            val arrowIcon = itemView.findViewById<ImageView>(R.id.list_details_arrow)
+            val uploadIcon = itemView.findViewById<ImageView>(R.id.list_uploaded_icon)
             tripTitleView.setTextColor(textColor)
             tripDetailsView.setTextColor(textColor)
-            itemView.findViewById<ImageView>(R.id.list_details_arrow).setColorFilter(textColor)
+            arrowIcon.setColorFilter(textColor)
+            uploadIcon.setColorFilter(textColor)
+            if (measurement.status == MeasurementStatus.SYNCED) {
+                uploadIcon.visibility = VISIBLE
+            }
         }
 
         fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =

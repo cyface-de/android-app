@@ -53,7 +53,7 @@
   <string name="drawer_title_imprint">Imprint</string>
   <string name="drawer_title_logout">Logout</string>
   <string name="drawer_setting_zoom_to_location">Mappa sempre centrata</string>
-  <string name="drawer_setting_auto_upload">Caricamento automatico</string>
+  <string name="drawer_setting_upload">Caricamento</string>
   <string name="sync_disabled_toast">Senza sincronizzazione, viene utilizzato più spazio di archiviazione.</string>
   <string name="zoom_to_location_enabled_toast">Quando lo schermo è attivo, viene caricato più materiale della mappa.</string>
 

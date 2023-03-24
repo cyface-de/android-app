@@ -1,8 +1,17 @@
 package de.cyface.app.r4r
 
 import android.Manifest
+import android.accounts.Account
+import android.accounts.AccountManager
+import android.accounts.AccountManagerFuture
+import android.accounts.AuthenticatorException
+import android.accounts.OperationCanceledException
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -18,8 +27,10 @@ import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
+import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION
+import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -32,7 +43,11 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.model.ParcelableGeoLocation
+import de.cyface.synchronization.Constants
+import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.utils.DiskConsumption
+import de.cyface.utils.Validate
+import java.io.IOException
 
 class MainActivity : AppCompatActivity(), ServiceProvider {
 
@@ -41,6 +56,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     override lateinit var capturingService: CyfaceDataCapturingService
 
     private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
+
+    /**
+     * The `SharedPreferences` used to store the user's preferences.
+     */
+    private var preferences: SharedPreferences? = null
 
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
@@ -67,7 +87,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 PERMISSION_REQUEST_ACCESS_FINE_LOCATION
             )
         }
-        //preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         // If camera service is requested, check needed permissions
         /* FIXME: final boolean cameraCapturingEnabled = preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
@@ -137,8 +157,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             persistenceLayer = capturingService.persistenceLayer
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            //startSynchronization(fragmentRoot.getContext())
-            //dataCapturingService.addConnectionStatusListener(this)
+            startSynchronization(applicationContext)
+            //FIXME: dataCapturingService.addConnectionStatusListener(this)
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
                 de.cyface.app.utils.Constants.AUTHORITY, CameraEventHandler(), dataCapturingButton
@@ -237,5 +257,89 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         /* FIXME: if (fragmentRoot != null && fragmentRoot.isShown()) {
             map.showAndMoveToCurrentLocation(true)
         }*/
+    }
+
+    /**
+     * Starts the synchronization.
+     *
+     * Creates an [Account] if there is none as an account is required for synchronization. If there was
+     * no account the synchronization is started when the async account creation future returns to ensure
+     * the account is available at that point.
+     *
+     * @param context the [Context] to load the [AccountManager]
+     */
+    private fun startSynchronization(context: Context?) {
+        val accountManager = AccountManager.get(context)
+        val validAccountExists = accountWithTokenExists(accountManager)
+        if (validAccountExists) {
+            try {
+                Log.d(TAG,"startSynchronization: Starting WifiSurveyor with exiting account.")
+                capturingService.startWifiSurveyor()
+            } catch (e: SetupException) {
+                throw java.lang.IllegalStateException(e)
+            }
+            return
+        }
+
+        // The LoginActivity is called by Android which handles the account creation
+        Log.d(TAG,"startSynchronization: No validAccountExists, requesting LoginActivity")
+        accountManager.addAccount(
+            ACCOUNT_TYPE,
+            Constants.AUTH_TOKEN_TYPE,
+            null,
+            null,
+            this,
+            { future: AccountManagerFuture<Bundle?> ->
+                val accountManager1 = AccountManager.get(context)
+                try {
+                    // allows to detect when LoginActivity is closed
+                    future.result
+
+                    // The LoginActivity created a temporary account which cannot be used for synchronization.
+                    // As the login was successful we now register the account correctly:
+                    val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
+                    Validate.notNull(account)
+
+                    // Set synchronizationEnabled to the current user preferences
+                    val syncEnabledPreference = preferences!!.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+                    Log.d(
+                        WiFiSurveyor.TAG,
+                        "Setting syncEnabled for new account to preference: $syncEnabledPreference"
+                    )
+                    capturingService.wiFiSurveyor.makeAccountSyncable(account,syncEnabledPreference)
+                    Log.d(TAG, "Starting WifiSurveyor with new account.")
+                    capturingService.startWifiSurveyor()
+                } catch (e: OperationCanceledException) {
+                    // Remove temp account when LoginActivity is closed during login [CY-5087]
+                    val accounts = accountManager1.getAccountsByType(ACCOUNT_TYPE)
+                    if (accounts.isNotEmpty()) {
+                        val account = accounts[0]
+                        accountManager1.removeAccount(account, null, null)
+                    }
+                    // This closes the app when the LoginActivity is closed
+                    this.finish()
+                } catch (e: AuthenticatorException) {
+                    throw java.lang.IllegalStateException(e)
+                } catch (e: IOException) {
+                    throw java.lang.IllegalStateException(e)
+                } catch (e: SetupException) {
+                    throw java.lang.IllegalStateException(e)
+                }
+            },
+            null
+        )
+    }
+
+    /**
+     * Checks if there is an account with an authToken.
+     *
+     * @param accountManager A reference to the [AccountManager]
+     * @return true if there is an account with an authToken
+     * @throws RuntimeException if there is more than one account
+     */
+    private fun accountWithTokenExists(accountManager: AccountManager): Boolean {
+        val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
+        Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
+        return existingAccounts.isNotEmpty()
     }
 }

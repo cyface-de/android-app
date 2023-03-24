@@ -32,6 +32,18 @@
   </LinearLayout>
 
   <ImageView
+    android:id="@+id/list_uploaded_icon"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:contentDescription="Uploaded"
+    android:src="@drawable/ic_baseline_cloud_done_24"
+    android:paddingEnd="8dp"
+    android:visibility="invisible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintRight_toLeftOf="@id/list_details_arrow"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <ImageView
     android:id="@+id/list_details_arrow"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"

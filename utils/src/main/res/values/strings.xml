@@ -46,7 +46,7 @@
     <string name="drawer_title_imprint">Imprint</string>
     <string name="drawer_title_logout">Logout</string>
     <string name="drawer_setting_zoom_to_location">Always centered map</string>
-    <string name="drawer_setting_auto_upload">Auto Upload</string>
+    <string name="drawer_setting_upload">Upload</string>
     <string name="sync_disabled_toast">Without synchronization more space is used.</string>
     <string name="zoom_to_location_enabled_toast">When the screen is active, more map material is loaded</string>
 

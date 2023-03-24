@@ -10,6 +10,9 @@
     <string name="map">Map</string>
     <string name="speed">Speed</string>
 
+    <!-- Navigation -->
+    <string name="drawer_setting_auto_upload">Auto Upload</string>
+
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
 
