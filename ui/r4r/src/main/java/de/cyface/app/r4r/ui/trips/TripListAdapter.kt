@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.Navigation
 import androidx.recyclerview.selection.ItemDetailsLookup
@@ -15,6 +16,7 @@ import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ui.trips.TripListAdapter.TripViewHolder
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
+import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -67,6 +69,7 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
     class TripViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
         private val tripTitleView: TextView = itemView.findViewById(R.id.titleView)
+        private val tripDetailsView: TextView = itemView.findViewById(R.id.detailsView)
 
         fun bind(measurement: Measurement, isActivated: Boolean = false) {
             itemView.isActivated = isActivated
@@ -78,13 +81,17 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             if (status === MeasurementStatus.SYNCED || status === MeasurementStatus.SKIPPED || status === MeasurementStatus.DEPRECATED) {
                 statusText += " - " + status.databaseIdentifier.lowercase()
             }
-            tripTitleView.text = itemView.context.getString(
+            tripTitleView.text = itemView.context.getString(R.string.trip_id,measurement.id)
+            tripDetailsView.text = itemView.context.getString(
                 R.string.trip_details_line,
-                measurement.id,
                 dateText,
                 distanceKm,
                 statusText
             )
+            val textColor = if (isActivated) itemView.resources.getColor(R.color.white) else itemView.resources.getColor(R.color.text)
+            tripTitleView.setTextColor(textColor)
+            tripDetailsView.setTextColor(textColor)
+            itemView.findViewById<ImageView>(R.id.list_details_arrow).setColorFilter(textColor)
         }
 
         fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =

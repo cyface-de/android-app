@@ -14,7 +14,7 @@
     <!-- Trips -->
     <string name="completed_trips">Completed trips</string>
     <string name="trip_id">Trip %d</string>
-    <string name="trip_details_line" translatable="false">%1$d) %2$s (%3$.3f km)%4$s</string>
+    <string name="click_to_see_details">Click to see details</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>

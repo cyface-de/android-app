@@ -15,6 +15,7 @@
     <!-- Trips -->
     <string name="completed_trips">Abgeschlossene Fahrten</string>
     <string name="trip_id">Fahrt %d</string>
+    <string name="click_to_see_details">Für Details Eintrag klicken</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>
