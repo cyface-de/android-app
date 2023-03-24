@@ -63,6 +63,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="@string/distance"
+      android:visibility="invisible"
       app:layout_constraintBottom_toTopOf="@+id/durationTitle"
       app:layout_constraintStart_toStartOf="@+id/speedTitle" />
 
@@ -72,6 +73,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="@string/duration"
+      android:visibility="invisible"
       app:layout_constraintBottom_toTopOf="@+id/ascendTitle"
       app:layout_constraintStart_toStartOf="@+id/distanceTitle" />
 
@@ -81,6 +83,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="@string/ascend"
+      android:visibility="invisible"
       app:layout_constraintBottom_toTopOf="@+id/co2Title"
       app:layout_constraintStart_toStartOf="@+id/durationTitle" />
 
@@ -90,6 +93,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
       android:text="@string/avoided_co2"
+      android:visibility="invisible"
       app:layout_constraintBottom_toTopOf="@+id/startResumeButton"
       app:layout_constraintStart_toStartOf="@+id/ascendTitle" />
 

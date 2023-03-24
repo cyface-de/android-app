@@ -7,6 +7,7 @@ import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -14,22 +15,29 @@ import android.preference.PreferenceManager
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationView
 import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.ui.sidebar.NavDrawer
+import de.cyface.app.r4r.ui.sidebar.NavDrawerListener
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.Map
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION
+import de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -37,8 +45,10 @@ import de.cyface.datacapturing.exception.SetupException
 import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.datacapturing.ui.Reason
+import de.cyface.energy_settings.TrackingSettings.generateFeedbackEmailIntent
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
+import de.cyface.energy_settings.TrackingSettings.showNoGuidanceNeededDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -49,7 +59,7 @@ import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import java.io.IOException
 
-class MainActivity : AppCompatActivity(), ServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -63,11 +73,24 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private var preferences: SharedPreferences? = null
 
     /**
+     * The `NavDrawer` which allows the user to change Fragments and to change preferences.
+     */
+    private var navDrawer: NavDrawer? = null
+
+    /**
+     * The `Intent` used when the user wants to send feedback.
+     */
+    private var emailIntent: Intent? = null
+
+    /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
-        CapturingViewModelFactory(persistenceLayer.measurementRepository!!, persistenceLayer.eventRepository!!)
+        CapturingViewModelFactory(
+            persistenceLayer.measurementRepository!!,
+            persistenceLayer.eventRepository!!
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,7 +172,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     override fun onLowDiskSpace(allocation: DiskConsumption?) {}
                     override fun onSynchronizationSuccessful() {}
                     override fun onErrorState(e: Exception?) {}
-                    override fun onRequiresPermission(permission: String, reason: Reason): Boolean {return false}
+                    override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
+                        return false
+                    }
+
                     override fun onCapturingStopped() {}
                 },
                 DEFAULT_SENSOR_FREQUENCY
@@ -180,16 +206,23 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 R.id.navigation_trips, R.id.navigation_capturing, R.id.navigation_statistics
             )
         )
-        setSupportActionBar(findViewById(R.id.toolbar))
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        // Setup sidebar
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout_main_activity);
+        val navigationView = findViewById<NavigationView>(R.id.navigation_view);
+        navDrawer = NavDrawer(this, navigationView, drawerLayout, toolbar)
+        navDrawer!!.addNavDrawerListener(this)
+
         // Setting up feedback email template
-        /*emailIntent = generateFeedbackEmailIntent(
+        emailIntent = generateFeedbackEmailIntent(
             this,
             getString(de.cyface.energy_settings.R.string.feedback_error_description),
-            de.cyface.app.utils.Constants.SUPPORT_EMAIL
-        )*/
+            SUPPORT_EMAIL
+        )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
         showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL)
@@ -268,12 +301,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      *
      * @param context the [Context] to load the [AccountManager]
      */
-    private fun startSynchronization(context: Context?) {
+    fun startSynchronization(context: Context?) {
         val accountManager = AccountManager.get(context)
         val validAccountExists = accountWithTokenExists(accountManager)
         if (validAccountExists) {
             try {
-                Log.d(TAG,"startSynchronization: Starting WifiSurveyor with exiting account.")
+                Log.d(TAG, "startSynchronization: Starting WifiSurveyor with exiting account.")
                 capturingService.startWifiSurveyor()
             } catch (e: SetupException) {
                 throw java.lang.IllegalStateException(e)
@@ -282,7 +315,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
 
         // The LoginActivity is called by Android which handles the account creation
-        Log.d(TAG,"startSynchronization: No validAccountExists, requesting LoginActivity")
+        Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
             ACCOUNT_TYPE,
             Constants.AUTH_TOKEN_TYPE,
@@ -301,12 +334,16 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = preferences!!.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+                    val syncEnabledPreference =
+                        preferences!!.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
                     )
-                    capturingService.wiFiSurveyor.makeAccountSyncable(account,syncEnabledPreference)
+                    capturingService.wiFiSurveyor.makeAccountSyncable(
+                        account,
+                        syncEnabledPreference
+                    )
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturingService.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {
@@ -341,5 +378,62 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
         Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
         return existingAccounts.isNotEmpty()
+    }
+
+    override fun feedbackSelected() {
+        startActivity(
+            Intent.createChooser(
+                emailIntent,
+                getString(de.cyface.energy_settings.R.string.feedback_choose_email_app)
+            )
+        )
+    }
+
+    override fun guideSelected() {
+        //homeSelected()
+        if (!showGnssWarningDialog(this) && !showEnergySaferWarningDialog(this)
+            && !showRestrictedBackgroundProcessingWarningDialog(this)
+            && !showProblematicManufacturerDialog(this, true, SUPPORT_EMAIL)
+        ) {
+            showNoGuidanceNeededDialog(this, SUPPORT_EMAIL)
+        }
+    }
+
+    override fun imprintSelected() {
+        /*val fragment = InformationViewFragment()
+        val bundle = Bundle()
+        bundle.putInt(InformationViewFragment.INFORMATION_VIEW_KEY, R.layout.fragment_imprint)
+        fragment.setArguments(bundle)
+
+        showFragment(
+            fragment,
+            getString(de.cyface.app.utils.R.string.drawer_title_imprint),
+            de.cyface.app.ui.MainActivity.INFORMATION_VIEW_FRAGMENT_TAG
+        )*/
+    }
+
+    override fun onAutoCenterMapSettingsChanged() {
+        /**if (mainFragment == null) {
+            Log.d(TAG, "Not updating map's autoCenterMapSettings as mainFragment is null")
+            return
+        }
+
+        val autoCenterEnabled = preferences!!.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
+        val map: Map = mainFragment.getMap()
+        if (map == null) {
+            Log.d(TAG,"Not updating map's autoCenterMapSettings as map is null")
+            return
+        }
+
+        map.isAutoCenterMapEnabled = autoCenterEnabled
+        Log.d(TAG,"setAutoCenterMapEnabled to $autoCenterEnabled")*/
+    }
+
+    override fun synchronizationToggled() {
+        // Nothing to do here
+    }
+
+    override fun logoutSelected() {
+        // Nothing to do
     }
 }

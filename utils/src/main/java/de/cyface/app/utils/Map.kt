@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
+import de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
@@ -130,8 +131,7 @@ class Map(
         view.getMapAsync(this)
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
-        //FIXME: preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY, false)
-        isAutoCenterMapEnabled = true
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
     }
 
     private fun requestLocationUpdates() {
@@ -383,8 +383,7 @@ class Map(
             return
         }
         requestLocationUpdates()
-        //FIXME: preferences.getBoolean(Constants.PREFERENCES_MOVE_TO_LOCATION_KEY, false)
-        isAutoCenterMapEnabled = true
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
     }
 
     fun onPause() {

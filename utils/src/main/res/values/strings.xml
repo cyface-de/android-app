@@ -24,7 +24,7 @@
     <string name="error_message_login_too_short">This username is too short</string>
 
     <!-- Capturing -->
-    <string name="upload">Upload</string>
+    <string name="upload">Auto-Upload</string>
     <string name="distance">Distance</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
