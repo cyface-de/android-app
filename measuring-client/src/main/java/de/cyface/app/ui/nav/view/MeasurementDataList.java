@@ -169,8 +169,8 @@ class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterVie
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        final Uri measurementUri = persistenceLayer.getMeasurementUri();
-        return new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns._ID + " DESC");
+        final Uri measurementUri = persistenceLayer.measurementUri();
+        return new CursorLoader(fragmentActivity, measurementUri, null, null, null, BaseColumns.ID + " DESC");
     }
 
     @Override
