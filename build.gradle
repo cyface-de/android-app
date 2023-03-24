@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -21,7 +21,7 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.1.2
+ * @version 2.2.0
  * @since 1.0.0
  */
 
@@ -56,11 +56,11 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.4.0" // Also update submodule commit ref
-    cyfaceUtilsVersion = "3.3.1" // Maven dependency
-    cyfaceEnergySettingsVersion = "3.2.3" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.1.4" // Also update submodule commit ref
-    cyfaceSerializationVersion = "2.3.1" // Keep im sync with version in submodule `backend`
+    cyfaceAndroidBackendVersion = "7.5.0" // Also update submodule commit ref
+    cyfaceUtilsVersion = "3.3.4" // Maven dependency
+    cyfaceEnergySettingsVersion = "3.2.6" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.1.7" // Also update submodule commit ref
+    cyfaceSerializationVersion = "2.3.3" // Keep im sync with version in submodule `backend`
 
     // Android SDK versions
     minSdkVersion = 21 // device support
@@ -74,19 +74,21 @@ ext {
     androidxAppCompatVersion = "1.6.0-rc01" // RC to fix duplicate lifecycle dependency issue in app
     androidPreferencesVersion = '1.2.0'
     localbroadcastmanagerVersion = '1.1.0'
-    exifinterfaceVersion = "1.3.3" // Required by Camera Service submodule
-    roomVersion = "2.4.3"
+    exifinterfaceVersion = "1.3.6" // Required by Camera Service submodule
+    roomVersion = "2.5.0"
+
+    // Kotlin components
+    coroutinesVersion = "1.6.4"
 
     // Other dependencies
-    kotlinCoreVersion = "1.9.0"
     materialDialogsVersion = "3.3.0"
     googleApiClientVersion = '1.31.5' // transmission protocol
 
     // Testing
-    junitVersion = "1.1.3"
+    junitVersion = "1.1.5"
     mockitoVersion = '4.8.0'
     hamcrestVersion = "1.3"
-    rulesVersion = "1.4.0"
+    rulesVersion = "1.5.0"
     robolectricVersion = "4.8.2"
     androidxTestCoreVersion = '1.4.0'
     runnerVersion = "1.4.0"
@@ -111,7 +113,6 @@ ext {
 
 // Attention: Overwrites also the repositories used to retrieve the transitive dependencies in the submodules
 allprojects {
-
     repositories {
         google()
         mavenCentral()

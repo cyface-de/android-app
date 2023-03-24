@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -35,7 +35,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.ListView;
@@ -46,8 +45,9 @@ import androidx.annotation.Nullable;
 
 import de.cyface.app.R;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
+import de.cyface.persistence.DefaultPersistenceLayer;
+import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
-import de.cyface.persistence.PersistenceLayer;
 import de.cyface.persistence.model.Measurement;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
@@ -59,7 +59,7 @@ import io.sentry.Sentry;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.0.2
+ * @version 2.0.3
  * @since 1.0.0
  */
 public final class MeasurementDeleteController extends AsyncTask<ListView, Void, ListView> {
@@ -68,7 +68,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
     /**
      * The data persistenceLayer used by this controller.
      */
-    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
      * {@code True} if the user opted-in to error reporting.
      */
@@ -79,8 +79,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
      */
     public MeasurementDeleteController(@NonNull final Context context) {
         this.contextReference = new WeakReference<>(context);
-        this.persistenceLayer = new PersistenceLayer<>(context, context.getContentResolver(), AUTHORITY,
-                new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
     }
@@ -100,7 +99,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             if (attachmentsFolder != null) {
                 deleteRecursively(context, attachmentsFolder);
             }
-            persistenceLayer.delete(measurement.getIdentifier());
+            persistenceLayer.delete(measurement.getId());
         }
         return view;
     }
@@ -148,7 +147,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
     private File findMeasurementAttachmentsFolder(@NonNull final Measurement measurement) {
         // If the app was reinstalled the pictures of the old installation were automatically deleted
         final File[] results = new File(externalCyfaceFolderPath(contextReference.get()))
-                .listFiles(pathname -> pathname.getName().endsWith("_" + measurement.getIdentifier()));
+                .listFiles(pathname -> pathname.getName().endsWith("_" + measurement.getId()));
         if (results != null && results.length > 0) {
             Arrays.sort(results);
             return results[results.length - 1];
@@ -193,17 +192,11 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             final int checkedRowNumber = checkedItemPositions.keyAt(itemPosition);
             // TODO [CY-4572]: final Measurement measurement = (Measurement)view.getItemAtPosition(checkedRowNumber);
             final Cursor cursor = (Cursor)view.getItemAtPosition(checkedRowNumber);
-            final int identifierColumnIndex = cursor.getColumnIndex(BaseColumns._ID);
-            final long selectedMeasurementId = cursor.getLong(identifierColumnIndex);
+            final long selectedMeasurementId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns.ID));
 
             // Ignoring the ongoing measurement
-            if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getIdentifier()) {
-                final Measurement measurement;
-                try {
-                    measurement = persistenceLayer.loadMeasurement(selectedMeasurementId);
-                } catch (final CursorIsNullException e) {
-                    throw new IllegalStateException(e);
-                }
+            if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getId()) {
+                final var measurement= persistenceLayer.loadMeasurement(selectedMeasurementId);
                 ret.add(measurement);
             }
         }

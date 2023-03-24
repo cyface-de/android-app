@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -75,8 +75,8 @@ import de.cyface.persistence.model.Event;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.Track;
 import de.cyface.synchronization.ConnectionStatusListener;
-import de.cyface.synchronization.exception.SynchronisationException;
 import de.cyface.synchronization.WiFiSurveyor;
+import de.cyface.synchronization.exception.SynchronisationException;
 import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -85,7 +85,7 @@ import io.sentry.Sentry;
  * A {@code Fragment} for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.4.1
+ * @version 1.4.2
  * @since 1.0.0
  */
 public class MainFragment extends Fragment implements ConnectionStatusListener {

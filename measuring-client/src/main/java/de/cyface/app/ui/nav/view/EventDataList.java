@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.Marker;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,16 +40,17 @@ import androidx.loader.content.CursorLoader;
 import de.cyface.app.R;
 import de.cyface.app.ui.Map;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
-import de.cyface.persistence.EventTable;
-import de.cyface.persistence.PersistenceLayer;
-import de.cyface.persistence.model.Event;
+import de.cyface.persistence.DefaultPersistenceLayer;
+import de.cyface.persistence.content.BaseColumns;
+import de.cyface.persistence.content.EventTable;
+import de.cyface.persistence.model.EventType;
 import de.cyface.utils.Validate;
 
 /**
  * A selectable list which is bound to a {@code Event} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 1.0.3
+ * @version 1.0.4
  * @since 2.4.0
  */
 class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,
@@ -71,7 +71,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
     /**
      * The {@code PersistenceLayer} required to link the {@link CursorEventAdapter} to the data stored persistently.
      */
-    private final PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
+    private final DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
     /**
      * The id of the {@code Measurement} linked to the {@code Events} handled by this {@code EventDataList}.
      * <p>
@@ -101,7 +101,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
      *            Marker can be focused.
      */
     EventDataList(FragmentActivity activity,
-            PersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer, @Nullable final Long measurementId,
+            DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer, @Nullable final Long measurementId,
             @NonNull final Map map) {
         this.activity = activity;
         this.persistenceLayer = persistenceLayer;
@@ -152,7 +152,7 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
         // Move map camera to marker and focus it
         final Cursor cursor = cursorAdapter.getCursor();
         cursor.moveToPosition(position);
-        final long eventId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
+        final var eventId = cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns.ID));
         final Marker marker = map.getEventMarker().get(eventId);
         // Can be null when no positions are available and, thus, no events can be positioned
         if (marker != null) {
@@ -167,11 +167,11 @@ class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnIt
     public CursorLoader onCreateLoader(final int id, final Bundle args) {
         final FragmentActivity fragmentActivity = activity;
         Validate.notNull(fragmentActivity);
-        final Uri eventUri = persistenceLayer.getEventUri();
+        final Uri eventUri = persistenceLayer.eventUri();
         return new CursorLoader(fragmentActivity, eventUri, null,
-                EventTable.COLUMN_MEASUREMENT_FK + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
-                new String[] {String.valueOf(measurementId), String.valueOf(Event.EventType.MODALITY_TYPE_CHANGE)},
-                EventTable.COLUMN_TIMESTAMP + " ASC");
+                BaseColumns.MEASUREMENT_ID + " = ? AND " + EventTable.COLUMN_TYPE + " = ?",
+                new String[] {String.valueOf(measurementId), String.valueOf(EventType.MODALITY_TYPE_CHANGE)},
+                BaseColumns.TIMESTAMP + " ASC");
     }
 
     @Override
