@@ -1,7 +1,5 @@
 package de.cyface.app.r4r
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
@@ -9,15 +7,12 @@ import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -31,7 +26,6 @@ import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
-import de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -80,19 +74,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (ContextCompat.checkSelfPermission(
-                this, ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Targeting Android 12+ we always need to request coarse together with fine location
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    ACCESS_FINE_LOCATION,
-                    ACCESS_COARSE_LOCATION
-                ), PERMISSION_REQUEST_ACCESS_FINE_LOCATION
-            )
-        }
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // The location permissions are requested in MapFragent as it needs to react to it
 
         // If camera service is requested, check needed permissions
         /* FIXME: final boolean cameraCapturingEnabled = preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
@@ -213,18 +197,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         requestCode: Int, permissions: Array<String?>, grantResults: IntArray
     ) {
         when (requestCode) {
-            PERMISSION_REQUEST_ACCESS_FINE_LOCATION -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    necessaryPermissionsGranted()
-                } else {
-                    // Close Cyface if permission has not been granted.
-                    // When the user repeatedly denies the location permission, the app won't start
-                    // and only starts again if the permissions are granted manually.
-                    // It was always like this, but if this is a problem we need to add a screen
-                    // which explains the user that this can happen.
-                    finish()
-                }
-            }
+            // Location permission request moved to `MapFragment` as it has to react to it
             /*de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION -> if (navDrawer != null && !(grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && (grantResults.size < 2 || grantResults[1] == PackageManager.PERMISSION_GRANTED))
             ) {
@@ -256,12 +229,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
         super.onResume()
-    }
-
-    private fun necessaryPermissionsGranted() {
-        /* FIXME: if (fragmentRoot != null && fragmentRoot.isShown()) {
-            map.showAndMoveToCurrentLocation(true)
-        }*/
     }
 
     /**

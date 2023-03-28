@@ -46,7 +46,6 @@ object SharedConstants {
      * Permission ids
      */
 
-    const val PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1
     const val PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT = 2
 
     /*

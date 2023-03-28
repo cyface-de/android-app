@@ -29,6 +29,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -70,7 +71,8 @@ import java.lang.ref.WeakReference
 class Map(
     private val view: MapView,
     savedInstanceState: Bundle?,
-    onMapReadyRunnable: Runnable
+    onMapReadyRunnable: Runnable,
+    permissionLauncher: ActivityResultLauncher<Array<String>>
 ) : OnMapReadyCallback, LocationListener {
     /**
      * The visualization library in use.
@@ -124,6 +126,7 @@ class Map(
         view.onCreate(savedInstanceState)
         val activity = view.context as Activity
         applicationContext = activity.applicationContext
+        permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
         this.onMapReadyRunnable = onMapReadyRunnable
         if (currentLocation == null) {
             currentLocation = LatLng(51.027852, 13.720864)
@@ -327,6 +330,8 @@ class Map(
                         moveToLocation(false, location)
                     }
                 }
+            } else {
+                Log.w(TAG, "showAndMoveToCurrentLocation ignored, fusedLocationClient is null")
             }
             // Happens when Google Play Services on phone is out of date
             if (googleMap != null) {

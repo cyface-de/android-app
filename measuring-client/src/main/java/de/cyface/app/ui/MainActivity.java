@@ -21,7 +21,6 @@ package de.cyface.app.ui;
 import static de.cyface.app.ui.nav.view.InformationViewFragment.INFORMATION_VIEW_KEY;
 import static de.cyface.app.utils.Constants.PACKAGE;
 import static de.cyface.app.utils.Constants.SUPPORT_EMAIL;
-import static de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY;
 import static de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
@@ -257,14 +256,9 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Targeting Android 12+ we always need to request coarse together with fine location
-            ActivityCompat.requestPermissions(this,
-                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
-        }
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Location permissions are requested by MainFragment as it needs to react to it
 
         // If camera service is requested, check needed permissions
         final boolean cameraCapturingEnabled = preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
@@ -339,20 +333,9 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
+        //noinspection SwitchStatementWithTooFewBranches
         switch (requestCode) {
-            case PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mainFragment.necessaryPermissionsGranted();
-                } else {
-                    // Close Cyface if permission has not been granted.
-                    // When the user repeatedly denies the location permission, the app won't start
-                    // and only starts again if the permissions are granted manually.
-                    // It was always like this, but if this is a problem we need to add a screen
-                    // which explains the user that this can happen.
-                    this.finish();
-                }
-                break;
-
+            // Location permissions are requested by MainFragment as it needs to react to it
             case PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION:
                 if (navDrawer != null && !(grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && (grantResults.length < 2 || (grantResults[1] == PackageManager.PERMISSION_GRANTED)))) {

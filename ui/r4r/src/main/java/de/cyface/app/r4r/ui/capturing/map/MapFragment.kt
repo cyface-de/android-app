@@ -1,12 +1,14 @@
 package de.cyface.app.r4r.ui.capturing.map
 
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -18,6 +20,7 @@ import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.Map
+import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -44,7 +47,29 @@ class MapFragment : Fragment() {
 
     private var preferences: SharedPreferences? = null
 
-    private var activityResultLauncher: ActivityResultLauncher<Array<String>>
+    // Ensure onMapReadyRunnable is called after permissions are newly granted
+    // This launcher must be launched to request permissions
+    private var permissionLauncher: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.isNotEmpty()) {
+                val allGranted = result.values.none { !it }
+                if (allGranted) {
+                    // Only if the map already called it's onMapReady
+                    if (map!!.googleMap != null) {
+                        map!!.onMapReady()
+                    }
+                } else {
+                    Toast.makeText(context, "Location permission repeatedly denies", Toast.LENGTH_LONG).show()
+                    // Close Cyface if permission has not been granted.
+                    // When the user repeatedly denies the location permission, the app won't start
+                    // and only starts again if the permissions are granted manually.
+                    // It was always like this, but if this is a problem we need to add a screen
+                    // which explains the user that this can happen.
+                    requireActivity().finish()
+                }
+            }
+        }
 
     private val capturingViewModel: CapturingViewModel by activityViewModels {
         CapturingViewModelFactory(
@@ -78,17 +103,6 @@ class MapFragment : Fragment() {
         }
     }
 
-    init {
-        // Ensure onMapReadyRunnable is called after permissions are newly granted
-        this.activityResultLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            val allGranted = result.values.none { !it }
-            if (allGranted) {
-                map!!.onMapReady()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -114,7 +128,7 @@ class MapFragment : Fragment() {
         val root: View = binding.root
 
         preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable)
+        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
 
         return root
     }
