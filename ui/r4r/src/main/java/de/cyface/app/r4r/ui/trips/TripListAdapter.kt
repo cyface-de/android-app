@@ -1,6 +1,5 @@
 package de.cyface.app.r4r.ui.trips
 
-import android.media.Image
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -18,7 +17,6 @@ import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ui.trips.TripListAdapter.TripViewHolder
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
-import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

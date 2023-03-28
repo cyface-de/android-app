@@ -23,7 +23,7 @@
   <string name="error_message_login_too_short">Questo nome utente è troppo corto</string>
 
   <!-- Capturing -->
-  <string name="upload">Caricamento automatico</string>
+  <string name="auto_upload">Caricamento automatico</string>
   <string name="distance">Distance</string>
   <string name="start">Start</string>
   <string name="pause">Pause</string>

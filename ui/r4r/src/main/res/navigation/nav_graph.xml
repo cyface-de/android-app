@@ -9,7 +9,17 @@
         android:id="@+id/navigation_capturing"
         android:name="de.cyface.app.r4r.ui.capturing.CapturingFragment"
         android:label="@string/app_name"
-        tools:layout="@layout/fragment_capturing" />
+      tools:layout="@layout/fragment_capturing">
+      <action android:id="@+id/action_capturing_to_imprint"
+        app:destination="@id/navigation_imprint">
+      </action>
+    </fragment>
+
+    <fragment
+      android:id="@+id/navigation_imprint"
+      android:name="de.cyface.app.r4r.ui.capturing.ImprintFragment"
+      android:label="@string/drawer_title_imprint"
+      tools:layout="@layout/fragment_imprint" />
 
     <fragment
       android:id="@+id/navigation_trips"

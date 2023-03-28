@@ -11,9 +11,6 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -27,6 +24,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.fragment.NavHostFragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -34,10 +32,10 @@ import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
-import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.r4r.ui.capturing.map.MapFragment
 import de.cyface.app.r4r.ui.capturing.speed.SpeedFragment
 import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -327,8 +325,20 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Add items to menu (top right)
+        // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
+        // work with with `findNavController()` (https://stackoverflow.com/a/60434988/5815054).
+        val navHostFragment =
+            requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(MenuProvider(capturingService), viewLifecycleOwner, Lifecycle.State.RESUMED)
+        menuHost.addMenuProvider(
+            MenuProvider(
+                capturingService,
+                requireActivity(),
+                navHostFragment.navController
+            ),
+            viewLifecycleOwner,
+            Lifecycle.State.RESUMED
+        )
 
         return root
     }
@@ -1010,24 +1020,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         override fun getItemCount(): Int {
             // List size
             return 2
-        }
-    }
-
-    private class MenuProvider(private val capturingService: CyfaceDataCapturingService) : androidx.core.view.MenuProvider {
-        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-            menuInflater.inflate(R.menu.capturing, menu)
-        }
-
-        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-            return when (menuItem.itemId) {
-                R.id.action_sync -> {
-                    capturingService.scheduleSyncNow()
-                    true
-                }
-                else -> {
-                    false
-                }
-            }
         }
     }
 }

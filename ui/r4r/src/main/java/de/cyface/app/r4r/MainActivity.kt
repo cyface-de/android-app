@@ -1,13 +1,13 @@
 package de.cyface.app.r4r
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -18,26 +18,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.navigation.findNavController
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigation.NavigationView
 import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
-import de.cyface.app.r4r.ui.sidebar.NavDrawer
-import de.cyface.app.r4r.ui.sidebar.NavDrawerListener
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
-import de.cyface.app.utils.Map
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION
-import de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -45,21 +39,19 @@ import de.cyface.datacapturing.exception.SetupException
 import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.datacapturing.ui.Reason
-import de.cyface.energy_settings.TrackingSettings.generateFeedbackEmailIntent
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
-import de.cyface.energy_settings.TrackingSettings.showNoGuidanceNeededDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.model.ParcelableGeoLocation
-import de.cyface.synchronization.Constants
+import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import java.io.IOException
 
-class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
+class MainActivity : AppCompatActivity(), ServiceProvider {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -67,20 +59,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
 
     private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
+    private lateinit var navController: NavController
+
+    private lateinit var toolbar: Toolbar
+
     /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private var preferences: SharedPreferences? = null
-
-    /**
-     * The `NavDrawer` which allows the user to change Fragments and to change preferences.
-     */
-    private var navDrawer: NavDrawer? = null
-
-    /**
-     * The `Intent` used when the user wants to send feedback.
-     */
-    private var emailIntent: Intent? = null
+    private lateinit var preferences: SharedPreferences
 
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
@@ -88,26 +74,22 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
         CapturingViewModelFactory(
-            persistenceLayer.measurementRepository!!,
-            persistenceLayer.eventRepository!!
+            persistenceLayer.measurementRepository!!, persistenceLayer.eventRepository!!
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                this, ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             // Targeting Android 12+ we always need to request coarse together with fine location
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                PERMISSION_REQUEST_ACCESS_FINE_LOCATION
+                this, arrayOf(
+                    ACCESS_FINE_LOCATION,
+                    ACCESS_COARSE_LOCATION
+                ), PERMISSION_REQUEST_ACCESS_FINE_LOCATION
             )
         }
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -196,32 +178,24 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setting up top action bar and bottom menu navigation
-        val navView: BottomNavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_trips, R.id.navigation_capturing, R.id.navigation_statistics
-            )
-        )
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        // Setting up top action bar & bottom menu (no sidebar, see RFR-333]
+        // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
+        // work with with `findNavController()` (https://stackoverflow.com/a/60434988/5815054).
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+        binding.bottomNav.setupWithNavController(navController)
+        toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
-
-        // Setup sidebar
-        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout_main_activity);
-        val navigationView = findViewById<NavigationView>(R.id.navigation_view);
-        navDrawer = NavDrawer(this, navigationView, drawerLayout, toolbar)
-        navDrawer!!.addNavDrawerListener(this)
-
-        // Setting up feedback email template
-        emailIntent = generateFeedbackEmailIntent(
-            this,
-            getString(de.cyface.energy_settings.R.string.feedback_error_description),
-            SUPPORT_EMAIL
+        setupActionBarWithNavController(
+            navController, AppBarConfiguration(
+                // Adding top-level destinations so they are added to the back stack while navigating
+                setOf(
+                    R.id.navigation_trips,
+                    R.id.navigation_capturing,
+                    R.id.navigation_statistics
+                )
+            )
         )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
@@ -232,13 +206,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
      * Fixes "home" (back) button in the top action bar when in the fragment details fragment.
      */
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String?>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<String?>, grantResults: IntArray
     ) {
         when (requestCode) {
             PERMISSION_REQUEST_ACCESS_FINE_LOCATION -> {
@@ -318,7 +290,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
         Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
             ACCOUNT_TYPE,
-            Constants.AUTH_TOKEN_TYPE,
+            AUTH_TOKEN_TYPE,
             null,
             null,
             this,
@@ -335,14 +307,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
 
                     // Set synchronizationEnabled to the current user preferences
                     val syncEnabledPreference =
-                        preferences!!.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+                        preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
                     )
                     capturingService.wiFiSurveyor.makeAccountSyncable(
-                        account,
-                        syncEnabledPreference
+                        account, syncEnabledPreference
                     )
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturingService.startWifiSurveyor()
@@ -378,62 +349,5 @@ class MainActivity : AppCompatActivity(), ServiceProvider, NavDrawerListener {
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
         Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
         return existingAccounts.isNotEmpty()
-    }
-
-    override fun feedbackSelected() {
-        startActivity(
-            Intent.createChooser(
-                emailIntent,
-                getString(de.cyface.energy_settings.R.string.feedback_choose_email_app)
-            )
-        )
-    }
-
-    override fun guideSelected() {
-        //homeSelected()
-        if (!showGnssWarningDialog(this) && !showEnergySaferWarningDialog(this)
-            && !showRestrictedBackgroundProcessingWarningDialog(this)
-            && !showProblematicManufacturerDialog(this, true, SUPPORT_EMAIL)
-        ) {
-            showNoGuidanceNeededDialog(this, SUPPORT_EMAIL)
-        }
-    }
-
-    override fun imprintSelected() {
-        /*val fragment = InformationViewFragment()
-        val bundle = Bundle()
-        bundle.putInt(InformationViewFragment.INFORMATION_VIEW_KEY, R.layout.fragment_imprint)
-        fragment.setArguments(bundle)
-
-        showFragment(
-            fragment,
-            getString(de.cyface.app.utils.R.string.drawer_title_imprint),
-            de.cyface.app.ui.MainActivity.INFORMATION_VIEW_FRAGMENT_TAG
-        )*/
-    }
-
-    override fun onAutoCenterMapSettingsChanged() {
-        /**if (mainFragment == null) {
-            Log.d(TAG, "Not updating map's autoCenterMapSettings as mainFragment is null")
-            return
-        }
-
-        val autoCenterEnabled = preferences!!.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
-        val map: Map = mainFragment.getMap()
-        if (map == null) {
-            Log.d(TAG,"Not updating map's autoCenterMapSettings as map is null")
-            return
-        }
-
-        map.isAutoCenterMapEnabled = autoCenterEnabled
-        Log.d(TAG,"setAutoCenterMapEnabled to $autoCenterEnabled")*/
-    }
-
-    override fun synchronizationToggled() {
-        // Nothing to do here
-    }
-
-    override fun logoutSelected() {
-        // Nothing to do
     }
 }

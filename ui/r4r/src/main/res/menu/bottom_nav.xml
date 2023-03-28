@@ -26,7 +26,7 @@
       android:title="@string/title_stop" /-->
 
     <item
-      android:id="@id/navigation_statistics"
+      android:id="@+id/navigation_statistics"
       android:icon="@drawable/ic_baseline_show_chart_24"
       android:title="@string/statistics" />
 

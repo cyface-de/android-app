@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name" translatable="false">Ready for Robots</string>
 
-    <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
+    <!-- BottomNavigationView -->
     <string name="trips">Trips</string>
     <string name="capturing">Capturing</string>
     <string name="statistics">Statistics</string>
+
+    <!-- Drawer View (Sidebar) -->
+    <string name="nav_open" translatable="false">Open</string>
+    <string name="nav_close" translatable="false">Close</string>
 
     <!-- Capturing -->
     <string name="map">Map</string>

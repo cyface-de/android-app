@@ -91,7 +91,7 @@
       android:layout_gravity="start|bottom"
       android:adjustViewBounds="true"
       android:background="@android:color/transparent"
-      android:contentDescription="@string/upload"
+      android:contentDescription="@string/auto_upload"
       android:scaleType="fitXY"
       android:tint="@color/gray"
       custom:srcCompat="@drawable/ic_sync"
