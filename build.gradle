@@ -21,13 +21,13 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.2.0
+ * @version 2.3.0
  * @since 1.0.0
  */
 
 buildscript {
     ext.gradle_version = '7.3.0'
-    ext.kotlin_version = "1.7.10"
+    ext.kotlin_version = "1.8.0"
     ext.matcher_version = "1.2.4"
 
     repositories {
