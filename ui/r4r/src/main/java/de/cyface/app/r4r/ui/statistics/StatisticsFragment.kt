@@ -45,20 +45,23 @@ class StatisticsFragment : Fragment() {
         val root: View = binding.root
 
         // Load measurements
-        val measurements = persistenceLayer.loadMeasurements()
+        val measurements = persistenceLayer.loadCompletedMeasurements()
 
         // Statistics calculation
         var totalDistanceKm = 0.0
         var maxDistanceKm = 0.0
         var totalDurationMillis = 0L
+        var maxDurationMillis = 0L
         var maxAscend = 0.0
         var totalAscend = 0.0
         measurements.forEach { measurement ->
             // FIXME: Code duplication (UnitConversion)
             val distanceKm = measurement.distance.div(1000.0)
+            val durationMillis = persistenceLayer.loadDuration(measurement.id)
             totalDistanceKm += distanceKm
             maxDistanceKm = max(distanceKm, maxDistanceKm)
-            totalDurationMillis += persistenceLayer.loadDuration(measurement.id)
+            maxDurationMillis = max(durationMillis, maxDurationMillis)
+            totalDurationMillis += durationMillis
             val ascend = persistenceLayer.loadAscend(measurement.id)
             totalAscend += if (ascend !== null) ascend else 0.0
             maxAscend = if (ascend !== null) max(ascend, maxAscend) else maxAscend
@@ -66,9 +69,9 @@ class StatisticsFragment : Fragment() {
 
         // UI binding
         val averageDistanceKm = if (measurements.isNotEmpty()) (totalDistanceKm / measurements.size * 100).roundToInt() / 100.0 else 0.0
-        binding.distanceView.text = "${(totalDistanceKm * 100).roundToInt() / 100.0} km (Ø $averageDistanceKm km)"
+        binding.distanceView.text = "${(maxDistanceKm * 10).roundToInt() / 10.0} km (Ø $averageDistanceKm km)"
         val averageDuration = if (measurements.isNotEmpty()) duration(totalDurationMillis / measurements.size) else 0L
-        binding.durationView.text = "${duration(totalDurationMillis)} (Ø $averageDuration)"
+        binding.durationView.text = "${duration(maxDurationMillis)} (Ø $averageDuration)"
         val averageAscend = if(measurements.isNotEmpty()) (totalAscend / measurements.size).roundToInt() else 0.0
         binding.ascendView.text = "max ${maxAscend.roundToInt()} m (Ø $averageAscend m)"
         // 95 g / km
