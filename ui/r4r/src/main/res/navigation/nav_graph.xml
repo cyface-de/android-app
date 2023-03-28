@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_capturing">
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/nav_graph"
+  app:startDestination="@+id/capturing">
 
+  <navigation
+    android:id="@+id/capturing"
+    app:startDestination="@id/navigation_capturing">
     <fragment
-        android:id="@+id/navigation_capturing"
-        android:name="de.cyface.app.r4r.ui.capturing.CapturingFragment"
-        android:label="@string/app_name"
+      android:id="@+id/navigation_capturing"
+      android:name="de.cyface.app.r4r.ui.capturing.CapturingFragment"
+      android:label="@string/app_name"
       tools:layout="@layout/fragment_capturing">
-      <action android:id="@+id/action_capturing_to_imprint"
-        app:destination="@id/navigation_imprint">
-      </action>
+      <action
+        android:id="@+id/action_capturing_to_imprint"
+        app:destination="@id/navigation_imprint" />
     </fragment>
 
     <fragment
@@ -20,13 +23,18 @@
       android:name="de.cyface.app.r4r.ui.capturing.ImprintFragment"
       android:label="@string/drawer_title_imprint"
       tools:layout="@layout/fragment_imprint" />
+  </navigation>
 
+  <navigation
+    android:id="@+id/trips"
+    app:startDestination="@id/navigation_trips">
     <fragment
       android:id="@+id/navigation_trips"
       android:name="de.cyface.app.r4r.ui.trips.TripsFragment"
       android:label="@string/completed_trips"
       tools:layout="@layout/fragment_trips">
-      <action android:id="@+id/action_trips_to_details"
+      <action
+        android:id="@+id/action_trips_to_details"
         app:destination="@id/navigation_trips_details">
         <argument
           android:name="measurementId"
@@ -39,11 +47,12 @@
       android:name="de.cyface.app.r4r.ui.trips.DetailsFragment"
       android:label="@string/trip_details"
       tools:layout="@layout/fragment_trips_details" />
+  </navigation>
 
-    <fragment
-      android:id="@+id/navigation_statistics"
-      android:name="de.cyface.app.r4r.ui.statistics.StatisticsFragment"
-      android:label="@string/statistics"
-      tools:layout="@layout/fragment_statistics" />
+  <fragment
+    android:id="@+id/navigation_statistics"
+    android:name="de.cyface.app.r4r.ui.statistics.StatisticsFragment"
+    android:label="@string/statistics"
+    tools:layout="@layout/fragment_statistics" />
 
 </navigation>

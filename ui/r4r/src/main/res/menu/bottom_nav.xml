@@ -3,12 +3,12 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-      android:id="@+id/navigation_trips"
+      android:id="@+id/trips"
       android:icon="@drawable/ic_baseline_format_list_bulleted_24"
       android:title="@string/trips" />
 
     <item
-      android:id="@+id/navigation_capturing"
+      android:id="@+id/capturing"
       android:icon="@drawable/ic_baseline_location_searching_24"
       android:title="@string/capturing" />
 
