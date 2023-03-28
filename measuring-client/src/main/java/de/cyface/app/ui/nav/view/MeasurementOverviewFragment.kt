@@ -67,7 +67,7 @@ import de.cyface.utils.Validate
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 4.5.6
+ * @version 4.5.7
  * @since 1.0.0
  */
 class MeasurementOverviewFragment : Fragment() {
@@ -174,7 +174,8 @@ class MeasurementOverviewFragment : Fragment() {
     // This launcher must be launched to request permissions
     private var permissionLauncher: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { result ->
             if (result.isNotEmpty()) {
                 val allGranted = result.values.none { !it }
                 if (allGranted) {
@@ -183,7 +184,11 @@ class MeasurementOverviewFragment : Fragment() {
                         map!!.onMapReady()
                     }
                 } else {
-                    Toast.makeText(context, "Location permission repeatedly denies", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Location permission repeatedly denies",
+                        Toast.LENGTH_LONG
+                    ).show()
                     // Close Cyface if permission has not been granted.
                     // When the user repeatedly denies the location permission, the app won't start
                     // and only starts again if the permissions are granted manually.
@@ -194,6 +199,7 @@ class MeasurementOverviewFragment : Fragment() {
             }
         }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val fragmentActivity = activity
@@ -251,49 +257,54 @@ class MeasurementOverviewFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val fragmentActivity = activity
         Validate.notNull(fragmentActivity)
-        return if (item.itemId == R.id.export_menu_item) {
-            // Permission requirements: https://developer.android.com/training/data-storage
-            val requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-            val missingPermissions = (ContextCompat.checkSelfPermission(
-                fragmentActivity!!,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(
-                fragmentActivity,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED)
-            if (requiresWritePermission && missingPermissions) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(
-                        arrayOf<String>(
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ),
-                        PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT
-                    )
+        return when (item.itemId) {
+            R.id.export_menu_item -> {
+                // Permission requirements: https://developer.android.com/training/data-storage
+                val requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                val missingPermissions = (ContextCompat.checkSelfPermission(
+                    fragmentActivity!!,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(
+                    fragmentActivity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED)
+                if (requiresWritePermission && missingPermissions) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(
+                            arrayOf(
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            ),
+                            PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT
+                        )
+                    } else {
+                        Toast.makeText(
+                            fragmentActivity,
+                            fragmentActivity.getString(de.cyface.app.utils.R.string.export_data_no_permission),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 } else {
-                    Toast.makeText(
-                        fragmentActivity,
-                        fragmentActivity.getString(de.cyface.app.utils.R.string.export_data_no_permission),
-                        Toast.LENGTH_LONG
-                    ).show()
+                    ExportTask(fragmentActivity).execute()
                 }
-            } else {
-                ExportTask(fragmentActivity).execute()
+                true
             }
-            true
-        } else if (item.itemId == R.id.select_all_item) {
-            selectAllItems()
-            true
-        } else if (item.itemId == R.id.delete_measurement_item) {
-            if (isEventsListShown) {
-                deleteSelectedEvents(fragmentActivity!!, eventDataList!!.listView)
-            } else {
-                deleteSelectedMeasurements(fragmentActivity!!, measurementDataList!!.listView)
+            R.id.select_all_item -> {
+                selectAllItems()
+                true
             }
-            true
-        } else {
-            super.onOptionsItemSelected(item)
+            R.id.delete_measurement_item -> {
+                if (isEventsListShown) {
+                    deleteSelectedEvents(fragmentActivity!!, eventDataList!!.listView)
+                } else {
+                    deleteSelectedMeasurements(fragmentActivity!!, measurementDataList!!.listView)
+                }
+                true
+            }
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
     }
 
@@ -325,7 +336,7 @@ class MeasurementOverviewFragment : Fragment() {
             ).show()
             return
         }
-        // TODO [CY-4572]: Validate.isTrue((measurementListView.getAdapter() instanceof MeasurementAdapter));
+        // TODO [CY-4572]: Validate.isTrue((measurementListView.getAdapter() instance of MeasurementAdapter));
         MeasurementDeleteController(fragmentActivity).execute(measurementsView)
         listView!!.choiceMode = ListView.CHOICE_MODE_SINGLE
     }
@@ -346,6 +357,7 @@ class MeasurementOverviewFragment : Fragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>,
         grantResults: IntArray
@@ -353,7 +365,7 @@ class MeasurementOverviewFragment : Fragment() {
         val fragmentActivity = activity
         Validate.notNull(fragmentActivity)
         when (requestCode) {
-            PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(
                     fragmentActivity,
                     fragmentActivity!!.getString(de.cyface.app.utils.R.string.export_data),
@@ -439,6 +451,7 @@ class MeasurementOverviewFragment : Fragment() {
      *
      * @param data an intent which may contain result data
      */
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE) {
@@ -489,10 +502,8 @@ class MeasurementOverviewFragment : Fragment() {
             }
 
             // Add new Event to database
-            val measurement: Measurement?
-            val eventId: Long
-            measurement = persistenceLayer!!.loadMeasurement(measurementId)
-            eventId = persistenceLayer!!.logEvent(
+            val measurement: Measurement? = persistenceLayer!!.loadMeasurement(measurementId)
+            val eventId: Long = persistenceLayer!!.logEvent(
                 EventType.MODALITY_TYPE_CHANGE, measurement!!,
                 nearestGeoLocation.timestamp, modality.databaseIdentifier
             )

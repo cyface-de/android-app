@@ -49,7 +49,7 @@ import de.cyface.utils.Validate;
  * We use an {@code AsyncTask} because this is blocking but should only run for a short time.
  *
  * @author Armin Schnabel
- * @version 2.0.1
+ * @version 2.0.2
  * @since 2.4.0
  */
 public final class EventDeleteController

@@ -38,7 +38,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.github.lzyzsd.circleprogress.DonutProgress
-import com.google.android.gms.maps.MapView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import de.cyface.app.BuildConfig
@@ -72,7 +71,7 @@ import java.io.IOException
  * A `Fragment` for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.4.2
+ * @version 1.4.3
  * @since 1.0.0
  */
 class MainFragment : Fragment(), ConnectionStatusListener {
@@ -118,7 +117,8 @@ class MainFragment : Fragment(), ConnectionStatusListener {
     // This launcher must be launched to request permissions
     private var permissionLauncher: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { result ->
             if (result.isNotEmpty()) {
                 val allGranted = result.values.none { !it }
                 if (allGranted) {
@@ -127,7 +127,11 @@ class MainFragment : Fragment(), ConnectionStatusListener {
                         map!!.onMapReady()
                     }
                 } else {
-                    Toast.makeText(context, "Location permission repeatedly denies", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Location permission repeatedly denies",
+                        Toast.LENGTH_LONG
+                    ).show()
                     // Close Cyface if permission has not been granted.
                     // When the user repeatedly denies the location permission, the app won't start
                     // and only starts again if the permissions are granted manually.
@@ -206,7 +210,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
             null
         )
         map = Map(
-            fragmentRoot!!.findViewById<MapView>(R.id.mapView),
+            fragmentRoot!!.findViewById(R.id.mapView),
             savedInstanceState,
             onMapReadyRunnable,
             permissionLauncher
@@ -274,7 +278,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
                 } catch (e: OperationCanceledException) {
                     // Remove temp account when LoginActivity is closed during login [CY-5087]
                     val accounts = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)
-                    if (accounts.size > 0) {
+                    if (accounts.isNotEmpty()) {
                         val account = accounts[0]
                         accountManager1.removeAccount(account, null, null)
                     }
@@ -358,6 +362,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
      * @param resultCode is used to describe the request's result
      * @param data an intent which may contain result data
      */
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE) {
@@ -378,19 +383,25 @@ class MainFragment : Fragment(), ConnectionStatusListener {
         Validate.notNull(modality, "Modality should already be set but isn't.")
 
         // Select the Modality tab
-        val tab: TabLayout.Tab?
-        tab = if (modality == Modality.CAR.name) {
-            tabLayout.getTabAt(0)
-        } else if (modality == Modality.BICYCLE.name) {
-            tabLayout.getTabAt(1)
-        } else if (modality == Modality.WALKING.name) {
-            tabLayout.getTabAt(2)
-        } else if (modality == Modality.BUS.name) {
-            tabLayout.getTabAt(3)
-        } else if (modality == Modality.TRAIN.name) {
-            tabLayout.getTabAt(4)
-        } else {
-            throw IllegalArgumentException("Unknown Modality id: $modality")
+        val tab: TabLayout.Tab? = when (modality) {
+            Modality.CAR.name -> {
+                tabLayout.getTabAt(0)
+            }
+            Modality.BICYCLE.name -> {
+                tabLayout.getTabAt(1)
+            }
+            Modality.WALKING.name -> {
+                tabLayout.getTabAt(2)
+            }
+            Modality.BUS.name -> {
+                tabLayout.getTabAt(3)
+            }
+            Modality.TRAIN.name -> {
+                tabLayout.getTabAt(4)
+            }
+            else -> {
+                throw IllegalArgumentException("Unknown Modality id: $modality")
+            }
         }
         Validate.notNull(tab)
         tab!!.select()
@@ -457,13 +468,13 @@ class MainFragment : Fragment(), ConnectionStatusListener {
     override fun onSaveInstanceState(outState: Bundle) {
         var imageView =
             fragmentRoot!!.findViewById<View>(R.id.capture_data_main_button).tag as ImageView
-        if (imageView != null) outState.putInt("capturing_button_resource_id", imageView.id)
+        outState.putInt("capturing_button_resource_id", imageView.id)
         imageView = fragmentRoot!!.findViewById<View>(R.id.data_sync_button).tag as ImageView
-        if (imageView != null) outState.putInt("data_sync_button_id", imageView.id)
+        outState.putInt("data_sync_button_id", imageView.id)
         try {
             val donutProgress = fragmentRoot!!
                 .findViewById<View>(R.id.connection_status_progress).tag as DonutProgress
-            if (imageView != null) outState.putInt(
+            outState.putInt(
                 "connection_status_progress_id",
                 donutProgress.id
             )
@@ -496,7 +507,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
         fun accountWithTokenExists(accountManager: AccountManager): Boolean {
             val existingAccounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE)
             Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
-            return existingAccounts.size != 0
+            return existingAccounts.isNotEmpty()
         }
     }
 }

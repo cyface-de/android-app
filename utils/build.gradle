@@ -51,11 +51,6 @@ android {
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
 
-        //buildConfigField("String", "localHostIp", '"10.0.2.2"')
-        //buildConfigField "String", "GitHash", '"${getGitHash()}"'
-        // we don't describe this provider build variable in the README so it's probably deprecated
-        // buildConfigField("String", "provider", '"de.cyface.app.provider"')
-
         // Ensure that the backend's "CyfaceFull" flavor is always used
         missingDimensionStrategy 'project', 'cyface'
         missingDimensionStrategy 'mode', 'full'
@@ -129,7 +124,6 @@ dependencies {
 
     // Dependencies for instrumentation tests
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
-    // UiAutomator Testing
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // FIXME: version
 
     // Dependencies for local unit tests

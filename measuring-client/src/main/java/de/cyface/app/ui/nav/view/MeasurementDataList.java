@@ -52,7 +52,7 @@ import de.cyface.utils.Validate;
  * A selectable list which is bound to a {@code Measurement} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 2.0.5
+ * @version 2.0.6
  * @since 2.0.0
  */
 class MeasurementDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,

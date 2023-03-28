@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -75,7 +75,7 @@ import de.cyface.utils.Validate;
  * This {@link Fragment} is used to allow advanced users to configure the capturing modes.
  *
  * @author Armin Schnabel
- * @version 1.1.1
+ * @version 1.1.2
  * @since 2.7.0
  */
 public class SettingsFragment extends Fragment {

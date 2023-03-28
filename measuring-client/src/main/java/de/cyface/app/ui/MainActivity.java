@@ -76,7 +76,7 @@ import de.cyface.camera_service.CameraModeDialog;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.3.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 public class MainActivity extends AppCompatActivity implements NavDrawerListener {

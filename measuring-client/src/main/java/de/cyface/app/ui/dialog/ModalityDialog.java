@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -53,7 +53,7 @@ import de.cyface.utils.Validate;
  * Make sure the order (0, 1, 2 from left(start) to right(end)) in the TabLayout is consistent in here.
  *
  * @author Armin Schnabel
- * @version 2.1.0
+ * @version 2.1.1
  * @since 1.0.0
  */
 public class ModalityDialog extends DialogFragment {

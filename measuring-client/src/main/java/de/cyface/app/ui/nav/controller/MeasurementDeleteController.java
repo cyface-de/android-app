@@ -58,7 +58,7 @@ import io.sentry.Sentry;
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.0.3
+ * @version 2.0.4
  * @since 1.0.0
  */
 public final class MeasurementDeleteController extends AsyncTask<ListView, Void, ListView> {

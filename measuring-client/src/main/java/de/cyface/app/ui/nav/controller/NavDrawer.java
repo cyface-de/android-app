@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -61,7 +61,7 @@ import de.cyface.synchronization.WiFiSurveyor;
  * {@link Fragment}s of the app.
  *
  * @author Armin Schnabel
- * @version 1.4.0
+ * @version 1.4.1
  * @since 1.0.0
  */
 public class NavDrawer implements NavigationView.OnNavigationItemSelectedListener {

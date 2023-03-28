@@ -50,7 +50,7 @@ import de.cyface.utils.Validate;
  * A selectable list which is bound to a {@code Event} {@code android.widget.Adapter}.
  *
  * @author Armin Schnabel
- * @version 1.0.4
+ * @version 1.0.5
  * @since 2.4.0
  */
 class EventDataList implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,

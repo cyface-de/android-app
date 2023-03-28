@@ -58,7 +58,6 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("String", "localHostIp", '"10.0.2.2"')
-        buildConfigField "String", "GitHash", '"${getGitHash()}"'
         // we don't describe this provider build variable in the README so it's probably deprecated
         // buildConfigField("String", "provider", '"de.cyface.app.provider"')
 

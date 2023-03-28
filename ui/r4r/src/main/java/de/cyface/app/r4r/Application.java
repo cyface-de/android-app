@@ -35,9 +35,6 @@ import io.sentry.Sentry;
 /**
  * The implementation of Android's {@code Application} class for this project.
  * <p>
- * FIXME: disabled
- * This class is used to allow for a larger code base by inheriting <code>MultiDexApplication</code>.
- * <p>
  * It shows the errors (not handled by {@link LoginActivity}) as simple {@link Toast} to the user.
  *
  * @author Klemens Muthmann
@@ -45,7 +42,7 @@ import io.sentry.Sentry;
  * @version 1.5.2
  * @since 1.0.0
  */
-public class Application extends android.app.Application /* MultiDexApplication */ {
+public class Application extends android.app.Application {
 
     /**
      * Stores the user's preferences.

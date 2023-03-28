@@ -45,7 +45,7 @@ import de.cyface.utils.Validate
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 3.0.1
+ * @version 3.0.2
  * @since 2.5.0
  */
 class CapturingEventHandler : EventHandlingStrategy {
