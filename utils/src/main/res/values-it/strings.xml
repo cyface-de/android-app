@@ -23,7 +23,6 @@
   <string name="error_message_login_too_short">Questo nome utente è troppo corto</string>
 
   <!-- Capturing -->
-  <string name="auto_upload">Caricamento automatico</string>
   <string name="distance">Distance</string>
   <string name="start">Start</string>
   <string name="pause">Pause</string>
@@ -34,6 +33,16 @@
   <string name="notification_title_capturing_stopped">La registrazione dei dati è stata bloccata</string>
   <string name="msg_calibrating">Calibrazione</string>
 
+  <!-- Settings -->
+  <string name="auto_center_map">Mappa sempre centrata</string>
+  <string name="upload_trips">Upload trips</string>
+  <string name="sync_disabled_toast">Senza sincronizzazione, viene utilizzato più spazio di archiviazione.</string>
+  <string name="zoom_to_location_enabled_toast">Quando lo schermo è attivo, viene caricato più materiale della mappa.</string>
+
+  <!-- Synchronization -->
+  <string name="error_message_sync_canceled_no_wifi">È necessaria una connessione Wi-Fi per registrare i dati.</string>
+  <string name="error_message_sync_canceled_disabled">La sincronizzazione è disattivata dalle impostazioni.</string>
+
   <!-- Map -->
   <string name="modality_car">Auto</string>
   <string name="modality_bicycle">Bici</string>
@@ -42,22 +51,15 @@
   <string name="modality_train">Treno</string>
   <string name="modality_motorbike">Motociclo</string>
 
-  <!-- Synchronization -->
-  <string name="error_message_sync_canceled_no_wifi">È necessaria una connessione Wi-Fi per registrare i dati.</string>
-  <string name="error_message_sync_canceled_disabled">La sincronizzazione è disattivata dalle impostazioni.</string>
-
   <!-- Navigation -->
   <string name="settings">Impostazioni</string>
   <string name="drawer_title_feedback">Feedback</string>
   <string name="drawer_title_guide">Guida all\'impostazione</string>
   <string name="drawer_title_imprint">Imprint</string>
   <string name="drawer_title_logout">Logout</string>
-  <string name="drawer_setting_zoom_to_location">Mappa sempre centrata</string>
-  <string name="drawer_setting_upload">Caricamento</string>
-  <string name="sync_disabled_toast">Senza sincronizzazione, viene utilizzato più spazio di archiviazione.</string>
-  <string name="zoom_to_location_enabled_toast">Quando lo schermo è attivo, viene caricato più materiale della mappa.</string>
 
   <!-- Measurements -->
+  <string name="upload_all">Upload all</string>
   <string name="modality_type">Tipo di modalità</string>
   <string name="mark_all_menu_item">Seleziona tutte le voci</string>
   <string name="delete_marked_menu_item">Elimina contrassegnato</string>
@@ -85,9 +87,7 @@
         \nGermany\n
 
         \nRepresented by:
-        \nDr. Klemens Muthmann
-        \nArmin Schnabel
-        \nDirk Ackner\n
+        \nDr. Klemens Muthmann\n
 
         \nEmail: mail@cyface.de
         \nTelefon: +49 351 658 6363 9\n
@@ -114,7 +114,7 @@
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <string name="disclaimer">Disclaimer</string>
-  <string name="disclaimer_content">L\'applicazione \"Cyface\" (di seguito anche: \"App\") è in <b>versione beta</b>. E\' stata sviluppata al meglio delle nostre conoscenze con la massima cura da parte di sviluppatori di software competenti. Stiamo testando l\'applicazione regolarmente e ampiamente sui nostri dispositivi mobili.
+  <string name="disclaimer_content">L\'applicazione (di seguito anche: \"App\") è in <b>versione beta</b>. E\' stata sviluppata al meglio delle nostre conoscenze con la massima cura da parte di sviluppatori di software competenti. Stiamo testando l\'applicazione regolarmente e ampiamente sui nostri dispositivi mobili.
         \nTuttavia, al momento non possiamo garantire che tutto funzioni come previsto e non ci assumiamo alcuna responsabilità per i danni che possono derivare dall\'uso dell\'applicazione. Allo stesso tempo, non possiamo promettervi la disponibilità dei nostri server e servizi come il caricamento dei dati, l\'elaborazione e la visualizzazione dei dati.
         \n<b>Utilizzando questa applicazione accetti queste condizioni e le condizioni sulla privacy qui sotto.</b></string>
 

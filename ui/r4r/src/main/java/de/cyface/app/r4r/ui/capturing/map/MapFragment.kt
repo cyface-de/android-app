@@ -96,7 +96,7 @@ class MapFragment : Fragment() {
             capturingService = (activity as ServiceProvider).capturingService
             persistenceLayer = capturingService.persistenceLayer
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement MyDependencies")
+            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
     }
 

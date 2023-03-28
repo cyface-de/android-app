@@ -24,7 +24,6 @@
     <string name="error_message_login_too_short">This username is too short</string>
 
     <!-- Capturing -->
-    <string name="auto_upload">Auto-Upload</string>
     <string name="distance">Distance</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
@@ -34,6 +33,12 @@
     <string name="error_message_capturing_canceled_no_space">You need to free some space to start capturing.</string>
     <string name="notification_title_capturing_stopped">Stopped Capturing</string>
     <string name="msg_calibrating">Calibrating</string>
+
+    <!-- Settings -->
+    <string name="auto_center_map">Always centered map</string>
+    <string name="upload_trips">Upload trips</string>
+    <string name="sync_disabled_toast">Without synchronization more space is used.</string>
+    <string name="zoom_to_location_enabled_toast">When the screen is active, more map material is loaded</string>
 
     <!-- Synchronization -->
     <string name="error_message_sync_canceled_no_wifi">You need a Wi-Fi connection to upload data.</string>
@@ -45,10 +50,6 @@
     <string name="drawer_title_guide">Setup guide</string>
     <string name="drawer_title_imprint">Imprint</string>
     <string name="drawer_title_logout">Logout</string>
-    <string name="drawer_setting_zoom_to_location">Always centered map</string>
-    <string name="drawer_setting_upload">Upload</string>
-    <string name="sync_disabled_toast">Without synchronization more space is used.</string>
-    <string name="zoom_to_location_enabled_toast">When the screen is active, more map material is loaded</string>
 
     <!-- Map -->
     <string name="modality_car">Car</string>
@@ -59,6 +60,7 @@
     <string name="modality_motorbike">Motorbike</string>
 
     <!-- Measurements -->
+    <string name="upload_all">Upload all</string>
     <string name="modality_type">Modality type</string>
     <string name="mark_all_menu_item">Select all items</string>
     <string name="delete_marked_menu_item">Delete marked</string>
@@ -86,9 +88,7 @@
         \nGermany\n
 
         \nRepresented by:
-        \nDr. Klemens Muthmann
-        \nArmin Schnabel
-        \nDirk Ackner\n
+        \nDr. Klemens Muthmann\n
 
         \nEmail: mail@cyface.de
         \nTelephone: +49 351 658 6363 9\n

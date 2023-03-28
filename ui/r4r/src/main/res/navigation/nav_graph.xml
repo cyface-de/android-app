@@ -16,6 +16,9 @@
       <action
         android:id="@+id/action_capturing_to_imprint"
         app:destination="@id/navigation_imprint" />
+      <action
+        android:id="@+id/action_capturing_to_settings"
+        app:destination="@id/navigation_settings" />
     </fragment>
 
     <fragment
@@ -23,6 +26,12 @@
       android:name="de.cyface.app.r4r.ui.capturing.ImprintFragment"
       android:label="@string/drawer_title_imprint"
       tools:layout="@layout/fragment_imprint" />
+
+    <fragment
+      android:id="@+id/navigation_settings"
+      android:name="de.cyface.app.r4r.ui.capturing.SettingsFragment"
+      android:label="@string/settings"
+      tools:layout="@layout/fragment_settings" />
   </navigation>
 
   <navigation

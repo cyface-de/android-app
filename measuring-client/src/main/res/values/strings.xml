@@ -13,6 +13,9 @@
     <item>Train</item>
   </string-array>
 
+  <!-- Settings -->
+  <string name="drawer_settings_synchronization">Synchronization</string>
+
   <!-- Capturing -->
   <string name="measurement_id">Measurement Id</string>
   <string name="capturing_active">Capturing ongoing</string>

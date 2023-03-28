@@ -23,7 +23,6 @@
     <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 
     <!-- Capturing -->
-    <string name="auto_upload">Automatisches Hochladen</string>
     <string name="distance">Distanz</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
@@ -33,6 +32,12 @@
     <string name="error_message_capturing_canceled_no_space">Mehr Speicherplatz benötigt um mit dem Messen zu beginnen.</string>
     <string name="notification_title_capturing_stopped">Aufnahme gestoppt</string>
     <string name="msg_calibrating">Kalibriere</string>
+
+    <!-- Settings -->
+    <string name="auto_center_map">Karte immer zentrieren</string>
+    <string name="upload_trips">Fahrten hochladen</string>
+    <string name="sync_disabled_toast">Ohne Synchronisation wird mehr Speicherplatz belegt</string>
+    <string name="zoom_to_location_enabled_toast">Bei aktiven Bildschirm wird mehr Kartenmaterial geladen</string>
 
     <!-- Synchronization -->
     <string name="error_message_sync_canceled_no_wifi">Für den Upload muss eine WLAN-Verbindung bestehen.</string>
@@ -44,10 +49,6 @@
     <string name="drawer_title_guide">Einrichtung</string>
     <string name="drawer_title_imprint">Impressum</string>
     <string name="drawer_title_logout">Ausloggen</string>
-    <string name="drawer_setting_zoom_to_location">Karte immer zentrieren</string>
-    <string name="drawer_setting_upload">Upload</string>
-    <string name="sync_disabled_toast">Ohne Synchronisation wird mehr Speicherplatz belegt</string>
-    <string name="zoom_to_location_enabled_toast">Bei aktiven Bildschirm wird mehr Kartenmaterial geladen</string>
 
     <!-- Map -->
     <string name="modality_car">Auto</string>
@@ -58,6 +59,7 @@
     <string name="modality_motorbike">Motorrad</string>
 
     <!-- Measurements -->
+    <string name="upload_all">Alles hochladen</string>
     <string name="modality_type">Fortbewegungsart</string>
     <string name="mark_all_menu_item">Alles Markieren</string>
     <string name="delete_marked_menu_item">Markierte löschen</string>
@@ -84,9 +86,7 @@
         \n01159 Dresden\n
 
         \nVertreten durch:
-        \nDr. Klemens Muthmann
-        \nArmin Schnabel
-        \nDirk Ackner\n
+        \nDr. Klemens Muthmann\n
 
         \nE-Mail: mail@cyface.de
         \nTelefon: +49 351 658 6363 9\n
@@ -113,7 +113,7 @@
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
     <string name="disclaimer">Disclaimer</string>
-    <string name="disclaimer_content">Die Anwendung \"Cyface\" (im Folgenden auch \„App\") befindet sich in der <b>Betaphase</b>. Sie wurde nach bestem Wissen mit größt möglicher Sorgfalt von ausgebildeten Softwareentwicklern erstellt. Wir testen die Anwendung regelmäßig und ausführlich auf unseren eigenen mobilen Endgeräten.
+    <string name="disclaimer_content">Die Anwendung (im Folgenden auch \„App\") befindet sich in der <b>Betaphase</b>. Sie wurde nach bestem Wissen mit größt möglicher Sorgfalt von ausgebildeten Softwareentwicklern erstellt. Wir testen die Anwendung regelmäßig und ausführlich auf unseren eigenen mobilen Endgeräten.
         \nDerzeit ist es uns aber unmöglich die Haftung für mögliche Schäden zu übernehmen die Ihnen während der Benutzung der App entstehen. Gleichzeitig übernehmen wir keine Garantie für die ständige Verfügbarkeit der an die App geknüpften Dienste, wie Datenupload, Datenverarbeitung und Datenvisualisierung.
         \n<b>Mit der Verwendung dieser App akzeptieren Sie die hier aufgeführten Bedingungen und unten stehende Datenschutzerklärung.</b></string>
 

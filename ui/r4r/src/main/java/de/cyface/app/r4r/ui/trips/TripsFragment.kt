@@ -1,7 +1,10 @@
 package de.cyface.app.r4r.ui.trips
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -24,9 +27,12 @@ import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentTripsBinding
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
+import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.DefaultPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
@@ -39,6 +45,11 @@ class TripsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var capturingService: CyfaceDataCapturingService
+
+    /**
+     * The preferences used to store the user's preferred settings.
+     */
+    private lateinit var preferences: SharedPreferences
 
     private var tracker: SelectionTracker<Long>? = null
 
@@ -53,7 +64,7 @@ class TripsFragment : Fragment() {
         if (activity is ServiceProvider) {
             capturingService = (activity as ServiceProvider).capturingService
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement MyDependencies")
+            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
     }
 
@@ -63,7 +74,7 @@ class TripsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTripsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         // Bind the UI element to the adapter
         val tripsList = binding.tripsList
@@ -99,12 +110,14 @@ class TripsFragment : Fragment() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(
             MenuProvider(
+                capturingService,
+                preferences,
                 adapter,
                 WeakReference<Context>(requireContext().applicationContext)
             ), viewLifecycleOwner, Lifecycle.State.RESUMED
         )
 
-        return root
+        return binding.root
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -118,6 +131,8 @@ class TripsFragment : Fragment() {
     }
 
     private class MenuProvider(
+        private val capturingService: CyfaceDataCapturingService,
+        private val preferences: SharedPreferences,
         private val adapter: TripListAdapter,
         private val context: WeakReference<Context>
     ) : androidx.core.view.MenuProvider {
@@ -127,6 +142,10 @@ class TripsFragment : Fragment() {
 
         override fun onMenuItemSelected(item: MenuItem): Boolean {
             return when (item.itemId) {
+                R.id.action_sync -> {
+                    syncNow()
+                    true
+                }
                 R.id.select_all_item -> {
                     adapter.selectAll()
                     true
@@ -141,10 +160,50 @@ class TripsFragment : Fragment() {
             }
         }
 
+        private fun syncNow() {
+            // Check if syncable network is available
+            val isConnected = capturingService.wiFiSurveyor.isConnected
+            Log.v(
+                WiFiSurveyor.TAG,
+                (if (isConnected) "" else "Not ") + "connected to syncable network"
+            )
+            if (!isConnected) {
+                Toast.makeText(
+                    context.get(),
+                    context.get()!!
+                        .getString(de.cyface.app.utils.R.string.error_message_sync_canceled_no_wifi),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
+            // Check is sync is disabled via frontend
+            val syncEnabled = capturingService.wiFiSurveyor.isSyncEnabled
+            val syncPreferenceEnabled = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+            Validate.isTrue(
+                syncEnabled == syncPreferenceEnabled,
+                "sync " + (if (syncEnabled) "enabled" else "disabled")
+                        + " but syncPreference " + if (syncPreferenceEnabled) "enabled" else "disabled"
+            )
+            if (!syncEnabled) {
+                Toast.makeText(
+                    context.get(),
+                    context.get()!!.getString(de.cyface.app.utils.R.string.error_message_sync_canceled_disabled),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
+            // Request instant Synchronization
+            capturingService.scheduleSyncNow()
+        }
+
         private fun deleteSelectedMeasurements() {
             if (adapter.tracker!!.selection.isEmpty) {
                 Toast.makeText(
-                    context.get(), context.get()!!.getString(de.cyface.app.utils.R.string.delete_data_non_selected),
+                    context.get(),
+                    context.get()!!
+                        .getString(de.cyface.app.utils.R.string.delete_data_non_selected),
                     Toast.LENGTH_LONG
                 ).show()
                 return

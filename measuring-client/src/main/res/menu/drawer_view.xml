@@ -35,14 +35,14 @@
 
                 <item
                     android:id="@+id/drawer_setting_zoom_to_location"
-                    android:title="@string/drawer_setting_zoom_to_location"
+                    android:title="@string/auto_center_map"
                     app:actionLayout="@layout/drawer_list_switch"
                     app:showAsAction="ifRoom"
                     android:checkable="false" />
 
                 <item
                     android:id="@+id/drawer_setting_synchronization"
-                    android:title="@string/drawer_setting_upload"
+                    android:title="@string/drawer_settings_synchronization"
                     app:actionLayout="@layout/drawer_list_switch"
                     app:showAsAction="always"
                     android:checkable="false" />

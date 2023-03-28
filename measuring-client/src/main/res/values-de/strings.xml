@@ -12,6 +12,9 @@
     <item>Zug</item>
   </string-array>
 
+  <!-- Settings -->
+  <string name="drawer_settings_synchronization">Synchronisation</string>
+
   <!-- Capturing -->
   <string name="measurement_id">Messungs-Id</string>
   <string name="capturing_active">Datenerfassung aktiv</string>

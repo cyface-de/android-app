@@ -22,7 +22,7 @@ import static de.cyface.app.ui.nav.view.InformationViewFragment.INFORMATION_VIEW
 import static de.cyface.app.utils.Constants.PACKAGE;
 import static de.cyface.app.utils.Constants.SUPPORT_EMAIL;
 import static de.cyface.app.utils.SharedConstants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION;
-import static de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY;
 import static de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
 import static de.cyface.energy_settings.Constants.DIALOG_ENERGY_SAFER_WARNING_CODE;
@@ -68,7 +68,6 @@ import de.cyface.app.ui.nav.controller.NavDrawerListener;
 import de.cyface.app.ui.nav.view.InformationViewFragment;
 import de.cyface.app.ui.nav.view.MeasurementOverviewFragment;
 import de.cyface.app.ui.nav.view.SettingsFragment;
-import de.cyface.app.utils.Constants;
 import de.cyface.app.utils.Map;
 import de.cyface.camera_service.CameraModeDialog;
 
@@ -238,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements NavDrawerListener
             return;
         }
 
-        final boolean isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY,
+        final boolean isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY,
                 false);
         final Map map = mainFragment.getMap();
         if (map == null) {

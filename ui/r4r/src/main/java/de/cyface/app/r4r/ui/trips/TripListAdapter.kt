@@ -81,21 +81,24 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             if (status === MeasurementStatus.SKIPPED || status === MeasurementStatus.DEPRECATED) {
                 statusText += " - " + status.databaseIdentifier.lowercase()
             }
-            tripTitleView.text = itemView.context.getString(R.string.trip_id,measurement.id)
+            tripTitleView.text = itemView.context.getString(R.string.trip_id, measurement.id)
             tripDetailsView.text = itemView.context.getString(
                 R.string.trip_details_line,
                 dateText,
                 distanceKm,
                 statusText
             )
-            val textColor = if (isActivated) itemView.resources.getColor(R.color.white) else itemView.resources.getColor(R.color.text)
+            val textColor =
+                if (isActivated) itemView.resources.getColor(R.color.white) else itemView.resources.getColor(
+                    R.color.text
+                )
             val arrowIcon = itemView.findViewById<ImageView>(R.id.list_details_arrow)
             val uploadIcon = itemView.findViewById<ImageView>(R.id.list_uploaded_icon)
             tripTitleView.setTextColor(textColor)
             tripDetailsView.setTextColor(textColor)
             arrowIcon.setColorFilter(textColor)
             uploadIcon.setColorFilter(textColor)
-            if (measurement.status == MeasurementStatus.SYNCED) {
+            if (measurement.status == MeasurementStatus.SYNCED || measurement.status == MeasurementStatus.SKIPPED || measurement.status == MeasurementStatus.DEPRECATED) {
                 uploadIcon.visibility = VISIBLE
             }
         }

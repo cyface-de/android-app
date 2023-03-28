@@ -47,7 +47,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY
+import de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
@@ -131,7 +131,7 @@ class Map(
         view.getMapAsync(this)
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
     }
 
     private fun requestLocationUpdates() {
@@ -141,7 +141,7 @@ class Map(
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
-                if (locationResult.locations.size > 0) {
+                if (locationResult.locations.size > 0 && isAutoCenterMapEnabled) {
                     moveToLocation(true,
                         locationResult.locations[locationResult.locations.size - 1]
                     )
@@ -321,9 +321,11 @@ class Map(
      */
     fun showAndMoveToCurrentLocation(permissionWereJustGranted: Boolean) {
         try {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    moveToLocation(false, location)
+            if (this::fusedLocationClient.isInitialized) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        moveToLocation(false, location)
+                    }
                 }
             }
             // Happens when Google Play Services on phone is out of date
@@ -383,7 +385,7 @@ class Map(
             return
         }
         requestLocationUpdates()
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false)
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
     }
 
     fun onPause() {
@@ -411,6 +413,7 @@ class Map(
     }
 
     override fun onLocationChanged(location: Location) {
+        // This is used by `measuring-client`, the `ui/r4r` uses `onLocationResult`
         if (isAutoCenterMapEnabled) {
             moveToLocation(true, location)
         }

@@ -38,7 +38,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import de.cyface.app.R;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.Validate;

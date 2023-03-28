@@ -12,6 +12,9 @@
     <item>Treno</item>
   </string-array>
 
+  <!-- Settings -->
+  <string name="drawer_settings_synchronization">Sincronizzazione</string>
+
   <!-- Capturing -->
   <string name="measurement_id">Identificativo misura</string>
   <string name="capturing_active">Registrazione dati in corso</string>

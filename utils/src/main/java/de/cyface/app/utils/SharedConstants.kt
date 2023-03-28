@@ -51,6 +51,8 @@ object SharedConstants {
 
     /*
      * Preferences keys
+     *
+     * *Don't change the values, as this resets the user's preferences!*
      */
 
     /**
@@ -71,7 +73,8 @@ object SharedConstants {
     const val ACCEPTED_REPORTING_KEY = "$KEY_PACKAGE.accepted_reporting"
 
     const val PREFERENCES_MODALITY_KEY = "$KEY_PACKAGE.modality"
-    const val PREFERENCES_MOVE_TO_LOCATION_KEY = "$KEY_PACKAGE.zoom_to_location"
+
+    const val PREFERENCES_CENTER_MAP_KEY = "$KEY_PACKAGE.zoom_to_location"
     const val PREFERENCES_SYNCHRONIZATION_KEY = "$KEY_PACKAGE.synchronization_enabled"
 
     /**

@@ -18,7 +18,7 @@
  */
 package de.cyface.app.ui.nav.controller;
 
-import static de.cyface.app.utils.SharedConstants.PREFERENCES_MOVE_TO_LOCATION_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION;
@@ -99,7 +99,7 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
         // .findItem(R.id.drawer_setting_speed_sensor).getActionView();
         cameraServiceToggle = (SwitchCompat)view.getMenu().findItem(R.id.drawer_setting_pictures).getActionView();
 
-        zoomToLocationToggle.setChecked(preferences.getBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, false));
+        zoomToLocationToggle.setChecked(preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false));
         // SynchronizationEnabled is set to the user preference when account is created
         final boolean syncEnabledPreference = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true);
         Log.d(WiFiSurveyor.TAG, "Setting navDrawer switch to syncEnabledPreference: " + syncEnabledPreference);
@@ -268,7 +268,7 @@ public class NavDrawer implements NavigationView.OnNavigationItemSelectedListene
             }
 
             final SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(PREFERENCES_MOVE_TO_LOCATION_KEY, isChecked);
+            editor.putBoolean(PREFERENCES_CENTER_MAP_KEY, isChecked);
             editor.apply();
 
             if (isChecked) {

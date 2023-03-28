@@ -12,14 +12,14 @@
     android:title="@string/drawer_title_feedback"
     app:showAsAction="never" />
   <item
-    android:id="@+id/imprint_item"
-    android:icon="@drawable/ic_business"
-    android:title="@string/drawer_title_imprint"
-    app:showAsAction="never" />
-  <item
     android:id="@+id/settings_item"
     android:icon="@drawable/ic_baseline_settings_24"
     android:title="@string/settings"
+    app:showAsAction="never" />
+  <item
+    android:id="@+id/imprint_item"
+    android:icon="@drawable/ic_business"
+    android:title="@string/drawer_title_imprint"
     app:showAsAction="never" />
   <item
     android:id="@+id/logout_item"
