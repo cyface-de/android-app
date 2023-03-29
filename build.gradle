@@ -55,7 +55,7 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.6.0-alpha2" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.5.1" // Also update submodule commit ref
     cyfaceUtilsVersion = "3.3.5" // Maven dependency
     cyfaceEnergySettingsVersion = "3.2.8" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "4.1.8-alpha1" // Also update submodule commit ref
