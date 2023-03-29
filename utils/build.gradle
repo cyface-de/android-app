@@ -81,7 +81,6 @@ android {
 }
 
 // Exception tracking
-// FIXME: we should probably add something to see that these crashes come from the RFR app!
 sentry {
     // Enables or disables the automatic upload of mapping files
     // during a build.  If you disable this, you'll need to manually
