@@ -1,9 +1,25 @@
+/*
+ * Copyright 2023 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.cyface.app.r4r.ui.capturing
 
 import android.app.Activity
 import android.app.ProgressDialog
-import android.content.Context
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -57,7 +73,6 @@ import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
-import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
 import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
@@ -68,7 +83,6 @@ import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
-import kotlin.math.roundToInt
 
 /**
  * This is the UI controller/element, responsible for displaying the data from the [CapturingViewModel].
@@ -82,152 +96,77 @@ import kotlin.math.roundToInt
  */
 class CapturingFragment : Fragment(), DataCapturingListener {
 
+    /**
+     * This property is only valid between onCreateView and onDestroyView.
+     */
     private var _binding: FragmentCapturingBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    /**
+     * The generated class which holds all bindings from the layout file.
+     */
     private val binding get() = _binding!!
 
-    private var capturingStatus: MeasurementStatus? = null
+    /**
+     * The capturing service object which controls data capturing and synchronization.
+     */
+    private lateinit var capturing: CyfaceDataCapturingService
 
-    private lateinit var locationManager: LocationManager
+    /**
+     * An implementation of the persistence layer which caches some data during capturing.
+     */
+    private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
-    private lateinit var capturingService: CyfaceDataCapturingService
+    /**
+     * Button which allows to start or resume a measurement.
+     */
+    private lateinit var startResumeButton: FloatingActionButton
 
-    private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
+    /**
+     * Button which allows to stop a measurement.
+     */
+    private lateinit var stopButton: FloatingActionButton
 
-    // Get shared `ViewModel` instance from Activity
-    private val capturingViewModel: CapturingViewModel by activityViewModels {
+    /**
+     * Button which allows to pause a measurement.
+     */
+    private lateinit var pauseButton: FloatingActionButton
+
+    /*+
+     * Listeners which are interested in the status of the calibration dialog.
+     */
+    private var calibrationDialogListener: Collection<CalibrationDialogListener>? = null
+
+    /**
+     * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
+     */
+    private val viewModel: CapturingViewModel by activityViewModels {
         CapturingViewModelFactory(
-            persistenceLayer.measurementRepository!!,
-            persistenceLayer.eventRepository!!
+            persistence.measurementRepository!!,
+            persistence.eventRepository!!
         )
     }
 
-    //private val preferences: SharedPreferences? = null
-
-    // When requested, this adapter returns a DemoObjectFragment,
-    // representing an object in the collection.
-    private lateinit var pagerAdapter: PagerAdapter
+    /**
+     * Handler for [startResumeButton] clicks.
+     */
+    private val onStartResume: View.OnClickListener = OnStartResumeListener(this)
 
     /**
-     * The pager widget, which handles animation and allows swiping horizontally
-     * to access previous and next wizard steps.
+     * Handler for [pauseButton] clicks.
      */
-    private lateinit var viewPager: ViewPager2
+    private val onPause: View.OnClickListener = OnPauseListener(this)
 
-    private lateinit var startResumeButton: FloatingActionButton
-    private lateinit var stopButton: FloatingActionButton
-    private lateinit var pauseButton: FloatingActionButton
-
-    @Suppress("PrivatePropertyName")
-    private val CALIBRATION_DIALOG_TIMEOUT = 1500L
-    private var calibrationDialogListener: Collection<CalibrationDialogListener>? = null
-    private var calibrationProgressDialog: ProgressDialog? = null
-
-    private val onStartResume: View.OnClickListener = View.OnClickListener {
-        // From examples:
-        // Update LiveData upon user interaction, network responses, or data loading completion.
-        // `setValue must be called from the main thread, use `postValue()` from worker threads.
-        // capturingViewModel.insert(measurement)
-
-        // Disables the button. This is used to avoid a duplicate start command which crashes the SDK
-        // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
-        startResumeButton.isEnabled = false
-
-        // The MaterialDialog implementation of the EnergySettings dialogs are not shown when called
-        // from inside the IsRunningCallback. Thus, we call it here for now instead of in startCapturing()
-        if ((capturingStatus == MeasurementStatus.FINISHED || capturingStatus == MeasurementStatus.PAUSED) && isRestrictionActive()) {
-            return@OnClickListener
-        }
-
-        capturingService.isRunning(
-            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
-            TimeUnit.MILLISECONDS,
-            object : IsRunningCallback {
-                override fun isRunning() {
-                    throw java.lang.IllegalStateException("Measurement is already running")
-                }
-
-                override fun timedOut() {
-                    Validate.isTrue(
-                        capturingStatus !== MeasurementStatus.OPEN,
-                        "DataCapturingButton is out of sync."
-                    )
-
-                    // If Measurement is paused, resume the measurement
-                    if (persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)) {
-                        resumeCapturing()
-                        return
-                    }
-                    startCapturing()
-                }
-            })
-    }
-
-    private val onPause: View.OnClickListener = View.OnClickListener {
-        // Disables the button. This is used to avoid a duplicate pause/stop command which crashes the SDK
-        // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
-        pauseButton.isEnabled = false
-        stopButton.isEnabled = false
-
-        capturingService.isRunning(
-            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
-            TimeUnit.MILLISECONDS,
-            object : IsRunningCallback {
-                override fun isRunning() {
-                    Validate.isTrue(
-                        capturingStatus === MeasurementStatus.OPEN,
-                        "DataCapturingButton is out of sync."
-                    )
-                    pauseCapturing()
-                }
-
-                override fun timedOut() {
-                    throw java.lang.IllegalStateException("No Measurement is running")
-                }
-            })
-    }
-
-    private val onStop: View.OnClickListener = View.OnClickListener {
-        // Disables the button. This is used to avoid a duplicate stop/pause command which crashes the SDK
-        // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
-        stopButton.isEnabled = false
-        pauseButton.isEnabled = false
-
-        capturingService.isRunning(
-            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
-            TimeUnit.MILLISECONDS,
-            object : IsRunningCallback {
-                override fun isRunning() {
-                    Validate.isTrue(
-                        capturingStatus === MeasurementStatus.OPEN,
-                        "DataCapturingButton is out of sync."
-                    )
-                    stopCapturing()
-                }
-
-                override fun timedOut() {
-                    // If Measurement is paused, stop the measurement
-                    if (persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)) {
-                        Validate.isTrue(
-                            capturingStatus === MeasurementStatus.PAUSED,
-                            "DataCapturingButton is out of sync."
-                        )
-                        stopCapturing()
-                        return
-                    }
-                    throw java.lang.IllegalStateException("No measurement is running")
-                }
-            })
-    }
+    /**
+     * Handler for [stopButton] clicks.
+     */
+    private val onStop: View.OnClickListener = OnStopListener(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (activity is ServiceProvider) {
-            capturingService = (activity as ServiceProvider).capturingService
-            persistenceLayer = capturingService.persistenceLayer
+            capturing = (activity as ServiceProvider).capturing
+            persistence = capturing.persistenceLayer
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
         }
@@ -245,84 +184,76 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         pauseButton = binding.pauseButton
 
         // Update UI elements with the updates from the ViewModel
-        capturingViewModel.measurementId.observe(viewLifecycleOwner) {
-            // FIXME: use parameterized resource like: textView.setText(String.format("%s %s",params.prefix, ascendText));
-            val tripTitle = if (it == null) null else "Fahrt ${it}"
+        viewModel.measurementId.observe(viewLifecycleOwner) {
+            val tripTitle = if (it == null) null else getString(R.string.trip_id, it)
             binding.tripTitle.text = tripTitle ?: ""
         }
-        capturingViewModel.measurement.observe(viewLifecycleOwner) {
+        viewModel.measurement.observe(viewLifecycleOwner) {
             val visibility = if (it == null) INVISIBLE else VISIBLE
-            // FIXME: The speed title could also reflect the GNSS fix / show a hint about it
             binding.speedTitle.visibility = visibility
             binding.distanceTitle.visibility = visibility
             binding.durationTitle.visibility = visibility
             binding.ascendTitle.visibility = visibility
             binding.co2Title.visibility = visibility
 
-            val distanceMeter = it?.distance
-            val distanceKm = distanceMeter?.div(1000.0)
-            val distanceText =
-                if (distanceKm == null) null else "${(distanceKm * 100).roundToInt() / 100.0} km"
-            binding.distanceView.text = distanceText ?: ""
+            // If code duplication increases, we could reduce it by introducing a domain layer
+            // see https://developer.android.com/topic/architecture/domain-layer
 
-            // 95 g / km
-            // https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/
-            val co2Gram = distanceKm?.times(95)
-            val co2Kg = co2Gram?.div(1000)
-            val co2Text = if (co2Kg == null) null else "${(co2Kg * 10).roundToInt() / 10.0} kg"
-            binding.co2View.text = co2Text ?: ""
+            val distanceKm = it?.distance?.div(1000.0)
+            binding.distanceView.text =
+                if (distanceKm == null) "" else getString(R.string.distanceKm, distanceKm)
 
-            val durationMillis = if (it == null) null else persistenceLayer.loadDuration(it.id)
-            val durationSeconds = durationMillis?.div(1000)
-            val durationMinutes = durationSeconds?.div(60)
-            val durationHours = durationMinutes?.div(60)
+            // 95 g / km see https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/
+            val co2Kg = distanceKm?.times(95)?.div(1000)
+            binding.co2View.text = if (co2Kg == null) "" else getString(R.string.co2kg, co2Kg)
+
+            val millis = if (it == null) null else persistence.loadDuration(it.id)
+            val seconds = millis?.div(1000)
+            val minutes = seconds?.div(60)
+            val hours = minutes?.div(60)
             val hoursText =
-                if (durationHours == null) null else if (durationHours > 0) durationHours.toString() + "h " else ""
-            val minutesText =
-                if (durationMinutes == null) null else if (durationMinutes > 0) (durationMinutes % 60).toString() + "m " else ""
-            val secondsText =
-                if (durationSeconds == null) null else (durationSeconds % 60).toString() + "s"
-            val durationText =
-                if (hoursText == null) null else hoursText + minutesText + secondsText
-            binding.durationView.text = durationText ?: ""
+                if (hours == null || hours == 0L) "" else getString(R.string.hours, hours) + " "
+            val minutesText = if (minutes == null || minutes == 0L) "" else getString(
+                R.string.minutes,
+                minutes % 60
+            ) + " "
+            val secondsText = if (seconds == null) "" else getString(R.string.seconds, seconds % 60)
+            val durationText = hoursText + minutesText + secondsText
+            binding.durationView.text = durationText
         }
-        capturingViewModel.location.observe(viewLifecycleOwner) {
-            var averageSpeedText: String? = null
-            var ascendText: String? = null
+        viewModel.location.observe(viewLifecycleOwner) {
+            val ascendText: String?
             try {
-                // FIXME: we only need to cache the current measurement id and then observe that measurement
-                val measurement = persistenceLayer.loadCurrentlyCapturedMeasurement()
+                val measurement = persistence.loadCurrentlyCapturedMeasurement()
                 val averageSpeedKmh =
-                    persistenceLayer.loadAverageSpeed(
+                    persistence.loadAverageSpeed(
                         measurement.id,
                         DefaultLocationCleaning()
                     ) * 3.6
-                averageSpeedText = averageSpeedKmh.roundToInt().toString() + " km/h"
 
-                val ascend =
-                    if (measurement.status == MeasurementStatus.OPEN) persistenceLayer.loadAscend(
-                        measurement.id
-                    ) else null
-                ascendText = if (ascend == null) null else "+ ${ascend.roundToInt()} m"
+                val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
+                val ascend = if (ongoingCapturing) persistence.loadAscend(measurement.id) else null
+                ascendText = getString(R.string.ascendMeters, ascend ?: 0.0)
+
+                val speedKmPh = it?.speed?.times(3.6)
+                binding.speedView.text = if (speedKmPh == null) "" else getString(
+                    R.string.speedKphWithAverage,
+                    speedKmPh,
+                    averageSpeedKmh
+                )
+                binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+
+                // FIXME: See more stuff from `DataCapturingButton.onNewGeoLocationAcquired` if not called in `onNewGeoLocation` in this class
             } catch (e: NoSuchMeasurementException) {
                 // Happen when locations arrive late
                 Log.d(TAG, "Position changed while no capturing is active, ignoring.")
             }
-            val speedMps = it?.speed
-            val speedKmPh = speedMps?.times(3.6)?.roundToInt()
-            val speedText = if (speedKmPh == null) null else "$speedKmPh km/h (Ø $averageSpeedText)"
-            binding.speedView.text = speedText ?: ""
-            binding.ascendView.text = if (speedText == null) "" else ascendText ?: "+ 0 m"
-
-            // FIXME: See more stuff from `DataCapturingButton.onNewGeoLocationAcquired` if not called in `onNewGeoLocation` in this class
         }
 
         startResumeButton.setOnClickListener(onStartResume)
         pauseButton.setOnClickListener(onPause)
         stopButton.setOnClickListener(onStop)
         calibrationDialogListener = HashSet()
-        locationManager =
-            requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Add items to menu (top right)
         // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
@@ -332,7 +263,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(
             MenuProvider(
-                capturingService,
+                capturing,
                 requireActivity(),
                 navHostFragment.navController
             ),
@@ -344,13 +275,12 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Instantiate a ViewPager2 and a PagerAdapter.
-        viewPager = view.findViewById(R.id.pager)
+        // Allows to change the tabs by swiping horizontally (disabled) and handles animation
+        val viewPager = view.findViewById<ViewPager2>(R.id.pager)
 
         // Connect adapter to ViewPager (which provides pages to the view pager)
         val fragmentManager: FragmentManager = childFragmentManager
-        pagerAdapter = PagerAdapter(fragmentManager, lifecycle)
-        viewPager.adapter = pagerAdapter
+        viewPager.adapter = PagerAdapter(fragmentManager, lifecycle)
 
         // Add TabItems to TabLayout
         val tabLayout: TabLayout = view.findViewById(R.id.tabLayout)
@@ -375,9 +305,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         super.onPause()
         //FIXME: move the code below to `disconnect()` like `reconnect()`
         //FIXME: unsetLocationListener()
-        capturingService.removeDataCapturingListener(this)
+        capturing.removeDataCapturingListener(this)
         //FIXME: cameraService.removeCameraListener(this)
-        capturingViewModel.setMeasurementId(null) // FIXME: experimental, might influence other Fragments
+        viewModel.setMeasurementId(null) // FIXME: experimental, might influence other Fragments
     }
 
     /**
@@ -403,8 +333,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     }
 
     override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation) {
-        capturingViewModel.setLocation(position)
-        capturingViewModel.addToTrack(position)
+        viewModel.setLocation(position)
+        viewModel.addToTrack(position)
     }
 
     override fun onNewSensorDataAcquired(data: CapturedData?) {
@@ -434,8 +364,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // Disabled on Android 13+ for workaround, see `stop/pauseCapturing()` [RFR-246]
         //if (Build.VERSION.SDK_INT < 33) { FIXME: see if bug is still here before uncommenting this
         setCapturingStatus(MeasurementStatus.FINISHED)
-        capturingViewModel.setLocation(null)
-        capturingViewModel.setMeasurementId(null)
+        viewModel.setLocation(null)
+        viewModel.setMeasurementId(null)
         //}
     }
 
@@ -446,7 +376,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // moved further down as this did not check async if the capturing is actually running
         //val (id) = capturingService.loadCurrentlyCapturedMeasurement()
         //updateCachedTrack(id)
-        capturingService.addDataCapturingListener(this)
+        capturing.addDataCapturingListener(this)
         // FIXME: cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
@@ -456,11 +386,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         stopButton.isEnabled = false
         GlobalScope.launch {
             // OPEN: running capturing
-            if (capturingService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.d(TAG, "onResume: reconnecting DCS succeeded")
                 // FIXME: setLocationListener()
-                val (id) = capturingService.loadCurrentlyCapturedMeasurement()
-                capturingViewModel.setMeasurementId(id)
+                val (id) = capturing.loadCurrentlyCapturedMeasurement()
+                viewModel.setMeasurementId(id)
                 // We re-sync the button here as the data capturing can be canceled while the app is closed
                 setCapturingStatus(MeasurementStatus.OPEN)
                 updateCachedTrack(id)
@@ -480,13 +410,13 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
             // PAUSED or FINISHED capturing
             Log.d(TAG, "onResume: reconnecting timed out")
-            if (persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)) {
+            if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
                 setCapturingStatus(MeasurementStatus.PAUSED)
-                capturingViewModel.setMeasurementId(null)
+                viewModel.setMeasurementId(null)
                 // Was disabled before, too:  mainFragment.showUnfinishedTracksOnMap(persistenceLayer.loadCurrentlyCapturedMeasurement().getIdentifier());
             } else {
                 setCapturingStatus(MeasurementStatus.FINISHED)
-                capturingViewModel.setMeasurementId(null)
+                viewModel.setMeasurementId(null)
             }
             //setButtonEnabled(button)
 
@@ -537,7 +467,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      * @param newStatus the new status of the measurement
      */
     private fun setCapturingStatus(newStatus: MeasurementStatus) {
-        capturingStatus = newStatus
+        viewModel.setCapturing(newStatus)
         runOnUiThread {
             updateButtonView(newStatus)
             // FIXME: updateOngoingCapturingInfo(newStatus)
@@ -551,31 +481,6 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         }
     }
 
-    /**
-     * Updates the `TextView`s depending on the current [MeasurementStatus].
-     *
-     * When a new Capturing is started, the `TextView` will only show the [Measurement.id]
-     * of the open [Measurement]. The [Measurement.distance] is automatically updated as soon as the
-     * first [ParcelableGeoLocation]s are captured. This way the user can see if the capturing actually works.
-     *
-     * @param status the state of the `DataCapturingButton`
-     */
-    private fun updateOngoingCapturingInfo(status: MeasurementStatus) {
-        if (status === MeasurementStatus.OPEN) {
-            // FIXME: We used `DefaultBehavior` before, but now `CapturingBehavior` is used
-            val measurementIdText = (getString(de.cyface.app.utils.R.string.measurement) + " "
-                    + persistenceLayer.loadCurrentlyCapturedMeasurement().id)
-            binding.tripTitle.text = measurementIdText
-            // FIXME: cameraInfoTextView.setVisibility(View.VISIBLE)
-        } else {
-            // This way you can notice if a GeoLocation/Picture was already captured or not
-            binding.distanceView.text = ""
-            // Disabling or else the text is updated when JpegSafer handles image after capturing stopped
-            //cameraInfoTextView.setText("")
-            //cameraInfoTextView.setVisibility(View.INVISIBLE)
-            binding.tripTitle.text = ""
-        }
-    }
 
     /**
      * Updates the views of the capturing buttons depending on the capturing [status].
@@ -627,7 +532,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun pauseCapturing() {
         try {
-            capturingService.pause(
+            capturing.pause(
                 object : ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                     override fun shutDownFinished(measurementIdentifier: Long) {
                         // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
@@ -636,7 +541,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                             // The measurement id should always be set [STAD-333]
                             Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                             setCapturingStatus(MeasurementStatus.PAUSED)
-                            capturingViewModel.setMeasurementId(null)
+                            viewModel.setMeasurementId(null)
                             //setButtonEnabled(button)
                         }
                     }
@@ -651,7 +556,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                     // The measurement id should always be set [STAD-333]
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
                     setCapturingStatus(MeasurementStatus.PAUSED)
-                    capturingViewModel.setMeasurementId(null)
+                    viewModel.setMeasurementId(null)
                     //setButtonEnabled(button)
                 }, SystemClock.uptimeMillis() + 500L)
             }
@@ -691,7 +596,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun stopCapturing() {
         try {
-            capturingService.stop(
+            capturing.stop(
                 object : ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                     override fun shutDownFinished(measurementIdentifier: Long) {
                         // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
@@ -699,9 +604,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                             // The measurement id should always be set [STAD-333]
                             Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                            capturingViewModel.setTracks(null)
+                            viewModel.setTracks(null)
                             setCapturingStatus(MeasurementStatus.FINISHED)
-                            capturingViewModel.setMeasurementId(null)
+                            viewModel.setMeasurementId(null)
                             //setButtonEnabled(button)
                         }
                     }
@@ -717,9 +622,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                     // The measurement id should always be set [STAD-333]
                     // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    capturingViewModel.setTracks(null)
+                    viewModel.setTracks(null)
                     setCapturingStatus(MeasurementStatus.FINISHED)
-                    capturingViewModel.setMeasurementId(null)
+                    viewModel.setMeasurementId(null)
                     //setButtonEnabled(button)
                 }, SystemClock.uptimeMillis() + 500L)
             }
@@ -761,7 +666,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private fun startCapturing() {
 
         // Measurement is stopped, so we start a new measurement
-        if (persistenceLayer.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
+        if (persistence.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
             showToastOnMainThread(
                 getString(de.cyface.app.utils.R.string.toast_last_tracking_crashed),
                 true
@@ -770,7 +675,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // We use a handler to run the UI Code on the main thread as it is supposed to be
         runOnUiThread {
-            calibrationProgressDialog = createAndShowCalibrationDialog()
+            val calibrationProgressDialog = createAndShowCalibrationDialog()
             scheduleProgressDialogDismissal(
                 calibrationProgressDialog!!,
                 calibrationDialogListener!!
@@ -779,14 +684,14 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            capturingViewModel.setTracks(arrayListOf(Track()))
-            capturingService.start(Modality.BICYCLE,
+            viewModel.setTracks(arrayListOf(Track()))
+            capturing.start(Modality.BICYCLE,
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
                         // The measurement id should always be set [STAD-333]
                         Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                         Log.v(TAG, "startUpFinished")
-                        capturingViewModel.setMeasurementId(measurementIdentifier)
+                        viewModel.setMeasurementId(measurementIdentifier)
                         // FIXME: Status should also be in ViewModel (maybe via currMId and observed M)
                         // the button should then just change on itself based on the live data measurement
                         setCapturingStatus(MeasurementStatus.OPEN)
@@ -817,15 +722,15 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun resumeCapturing() {
         Log.d(TAG, "resumeCachedTrack: Adding new sub track to existing cached track")
-        capturingViewModel.addTrack(Track())
+        viewModel.addTrack(Track())
         try {
-            capturingService.resume(
+            capturing.resume(
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
                         // The measurement id should always be set [STAD-333]
                         Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                         Log.v(TAG, "resumeCapturing: startUpFinished")
-                        capturingViewModel.setMeasurementId(measurementIdentifier)
+                        viewModel.setMeasurementId(measurementIdentifier)
                         setCapturingStatus(MeasurementStatus.OPEN)
                         //setButtonEnabled(button)
 
@@ -903,7 +808,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             false
         ) {
             try {
-                capturingService
+                capturing
                     .stop(object : ShutDownFinishedHandler(
                         MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED
                     ) {
@@ -937,9 +842,10 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         progressDialog: ProgressDialog,
         calibrationDialogListener: Collection<CalibrationDialogListener>
     ) {
+        val dialogTimeoutMillis = 1500L
         Handler().postDelayed(
             { dismissCalibrationDialog(progressDialog, calibrationDialogListener) },
-            CALIBRATION_DIALOG_TIMEOUT
+            dialogTimeoutMillis
         )
     }
 
@@ -965,24 +871,24 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      */
     private fun updateCachedTrack(measurementId: Long) {
         try {
-            if (!persistenceLayer.hasMeasurement(MeasurementStatus.OPEN)
-                && !persistenceLayer.hasMeasurement(MeasurementStatus.PAUSED)
+            if (!persistence.hasMeasurement(MeasurementStatus.OPEN)
+                && !persistence.hasMeasurement(MeasurementStatus.PAUSED)
             ) {
                 Log.d(TAG, "updateCachedTrack: No unfinished measurement found, un-setting cache.")
-                capturingViewModel.setTracks(null)
+                viewModel.setTracks(null)
                 return
             }
             Log.d(
                 TAG,
                 "updateCachedTrack: Unfinished measurement found, loading track from database."
             )
-            val loadedList = persistenceLayer.loadTracks(
+            val loadedList = persistence.loadTracks(
                 measurementId,
                 DefaultLocationCleaning()
             )
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
-            capturingViewModel.setTracks(ArrayList(loadedList))
+            viewModel.setTracks(ArrayList(loadedList))
         } catch (e: NoSuchMeasurementException) {
             throw java.lang.RuntimeException(e)
         }
@@ -1020,6 +926,113 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         override fun getItemCount(): Int {
             // List size
             return 2
+        }
+    }
+
+    class OnStartResumeListener(private val capturingFragment: CapturingFragment) :
+        View.OnClickListener {
+        override fun onClick(v: View?) {
+            // From examples:
+            // Update LiveData upon user interaction, network responses, or data loading completion.
+            // `setValue must be called from the main thread, use `postValue()` from worker threads.
+            // capturingViewModel.insert(measurement)
+
+            // Disables the button. This is used to avoid a duplicate start command which crashes the SDK
+            // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
+            capturingFragment.startResumeButton.isEnabled = false
+
+            // The MaterialDialog implementation of the EnergySettings dialogs are not shown when called
+            // from inside the IsRunningCallback. Thus, we call it here for now instead of in startCapturing()
+            val capturingStatus = capturingFragment.viewModel.capturing.value
+            if ((capturingStatus == MeasurementStatus.FINISHED || capturingStatus == MeasurementStatus.PAUSED) && capturingFragment.isRestrictionActive()) {
+                return
+            }
+
+            capturingFragment.capturing.isRunning(
+                DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
+                TimeUnit.MILLISECONDS,
+                object : IsRunningCallback {
+                    override fun isRunning() {
+                        throw java.lang.IllegalStateException("Measurement is already running")
+                    }
+
+                    override fun timedOut() {
+                        Validate.isTrue(
+                            capturingStatus !== MeasurementStatus.OPEN,
+                            "DataCapturingButton is out of sync."
+                        )
+
+                        // If Measurement is paused, resume the measurement
+                        if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+                            capturingFragment.resumeCapturing()
+                            return
+                        }
+                        capturingFragment.startCapturing()
+                    }
+                })
+        }
+    }
+
+    class OnPauseListener(private val capturingFragment: CapturingFragment) : View.OnClickListener {
+        override fun onClick(v: View?) {
+
+            // Disables the button. This is used to avoid a duplicate pause/stop command which crashes the SDK
+            // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
+            capturingFragment.pauseButton.isEnabled = false
+            capturingFragment.stopButton.isEnabled = false
+
+            capturingFragment.capturing.isRunning(
+                DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
+                TimeUnit.MILLISECONDS,
+                object : IsRunningCallback {
+                    override fun isRunning() {
+                        Validate.isTrue(
+                            capturingFragment.viewModel.capturing.value === MeasurementStatus.OPEN,
+                            "DataCapturingButton is out of sync."
+                        )
+                        capturingFragment.pauseCapturing()
+                    }
+
+                    override fun timedOut() {
+                        throw java.lang.IllegalStateException("No Measurement is running")
+                    }
+                })
+        }
+    }
+
+    class OnStopListener(private val capturingFragment: CapturingFragment) :
+        View.OnClickListener {
+        override fun onClick(v: View?) {
+            // Disables the button. This is used to avoid a duplicate stop/pause command which crashes the SDK
+            // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
+            capturingFragment.stopButton.isEnabled = false
+            capturingFragment.pauseButton.isEnabled = false
+
+            capturingFragment.capturing.isRunning(
+                DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
+                TimeUnit.MILLISECONDS,
+                object : IsRunningCallback {
+                    override fun isRunning() {
+                        Validate.isTrue(
+                            capturingFragment.viewModel.capturing.value === MeasurementStatus.OPEN,
+                            "DataCapturingButton is out of sync."
+                        )
+                        capturingFragment.stopCapturing()
+                    }
+
+                    override fun timedOut() {
+                        // If Measurement is paused, stop the measurement
+                        if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+                            Validate.isTrue(
+                                capturingFragment.viewModel.capturing.value === MeasurementStatus.PAUSED,
+                                "DataCapturingButton is out of sync."
+                            )
+                            capturingFragment.stopCapturing()
+                            return
+                        }
+                        throw java.lang.IllegalStateException("No measurement is running")
+                    }
+                })
         }
     }
 }

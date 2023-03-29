@@ -1,3 +1,21 @@
+/*
+ * Copyright 2023 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.cyface.app.r4r
 
 import android.accounts.Account
@@ -31,13 +49,11 @@ import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
 import de.cyface.datacapturing.model.CapturedData
-import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
-import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.WiFiSurveyor
@@ -45,17 +61,31 @@ import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import java.io.IOException
 
+/**
+ * The base `Activity` for the actual Cyface measurement client. It's called by the
+ * [de.cyface.app.r4r.ui.TermsOfUseActivity] class.
+ *
+ * @author Klemens Muthmann
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 3.2.0
+ */
 class MainActivity : AppCompatActivity(), ServiceProvider {
 
+    /**
+     * The generated class which holds all bindings from the layout file.
+     */
     private lateinit var binding: ActivityMainBinding
 
-    override lateinit var capturingService: CyfaceDataCapturingService
+    /**
+     * The capturing service object which controls data capturing and synchronization.
+     */
+    override lateinit var capturing: CyfaceDataCapturingService
 
-    private lateinit var persistenceLayer: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
-
-    private lateinit var navController: NavController
-
-    private lateinit var toolbar: Toolbar
+    /**
+     * The controller which allows to navigate through the navigation graph.
+     */
+    private lateinit var navigation: NavController
 
     /**
      * The `SharedPreferences` used to store the user's preferences.
@@ -63,12 +93,32 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private lateinit var preferences: SharedPreferences
 
     /**
+     * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
+     * just registers and unregisters itself.
+     */
+    private val unInterestedListener = object : DataCapturingListener {
+        override fun onFixAcquired() {}
+        override fun onFixLost() {}
+        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) {}
+        override fun onNewSensorDataAcquired(data: CapturedData?) {}
+        override fun onLowDiskSpace(allocation: DiskConsumption?) {}
+        override fun onSynchronizationSuccessful() {}
+        override fun onErrorState(e: Exception?) {}
+        override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
+            return false
+        }
+
+        override fun onCapturingStopped() {}
+    }
+
+    /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
+        val persistence = capturing.persistenceLayer
         CapturingViewModelFactory(
-            persistenceLayer.measurementRepository!!, persistenceLayer.eventRepository!!
+            persistence.measurementRepository!!, persistence.eventRepository!!
         )
     }
 
@@ -76,10 +126,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         super.onCreate(savedInstanceState)
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        // The location permissions are requested in MapFragent as it needs to react to it
+        // The location permissions are requested in MapFragment which needs to react to results
 
         // If camera service is requested, check needed permissions
-        /* FIXME: final boolean cameraCapturingEnabled = preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
+        /* final boolean cameraCapturingEnabled = preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
         final boolean permissionsMissing = ContextCompat.checkSelfPermission(this,
             Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
         /*
@@ -98,59 +148,21 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION);
         }*/
 
-        // If the savedInstanceState bundle isn't null, a configuration change occurred (e.g. screen rotation)
-        // thus, we don't need to recreate the fragment but can just reattach the existing one
-        /*fragmentManager = supportFragmentManager
-        if (findViewById<View?>(R.id.main_fragment_placeholder) != null) {
-            if (savedInstanceState != null) {
-                mainFragment =
-                    fragmentManager.findFragmentByTag(de.cyface.app.ui.MainActivity.MAIN_FRAGMENT_TAG) as MainFragment
-            }
-            if (mainFragment == null) {
-                mainFragment = MainFragment()
-            }
-            fragmentManager.beginTransaction().replace(
-                R.id.main_fragment_placeholder,
-                mainFragment,
-                de.cyface.app.ui.MainActivity.MAIN_FRAGMENT_TAG
-            )
-                .commit()
-        } else {
-            Log.w(de.cyface.app.utils.Constants.PACKAGE, "onCreate: main fragment already attached")
-        }*/
-
-        // FIXME: To access the Activities `capturingService` in Fragment.onCreate this needs to happen before `inflate` but there might be
         // Start DataCapturingService and CameraService
         try {
-            capturingService = CyfaceDataCapturingService(
+            capturing = CyfaceDataCapturingService(
                 applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
                 CapturingEventHandler(),
-                // Instead of registering the `DataCapturingButton/CapturingFragment` here,
-                // the CapturingFragment just registers and unregisters itself
-                object : DataCapturingListener {
-                    override fun onFixAcquired() {}
-                    override fun onFixLost() {}
-                    override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) {}
-                    override fun onNewSensorDataAcquired(data: CapturedData?) {}
-                    override fun onLowDiskSpace(allocation: DiskConsumption?) {}
-                    override fun onSynchronizationSuccessful() {}
-                    override fun onErrorState(e: Exception?) {}
-                    override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
-                        return false
-                    }
-
-                    override fun onCapturingStopped() {}
-                },
+                unInterestedListener,
                 DEFAULT_SENSOR_FREQUENCY
             )
-            persistenceLayer = capturingService.persistenceLayer
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             startSynchronization(applicationContext)
-            //FIXME: dataCapturingService.addConnectionStatusListener(this)
+            // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
                 de.cyface.app.utils.Constants.AUTHORITY, CameraEventHandler(), dataCapturingButton
@@ -159,6 +171,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             throw IllegalStateException(e)
         }
 
+        // To access the `Activity`s' `capturingService` from `Fragment.onCreate` the
+        // `capturingService` has to be initialized before calling `inflate`
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -167,12 +181,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // work with with `findNavController()` (https://stackoverflow.com/a/60434988/5815054).
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        binding.bottomNav.setupWithNavController(navController)
-        toolbar = findViewById(R.id.toolbar)
+        navigation = navHostFragment.navController
+        binding.bottomNav.setupWithNavController(navigation)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         setupActionBarWithNavController(
-            navController, AppBarConfiguration(
+            navigation, AppBarConfiguration(
                 // Adding top-level destinations so they are added to the back stack while navigating
                 setOf(
                     R.id.navigation_trips,
@@ -190,14 +204,16 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * Fixes "home" (back) button in the top action bar when in the fragment details fragment.
      */
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return navigation.navigateUp() || super.onSupportNavigateUp()
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String?>, grantResults: IntArray
     ) {
+        @Suppress("UNUSED_EXPRESSION")
         when (requestCode) {
-            // Location permission request moved to `MapFragment` as it has to react to it
+            // Location permission request moved to `MapFragment` as it has to react to results
+
             /*de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION -> if (navDrawer != null && !(grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && (grantResults.size < 2 || grantResults[1] == PackageManager.PERMISSION_GRANTED))
             ) {
@@ -220,7 +236,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     @Suppress("RedundantOverride")
     override fun onPause() {
-        // dismissAllDialogs(fragmentManager); not required anymore with MaterialDialogs
         super.onPause()
     }
 
@@ -246,7 +261,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         if (validAccountExists) {
             try {
                 Log.d(TAG, "startSynchronization: Starting WifiSurveyor with exiting account.")
-                capturingService.startWifiSurveyor()
+                capturing.startWifiSurveyor()
             } catch (e: SetupException) {
                 throw java.lang.IllegalStateException(e)
             }
@@ -279,11 +294,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
                     )
-                    capturingService.wiFiSurveyor.makeAccountSyncable(
+                    capturing.wiFiSurveyor.makeAccountSyncable(
                         account, syncEnabledPreference
                     )
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
-                    capturingService.startWifiSurveyor()
+                    capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {
                     // Remove temp account when LoginActivity is closed during login [CY-5087]
                     val accounts = accountManager1.getAccountsByType(ACCOUNT_TYPE)

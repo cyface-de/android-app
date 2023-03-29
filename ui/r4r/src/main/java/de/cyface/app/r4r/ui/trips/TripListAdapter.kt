@@ -20,7 +20,6 @@ import de.cyface.persistence.model.MeasurementStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.roundToInt
 
 /**
  * [ListAdapter] which creates and binds a [TripViewHolder].
@@ -75,7 +74,7 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             itemView.isActivated = isActivated
             val date = Date(measurement.timestamp)
             val dateText = SimpleDateFormat("dd.MM.yy HH:mm", Locale.GERMANY).format(date)
-            val distanceKm = (measurement.distance / 1000 * 1000).roundToInt() / 1000.0
+            val distanceKm = measurement.distance.div(1000)
             val status = measurement.status
             var statusText = ""
             if (status === MeasurementStatus.SKIPPED || status === MeasurementStatus.DEPRECATED) {

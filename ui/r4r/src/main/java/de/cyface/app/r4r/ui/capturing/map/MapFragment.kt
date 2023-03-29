@@ -1,7 +1,6 @@
 package de.cyface.app.r4r.ui.capturing.map
 
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
@@ -20,7 +19,6 @@ import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.Map
-import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -107,7 +105,7 @@ class MapFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (activity is ServiceProvider) {
-            capturingService = (activity as ServiceProvider).capturingService
+            capturingService = (activity as ServiceProvider).capturing
             persistenceLayer = capturingService.persistenceLayer
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")

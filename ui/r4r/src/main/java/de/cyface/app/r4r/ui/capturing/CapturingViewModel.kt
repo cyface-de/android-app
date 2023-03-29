@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -11,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Measurement
+import de.cyface.persistence.model.MeasurementStatus
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.repository.EventRepository
@@ -40,6 +42,13 @@ class CapturingViewModel(
     private val repository: MeasurementRepository,
     eventRepository: EventRepository
 ) : ViewModel() {
+
+    /**
+     * The cached capturing status or `null` until the status is retrieved asynchronously.
+     */
+    private val _capturing = MutableLiveData<MeasurementStatus?>()
+
+    val capturing: LiveData<MeasurementStatus?> = _capturing
 
     /**
      * The cached id of the currently active measurement or `null` if capturing is inactive.
@@ -89,18 +98,22 @@ class CapturingViewModel(
         "${tracks.job} ${events.name}"
     }*/
 
+    fun setCapturing(status: MeasurementStatus?) {
+        _capturing.postValue(status)
+    }
+
     fun setMeasurementId(id: Long?) {
         _measurementId.postValue(id)
     }
 
     /**
-     * Launch a new coroutine to update the data in a non-blocking way.
+     * Launch a new coroutine to update the data in a non-blocking way. [RFR-341]
      *
      * Encapsulates the `Repository` interface from the UI.
      */
-    fun update(measurement: Measurement) = viewModelScope.launch {
+    /*fun update(measurement: Measurement) = viewModelScope.launch {
         repository.update(measurement)
-    }
+    }*/
 
     fun setLocation(location: ParcelableGeoLocation?) {
         _location.postValue(location)

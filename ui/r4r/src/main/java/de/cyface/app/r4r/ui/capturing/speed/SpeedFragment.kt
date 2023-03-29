@@ -39,7 +39,7 @@ class SpeedFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (activity is ServiceProvider) {
-            capturingService = (activity as ServiceProvider).capturingService
+            capturingService = (activity as ServiceProvider).capturing
             persistenceLayer = capturingService.persistenceLayer
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
@@ -55,9 +55,8 @@ class SpeedFragment : Fragment() {
         val root: View = binding.root
 
         capturingViewModel.location.observe(viewLifecycleOwner) {
-            val speedMps = it?.speed
-            val speedKmPh = speedMps?.times(3.6)?.roundToInt()
-            val speedText = if (speedKmPh == null) null else "$speedKmPh km/h"
+            val speedKmPh = it?.speed?.times(3.6)
+            val speedText = if (speedKmPh == null) null else getString(R.string.speedKph, speedKmPh)
             binding.liveSpeedView.text = speedText ?: getString(R.string.capturing_inactive)
         }
         return root

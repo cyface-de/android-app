@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import de.cyface.app.r4r.R
 import de.cyface.app.r4r.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentStatisticsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 class StatisticsFragment : Fragment() {
 
@@ -29,7 +29,7 @@ class StatisticsFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (activity is ServiceProvider) {
-            capturingService = (activity as ServiceProvider).capturingService
+            capturingService = (activity as ServiceProvider).capturing
             persistenceLayer = capturingService.persistenceLayer
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
@@ -68,34 +68,28 @@ class StatisticsFragment : Fragment() {
         }
 
         // UI binding
-        val averageDistanceKm = if (measurements.isNotEmpty()) (totalDistanceKm / measurements.size * 100).roundToInt() / 100.0 else 0.0
-        binding.distanceView.text = "${(maxDistanceKm * 10).roundToInt() / 10.0} km (Ø $averageDistanceKm km)"
+        val averageDistanceKm = if (measurements.isNotEmpty()) totalDistanceKm / measurements.size else 0.0
+        binding.distanceView.text = getString(R.string.distanceKmWithAverage, maxDistanceKm, averageDistanceKm)
         val averageDuration = if (measurements.isNotEmpty()) duration(totalDurationMillis / measurements.size) else 0L
-        binding.durationView.text = "${duration(maxDurationMillis)} (Ø $averageDuration)"
-        val averageAscend = if(measurements.isNotEmpty()) (totalAscend / measurements.size).roundToInt() else 0.0
-        binding.ascendView.text = "max ${maxAscend.roundToInt()} m (Ø $averageAscend m)"
-        // 95 g / km
-        // https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/
-        val totalCo2Gram = totalDistanceKm.times(95)
-        val maxCo2Gram = maxDistanceKm.times(95)
-        val totalCo2Kg = totalCo2Gram.div(1000)
-        val maxCo2Kg = maxCo2Gram.div(1000)
-        val totalCo2Text = "${(totalCo2Kg * 10).roundToInt() / 10.0} kg"
-        val averageCo2Kg = if(measurements.isNotEmpty()) (totalCo2Kg / measurements.size * 10).roundToInt() / 10.0 else 0.0
-        val maxCo2Text = "${(maxCo2Kg * 10).roundToInt() / 10.0} kg (Ø $averageCo2Kg kg)"
-        binding.totalCo2View.text = totalCo2Text
-        binding.maxCo2View.text = maxCo2Text
+        binding.durationView.text = getString(R.string.durationWithAverage, duration(maxDurationMillis), averageDuration)
+        val averageAscend = if (measurements.isNotEmpty()) totalAscend / measurements.size else 0.0
+        binding.ascendView.text = getString(R.string.ascendMetersWithAverage, maxAscend, averageAscend)
+        val totalCo2Kg = totalDistanceKm.times(95).div(1000)
+        val maxCo2Kg = maxDistanceKm.times(95).div(1000)
+        val averageCo2Kg = if (measurements.isNotEmpty()) totalCo2Kg / measurements.size else 0.0
+        binding.totalCo2View.text = getString(R.string.co2kg, totalCo2Kg)
+        binding.maxCo2View.text = getString(R.string.co2kgWithAverage, maxCo2Kg, averageCo2Kg)
 
         return root
     }
 
     private fun duration(millis: Long): String {
-        val durationSeconds = millis.div(1000)
-        val durationMinutes = durationSeconds.div(60)
-        val durationHours = durationMinutes.div(60)
-        val hoursText = if (durationHours > 0) durationHours.toString() + "h " else ""
-        val minutesText = if (durationMinutes > 0) (durationMinutes % 60).toString() + "m " else ""
-        val secondsText = (durationSeconds % 60).toString() + "s"
+        val seconds = millis.div(1000)
+        val minutes = seconds.div(60)
+        val hours = minutes.div(60)
+        val hoursText = if (hours > 0) getString(R.string.hours, hours) + " " else ""
+        val minutesText = if (minutes > 0) getString(R.string.minutes, minutes % 60) + " " else ""
+        val secondsText = getString(R.string.seconds, seconds % 60)
         return hoursText + minutesText + secondsText
     }
 

@@ -62,7 +62,7 @@ class TripsFragment : Fragment() {
         if (savedInstanceState != null) tracker?.onRestoreInstanceState(savedInstanceState)
 
         if (activity is ServiceProvider) {
-            capturingService = (activity as ServiceProvider).capturingService
+            capturingService = (activity as ServiceProvider).capturing
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }

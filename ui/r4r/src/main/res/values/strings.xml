@@ -13,6 +13,18 @@
     <!-- Capturing -->
     <string name="map">Map</string>
     <string name="speed">Speed</string>
+    <string name="co2kg" translatable="false">%1$.1f kg</string>
+    <string name="co2kgWithAverage" translatable="false">%1$.1f kg (Ø %2$.1f kg)</string>
+    <string name="distanceKm" translatable="false">%1$.3f km</string>
+    <string name="distanceKmWithAverage" translatable="false">%1$.1f km (Ø %2$.1f km)</string>
+    <string name="speedKph" translatable="false">%1$.0f km/h</string>
+    <string name="speedKphWithAverage" translatable="false">%1$.0f km/h (Ø %2$.0f km/h)"</string>
+    <string name="ascendMeters" translatable="false">%1$.0f m</string>
+    <string name="ascendMetersWithAverage" translatable="false">%1$.0f m (Ø %2.0f m)</string>
+    <string name="hours" translatable="false">%d h</string>
+    <string name="minutes" translatable="false">%d m</string>
+    <string name="seconds" translatable="false">%d s</string>
+    <string name="durationWithAverage" translatable="false">%s (Ø %s)</string>
 
     <!-- Navigation -->
     <string name="drawer_setting_auto_upload">Auto Upload</string>
