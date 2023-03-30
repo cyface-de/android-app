@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
       android:id="@+id/trips"
@@ -15,24 +14,9 @@
     <!-- To change `app:IconTint="@color/red_700"` enable `vectorDrawables.useSupportLibrary`
     and use a selector, see: https://stackoverflow.com/a/68915308/5815054 -->
 
-    <!--item
-      android:id="@+id/navigation_start"
-      android:icon="@drawable/ic_baseline_play_arrow_24"
-      android:title="@string/title_start" />
-
-    <item
-      android:id="@+id/navigation_stop"
-      android:icon="@drawable/ic_baseline_stop_24"
-      android:title="@string/title_stop" /-->
-
     <item
       android:id="@+id/navigation_statistics"
       android:icon="@drawable/ic_baseline_show_chart_24"
       android:title="@string/statistics" />
-
-    <!--item
-      android:id="@+id/navigation_sync"
-      android:icon="@drawable/ic_baseline_sync_24"
-      android:title="@string/title_sync" /-->
 
 </menu>

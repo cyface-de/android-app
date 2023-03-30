@@ -101,7 +101,7 @@ class MeasurementOverviewFragment : Fragment() {
     /**
      * The `View` required to find layout elements.
      */
-    private var view: View? = null
+    private lateinit var view: View
 
     /**
      * The `ListView` used to display `Measurement`s and their `Event`s.
@@ -212,7 +212,7 @@ class MeasurementOverviewFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         view = inflater.inflate(R.layout.fragment_measurements, container, false)
         persistenceLayer = DefaultPersistenceLayer(
             inflater.context,
@@ -220,17 +220,17 @@ class MeasurementOverviewFragment : Fragment() {
             DefaultPersistenceBehaviour()
         )
         map = Map(
-            requireView().findViewById(R.id.mapView),
+            view.findViewById(R.id.mapView),
             savedInstanceState,
             {},
             permissionLauncher
         )
         measurementDataList = MeasurementDataList(activity, persistenceLayer, this, map)
-        measurementDataList!!.onCreateView(requireView())
+        measurementDataList!!.onCreateView(view)
         eventDataList = EventDataList(activity, persistenceLayer, null, map!!)
-        eventDataList!!.onCreateView(requireView())
-        listView = requireView().findViewById(R.id.measurements_list_view)
-        addButton = requireView().findViewById(R.id.add_button)
+        eventDataList!!.onCreateView(view)
+        listView = view.findViewById(R.id.measurements_list_view)
+        addButton = view.findViewById(R.id.add_button)
         addButton!!.setOnClickListener(addButtonClickListener)
         return view
     }

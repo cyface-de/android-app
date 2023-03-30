@@ -1,0 +1,145 @@
+/*
+ * Copyright 2017-2023 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ */
+package de.cyface.app.r4r.ui
+
+import android.app.Activity
+import android.content.Intent
+import android.content.SharedPreferences
+import android.os.Bundle
+import android.preference.PreferenceManager
+import android.view.View
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.CompoundButton
+import de.cyface.app.r4r.BuildConfig
+import de.cyface.app.r4r.MainActivity
+import de.cyface.app.r4r.R
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
+import de.cyface.app.utils.SharedConstants.ACCEPTED_TERMS_KEY
+
+/**
+ * The TermsOfUserActivity is the first [Activity] started on app launch.
+ *
+ * It's responsible for informing the user about the terms of use (and data privacy conditions).
+ *
+ * When the current terms are accepted or have been before, the [MainActivity] is launched.
+ *
+ * @author Armin Schnabel
+ * @version 1.1.1
+ * @since 1.0.0
+ */
+class TermsOfUseActivity : Activity(), View.OnClickListener {
+    /**
+     * Intent for switching to the main activity after this activity has been finished.
+     */
+    private var callMainActivityIntent: Intent? = null
+
+    /**
+     * The button to click to accept the terms of use and data privacy conditions.
+     */
+    private var acceptTermsButton: Button? = null
+
+    /**
+     * `True` if the user opted-in to error reporting.
+     */
+    private var isReportingEnabled = false
+
+    /**
+     * To check whether the user accepted the terms and opted-in to error reporting.
+     */
+    private var preferences: SharedPreferences? = null
+
+    /**
+     * Allows the user to opt-in to error reporting.
+     */
+    private var acceptReportsCheckbox: CheckBox? = null
+
+    /**
+     * To ask the user to accept the terms.
+     */
+    private var acceptTermsCheckbox: CheckBox? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        preferences = PreferenceManager.getDefaultSharedPreferences(
+            applicationContext
+        )
+        callMainActivityIntent = Intent(this, MainActivity::class.java)
+        if (currentTermsHadBeenAccepted()) {
+            startActivity(callMainActivityIntent)
+            finish()
+            return
+        }
+        setContentView(R.layout.activity_terms_of_use)
+    }
+
+    /**
+     * @return `True` if the latest privacy policy was accepted by the user.
+     */
+    private fun currentTermsHadBeenAccepted(): Boolean {
+        val acceptedTermsVersion = preferences!!.getInt(ACCEPTED_TERMS_KEY, 0)
+        return acceptedTermsVersion == BuildConfig.currentTerms
+    }
+
+    /**
+     * Registers the handlers for user interaction.
+     */
+    private fun registerOnClickListeners() {
+        acceptTermsButton = findViewById(R.id.accept_terms_button)
+        acceptTermsButton!!.setOnClickListener(this)
+        acceptTermsCheckbox = findViewById(R.id.accept_terms_checkbox)
+        acceptReportsCheckbox = findViewById(R.id.accept_reports_checkbox)
+        acceptTermsCheckbox!!
+            .setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+                acceptTermsButton!!.isEnabled = isChecked
+            }
+        acceptReportsCheckbox!!
+            .setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
+                isReportingEnabled = isChecked
+            }
+    }
+
+    /**
+     * Unregisters the handlers for user interaction.
+     */
+    private fun unregisterOnClickListeners() {
+        acceptTermsButton!!.setOnClickListener(null)
+        acceptTermsCheckbox!!.setOnCheckedChangeListener(null)
+        acceptReportsCheckbox!!.setOnCheckedChangeListener(null)
+    }
+
+    override fun onClick(view: View) {
+        val editor = preferences!!.edit()
+        editor.putInt(ACCEPTED_TERMS_KEY, BuildConfig.currentTerms)
+        editor.putBoolean(ACCEPTED_REPORTING_KEY, isReportingEnabled)
+        editor.apply()
+        this.startActivity(callMainActivityIntent)
+        finish()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterOnClickListeners()
+        acceptTermsButton!!.setOnClickListener(null)
+    }
+
+    public override fun onResume() {
+        registerOnClickListeners()
+        super.onResume()
+    }
+}

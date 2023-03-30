@@ -467,17 +467,23 @@ class MainFragment : Fragment(), ConnectionStatusListener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         var imageView =
-            fragmentRoot!!.findViewById<View>(R.id.capture_data_main_button).tag as ImageView
-        outState.putInt("capturing_button_resource_id", imageView.id)
-        imageView = fragmentRoot!!.findViewById<View>(R.id.data_sync_button).tag as ImageView
-        outState.putInt("data_sync_button_id", imageView.id)
+            fragmentRoot!!.findViewById<View>(R.id.capture_data_main_button).tag as ImageView?
+        if (imageView != null) { // Added after converting to kotlin
+            outState.putInt("capturing_button_resource_id", imageView.id)
+        }
+        imageView = fragmentRoot!!.findViewById<View>(R.id.data_sync_button).tag as ImageView?
+        if (imageView != null) { // Added after converting to kotlin
+            outState.putInt("data_sync_button_id", imageView.id)
+        }
         try {
             val donutProgress = fragmentRoot!!
-                .findViewById<View>(R.id.connection_status_progress).tag as DonutProgress
-            outState.putInt(
-                "connection_status_progress_id",
-                donutProgress.id
-            )
+                .findViewById<View>(R.id.connection_status_progress).tag as DonutProgress?
+            if (donutProgress != null) { // Added after converting to kotlin
+                outState.putInt(
+                    "connection_status_progress_id",
+                    donutProgress.id
+                )
+            }
         } catch (e: NullPointerException) {
             Log.w(TAG, "Failed to save donutProgress view state")
         }

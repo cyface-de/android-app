@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contentAuthority="de.cyface.app.rfr.provider"
-    android:accountType="de.cyface.app.rfr"
+    android:contentAuthority="de.cyface.app.r4r.provider"
+    android:accountType="de.cyface.app.r4r"
     android:userVisible="false"
     android:supportsUploading="true"
     android:allowParallelSyncs="false"

@@ -123,7 +123,7 @@ dependencies {
 
     // Dependencies for instrumentation tests
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // FIXME: version
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
 
     // Dependencies for local unit tests
     // - If Junit symbols are not resolvable in IntelliJ, make sure Build Variant is set to debug

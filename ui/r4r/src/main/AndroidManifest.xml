@@ -45,9 +45,6 @@
   <!-- allowBackup=false as we did not yet define what we really want to backup-->
   <!-- usesCleartextTraffic only API 23+, ignored below. only for debugging -->
   <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
-  <!-- FIXME: we set allowBackup to false, the generated code had it to true with:
-    android:dataExtractionRules="@xml/data_extraction_rules"
-    android:fullBackupContent="@xml/backup_rules" -->
   <application
     android:name=".Application"
     android:allowBackup="false"
@@ -63,25 +60,9 @@
     <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
 
     <!-- Google Maps for Android requirements -->
-    <!-- FIXME: See if this is still necessary
-    meta-data
-      android:name="com.google.android.gms.version"
-      android:value="@integer/google_play_services_version" /-->
     <meta-data
       android:name="com.google.android.geo.API_KEY"
       android:value="${googleMapsApiKey}" />
-
-    <!-- FIXME: see if this is still necessary
-    < ! This workaround is required to use GoogleMaps with API 28.
-    From https://issuetracker.google.com/issues/79478779 >
-    uses-library
-      android:name="org.apache.http.legacy"
-      android:required="false" /-->
-
-    <!-- added by generated code
-    meta-data
-      android:name="android.app.lib_name"
-      android:value="" /-->
 
     <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
     <!-- `exported="true"` or else the app cannot be launched after installation! -->
@@ -107,7 +88,7 @@
     <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
     <provider
       android:name="de.cyface.persistence.content.MeasurementProvider"
-      android:authorities="de.cyface.app.rfr.provider"
+      android:authorities="de.cyface.app.r4r.provider"
       android:exported="false"
       android:process=":persistence_process"
       android:syncable="true"

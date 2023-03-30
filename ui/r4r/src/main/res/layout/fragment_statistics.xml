@@ -11,7 +11,6 @@
       android:layout_height="wrap_content"
       android:padding="@dimen/activity_horizontal_margin">
 
-
         <TextView
           android:id="@+id/length_title"
           app:layout_constraintTop_toTopOf="parent"
