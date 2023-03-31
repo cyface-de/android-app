@@ -123,7 +123,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         // The location permissions are requested in MapFragment which needs to react to results
@@ -170,6 +169,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }
+
+        // Crashes with RuntimeException: capturing not initialized when this is at the top of `onCreate`
+        super.onCreate(savedInstanceState)
 
         // To access the `Activity`s' `capturingService` from `Fragment.onCreate` the
         // `capturingService` has to be initialized before calling `inflate`
