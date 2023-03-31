@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.trips
+package de.cyface.app.utils.trips
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.recyclerview.selection.MutableSelection
-import de.cyface.app.r4r.R
-import de.cyface.app.r4r.utils.Constants
+import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.DefaultPersistenceBehaviour
@@ -63,6 +63,38 @@ class MenuProvider(
                 syncNow()
                 true
             }
+            /*R.id.export_menu_item -> {
+                // Permission requirements: https://developer.android.com/training/data-storage
+                val requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                val missingPermissions = (ContextCompat.checkSelfPermission(
+                    fragmentActivity!!,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(
+                    fragmentActivity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED)
+                if (requiresWritePermission && missingPermissions) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        requestPermissions(
+                            arrayOf(
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            ),
+                            SharedConstants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT
+                        )
+                    } else {
+                        Toast.makeText(
+                            fragmentActivity,
+                            fragmentActivity.getString(de.cyface.app.utils.R.string.export_data_no_permission),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    ExportTask(fragmentActivity).execute()
+                }
+                true
+            }*/
             R.id.select_all_item -> {
                 adapter.selectAll()
                 true
@@ -76,6 +108,34 @@ class MenuProvider(
             }
         }
     }
+
+    /*@Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        val fragmentActivity = activity
+        Validate.notNull(fragmentActivity)
+        when (requestCode) {
+            SharedConstants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(
+                    fragmentActivity,
+                    fragmentActivity!!.getString(de.cyface.app.utils.R.string.export_data),
+                    Toast.LENGTH_LONG
+                ).show()
+                ExportTask(fragmentActivity).execute()
+            } else {
+                Toast.makeText(
+                    fragmentActivity,
+                    fragmentActivity!!.getString(de.cyface.app.utils.R.string.export_data_no_permission),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            else -> {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            }
+        }
+    }*/
 
     /**
      * Triggers synchronization if a network is available and synchronization is enabled.
@@ -91,7 +151,7 @@ class MenuProvider(
             Toast.makeText(
                 context.get(),
                 context.get()!!
-                    .getString(de.cyface.app.utils.R.string.error_message_sync_canceled_no_wifi),
+                    .getString(R.string.error_message_sync_canceled_no_wifi),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -110,7 +170,7 @@ class MenuProvider(
             Toast.makeText(
                 context.get(),
                 context.get()!!
-                    .getString(de.cyface.app.utils.R.string.error_message_sync_canceled_disabled),
+                    .getString(R.string.error_message_sync_canceled_disabled),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -130,7 +190,7 @@ class MenuProvider(
             Toast.makeText(
                 context.get(),
                 context.get()!!
-                    .getString(de.cyface.app.utils.R.string.delete_data_non_selected),
+                    .getString(R.string.delete_data_non_selected),
                 Toast.LENGTH_LONG
             ).show()
             return
@@ -139,7 +199,6 @@ class MenuProvider(
         GlobalScope.launch {
             val persistence = DefaultPersistenceLayer(
                 context.get()!!,
-                Constants.AUTHORITY,
                 DefaultPersistenceBehaviour()
             )
             val mutableSelection = MutableSelection<Long>()

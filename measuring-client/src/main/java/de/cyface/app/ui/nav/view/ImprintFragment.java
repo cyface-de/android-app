@@ -35,17 +35,17 @@ import de.cyface.utils.Validate;
  * @version 2.0.0
  * @since 1.0.0
  */
-public class InformationViewFragment extends Fragment {
+public class ImprintFragment extends Fragment {
 
-    public final static String INFORMATION_VIEW_KEY = "informationView";
+    public final static String IMPRINT_VIEW_KEY = "informationView";
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
         final Bundle arguments = getArguments();
         Validate.notNull(arguments);
-        Validate.isTrue(arguments.containsKey(INFORMATION_VIEW_KEY));
-        final int info_view = arguments.getInt(INFORMATION_VIEW_KEY);
+        Validate.isTrue(arguments.containsKey(IMPRINT_VIEW_KEY));
+        final int info_view = arguments.getInt(IMPRINT_VIEW_KEY);
         return inflater.inflate(info_view, container, false);
     }
 

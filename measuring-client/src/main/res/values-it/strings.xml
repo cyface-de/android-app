@@ -12,9 +12,6 @@
     <item>Treno</item>
   </string-array>
 
-  <!-- Settings -->
-  <string name="drawer_settings_synchronization">Sincronizzazione</string>
-
   <!-- Capturing -->
   <string name="measurement_id">Identificativo misura</string>
   <string name="capturing_active">Registrazione dati in corso</string>
@@ -22,14 +19,11 @@
   <string name="toast_measurement_resumed">Il viaggio riprende</string>
 
   <!-- Navigation -->
-  <string name="drawer_title_home">Home</string>
-  <string name="drawer_title_measurements">Misurazioni</string>
   <string name="drawer_setting_speed_sensor">External sensor</string>
   <string name="drawer_setting_pictures">Camera mode</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
-  <string name="drawer_settings">Settings</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
 
   <!-- Camera -->

@@ -1,57 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Ready for Robots</string>
 
-    <!-- BottomNavigationView -->
-    <string name="trips">Trips</string>
-    <string name="capturing">Capturing</string>
-    <string name="statistics">Statistics</string>
-
-    <!-- Drawer View (Sidebar) -->
-    <string name="nav_open" translatable="false">Open</string>
-    <string name="nav_close" translatable="false">Close</string>
-
-    <!-- Capturing -->
-    <string name="map">Map</string>
-    <string name="speed">Speed</string>
-    <string name="co2kg" translatable="false">%1$.1f kg</string>
-    <string name="co2kgWithAverage" translatable="false">%1$.1f kg (Ø %2$.1f kg)</string>
-    <string name="distanceKm" translatable="false">%1$.3f km</string>
-    <string name="distanceKmWithAverage" translatable="false">%1$.1f km (Ø %2$.1f km)</string>
-    <string name="speedKph" translatable="false">%1$.0f km/h</string>
-    <string name="speedKphWithAverage" translatable="false">%1$.0f km/h (Ø %2$.0f km/h)"</string>
-    <string name="ascendMeters" translatable="false">%1$.0f m</string>
-    <string name="ascendMetersWithAverage" translatable="false">%1$.0f m (Ø %2.0f m)</string>
-    <string name="hours" translatable="false">%d h</string>
-    <string name="minutes" translatable="false">%d m</string>
-    <string name="seconds" translatable="false">%d s</string>
-    <string name="durationWithAverage" translatable="false">%s (Ø %s)</string>
-
-    <!-- Navigation -->
-    <string name="drawer_setting_auto_upload">Auto Upload</string>
-
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
-
-    <!-- Trips -->
-    <string name="completed_trips">Completed trips</string>
-    <string name="trip_id">Trip %d</string>
-    <string name="trip_details_line" translatable="false">%1$s (%2$.3f km)%3$s</string>
-    <string name="click_to_see_details">Click to see details</string>
-
-    <!-- Trip Details -->
-    <string name="trip_details">Trip details</string>
-    <string name="chart_label">elevation [m]</string>
-    <string name="maximum">Maximum</string>
-    <string name="length">Length</string>
-    <string name="duration">Duration</string>
-    <string name="elevation_profile">Elevation profile</string>
-    <string name="elevation_profile_no_data">Elevation profile (no altitude data available)</string>
-    <string name="ascend">Ascend</string>
-    <string name="avoided_co2">Avoided CO² emission</string>
-    <string name="compared_to_car">Compared to a car</string>
-
-    <!-- Statistics -->
-    <string name="max_length">Maximum Length</string>
-    <string name="elevation">Elevation</string>
-    <string name="total">Total</string>
 </resources>

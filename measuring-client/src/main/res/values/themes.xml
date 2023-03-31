@@ -1,0 +1,39 @@
+<resources>
+  <!-- Base application theme. -->
+  <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+
+    <!-- Material Design -->
+    <!--   app branding color for the app bar, e.g used for the tool bar -->
+    <item name="colorPrimary">@color/primary_color</item>
+    <!--   darker variant of the branding color, e.g. used for the status bar & contextual app bars -->
+    <item name="colorPrimaryVariant">@color/primary_color_variant</item>
+    <item name="colorOnPrimary">@color/text_on_primary_color</item>
+
+    <!-- Secondary brand color. -->
+    <item name="colorSecondary">@color/primary_color</item>
+    <item name="colorSecondaryVariant">@color/primary_color_variant</item>
+    <item name="colorOnSecondary">@color/text_on_primary_color</item>
+
+    <!-- Status bar color. -->
+    <!--   darker variant for the status bar and contextual app bars -->
+    <item name="android:statusBarColor">@color/primary_color_variant</item>
+
+    <!-- can maybe be removed -->
+    <item name="android:windowTranslucentStatus">true</item>
+    <item name="android:navigationBarColor">@color/primary_color_variant</item>
+    <item name="android:colorEdgeEffect">@color/primary_color</item>
+    <!--   theme UI controls like checkboxes and text fields -->
+    <item name="colorAccent">@color/primary_color</item>
+
+    <!-- Toolbar icon color. -->
+    <item name="iconTint">@color/white</item>
+    <!-- Customize your theme here. -->
+    <!-- menu items in dropdown, e.g. the trips fragment top right menu -->
+    <item name="android:itemTextAppearance">@style/menuItem</item>
+  </style>
+
+  <style name="menuItem" parent="Widget.AppCompat.TextView.SpinnerItem">
+    <item name="android:textColor">@color/text</item>
+  </style>
+</resources>

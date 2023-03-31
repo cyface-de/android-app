@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/trips_graph"
+  app:startDestination="@id/navigation_trips">
+
+  <fragment
+    android:id="@+id/navigation_trips"
+    android:name="de.cyface.app.utils.trips.TripsFragment"
+    android:label="@string/completed_trips"
+    tools:layout="@layout/fragment_trips">
+    <action
+      android:id="@+id/action_trips_to_details"
+      app:destination="@id/navigation_trips_details">
+      <argument
+        android:name="measurementId"
+        app:argType="long" />
+    </action>
+  </fragment>
+
+  <fragment
+    android:id="@+id/navigation_trips_details"
+    android:name="de.cyface.app.utils.trips.DetailsFragment"
+    android:label="@string/trip_details"
+    tools:layout="@layout/fragment_trips_details" />
+
+</navigation>

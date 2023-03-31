@@ -1,39 +1,5 @@
 <resources>
 
-    <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
-    <string name="trips">Fahrten</string>
-    <string name="capturing">Aufzeichnen</string>
-    <string name="statistics">Statistiken</string>
-
-    <!-- Capturing -->
-    <string name="map">Karte</string>
-    <string name="speed">Geschwindigkeit</string>
-
-    <!-- Navigation -->
-    <string name="drawer_setting_auto_upload">Automatischer Upload</string>
-
     <!-- Speed -->
     <string name="capturing_inactive">Datenerfassung inaktiv</string>
-
-    <!-- Trips -->
-    <string name="completed_trips">Abgeschlossene Fahrten</string>
-    <string name="trip_id">Fahrt %d</string>
-    <string name="click_to_see_details">Für Details Eintrag klicken</string>
-
-    <!-- Trip Details -->
-    <string name="trip_details">Fahrtdetails</string>
-    <string name="chart_label">Höhe [m]</string>
-    <string name="maximum">Maximal</string>
-    <string name="length">Länge</string>
-    <string name="duration">Fahrzeit</string>
-    <string name="elevation_profile">Höhenprofil</string>
-    <string name="elevation_profile_no_data">Höhenprofil (keine Höhendaten vorhanden)</string>
-    <string name="ascend">Anstieg</string>
-    <string name="avoided_co2">Vermiedener CO² Ausstoß</string>
-    <string name="compared_to_car">Im Vergleich zum Auto</string>
-
-    <!-- Statistics -->
-    <string name="max_length">Maximale Länge</string>
-    <string name="elevation">Höhe</string>
-    <string name="total">Gesamt</string>
 </resources>

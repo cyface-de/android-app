@@ -3,6 +3,22 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
+  <!--item
+      android:id="@+id/drawer_setting_speed_sensor"
+      android:title="@string/drawer_setting_speed_sensor"
+      app:actionLayout="@layout/drawer_list_switch"
+      app:showAsAction="ifRoom"/-->
+
+  <!--item
+    android:id="@+id/drawer_setting_pictures"
+    android:title="@string/drawer_setting_pictures"
+    android:visible="false"
+    android:checkable="false"
+    app:actionLayout="@layout/drawer_list_switch"
+    app:showAsAction="ifRoom" /-->
+
+  <!-- the above was before in the sidebar -->
+
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

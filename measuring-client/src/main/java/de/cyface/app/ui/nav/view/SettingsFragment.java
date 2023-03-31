@@ -18,13 +18,14 @@
  */
 package de.cyface.app.ui.nav.view;
 
-import static de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY;
 import static de.cyface.app.utils.Constants.PACKAGE;
+import static de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY;
 import static de.cyface.camera_service.Constants.DEFAULT_STATIC_EXPOSURE_TIME;
 import static de.cyface.camera_service.Constants.DEFAULT_STATIC_EXPOSURE_VALUE_ISO_100;
 import static de.cyface.camera_service.Constants.DEFAULT_STATIC_FOCUS_DISTANCE;
 import static de.cyface.camera_service.Constants.DEFAULT_TRIGGERING_DISTANCE;
+import static de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_DISTANCE_BASED_TRIGGERING_ENABLED_KEY;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_RAW_MODE_ENABLED_KEY;
@@ -43,9 +44,12 @@ import java.util.TreeMap;
 
 import com.google.android.material.slider.Slider;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -63,6 +67,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -79,6 +84,155 @@ import de.cyface.utils.Validate;
  * @since 2.7.0
  */
 public class SettingsFragment extends Fragment {
+
+    /*
+     * override fun onRequestPermissionsResult(
+     * requestCode: Int, permissions: Array<String>,
+     * grantResults: IntArray
+     * ) {
+     * // noinspection SwitchStatementWithTooFewBranches
+     * when (requestCode) {
+     * de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION -> {
+     * val granted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+     * val unexpectedPermissionNumber = grantResults.size < 2
+     * val missingPermissions =
+     * !(granted && (unexpectedPermissionNumber || (grantResults[1] == PackageManager.PERMISSION_GRANTED)))
+     * 
+     * if (missingPermissions) {
+     * // Deactivate camera service and inform user about this
+     * //navDrawer!!.deactivateCameraService()
+     * Toast.makeText(
+     * applicationContext,
+     * applicationContext.getString(
+     * de.cyface.camera_service.R.string.camera_service_off_missing_permissions
+     * ),
+     * Toast.LENGTH_LONG
+     * ).show()
+     * } else {
+     * // Ask used which camera mode to use, video or default (shutter image)
+     * showCameraModeDialog()
+     * }
+     * }
+     * else -> {
+     * super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+     * }
+     * }
+     * }
+     * 
+     * // final SwitchCompat connectToExternalSpeedSensorToggle = (SwitchCompat)view.getMenu()
+     * // .findItem(R.id.drawer_setting_speed_sensor).getActionView();
+     * cameraServiceToggle = (SwitchCompat)view.getMenu().findItem(R.id.drawer_setting_pictures).getActionView();
+     * 
+     * /*
+     * final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
+     * && preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
+     * connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
+     * /
+     * cameraServiceToggle.setChecked(preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false));
+     * 
+     * // connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
+     * cameraServiceToggle.setOnCheckedChangeListener(new PicturesToggleListener());
+    public void deactivateCameraService() {
+        cameraServiceToggle.setChecked(false);
+        final SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
+        editor.apply();
+    }
+
+    private void cameraSettingsSelected(final MenuItem item) {
+        for (NavDrawerListener listener : this.listener) {
+            listener.cameraSettingsSelected();
+        }
+        finishSelection(item);
+    }
+
+    /*
+     * A listener which is called when the external bluetooth sensor toggle in the {@link NavDrawer} is clicked.
+     * /
+     * private class ConnectToExternalSpeedSensorToggleListener implements CompoundButton.OnCheckedChangeListener {
+     *
+     * @Override
+     * public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+     * final CompoundButton compoundButton = (CompoundButton)view;
+     * final Context applicationContext = view.getContext().getApplicationContext();
+     * if (compoundButton.isChecked()) {
+     * final BluetoothLeSetup bluetoothLeSetup = new BluetoothLeSetup(new BluetoothLeSetupListener() {
+     *
+     * @Override
+     * public void onDeviceSelected(final BluetoothDevice device, final double wheelCircumference) {
+     * final SharedPreferences.Editor editor = preferences.edit();
+     * editor.putString(BLUETOOTHLE_DEVICE_MAC_KEY, device.getAddress());
+     * editor.putFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE,
+     * Double.valueOf(wheelCircumference).floatValue());
+     * editor.apply();
+     * }
+     *
+     * @Override
+     * public void onSetupProcessFailed(final Reason reason) {
+     * compoundButton.setChecked(false);
+     * if (reason.equals(Reason.NOT_SUPPORTED)) {
+     * Toast.makeText(applicationContext, R.string.ble_not_supported, Toast.LENGTH_SHORT)
+     * .show();
+     * } else {
+     * Log.e(TAG, "Setup process of bluetooth failed: " + reason);
+     * Toast.makeText(applicationContext, R.string.bluetooth_setup_failed, Toast.LENGTH_SHORT)
+     * .show();
+     * }
+     * }
+     * });
+     * bluetoothLeSetup.setup(mainActivity);
+     * } else {
+     * final SharedPreferences.Editor editor = preferences.edit();
+     * editor.remove(BLUETOOTHLE_DEVICE_MAC_KEY);
+     * editor.remove(BLUETOOTHLE_WHEEL_CIRCUMFERENCE);
+     * editor.apply();
+     * }
+     * }
+     * }
+
+    /**
+     * Displays a dialog for the user to select a camera mode (video- or picture mode).
+     *
+     * /
+    fun showCameraModeDialog() {
+
+        // avoid crash DAT-69
+        /*homeSelected()
+        val cameraModeDialog: DialogFragment = CameraModeDialog()
+        cameraModeDialog.setTargetFragment(
+            capturingFragment,
+            de.cyface.energy_settings.Constants.DIALOG_ENERGY_SAFER_WARNING_CODE
+        )
+        cameraModeDialog.isCancelable = false
+        cameraModeDialog.show(fragmentManager!!, "CAMERA_MODE_DIALOG")* /
+    }*/
+
+    /*override fun onRequestPermissionsResult(
+            requestCode: Int, permissions: Array<String?>, grantResults: IntArray
+    ) {
+        @Suppress("UNUSED_EXPRESSION")
+                when (requestCode) {
+            // Location permission request moved to `MapFragment` as it has to react to results
+
+            /*de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION -> if (navDrawer != null && !(grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && (grantResults.size < 2 || grantResults[1] == PackageManager.PERMISSION_GRANTED))
+            ) {
+                // Deactivate camera service and inform user about this
+                navDrawer.deactivateCameraService()
+                Toast.makeText(
+                    applicationContext,
+                    applicationContext.getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                // Ask used which camera mode to use, video or default (shutter image)
+                showCameraModeDialog()
+            }* /
+            else -> {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            }
+        }
+    }*/
 
     /**
      * The tag used to identify logging from this class.
@@ -383,7 +537,7 @@ public class SettingsFragment extends Fragment {
         final boolean distanceBasedTriggeringPreferred = preferences.getBoolean(
                 PREFERENCES_CAMERA_DISTANCE_BASED_TRIGGERING_ENABLED_KEY,
                 true);
-        if (distanceBasedSwitcher.isChecked(    ) != distanceBasedTriggeringPreferred) {
+        if (distanceBasedSwitcher.isChecked() != distanceBasedTriggeringPreferred) {
             Log.d(TAG, "updateView distance based triggering switcher -> " + distanceBasedTriggeringPreferred);
             distanceBasedSwitcher.setChecked(distanceBasedTriggeringPreferred);
 
@@ -557,7 +711,8 @@ public class SettingsFragment extends Fragment {
 
         final Integer focusDistanceCalibration = characteristics
                 .get(CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION);
-        if (focusDistanceCalibration == null) return "N/A";
+        if (focusDistanceCalibration == null)
+            return "N/A";
 
         switch (focusDistanceCalibration) {
             case CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED:
@@ -904,6 +1059,52 @@ public class SettingsFragment extends Fragment {
             final String fraction = getExposureTimeFraction(exposureTimeNanos);
             Log.d(TAG, "Update view to exposure time -> " + exposureTimeNanos + " ns - fraction: " + fraction + " s");
             staticExposureTimePreference.setText(fraction);
+        }
+    }
+    /**
+     * A listener which is called when the camera switch is clicked.
+     *
+     * @author Armin Schnabel
+     * @version 1.0.0
+     * @since 2.0.0
+     */
+    private class PicturesToggleListener implements CompoundButton.OnCheckedChangeListener {
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            final Context applicationContext = view.getContext().getApplicationContext();
+            final SharedPreferences.Editor editor = preferences.edit();
+
+            // Disable camera
+            if (!buttonView.isChecked()) {
+                editor.putBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false).apply();
+                return;
+            }
+
+            // No rear camera found to be enabled - we explicitly only support rear camera for now
+            @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
+            final boolean noCameraFound = !applicationContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_CAMERA);
+            if (noCameraFound) {
+                buttonView.setChecked(false);
+                Toast.makeText(applicationContext, R.string.no_camera_available_toast, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // Request permission for camera capturing
+            final boolean permissionsGranted = ActivityCompat.checkSelfPermission(applicationContext,
+                    Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+            /* FIXME: if (!permissionsGranted) {
+                ActivityCompat.requestPermissions(mainActivity,
+                        new String[] {Manifest.permission.CAMERA},
+                        PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION);
+            } else {
+                // Ask user to select camera mode
+                mainActivity.showCameraModeDialog();
+            }*/
+
+            // Enable camera capturing feature
+            editor.putBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, true).apply();
         }
     }
 }

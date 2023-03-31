@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.trips
+package de.cyface.app.utils.trips
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -29,15 +29,10 @@ import androidx.core.view.MenuHost
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.recyclerview.selection.SelectionPredicates
-import androidx.recyclerview.selection.SelectionTracker
-import androidx.recyclerview.selection.StableIdKeyProvider
-import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import de.cyface.app.r4r.ServiceProvider
-import de.cyface.app.r4r.databinding.FragmentTripsBinding
-import de.cyface.app.r4r.ui.capturing.CapturingViewModel
+import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import java.lang.ref.WeakReference
 
@@ -73,10 +68,10 @@ class TripsFragment : Fragment() {
     /**
      * Tracker for selected items in the list.
      */
-    private var tracker: SelectionTracker<Long>? = null
+    private var tracker: androidx.recyclerview.selection.SelectionTracker<Long>? = null
 
     /**
-     * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
+     * The [TripsViewModel] which holds the UI data.
      */
     private val tripsViewModel: TripsViewModel by viewModels {
         TripsViewModelFactory(capturing.persistenceLayer.measurementRepository!!)
@@ -108,14 +103,14 @@ class TripsFragment : Fragment() {
         tripsList.layoutManager = LinearLayoutManager(context)
 
         // Support list selection
-        val tracker = SelectionTracker.Builder(
+        val tracker = androidx.recyclerview.selection.SelectionTracker.Builder(
             "tripsListSelection",
             tripsList,
-            StableIdKeyProvider(tripsList),
+            androidx.recyclerview.selection.StableIdKeyProvider(tripsList),
             TripListAdapter.ItemsDetailsLookup(tripsList),
-            StorageStrategy.createLongStorage()
+            androidx.recyclerview.selection.StorageStrategy.createLongStorage()
         ).withSelectionPredicate(
-            SelectionPredicates.createSelectAnything() // allows multiple choice
+            androidx.recyclerview.selection.SelectionPredicates.createSelectAnything() // allows multiple choice
         ).build()
         adapter.tracker = tracker
 

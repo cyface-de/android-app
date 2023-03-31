@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -16,33 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui.nav.controller;
+package de.cyface.app.utils
+
+import de.cyface.datacapturing.CyfaceDataCapturingService
 
 /**
- * Interface for listeners interested in interactions made with the {@link NavDrawer}.
+ * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from
+ * the `Fragments`.
  *
- * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.1.0
- * @since 1.0.0
+ * @version 1.0.0
+ * @since 7.5.0
  */
-public interface NavDrawerListener {
-
-    void homeSelected();
-
-    void measurementsSelected();
-
-    void feedbackSelected();
-
-    void guideSelected();
-
-    void imprintSelected();
-
-    void onAutoCenterMapSettingsChanged();
-
-    void synchronizationToggled();
-
-    void logoutSelected();
-
-    void cameraSettingsSelected();
+interface ServiceProvider {
+    val capturing: CyfaceDataCapturingService
 }

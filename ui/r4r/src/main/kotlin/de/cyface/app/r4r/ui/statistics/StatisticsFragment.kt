@@ -23,8 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import de.cyface.app.r4r.R
-import de.cyface.app.r4r.ServiceProvider
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentStatisticsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
@@ -104,19 +103,19 @@ class StatisticsFragment : Fragment() {
         val averageDistanceKm =
             if (measurements.isNotEmpty()) totalDistanceKm / measurements.size else 0.0
         binding.distanceView.text =
-            getString(R.string.distanceKmWithAverage, maxDistanceKm, averageDistanceKm)
+            getString(de.cyface.app.utils.R.string.distanceKmWithAverage, maxDistanceKm, averageDistanceKm)
         val averageDuration =
             if (measurements.isNotEmpty()) duration(totalDurationMillis / measurements.size) else 0L
         binding.durationView.text =
-            getString(R.string.durationWithAverage, duration(maxDurationMillis), averageDuration)
+            getString(de.cyface.app.utils.R.string.durationWithAverage, duration(maxDurationMillis), averageDuration)
         val averageAscend = if (measurements.isNotEmpty()) totalAscend / measurements.size else 0.0
         binding.ascendView.text =
-            getString(R.string.ascendMetersWithAverage, maxAscend, averageAscend)
+            getString(de.cyface.app.utils.R.string.ascendMetersWithAverage, maxAscend, averageAscend)
         val totalCo2Kg = totalDistanceKm.times(95).div(1000)
         val maxCo2Kg = maxDistanceKm.times(95).div(1000)
         val averageCo2Kg = if (measurements.isNotEmpty()) totalCo2Kg / measurements.size else 0.0
-        binding.totalCo2View.text = getString(R.string.co2kg, totalCo2Kg)
-        binding.maxCo2View.text = getString(R.string.co2kgWithAverage, maxCo2Kg, averageCo2Kg)
+        binding.totalCo2View.text = getString(de.cyface.app.utils.R.string.co2kg, totalCo2Kg)
+        binding.maxCo2View.text = getString(de.cyface.app.utils.R.string.co2kgWithAverage, maxCo2Kg, averageCo2Kg)
 
         return root
     }
@@ -130,9 +129,9 @@ class StatisticsFragment : Fragment() {
         val seconds = millis.div(1000)
         val minutes = seconds.div(60)
         val hours = minutes.div(60)
-        val hoursText = if (hours > 0) getString(R.string.hours, hours) + " " else ""
-        val minutesText = if (minutes > 0) getString(R.string.minutes, minutes % 60) + " " else ""
-        val secondsText = getString(R.string.seconds, seconds % 60)
+        val hoursText = if (hours > 0) getString(de.cyface.app.utils.R.string.hours, hours) + " " else ""
+        val minutesText = if (minutes > 0) getString(de.cyface.app.utils.R.string.minutes, minutes % 60) + " " else ""
+        val secondsText = getString(de.cyface.app.utils.R.string.seconds, seconds % 60)
         return hoursText + minutesText + secondsText
     }
 

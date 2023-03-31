@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.trips.TripsFragment">
+    android:background="@color/background"
+    tools:context="de.cyface.app.utils.trips.TripsFragment">
+    <!-- background overwritten for measuring-client which has not LightDark theme yet -->
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/tripsList"

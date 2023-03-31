@@ -28,7 +28,7 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import de.cyface.app.r4r.ServiceProvider
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY

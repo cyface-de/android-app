@@ -18,12 +18,6 @@
  */
 package de.cyface.app.ui
 
-import android.accounts.Account
-import android.accounts.AccountManager
-import android.accounts.AccountManagerFuture
-import android.accounts.AuthenticatorException
-import android.accounts.OperationCanceledException
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -32,40 +26,32 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.github.lzyzsd.circleprogress.DonutProgress
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import de.cyface.app.BuildConfig
-import de.cyface.app.R
+import de.cyface.app.CameraServiceProvider
+import de.cyface.app.databinding.FragmentCapturingBinding
 import de.cyface.app.ui.button.DataCapturingButton
 import de.cyface.app.ui.button.SynchronizationButton
 import de.cyface.app.ui.dialog.ModalityDialog
-import de.cyface.app.ui.notification.CameraEventHandler
-import de.cyface.app.ui.notification.DataCapturingEventHandler
-import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Map
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.camera_service.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.datacapturing.exception.SetupException
+import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
+import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
-import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.synchronization.exception.SynchronisationException
 import de.cyface.utils.Validate
 import io.sentry.Sentry
-import java.io.IOException
 
 /**
  * A `Fragment` for the main UI used for data capturing and supervision of the capturing process.
@@ -74,7 +60,18 @@ import java.io.IOException
  * @version 1.4.3
  * @since 1.0.0
  */
-class MainFragment : Fragment(), ConnectionStatusListener {
+class CapturingFragment : Fragment(), ConnectionStatusListener {
+
+    /**
+     * This property is only valid between onCreateView and onDestroyView.
+     */
+    private var _binding: FragmentCapturingBinding? = null
+
+    /**
+     * The generated class which holds all bindings from the layout file.
+     */
+    private val binding get() = _binding!!
+
     /**
      * The `DataCapturingButton` which allows the user to control the capturing lifecycle.
      */
@@ -85,11 +82,6 @@ class MainFragment : Fragment(), ConnectionStatusListener {
      * and to see the synchronization progress.
      */
     private var syncButton: SynchronizationButton? = null
-
-    /**
-     * The root element of this `Fragment`s `View`
-     */
-    private var fragmentRoot: View? = null
 
     /**
      * The `Map` used to visualize the ongoing capturing.
@@ -105,13 +97,17 @@ class MainFragment : Fragment(), ConnectionStatusListener {
     /**
      * The `DataCapturingService` which represents the API of the Cyface Android SDK.
      */
-    var dataCapturingService: CyfaceDataCapturingService? = null
-        private set
+    private lateinit var capturing: CyfaceDataCapturingService
+
+    /**
+     * An implementation of the persistence layer which caches some data during capturing.
+     */
+    private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
     /**
      * The `CameraService` which collects camera data if the user did activate this feature.
      */
-    private var cameraService: CameraService? = null
+    private lateinit var cameraService: CameraService
 
     // Ensure onMapReadyRunnable is called after permissions are newly granted
     // This launcher must be launched to request permissions
@@ -164,6 +160,18 @@ class MainFragment : Fragment(), ConnectionStatusListener {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (activity is ServiceProvider) {
+            capturing = (activity as ServiceProvider).capturing
+            persistence = capturing.persistenceLayer
+            cameraService = (activity as CameraServiceProvider).cameraService
+        } else {
+            throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
+        }
+    }
+
     /**
      * All non-graphical initializations should go into onCreate (which might be called before Activity's onCreate
      * finishes). All view-related initializations go into onCreateView and final initializations which depend on the
@@ -172,128 +180,30 @@ class MainFragment : Fragment(), ConnectionStatusListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        fragmentRoot = inflater.inflate(R.layout.fragment_capturing, container, false)
+    ): View {
+        _binding = FragmentCapturingBinding.inflate(inflater, container, false)
         dataCapturingButton = DataCapturingButton(this)
         preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        val sensorFrequency = preferences!!.getInt(
-            PREFERENCES_SENSOR_FREQUENCY_KEY,
-            DEFAULT_SENSOR_FREQUENCY
-        )
-
-        // Start DataCapturingService and CameraService
-        try {
-            dataCapturingService = CyfaceDataCapturingService(
-                requireContext(),
-                Constants.AUTHORITY,
-                Constants.ACCOUNT_TYPE,
-                BuildConfig.cyfaceServer,
-                DataCapturingEventHandler(),
-                dataCapturingButton!!,
-                sensorFrequency
-            )
-            // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
-            // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            startSynchronization(requireContext())
-            dataCapturingService!!.addConnectionStatusListener(this)
-            cameraService = CameraService(
-                requireContext(), Constants.AUTHORITY, CameraEventHandler(),
-                dataCapturingButton!!
-            )
-        } catch (e: SetupException) {
-            throw IllegalStateException(e)
-        }
-        syncButton = SynchronizationButton(dataCapturingService!!)
+        // Register synchronization listener
+        capturing.addConnectionStatusListener(this)
+        syncButton = SynchronizationButton(capturing)
         showModalitySelectionDialogIfNeeded()
         dataCapturingButton!!.onCreateView(
-            fragmentRoot!!.findViewById(R.id.capture_data_main_button),
+            binding.captureDataMainButton,
             null
         )
         map = Map(
-            fragmentRoot!!.findViewById(R.id.mapView),
+            binding.mapView,
             savedInstanceState,
             onMapReadyRunnable,
             permissionLauncher
         )
         syncButton!!.onCreateView(
-            fragmentRoot!!.findViewById(R.id.data_sync_button),
-            fragmentRoot!!.findViewById(R.id.connection_status_progress)
+            binding.dataSyncButton,
+            binding.connectionStatusProgress
         )
         dataCapturingButton!!.bindMap(map)
-        return fragmentRoot
-    }
-
-    /**
-     * Starts the synchronization. Creates an [Account] if there is none as an account is required
-     * for synchronization. If there was no account the synchronization is started when the async account
-     * creation future returns to ensure the account is available at that point.
-     *
-     * @param context the [Context] to load the [AccountManager]
-     */
-    fun startSynchronization(context: Context?) {
-        val accountManager = AccountManager.get(context)
-        val validAccountExists = accountWithTokenExists(accountManager)
-        if (validAccountExists) {
-            try {
-                Log.d(TAG, "startSynchronization: Starting WifiSurveyor with exiting account.")
-                dataCapturingService!!.startWifiSurveyor()
-            } catch (e: SetupException) {
-                throw IllegalStateException(e)
-            }
-            return
-        }
-
-        // The LoginActivity is called by Android which handles the account creation
-        Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
-        accountManager.addAccount(
-            Constants.ACCOUNT_TYPE,
-            de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE,
-            null,
-            null,
-            MainActivity.getMainActivityFromContext(context),
-            { future: AccountManagerFuture<Bundle?> ->
-                val accountManager1 = AccountManager.get(context)
-                try {
-                    // allows to detect when LoginActivity is closed
-                    future.result
-
-                    // The LoginActivity created a temporary account which cannot be used for synchronization.
-                    // As the login was successful we now register the account correctly:
-                    val account = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)[0]
-                    Validate.notNull(account)
-
-                    // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = preferences!!
-                        .getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
-                    Log.d(
-                        WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $syncEnabledPreference"
-                    )
-                    dataCapturingService!!.wiFiSurveyor.makeAccountSyncable(
-                        account,
-                        syncEnabledPreference
-                    )
-                    Log.d(TAG, "Starting WifiSurveyor with new account.")
-                    dataCapturingService!!.startWifiSurveyor()
-                } catch (e: OperationCanceledException) {
-                    // Remove temp account when LoginActivity is closed during login [CY-5087]
-                    val accounts = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)
-                    if (accounts.isNotEmpty()) {
-                        val account = accounts[0]
-                        accountManager1.removeAccount(account, null, null)
-                    }
-                    // This closes the app when the LoginActivity is closed
-                    MainActivity.getMainActivityFromContext(context).finish()
-                } catch (e: AuthenticatorException) {
-                    throw IllegalStateException(e)
-                } catch (e: IOException) {
-                    throw IllegalStateException(e)
-                } catch (e: SetupException) {
-                    throw IllegalStateException(e)
-                }
-            },
-            null
-        )
+        return binding.root
     }
 
     private fun showModalitySelectionDialogIfNeeded() {
@@ -312,7 +222,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
     }
 
     private fun registerModalityTabSelectionListener() {
-        val tabLayout = fragmentRoot!!.findViewById<TabLayout>(R.id.tab_layout)
+        val tabLayout = binding.modalityTabs
         val newModality = arrayOfNulls<Modality>(1)
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
@@ -338,7 +248,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
                     )
                     return
                 }
-                dataCapturingService!!.changeModalityType(newModality[0]!!)
+                capturing.changeModalityType(newModality[0]!!)
 
                 // Deactivated for pro app until we show them their own tiles:
                 // if (map != null) { map.loadCyfaceTiles(newModality[0].getDatabaseIdentifier()); }
@@ -378,7 +288,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
      * with the order here to map the correct enum to each tab.
      */
     private fun selectModalityTab() {
-        val tabLayout = fragmentRoot!!.findViewById<TabLayout>(R.id.tab_layout)
+        val tabLayout = binding.modalityTabs
         val modality = preferences!!.getString(PREFERENCES_MODALITY_KEY, null)
         Validate.notNull(modality, "Modality should already be set but isn't.")
 
@@ -410,15 +320,15 @@ class MainFragment : Fragment(), ConnectionStatusListener {
     override fun onResume() {
         super.onResume()
         syncButton!!.onResume()
-        dataCapturingService!!.addConnectionStatusListener(this)
+        capturing.addConnectionStatusListener(this)
         map!!.onResume()
-        dataCapturingButton!!.onResume(dataCapturingService!!, cameraService!!)
+        dataCapturingButton!!.onResume(capturing, cameraService!!)
     }
 
     override fun onPause() {
         map!!.onPause()
         dataCapturingButton!!.onPause()
-        dataCapturingService!!.removeConnectionStatusListener(this)
+        capturing.removeConnectionStatusListener(this)
         super.onPause()
     }
 
@@ -452,7 +362,7 @@ class MainFragment : Fragment(), ConnectionStatusListener {
         // Clean up CyfaceDataCapturingService
         try {
             // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
-            dataCapturingService!!.shutdownDataCapturingService()
+            capturing.shutdownDataCapturingService()
         } catch (e: SynchronisationException) {
             val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
@@ -460,30 +370,22 @@ class MainFragment : Fragment(), ConnectionStatusListener {
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
-        dataCapturingService!!.removeConnectionStatusListener(this)
+        capturing.removeConnectionStatusListener(this)
         Log.d(TAG, "onDestroyView: stopped CyfaceDataCapturingService")
         super.onDestroyView()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        var imageView =
-            fragmentRoot!!.findViewById<View>(R.id.capture_data_main_button).tag as ImageView?
-        if (imageView != null) { // Added after converting to kotlin
-            outState.putInt("capturing_button_resource_id", imageView.id)
-        }
-        imageView = fragmentRoot!!.findViewById<View>(R.id.data_sync_button).tag as ImageView?
-        if (imageView != null) { // Added after converting to kotlin
-            outState.putInt("data_sync_button_id", imageView.id)
-        }
+        var imageView = binding.captureDataMainButton
+        outState.putInt("capturing_button_resource_id", imageView.id)
+        imageView = binding.dataSyncButton
+        outState.putInt("data_sync_button_id", imageView.id)
         try {
-            val donutProgress = fragmentRoot!!
-                .findViewById<View>(R.id.connection_status_progress).tag as DonutProgress?
-            if (donutProgress != null) { // Added after converting to kotlin
-                outState.putInt(
-                    "connection_status_progress_id",
-                    donutProgress.id
-                )
-            }
+            val donutProgress = binding.connectionStatusProgress
+            outState.putInt(
+                "connection_status_progress_id",
+                donutProgress.id
+            )
         } catch (e: NullPointerException) {
             Log.w(TAG, "Failed to save donutProgress view state")
         }
@@ -501,19 +403,5 @@ class MainFragment : Fragment(), ConnectionStatusListener {
          * The tag used to identify logging from this class.
          */
         private const val TAG = "de.cyface.app.frag.main"
-
-        /**
-         * Checks if there is an account with an authToken.
-         *
-         * @param accountManager A reference to the [AccountManager]
-         * @return true if there is an account with an authToken
-         * @throws RuntimeException if there is more than one account
-         */
-        @JvmStatic
-        fun accountWithTokenExists(accountManager: AccountManager): Boolean {
-            val existingAccounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE)
-            Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
-            return existingAccounts.isNotEmpty()
-        }
     }
 }

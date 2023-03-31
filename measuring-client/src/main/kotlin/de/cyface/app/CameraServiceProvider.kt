@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r
+package de.cyface.app
 
-import de.cyface.datacapturing.CyfaceDataCapturingService
+import de.cyface.camera_service.CameraService
 
 /**
- * Interface which defines the dependencies implemented by the [MainActivity] to be accessible from
+ * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from
  * the `Fragments`.
  *
  * @author Armin Schnabel
  * @version 1.0.0
  * @since 7.5.0
  */
-interface ServiceProvider {
-    val capturing: CyfaceDataCapturingService
+interface CameraServiceProvider {
+    val cameraService: CameraService
 }

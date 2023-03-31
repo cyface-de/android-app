@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.trips
+package de.cyface.app.utils.trips
 
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -31,8 +31,8 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import de.cyface.app.r4r.R
-import de.cyface.app.r4r.ui.trips.TripListAdapter.TripViewHolder
+import de.cyface.app.utils.R
+import de.cyface.app.utils.trips.TripListAdapter.TripViewHolder
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
 import java.text.SimpleDateFormat

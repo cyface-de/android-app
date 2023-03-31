@@ -25,7 +25,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import de.cyface.app.r4r.R
-import de.cyface.app.r4r.ServiceProvider
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentSpeedBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
@@ -93,7 +93,7 @@ class SpeedFragment : Fragment() {
 
         capturingViewModel.location.observe(viewLifecycleOwner) {
             val speedKmPh = it?.speed?.times(3.6)
-            val speedText = if (speedKmPh == null) null else getString(R.string.speedKph, speedKmPh)
+            val speedText = if (speedKmPh == null) null else getString(de.cyface.app.utils.R.string.speedKph, speedKmPh)
             binding.liveSpeedView.text = speedText ?: getString(R.string.capturing_inactive)
         }
         return root

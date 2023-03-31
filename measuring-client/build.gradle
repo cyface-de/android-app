@@ -144,10 +144,9 @@ android {
         jvmTarget = rootProject.ext.kotlinTargetJavaVersion
     }
 
-    /* Required when switching to MVVM
     buildFeatures {
         viewBinding true
-    }*/
+    }
 }
 
 // Exception tracking
@@ -187,6 +186,13 @@ dependencies {
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
+    // To stream data changes via LiveData and ViewModel to the UI
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.ext.lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.ext.lifecycleVersion"
+    // To use the navigation graph
+    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
+    // For the action bar (at the bottom of the screen)
+    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
 

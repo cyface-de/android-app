@@ -1,25 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:custom="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical"
   android:weightSum="7"
-  tools:context=".ui.MainFragment">
+  tools:context=".ui.CapturingFragment">
 
   <com.google.android.gms.maps.MapView
     android:id="@+id/mapView"
     android:layout_width="match_parent"
     android:layout_height="0dp"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toTopOf="@id/mapGuideline"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
     android:layout_weight="4" />
+
+  <androidx.constraintlayout.widget.Guideline
+    android:id="@+id/mapGuideline"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    app:layout_constraintGuide_percent="0.5714"/> <!-- before: 4/7 -->
 
   <!-- Keep the tabs consistent with helper class Modality -->
   <com.google.android.material.tabs.TabLayout
-    android:id="@+id/tab_layout"
+    android:id="@+id/modalityTabs"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    custom:tabIconTint="@color/gray">
+    app:layout_constraintTop_toBottomOf="@id/mapGuideline"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+    <!--custom:tabIconTint="@color/gray"-->
 
     <com.google.android.material.tabs.TabItem
       android:layout_width="match_parent"
@@ -47,32 +61,32 @@
       android:icon="@drawable/ic_train" />
   </com.google.android.material.tabs.TabLayout>
 
-  <RelativeLayout
-    android:id="@+id/activity_main_layout"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_gravity="bottom"
-    android:layout_weight="3">
-
     <!-- Using AppCompatImageButton and custom:srcCompat with tools:ignore to make this compatible for lower android versions -->
     <!-- As there is no circle_stop button, we have a circle and only change the symbol within -->
     <androidx.appcompat.widget.AppCompatImageButton
       android:id="@+id/capture_data_button_background"
       android:layout_width="200dp"
       android:layout_height="200dp"
+      app:layout_constraintTop_toBottomOf="@id/modalityTabs"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
       android:layout_centerHorizontal="true"
       android:layout_centerVertical="true"
       android:adjustViewBounds="true"
       android:background="@android:color/transparent"
       android:scaleType="fitXY"
       android:tint="@color/text_on_secondary_color"
-      custom:srcCompat="@drawable/ic_circle"
       tools:ignore="MissingPrefix" />
+  <!--custom:srcCompat="@drawable/ic_circle"-->
+
     <!-- The symbol indicating the state to reach after the next click -->
     <androidx.appcompat.widget.AppCompatImageButton
       android:id="@+id/capture_data_main_button"
       android:layout_width="100dp"
       android:layout_height="100dp"
+      app:layout_constraintTop_toBottomOf="@id/modalityTabs"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
       android:layout_centerHorizontal="true"
       android:layout_centerVertical="true"
       android:adjustViewBounds="true"
@@ -80,42 +94,43 @@
       android:contentDescription="@string/start"
       android:scaleType="fitXY"
       android:tint="@color/text_on_secondary_color"
-      custom:srcCompat="@drawable/ic_play"
       tools:ignore="MissingPrefix" />
+  <!--custom:srcCompat="@drawable/ic_play"-->
 
     <androidx.appcompat.widget.AppCompatImageButton
       android:id="@+id/data_sync_button"
       android:layout_width="80dp"
       android:layout_height="80dp"
-      android:layout_alignParentStart="true"
-      android:layout_alignParentBottom="true"
-      android:layout_gravity="start|bottom"
+      app:layout_constraintTop_toBottomOf="@id/capture_data_button_background"
+      app:layout_constraintStart_toStartOf="parent"
       android:adjustViewBounds="true"
       android:background="@android:color/transparent"
       android:contentDescription="@string/upload_trips"
       android:scaleType="fitXY"
       android:tint="@color/gray"
-      custom:srcCompat="@drawable/ic_sync"
       tools:ignore="MissingPrefix" />
+  <!--custom:srcCompat="@drawable/ic_sync"-->
 
     <com.github.lzyzsd.circleprogress.DonutProgress
       android:id="@+id/connection_status_progress"
       android:layout_width="80dp"
       android:layout_height="80dp"
-      android:layout_alignParentStart="true"
-      android:layout_alignParentBottom="true"
-      android:layout_gravity="start|bottom"
+      app:layout_constraintTop_toBottomOf="@id/capture_data_button_background"
+      app:layout_constraintStart_toStartOf="parent"
       android:background="@android:color/transparent"
-      android:visibility="invisible"
-      custom:donut_finished_color="@color/primary_color"
-      custom:donut_progress="0"
-      custom:donut_text_color="@color/primary_color_variant"
-      custom:donut_unfinished_color="@color/primary_color" />
+      android:visibility="invisible" />
+  <!--custom:donut_finished_color="@color/primary_color"
+  custom:donut_progress="0"
+  custom:donut_text_color="@color/primary_color_variant"
+  custom:donut_unfinished_color="@color/primary_color"-->
 
     <androidx.appcompat.widget.AppCompatTextView
       android:id="@+id/data_capturing_measurement_id"
       android:layout_width="200dp"
       android:layout_height="20dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
       android:layout_alignParentEnd="true"
       android:layout_alignParentBottom="true"
       android:layout_gravity="bottom|end"
@@ -130,6 +145,9 @@
     <LinearLayout
       android:layout_width="300dp"
       android:layout_height="20dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
       android:layout_alignParentEnd="true"
       android:layout_alignParentBottom="true"
       android:layout_gravity="bottom|end"
@@ -157,6 +175,4 @@
         android:textSize="14sp" />
     </LinearLayout>
 
-  </RelativeLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
