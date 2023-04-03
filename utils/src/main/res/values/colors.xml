@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
+    <color name="dark">#FF111111</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bright">#eeeeee</color>
     <color name="defaultPrimary">#299463</color>
 
+    <!-- grey for disable items -->
+    <color name="grey_700">#6b6b6b</color>
+    <color name="grey_500">#aaaaaa</color>
+    <color name="grey_200">#f2f2f2</color>
+
     <!-- day night difference -->
-    <color name="text">@color/black</color>
+    <color name="text">@color/dark</color>
     <color name="background">@color/white</color>
 </resources>

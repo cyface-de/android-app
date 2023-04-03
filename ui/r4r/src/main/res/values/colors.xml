@@ -9,9 +9,4 @@
     <!-- complementary color, see tool above -->
     <color name="red_200">#fc99b7</color>
     <color name="red_700">#cf3666</color>
-    
-    <!-- grey for disable items, e.g. stop button when capturing is already stopped -->
-    <color name="grey_700">#6b6b6b</color>
-    <color name="grey_500">#aaaaaa</color>
-    <color name="grey_200">#f2f2f2</color>
 </resources>

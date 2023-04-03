@@ -359,17 +359,6 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         syncButton!!.onDestroyView()
         dataCapturingButton!!.onDestroyView()
 
-        // Clean up CyfaceDataCapturingService
-        try {
-            // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
-            capturing.shutdownDataCapturingService()
-        } catch (e: SynchronisationException) {
-            val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
-                Sentry.captureException(e)
-            }
-            Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
-        }
         capturing.removeConnectionStatusListener(this)
         Log.d(TAG, "onDestroyView: stopped CyfaceDataCapturingService")
         super.onDestroyView()

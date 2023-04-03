@@ -44,6 +44,7 @@ import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -58,8 +59,10 @@ import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProces
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.synchronization.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
+import io.sentry.Sentry
 import java.io.IOException
 
 /**
@@ -217,6 +220,22 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up CyfaceDataCapturingService
+        try {
+            // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
+            capturing.shutdownDataCapturingService()
+            // Before we only called: shutdownConnectionStatusReceiver();
+        } catch (e: SynchronisationException) {
+            val isReportingEnabled = preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+            if (isReportingEnabled) {
+                Sentry.captureException(e)
+            }
+            Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
+        }
     }
 
     /**

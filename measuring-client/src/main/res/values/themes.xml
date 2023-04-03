@@ -5,26 +5,18 @@
 
     <!-- Material Design -->
     <!--   app branding color for the app bar, e.g used for the tool bar -->
-    <item name="colorPrimary">@color/primary_color</item>
+    <item name="colorPrimary">@color/green_700</item>
     <!--   darker variant of the branding color, e.g. used for the status bar & contextual app bars -->
-    <item name="colorPrimaryVariant">@color/primary_color_variant</item>
-    <item name="colorOnPrimary">@color/text_on_primary_color</item>
+    <item name="colorPrimaryVariant">@color/green_900</item>
+    <item name="colorOnPrimary">@color/white</item>
 
     <!-- Secondary brand color. -->
-    <item name="colorSecondary">@color/primary_color</item>
-    <item name="colorSecondaryVariant">@color/primary_color_variant</item>
-    <item name="colorOnSecondary">@color/text_on_primary_color</item>
+    <item name="colorSecondary">@color/green_700</item>
+    <item name="colorSecondaryVariant">@color/green_900</item>
+    <item name="colorOnSecondary">@color/white</item>
 
     <!-- Status bar color. -->
-    <!--   darker variant for the status bar and contextual app bars -->
-    <item name="android:statusBarColor">@color/primary_color_variant</item>
-
-    <!-- can maybe be removed -->
-    <item name="android:windowTranslucentStatus">true</item>
-    <item name="android:navigationBarColor">@color/primary_color_variant</item>
-    <item name="android:colorEdgeEffect">@color/primary_color</item>
-    <!--   theme UI controls like checkboxes and text fields -->
-    <item name="colorAccent">@color/primary_color</item>
+    <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
 
     <!-- Toolbar icon color. -->
     <item name="iconTint">@color/white</item>

@@ -48,6 +48,7 @@ import de.cyface.app.ui.notification.CameraEventHandler
 import de.cyface.app.ui.notification.DataCapturingEventHandler
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
@@ -64,8 +65,10 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.synchronization.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
+import io.sentry.Sentry
 import java.io.IOException
 import java.lang.ref.WeakReference
 
@@ -240,6 +243,22 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up CyfaceDataCapturingService
+        try {
+            // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
+            capturing.shutdownDataCapturingService()
+            // Before we only called: shutdownConnectionStatusReceiver();
+        } catch (e: SynchronisationException) {
+            val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
+            if (isReportingEnabled) {
+                Sentry.captureException(e)
+            }
+            Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
+        }
     }
 
     /**
