@@ -18,7 +18,7 @@
  */
 package de.cyface.app.ui.dialog;
 
-import static de.cyface.app.ui.nav.view.SettingsFragment.DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE;
+import static de.cyface.app.capturing.SettingsFragment.DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_STATIC_EXPOSURE_TIME_KEY;
 import static de.cyface.camera_service.Constants.TAG;
 

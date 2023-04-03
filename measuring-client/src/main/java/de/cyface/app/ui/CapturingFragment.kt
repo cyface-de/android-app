@@ -30,9 +30,13 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import de.cyface.app.CameraServiceProvider
+import de.cyface.app.R
+import de.cyface.app.capturing.MenuProvider
 import de.cyface.app.databinding.FragmentCapturingBinding
 import de.cyface.app.ui.button.DataCapturingButton
 import de.cyface.app.ui.button.SynchronizationButton
@@ -49,7 +53,6 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
-import de.cyface.synchronization.exception.SynchronisationException
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 
@@ -203,6 +206,22 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             binding.connectionStatusProgress
         )
         dataCapturingButton!!.bindMap(map)
+
+        // Add items to menu (top right)
+        // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
+        // work with with `findNavController()` (https://stackoverflow.com/a/60434988/5815054).
+        val navHostFragment =
+            requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        requireActivity().addMenuProvider(
+            MenuProvider(
+                capturing,
+                requireActivity(),
+                navHostFragment.navController
+            ),
+            viewLifecycleOwner,
+            Lifecycle.State.RESUMED
+        )
+
         return binding.root
     }
 

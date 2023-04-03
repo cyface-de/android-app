@@ -120,7 +120,7 @@ class SettingsFragment : Fragment() {
  * @version 1.0.0
  * @since 3.2.0
  */
-class UploadSwitchHandler(
+private class UploadSwitchHandler(
     private val preferences: SharedPreferences,
     private val context: Context?,
     private val capturingService: CyfaceDataCapturingService

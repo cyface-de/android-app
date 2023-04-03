@@ -5,25 +5,25 @@
     android:id="@+id/guide_item"
     android:icon="@drawable/ic_help"
     android:title="@string/drawer_title_guide"
-    android:showAsAction="never" />
+    app:showAsAction="never" />
   <item
     android:id="@+id/feedback_item"
     android:icon="@drawable/ic_chat_bubble"
     android:title="@string/drawer_title_feedback"
-    android:showAsAction="never" />
+    app:showAsAction="never" />
   <item
     android:id="@+id/settings_item"
     android:icon="@drawable/ic_baseline_settings_24"
     android:title="@string/settings"
-    android:showAsAction="never" />
+    app:showAsAction="never" />
   <item
     android:id="@+id/imprint_item"
     android:icon="@drawable/ic_business"
     android:title="@string/drawer_title_imprint"
-    android:showAsAction="never" />
+    app:showAsAction="never" />
   <item
     android:id="@+id/logout_item"
     android:icon="@drawable/ic_logout"
     android:title="@string/drawer_title_logout"
-    android:showAsAction="never" />
+    app:showAsAction="never" />
 </menu>

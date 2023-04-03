@@ -257,8 +257,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // work with with `findNavController()` (https://stackoverflow.com/a/60434988/5815054).
         val navHostFragment =
             requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(
+        requireActivity().addMenuProvider(
             MenuProvider(
                 capturing,
                 requireActivity(),

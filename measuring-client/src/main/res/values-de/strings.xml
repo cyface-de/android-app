@@ -32,8 +32,8 @@
   <string name="camera_status_paused">Kamera: pausiert</string>
   <string name="camera_capturing_active">Kamera Datenerfassung aktiv</string>
   <string name="experimental_feature_warning">Achtung: Experimentelle Einstellung</string>
-  <string name="camera_settings_JPEG_settings">JPEG Einzelbild-Modus</string>
-  <string name="camera_settings_title_supported_features">Unterstützte Funktionen (Hauptkamera)</string>
+  <string name="JPEG_settings">JPEG Einzelbild-Modus</string>
+  <string name="supported_features_title">Unterstützte Funktionen (Hauptkamera)</string>
   <string name="camera_feature_camera2_support_level"> \'camera2\' Support Level: </string>
   <string name="camera_feature_manual_sensor">Manuelle Steuerung: </string>
   <string name="camera_feature_focus_distance_calibration">Fokus Distanz: </string>
