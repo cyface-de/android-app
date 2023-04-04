@@ -191,7 +191,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             // FIXME: dataCapturingService!!.addConnectionStatusListener(this)
             cameraService = CameraService(
                 this.applicationContext,
-                Constants.AUTHORITY,
                 CameraEventHandler(),
                 unInterestedCameraListener // here was the capturing button but it registers itself, too
             )
