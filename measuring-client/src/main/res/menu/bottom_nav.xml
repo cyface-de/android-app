@@ -15,7 +15,7 @@
     and use a selector, see: https://stackoverflow.com/a/68915308/5815054 -->
 
     <item
-      android:id="@+id/navigation_statistics"
+      android:id="@+id/statistics_graph"
       android:icon="@drawable/ic_baseline_show_chart_24"
       android:title="@string/statistics" />
 

@@ -341,7 +341,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         syncButton!!.onResume()
         capturing.addConnectionStatusListener(this)
         map!!.onResume()
-        dataCapturingButton!!.onResume(capturing, cameraService!!)
+        dataCapturingButton!!.onResume(capturing, cameraService)
     }
 
     override fun onPause() {

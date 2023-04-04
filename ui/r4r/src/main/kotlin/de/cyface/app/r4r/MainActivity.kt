@@ -23,7 +23,6 @@ import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -199,7 +198,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 setOf(
                     de.cyface.app.utils.R.id.navigation_trips,
                     R.id.navigation_capturing,
-                    R.id.navigation_statistics
+                    de.cyface.app.utils.R.id.navigation_statistics
                 )
             )
         )

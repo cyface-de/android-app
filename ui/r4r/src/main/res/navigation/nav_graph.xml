@@ -36,10 +36,6 @@
 
   <include app:graph="@navigation/trips_graph" />
 
-  <fragment
-    android:id="@+id/navigation_statistics"
-    android:name="de.cyface.app.r4r.ui.statistics.StatisticsFragment"
-    android:label="@string/statistics"
-    tools:layout="@layout/fragment_statistics" />
+  <include app:graph="@navigation/statistics_graph" />
 
 </navigation>
