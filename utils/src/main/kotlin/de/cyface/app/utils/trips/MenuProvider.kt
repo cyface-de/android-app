@@ -18,14 +18,18 @@
  */
 package de.cyface.app.utils.trips
 
+import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.selection.MutableSelection
 import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants
@@ -50,56 +54,59 @@ class MenuProvider(
     private val capturingService: CyfaceDataCapturingService,
     private val preferences: SharedPreferences,
     private val adapter: TripListAdapter,
+    private val exportPermissionLauncher: ActivityResultLauncher<Array<String>>,
     private val context: WeakReference<Context>
 ) : androidx.core.view.MenuProvider {
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.trips, menu)
+        val showExport = context.get()!!.packageName.equals("de.cyface.app")
+        if (showExport) {
+            menu.findItem(R.id.export).isVisible = true
+        }
     }
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_sync -> {
+            R.id.sync -> {
                 syncNow()
                 true
             }
-            /*R.id.export_menu_item -> {
+            R.id.export -> {
                 // Permission requirements: https://developer.android.com/training/data-storage
-                val requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-                val missingPermissions = (ContextCompat.checkSelfPermission(
-                    fragmentActivity!!,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-                        || ContextCompat.checkSelfPermission(
-                    fragmentActivity,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED)
-                if (requiresWritePermission && missingPermissions) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        requestPermissions(
+                val requiresWritePermission =
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                            Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                if (requiresWritePermission) {
+                    if (ContextCompat.checkSelfPermission(
+                            context.get()!!,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        ) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                            context.get()!!,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+
+                        exportPermissionLauncher.launch(
                             arrayOf(
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.READ_EXTERNAL_STORAGE
-                            ),
-                            SharedConstants.PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT
+                            )
                         )
                     } else {
-                        Toast.makeText(
-                            fragmentActivity,
-                            fragmentActivity.getString(de.cyface.app.utils.R.string.export_data_no_permission),
-                            Toast.LENGTH_LONG
-                        ).show()
+                        GlobalScope.launch { Exporter(context.get()!!).export() }
                     }
                 } else {
-                    ExportTask(fragmentActivity).execute()
+                    GlobalScope.launch { Exporter(context.get()!!).export() }
                 }
+
                 true
-            }*/
-            R.id.select_all_item -> {
+            }
+            R.id.select_all -> {
                 adapter.selectAll()
                 true
             }
-            R.id.delete_measurement_item -> {
+            R.id.delete -> {
                 deleteSelectedMeasurements()
                 true
             }

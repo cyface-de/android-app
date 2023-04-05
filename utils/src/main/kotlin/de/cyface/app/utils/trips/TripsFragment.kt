@@ -25,7 +25,9 @@ import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.MenuHost
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -34,6 +36,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
 /**
@@ -76,6 +80,25 @@ class TripsFragment : Fragment() {
     private val tripsViewModel: TripsViewModel by viewModels {
         TripsViewModelFactory(capturing.persistenceLayer.measurementRepository!!)
     }
+
+    // This launcher must be launched to request permissions
+    private var exportPermissionLauncher: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { result ->
+            if (result.isNotEmpty()) {
+                val allGranted = result.values.none { !it }
+                if (allGranted) {
+                    GlobalScope.launch { Exporter(requireContext()).export() }
+                } else {
+                    Toast.makeText(
+                        context,
+                        requireContext().getString(de.cyface.app.utils.R.string.export_data_no_permission),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,12 +150,12 @@ class TripsFragment : Fragment() {
         }
 
         // Add items to menu (top right)
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(
+        requireActivity().addMenuProvider(
             MenuProvider(
                 capturing,
                 preferences,
                 adapter,
+                exportPermissionLauncher,
                 WeakReference<Context>(requireContext().applicationContext)
             ), viewLifecycleOwner, Lifecycle.State.RESUMED
         )

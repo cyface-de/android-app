@@ -111,7 +111,7 @@ class MapFragment : Fragment() {
                 } else {
                     Toast.makeText(
                         context,
-                        "Location permission repeatedly denies",
+                        "Location permission repeatedly denied",
                         Toast.LENGTH_LONG
                     ).show()
                     // Close Cyface if permission has not been granted.

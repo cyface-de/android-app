@@ -56,6 +56,8 @@ import io.sentry.Sentry;
  * Async task to delete measurements with all their data.
  * We use an AsyncTask because this is blocking but should only run for a short time.
  *
+ * FIXME: This needs to move into Trips MenuProvider delete action after camera is re-added.
+ *
  * @author Armin Schnabel
  * @author Klemens Muthmann
  * @version 2.0.4
