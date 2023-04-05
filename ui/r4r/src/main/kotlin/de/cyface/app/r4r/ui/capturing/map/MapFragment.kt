@@ -131,7 +131,7 @@ class MapFragment : Fragment() {
         try {
             val measurement = persistence.loadCurrentlyCapturedMeasurement()
             val tracks: List<Track> = persistence.loadTracks(measurement.id)
-            capturingViewModel.setTracks(tracks as ArrayList<Track>)
+            capturingViewModel.setTracks(tracks)
             capturingViewModel.tracks.observe(viewLifecycleOwner) {
                 if (it != null) {
                     //val events: List<Event> = loadCurrentMeasurementsEvents()

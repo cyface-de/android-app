@@ -15,7 +15,8 @@
     <string name="login_name">Login</string>
     <string name="password">Passwort</string>
     <string name="log_in">Anmelden</string>
-    <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
+    <string name="no_credentials">Keine Zugangsdaten?</string>
+    <string name="register_now">Registrieren</string>
     <string name="title_activity_login">Einloggen</string>
     <string name="error_message_field_required">Bitte ausfüllen</string>
     <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>

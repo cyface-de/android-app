@@ -136,8 +136,8 @@ class CapturingViewModel(
      * @param tracks The cached [Track]s of the current [Measurement], so we do not need to ask the database each time
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
-    fun setTracks(tracks: ArrayList<Track>?) {
-        _tracks.postValue(tracks)
+    fun setTracks(tracks: List<Track>?) {
+        _tracks.postValue(if (tracks == null) null else if (tracks.isEmpty()) arrayListOf() else tracks as ArrayList<Track>)
     }
 
     /**

@@ -15,7 +15,8 @@
   <string name="login_name">Login</string>
   <string name="password">Password</string>
   <string name="log_in">Accedi</string>
-  <string name="no_login_register">Nessuna credenziale? <font color="#3f8730">Registrati ora</font></string>
+  <string name="no_credentials">Nessuna credenziale?</string>
+  <string name="register_now">Registrati ora</string>
   <string name="title_activity_login">Accedi</string>
   <string name="error_message_field_required">This Quest ocampo è richiesto</string>
   <string name="error_message_invalid_email">Questa email non è valida</string>
