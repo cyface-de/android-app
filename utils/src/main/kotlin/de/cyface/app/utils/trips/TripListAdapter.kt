@@ -35,6 +35,7 @@ import de.cyface.app.utils.R
 import de.cyface.app.utils.trips.TripListAdapter.TripViewHolder
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
+import de.cyface.persistence.model.Modality
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -104,7 +105,10 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             if (status === MeasurementStatus.SKIPPED || status === MeasurementStatus.DEPRECATED) {
                 statusText += " - " + status.databaseIdentifier.lowercase()
             }
-            tripTitleView.text = itemView.context.getString(R.string.trip_id, measurement.id)
+            val context = tripDetailsView.context
+            val showModality = context.packageName.equals("de.cyface.app")
+            val modalityText = if (showModality) " (${context.getString(resource(measurement.modality))})" else ""
+            tripTitleView.text = itemView.context.getString(R.string.trip_id, measurement.id) + modalityText
             tripDetailsView.text = itemView.context.getString(
                 R.string.trip_details_line,
                 dateText,
@@ -123,6 +127,21 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             uploadIcon.setColorFilter(textColor)
             if (measurement.status == MeasurementStatus.SYNCED || measurement.status == MeasurementStatus.SKIPPED || measurement.status == MeasurementStatus.DEPRECATED) {
                 uploadIcon.visibility = VISIBLE
+            }
+        }
+
+        /**
+         * @param The modality to translate
+         * @return The resource identifier of the modality name
+         */
+        private fun resource(modality: Modality): Int {
+            return when (modality) {
+                Modality.CAR -> R.string.car
+                Modality.BICYCLE -> R.string.bicycle
+                Modality.WALKING -> R.string.walking
+                Modality.BUS -> R.string.bus
+                Modality.TRAIN -> R.string.train
+                else -> throw IllegalArgumentException("Unknown modality: $modality")
             }
         }
 

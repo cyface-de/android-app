@@ -70,6 +70,11 @@
     <string name="total">Gesamt</string>
 
     <!-- Trips -->
+    <string name="car">Auto</string>
+    <string name="bicycle">Fahrrad</string>
+    <string name="walking">Zu Fuß</string>
+    <string name="bus">Bus</string>
+    <string name="train">Zug</string>
     <string name="completed_trips">Abgeschlossene Fahrten</string>
     <string name="trip_id">Fahrt %d</string>
     <string name="click_to_see_details">Für Details Eintrag klicken</string>

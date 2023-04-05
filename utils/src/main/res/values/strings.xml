@@ -71,6 +71,11 @@
     <string name="total">Total</string>
 
     <!-- Trips -->
+    <string name="car">Car</string>
+    <string name="bicycle">Bicycle</string>
+    <string name="walking">Walking</string>
+    <string name="bus">Bus</string>
+    <string name="train">Train</string>
     <string name="completed_trips">Completed trips</string>
     <string name="trip_id">Trip %d</string>
     <string name="trip_details_line" translatable="false">%1$s (%2$.3f km)%3$s</string>

@@ -70,6 +70,11 @@
   <string name="drawer_title_logout">Logout</string>
 
   <!-- Trips -->
+  <string name="car">Auto</string>
+  <string name="bicycle">Bici</string>
+  <string name="walking">Passeggiare</string>
+  <string name="bus">Autobus</string>
+  <string name="train">Treno</string>
   <string name="completed_trips">Completed trips</string>
   <string name="trip_id">Trip %d</string>
   <string name="click_to_see_details">Click to see details</string>
