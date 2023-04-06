@@ -117,7 +117,7 @@ class Map(
      * All currently shown `Event` `Marker`s with a reference between both required to find the Marker of a
      * Event.
      */
-    val eventMarker = HashMap<Long, Marker?>()
+    private val eventMarker = HashMap<Long, Marker?>()
 
     /**
      * `True` if the user opted-in to error reporting.
@@ -467,7 +467,7 @@ class Map(
      * @param latLng the `LatLng` of the marker to be added
      * @param modality the new `Modality` of the `MODALITY_TYPE_CHANGE` marker to be added
      * @param isMarkerToBeFocused `True` if the newly added `Marker` is to be focused after creation
-     */
+     * /
     fun addMarker(
         eventId: Long, latLng: LatLng, modality: Modality,
         isMarkerToBeFocused: Boolean
@@ -495,7 +495,7 @@ class Map(
         val googleMap = googleMap
         val cameraUpdate = CameraUpdateFactory.newLatLng(markerLatLng)
         googleMap!!.moveCamera(cameraUpdate)
-    }
+    }*/
 
     /**
      * Returns the translation for the [Modality].
@@ -533,6 +533,6 @@ class Map(
          * The id of the `Marker` used when the user adds a new `Marker` to the map which can still
          * be replaced or removed.
          */
-        const val TEMPORARY_EVENT_MARKER_ID = -1L
+        //const val TEMPORARY_EVENT_MARKER_ID = -1L
     }
 }

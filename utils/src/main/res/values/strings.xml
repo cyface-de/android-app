@@ -16,14 +16,21 @@
     <string name="login_name">Login</string>
     <string name="password">Password</string>
     <string name="log_in">Log in</string>
-    <string name="no_login_register">No credentials? <font color="#3f8730">Register now</font></string>
+    <string name="no_credentials">No credentials?</string>
+    <string name="register_now">Register now</string>
     <string name="title_activity_login">Sign in</string>
     <string name="error_message_field_required">This field is required</string>
     <string name="error_message_invalid_email">This email address is invalid</string>
     <string name="error_message_password_too_short">This password is too short</string>
     <string name="error_message_login_too_short">This username is too short</string>
 
+    <!-- BottomNavigationView -->
+    <string name="trips">Trips</string>
+    <string name="capturing">Capturing</string>
+    <string name="statistics">Statistics</string>
+
     <!-- Capturing -->
+    <string name="map">Map</string>
     <string name="distance">Distance</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
@@ -59,7 +66,22 @@
     <string name="modality_train">Train</string>
     <string name="modality_motorbike">Motorbike</string>
 
-    <!-- Measurements -->
+    <!-- Statistics -->
+    <string name="max_length">Maximum Length</string>
+    <string name="elevation">Elevation</string>
+    <string name="total">Total</string>
+
+    <!-- Trips -->
+    <string name="car">Car</string>
+    <string name="bicycle">Bicycle</string>
+    <string name="walking">Walking</string>
+    <string name="bus">Bus</string>
+    <string name="train">Train</string>
+    <string name="ok" translatable="false">OK</string>
+    <string name="completed_trips">Completed trips</string>
+    <string name="trip_id">Trip %d</string>
+    <string name="trip_details_line" translatable="false">%1$s (%2$.3f km)%3$s</string>
+    <string name="click_to_see_details">Click to see details</string>
     <string name="upload_all">Upload all</string>
     <string name="modality_type">Modality type</string>
     <string name="mark_all_menu_item">Select all items</string>
@@ -78,6 +100,31 @@
     <string name="toast_item_deletion_success">The selected items were deleted.</string>
     <string name="toast_select_location">Please select a location</string>
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
+
+    <!-- Trip Details -->
+    <string name="trip_details">Trip details</string>
+    <string name="chart_label">elevation [m]</string>
+    <string name="maximum">Maximum</string>
+    <string name="length">Length</string>
+    <string name="duration">Duration</string>
+    <string name="elevation_profile">Elevation profile</string>
+    <string name="elevation_profile_no_data">Elevation profile (no altitude data available)</string>
+    <string name="ascend">Ascend</string>
+    <string name="avoided_co2">Avoided CO² emission</string>
+    <string name="compared_to_car">Compared to a car</string>
+    <string name="speed">Speed</string>
+    <string name="co2kg" translatable="false">%1$.1f kg</string>
+    <string name="co2kgWithAverage" translatable="false">%1$.1f kg (Ø %2$.1f kg)</string>
+    <string name="distanceKm" translatable="false">%1$.3f km</string>
+    <string name="distanceKmWithAverage" translatable="false">%1$.1f km (Ø %2$.1f km)</string>
+    <string name="speedKph" translatable="false">%1$.0f km/h</string>
+    <string name="speedKphWithAverage" translatable="false">%1$.0f km/h (Ø %2$.0f km/h)"</string>
+    <string name="ascendMeters" translatable="false">%1$.0f m</string>
+    <string name="ascendMetersWithAverage" translatable="false">%1$.0f m (Ø %2.0f m)</string>
+    <string name="hours" translatable="false">%d h</string>
+    <string name="minutes" translatable="false">%d m</string>
+    <string name="seconds" translatable="false">%d s</string>
+    <string name="durationWithAverage" translatable="false">%s (Ø %s)</string>
 
 
     <!-- Imprint -->

@@ -31,7 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.gms.maps.MapsInitializer
-import de.cyface.app.r4r.ServiceProvider
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentMapBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
@@ -111,7 +111,7 @@ class MapFragment : Fragment() {
                 } else {
                     Toast.makeText(
                         context,
-                        "Location permission repeatedly denies",
+                        "Location permission repeatedly denied",
                         Toast.LENGTH_LONG
                     ).show()
                     // Close Cyface if permission has not been granted.
@@ -131,7 +131,7 @@ class MapFragment : Fragment() {
         try {
             val measurement = persistence.loadCurrentlyCapturedMeasurement()
             val tracks: List<Track> = persistence.loadTracks(measurement.id)
-            capturingViewModel.setTracks(tracks as ArrayList<Track>)
+            capturingViewModel.setTracks(tracks)
             capturingViewModel.tracks.observe(viewLifecycleOwner) {
                 if (it != null) {
                     //val events: List<Event> = loadCurrentMeasurementsEvents()

@@ -15,14 +15,21 @@
   <string name="login_name">Login</string>
   <string name="password">Password</string>
   <string name="log_in">Accedi</string>
-  <string name="no_login_register">Nessuna credenziale? <font color="#3f8730">Registrati ora</font></string>
+  <string name="no_credentials">Nessuna credenziale?</string>
+  <string name="register_now">Registrati ora</string>
   <string name="title_activity_login">Accedi</string>
   <string name="error_message_field_required">This Quest ocampo è richiesto</string>
   <string name="error_message_invalid_email">Questa email non è valida</string>
   <string name="error_message_password_too_short">Questa password è troppo corta</string>
   <string name="error_message_login_too_short">Questo nome utente è troppo corto</string>
 
+  <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
+  <string name="trips">Trips</string>
+  <string name="capturing">Capturing</string>
+  <string name="statistics">Statistics</string>
+
   <!-- Capturing -->
+  <string name="map">Map</string>
   <string name="distance">Distance</string>
   <string name="start">Start</string>
   <string name="pause">Pause</string>
@@ -51,6 +58,11 @@
   <string name="modality_train">Treno</string>
   <string name="modality_motorbike">Motociclo</string>
 
+  <!-- Statistics -->
+  <string name="max_length">Maximum Length</string>
+  <string name="elevation">Elevation</string>
+  <string name="total">Total</string>
+
   <!-- Navigation -->
   <string name="settings">Impostazioni</string>
   <string name="drawer_title_feedback">Feedback</string>
@@ -58,7 +70,15 @@
   <string name="drawer_title_imprint">Imprint</string>
   <string name="drawer_title_logout">Logout</string>
 
-  <!-- Measurements -->
+  <!-- Trips -->
+  <string name="car">Auto</string>
+  <string name="bicycle">Bici</string>
+  <string name="walking">Passeggiare</string>
+  <string name="bus">Autobus</string>
+  <string name="train">Treno</string>
+  <string name="completed_trips">Completed trips</string>
+  <string name="trip_id">Trip %d</string>
+  <string name="click_to_see_details">Click to see details</string>
   <string name="upload_all">Upload all</string>
   <string name="modality_type">Tipo di modalità</string>
   <string name="mark_all_menu_item">Seleziona tutte le voci</string>
@@ -77,6 +97,19 @@
   <string name="toast_item_deletion_success">Le voci selezionate sono state cancellate.</string>
   <string name="toast_select_location">Selezionare una località</string>
   <string name="toast_item_created_on_tracks_nearest_position">L\'elemento è stato creato e spostato in pista</string>
+
+  <!-- Trip Details -->
+  <string name="trip_details">Trip details</string>
+  <string name="chart_label">elevation [m]</string>
+  <string name="maximum">Maximum</string>
+  <string name="length">Length</string>
+  <string name="duration">Duration</string>
+  <string name="elevation_profile">Elevation profile</string>
+  <string name="elevation_profile_no_data">Elevation profile (no altitude data available)</string>
+  <string name="ascend">Ascend</string>
+  <string name="avoided_co2">Avoided CO² emission</string>
+  <string name="compared_to_car">Compared to a car</string>
+  <string name="speed">Speed</string>
 
 
   <!-- Imprint -->

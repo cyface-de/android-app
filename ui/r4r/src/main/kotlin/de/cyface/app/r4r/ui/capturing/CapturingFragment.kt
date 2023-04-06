@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -46,7 +45,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.R
-import de.cyface.app.r4r.ServiceProvider
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
 import de.cyface.app.r4r.ui.capturing.map.MapFragment
 import de.cyface.app.r4r.ui.capturing.speed.SpeedFragment
@@ -185,7 +184,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // Update UI elements with the updates from the ViewModel
         viewModel.measurementId.observe(viewLifecycleOwner) {
-            val tripTitle = if (it == null) null else getString(R.string.trip_id, it)
+            val tripTitle = if (it == null) null else getString(de.cyface.app.utils.R.string.trip_id, it)
             binding.tripTitle.text = tripTitle ?: ""
         }
         viewModel.measurement.observe(viewLifecycleOwner) {
@@ -201,23 +200,23 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
             val distanceKm = it?.distance?.div(1000.0)
             binding.distanceView.text =
-                if (distanceKm == null) "" else getString(R.string.distanceKm, distanceKm)
+                if (distanceKm == null) "" else getString(de.cyface.app.utils.R.string.distanceKm, distanceKm)
 
             // 95 g / km see https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/
             val co2Kg = distanceKm?.times(95)?.div(1000)
-            binding.co2View.text = if (co2Kg == null) "" else getString(R.string.co2kg, co2Kg)
+            binding.co2View.text = if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)
 
             val millis = if (it == null) null else persistence.loadDuration(it.id)
             val seconds = millis?.div(1000)
             val minutes = seconds?.div(60)
             val hours = minutes?.div(60)
             val hoursText =
-                if (hours == null || hours == 0L) "" else getString(R.string.hours, hours) + " "
+                if (hours == null || hours == 0L) "" else getString(de.cyface.app.utils.R.string.hours, hours) + " "
             val minutesText = if (minutes == null || minutes == 0L) "" else getString(
-                R.string.minutes,
+                de.cyface.app.utils.R.string.minutes,
                 minutes % 60
             ) + " "
-            val secondsText = if (seconds == null) "" else getString(R.string.seconds, seconds % 60)
+            val secondsText = if (seconds == null) "" else getString(de.cyface.app.utils.R.string.seconds, seconds % 60)
             val durationText = hoursText + minutesText + secondsText
             binding.durationView.text = durationText
         }
@@ -233,11 +232,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
                 val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
                 val ascend = if (ongoingCapturing) persistence.loadAscend(measurement.id) else null
-                ascendText = getString(R.string.ascendMeters, ascend ?: 0.0)
+                ascendText = getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
 
                 val speedKmPh = it?.speed?.times(3.6)
                 binding.speedView.text = if (speedKmPh == null) "" else getString(
-                    R.string.speedKphWithAverage,
+                    de.cyface.app.utils.R.string.speedKphWithAverage,
                     speedKmPh,
                     averageSpeedKmh
                 )
@@ -258,8 +257,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // work with with `findNavController()` (https://stackoverflow.com/a/60434988/5815054).
         val navHostFragment =
             requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(
+        requireActivity().addMenuProvider(
             MenuProvider(
                 capturing,
                 requireActivity(),
@@ -435,10 +433,10 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         // cameraService.removeCameraListener(this)
 
         try {
-            capturing.disconnect();
+            capturing.disconnect()
         } catch (e: DataCapturingException) {
             // This just tells us there is no running capturing in the background, see [MOV-588]
-            Log.d(TAG, "No need to unbind as the background service was not running.");
+            Log.d(TAG, "No need to unbind as the background service was not running.")
         }
         /*try {
             cameraService.disconnect()

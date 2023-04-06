@@ -53,10 +53,10 @@ import de.cyface.ItActivity;
 @MediumTest
 public final class BluetoothLeSetupIntegrationTest {
 
-    @Rule
+    Kotlin: @get:Rule
     public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
-    @Rule
+    Kotlin: @get:Rule
     public ActivityTestRule<ItActivity> activityTestRule = new ActivityTestRule<>(ItActivity.class);
 
     @Mock

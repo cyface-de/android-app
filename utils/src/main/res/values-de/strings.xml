@@ -15,14 +15,21 @@
     <string name="login_name">Login</string>
     <string name="password">Passwort</string>
     <string name="log_in">Anmelden</string>
-    <string name="no_login_register">Keine Zugangsdaten? <font color="#3f8730">Registrieren</font></string>
+    <string name="no_credentials">Keine Zugangsdaten?</string>
+    <string name="register_now">Registrieren</string>
     <string name="title_activity_login">Einloggen</string>
     <string name="error_message_field_required">Bitte ausfüllen</string>
     <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
     <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
     <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 
+    <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
+    <string name="trips">Fahrten</string>
+    <string name="capturing">Aufzeichnen</string>
+    <string name="statistics">Statistiken</string>
+
     <!-- Capturing -->
+    <string name="map">Karte</string>
     <string name="distance">Distanz</string>
     <string name="start">Start</string>
     <string name="pause">Pause</string>
@@ -58,7 +65,20 @@
     <string name="modality_train">Zug</string>
     <string name="modality_motorbike">Motorrad</string>
 
-    <!-- Measurements -->
+    <!-- Statistics -->
+    <string name="max_length">Maximale Länge</string>
+    <string name="elevation">Höhe</string>
+    <string name="total">Gesamt</string>
+
+    <!-- Trips -->
+    <string name="car">Auto</string>
+    <string name="bicycle">Fahrrad</string>
+    <string name="walking">Zu Fuß</string>
+    <string name="bus">Bus</string>
+    <string name="train">Zug</string>
+    <string name="completed_trips">Abgeschlossene Fahrten</string>
+    <string name="trip_id">Fahrt %d</string>
+    <string name="click_to_see_details">Für Details Eintrag klicken</string>
     <string name="upload_all">Alles hochladen</string>
     <string name="modality_type">Fortbewegungsart</string>
     <string name="mark_all_menu_item">Alles Markieren</string>
@@ -77,6 +97,19 @@
     <string name="toast_item_deletion_success">Die markierten Einträge wurden entfernt.</string>
     <string name="toast_select_location">Bitte wählen Sie einen Standort aus</string>
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
+
+    <!-- Trip Details -->
+    <string name="trip_details">Fahrtdetails</string>
+    <string name="chart_label">Höhe [m]</string>
+    <string name="maximum">Maximal</string>
+    <string name="length">Länge</string>
+    <string name="duration">Fahrzeit</string>
+    <string name="elevation_profile">Höhenprofil</string>
+    <string name="elevation_profile_no_data">Höhenprofil (keine Höhendaten vorhanden)</string>
+    <string name="ascend">Anstieg</string>
+    <string name="avoided_co2">Vermiedener CO² Ausstoß</string>
+    <string name="compared_to_car">Im Vergleich zum Auto</string>
+    <string name="speed">Geschwindigkeit</string>
 
 
     <!-- Imprint -->

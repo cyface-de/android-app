@@ -50,12 +50,6 @@ object SharedConstants {
     const val DEFAULT_SENSOR_FREQUENCY = 100
 
     /*
-     * Permission ids
-     */
-
-    const val PERMISSION_REQUEST_EXTERNAL_STORAGE_FOR_EXPORT = 2
-
-    /*
      * Preferences keys
      *
      * *Don't change the values, as this resets the user's preferences!*

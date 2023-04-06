@@ -18,8 +18,7 @@
  */
 package de.cyface.app.ui.dialog;
 
-import static de.cyface.app.ui.MainFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
-import static de.cyface.app.ui.nav.view.MeasurementOverviewFragment.DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE;
+import static de.cyface.app.ui.CapturingFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.BICYCLE;
 import static de.cyface.persistence.model.Modality.BUS;
@@ -59,7 +58,13 @@ import de.cyface.utils.Validate;
 public class ModalityDialog extends DialogFragment {
 
     private final static int DIALOG_INITIAL_MODALITY_SELECTION_RESULT_CODE = 201909192;
+    /**
+     * The identifier for the [ModalityDialog] request which asks the user to select a [Modality] when he
+     * adds a new [EventType.MODALITY_TYPE_CHANGE] via UI.
+     */
+    private final static int DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE = 201909193;
     private final static int DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE = 201909194;
+
     /**
      * The id if the {@code Measurement} if this dialog is called for a specific Measurement.
      */

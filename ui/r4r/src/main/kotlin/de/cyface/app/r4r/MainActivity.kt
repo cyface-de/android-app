@@ -23,7 +23,6 @@ import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -43,6 +42,8 @@ import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -57,8 +58,10 @@ import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProces
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.synchronization.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
+import io.sentry.Sentry
 import java.io.IOException
 
 /**
@@ -95,6 +98,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
      * just registers and unregisters itself.
+     *
+     * FIXME: Change interface of DCS constructor to not force us to do this.
      */
     private val unInterestedListener = object : DataCapturingListener {
         override fun onFixAcquired() {}
@@ -160,7 +165,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            startSynchronization(applicationContext)
+            startSynchronization()
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
@@ -191,9 +196,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             navigation, AppBarConfiguration(
                 // Adding top-level destinations so they are added to the back stack while navigating
                 setOf(
-                    R.id.navigation_trips,
+                    de.cyface.app.utils.R.id.navigation_trips,
                     R.id.navigation_capturing,
-                    R.id.navigation_statistics
+                    de.cyface.app.utils.R.id.navigation_statistics
                 )
             )
         )
@@ -209,43 +214,27 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         return navigation.navigateUp() || super.onSupportNavigateUp()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String?>, grantResults: IntArray
-    ) {
-        @Suppress("UNUSED_EXPRESSION")
-        when (requestCode) {
-            // Location permission request moved to `MapFragment` as it has to react to results
-
-            /*de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION -> if (navDrawer != null && !(grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && (grantResults.size < 2 || grantResults[1] == PackageManager.PERMISSION_GRANTED))
-            ) {
-                // Deactivate camera service and inform user about this
-                navDrawer.deactivateCameraService()
-                Toast.makeText(
-                    applicationContext,
-                    applicationContext.getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
-                    Toast.LENGTH_LONG
-                ).show()
-            } else {
-                // Ask used which camera mode to use, video or default (shutter image)
-                showCameraModeDialog()
-            }*/
-            else -> {
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            }
-        }
-    }
-
-    @Suppress("RedundantOverride")
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onResume() {
         showGnssWarningDialog(this)
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up CyfaceDataCapturingService
+        try {
+            // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
+            capturing.shutdownDataCapturingService()
+            // Before we only called: shutdownConnectionStatusReceiver();
+        } catch (e: SynchronisationException) {
+            val isReportingEnabled = preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+            if (isReportingEnabled) {
+                Sentry.captureException(e)
+            }
+            Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
+        }
     }
 
     /**
@@ -254,11 +243,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * Creates an [Account] if there is none as an account is required for synchronization. If there was
      * no account the synchronization is started when the async account creation future returns to ensure
      * the account is available at that point.
-     *
-     * @param context the [Context] to load the [AccountManager]
      */
-    fun startSynchronization(context: Context?) {
-        val accountManager = AccountManager.get(context)
+    fun startSynchronization() {
+        val accountManager = AccountManager.get(this.applicationContext)
         val validAccountExists = accountWithTokenExists(accountManager)
         if (validAccountExists) {
             try {
@@ -279,7 +266,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             null,
             this,
             { future: AccountManagerFuture<Bundle?> ->
-                val accountManager1 = AccountManager.get(context)
+                val accountManager1 = AccountManager.get(this.applicationContext)
                 try {
                     // allows to detect when LoginActivity is closed
                     future.result

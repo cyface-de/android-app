@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- day night difference -->
-    <color name="text">@color/white</color>
-    <color name="background">@color/black</color>
-</resources>

@@ -13,9 +13,6 @@
     <item>Train</item>
   </string-array>
 
-  <!-- Settings -->
-  <string name="drawer_settings_synchronization">Synchronization</string>
-
   <!-- Capturing -->
   <string name="measurement_id">Measurement Id</string>
   <string name="capturing_active">Capturing ongoing</string>
@@ -23,15 +20,11 @@
   <string name="toast_measurement_resumed">Trip resumed</string>
 
   <!-- Navigation -->
-  <string name="app_slogan" translatable="false">EASY RIDING</string>
-  <string name="drawer_title_home">Home</string>
-  <string name="drawer_title_measurements">Measurements</string>
   <string name="drawer_setting_speed_sensor">External sensor</string>
   <string name="drawer_setting_pictures">Camera mode</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
-  <string name="drawer_settings">Settings</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
 
@@ -41,8 +34,8 @@
   <string name="camera_status_paused">camera: paused</string>
   <string name="camera_capturing_active">Camera capturing ongoing</string>
   <string name="experimental_feature_warning">Attention: Experimental setting</string>
-  <string name="camera_settings_JPEG_settings">JPEG picture-mode</string>
-  <string name="camera_settings_title_supported_features">Supported Features (main camera)</string>
+  <string name="JPEG_settings">JPEG picture-mode</string>
+  <string name="supported_features_title">Supported Features (main camera)</string>
   <string name="camera_feature_camera2_support_level"> \'camera2\' support level:</string>
   <string name="camera_feature_manual_sensor">Manual sensor control:</string>
   <string name="camera_feature_focus_distance_calibration">Focus distance: </string>

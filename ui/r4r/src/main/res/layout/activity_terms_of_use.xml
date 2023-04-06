@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:layout_width="match_parent"
-  android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
-  android:weightSum="5"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
   android:orientation="vertical"
-  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:weightSum="5"
   tools:context=".ui.TermsOfUseActivity">
-  <!-- android:paddingTop="?attr/actionBarSize"-->
 
   <RelativeLayout
-    android:orientation="vertical"
+    android:id="@+id/terms_of_reports_view"
     android:layout_width="match_parent"
     android:layout_height="0sp"
     android:layout_weight="2"
-    android:id="@+id/terms_of_reports_view"
+    android:orientation="vertical"
     android:padding="5sp">
 
     <CheckBox
-      android:text="@string/accept_reports_details"
+      android:id="@+id/accept_reports_checkbox"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:minHeight="48dp"
-      android:id="@+id/accept_reports_checkbox"
       android:layout_alignParentStart="true"
-      android:paddingTop="5sp"
+      android:layout_alignParentBottom="true"
       android:layout_gravity="center_horizontal"
-      android:layout_alignParentBottom="true"/>
+      android:minHeight="48dp"
+      android:paddingTop="5sp"
+      android:text="@string/accept_reports_details" />
 
     <ScrollView
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:layout_above="@+id/accept_reports_checkbox"
-      android:orientation="vertical"
       android:fadeScrollbars="false"
+      android:orientation="vertical"
       android:scrollbarSize="5sp">
 
       <LinearLayout
@@ -62,39 +61,39 @@
   </RelativeLayout>
 
   <RelativeLayout
-    android:orientation="vertical"
+    android:id="@+id/terms_of_use_view"
     android:layout_width="match_parent"
     android:layout_height="0sp"
     android:layout_weight="3"
-    android:id="@+id/terms_of_use_view"
+    android:orientation="vertical"
     android:padding="5sp">
 
     <Button
+      android:id="@+id/accept_terms_button"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:text="@string/accept_terms"
-      android:id="@+id/accept_terms_button"
-      android:layout_gravity="center_horizontal"
       android:layout_alignParentBottom="true"
+      android:layout_gravity="center_horizontal"
       android:layout_marginBottom="5sp"
-      android:enabled="false"/>
+      android:enabled="false"
+      android:text="@string/accept_terms" />
 
     <CheckBox
-      android:text="@string/accept_terms_details"
+      android:id="@+id/accept_terms_checkbox"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:minHeight="48dp"
-      android:id="@+id/accept_terms_checkbox"
       android:layout_above="@+id/accept_terms_button"
       android:layout_alignParentStart="true"
-      android:paddingTop="5sp"/>
+      android:minHeight="48dp"
+      android:paddingTop="5sp"
+      android:text="@string/accept_terms_details" />
 
     <ScrollView
-      android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:layout_above="@+id/accept_terms_checkbox"
       android:fadeScrollbars="false"
+      android:orientation="vertical"
       android:scrollbarSize="5sp">
 
       <LinearLayout
@@ -103,38 +102,38 @@
         android:orientation="vertical">
 
         <TextView
+          android:id="@+id/disclaimer"
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
           android:text="@string/disclaimer"
-          android:id="@+id/disclaimer"/>
+          android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceMedium"
-          android:textSize="15sp"
-          android:text="@string/disclaimer_content"
           android:id="@+id/disclaimer_content"
-          android:padding="5sp"/>
-
-        <TextView
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="@string/privacy"
-          android:id="@+id/privacy"
-          android:paddingTop="5sp"/>
-
-        <TextView
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"
+          android:padding="5sp"
+          android:text="@string/disclaimer_content"
           android:textAppearance="?android:attr/textAppearanceMedium"
-          android:textSize="15sp"
-          android:text="@string/privacy_content"
+          android:textSize="15sp" />
+
+        <TextView
+          android:id="@+id/privacy"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:paddingTop="5sp"
+          android:text="@string/privacy"
+          android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
           android:id="@+id/privacy_content"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
           android:layout_gravity="center_horizontal"
-          android:padding="5sp"/>
+          android:padding="5sp"
+          android:text="@string/privacy_content"
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textSize="15sp" />
 
       </LinearLayout>
     </ScrollView>

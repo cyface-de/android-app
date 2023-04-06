@@ -103,7 +103,7 @@ class MenuProvider(
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                (activity as MainActivity).startSynchronization(activity)
+                (activity as MainActivity).startSynchronization()
                 true
             }
             else -> {

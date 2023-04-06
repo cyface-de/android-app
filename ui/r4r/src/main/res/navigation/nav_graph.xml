@@ -3,7 +3,7 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/nav_graph"
-  app:startDestination="@+id/capturing">
+  app:startDestination="@id/capturing">
 
   <navigation
     android:id="@+id/capturing"
@@ -34,34 +34,8 @@
       tools:layout="@layout/fragment_settings" />
   </navigation>
 
-  <navigation
-    android:id="@+id/trips"
-    app:startDestination="@id/navigation_trips">
-    <fragment
-      android:id="@+id/navigation_trips"
-      android:name="de.cyface.app.r4r.ui.trips.TripsFragment"
-      android:label="@string/completed_trips"
-      tools:layout="@layout/fragment_trips">
-      <action
-        android:id="@+id/action_trips_to_details"
-        app:destination="@id/navigation_trips_details">
-        <argument
-          android:name="measurementId"
-          app:argType="long" />
-      </action>
-    </fragment>
+  <include app:graph="@navigation/trips_graph" />
 
-    <fragment
-      android:id="@+id/navigation_trips_details"
-      android:name="de.cyface.app.r4r.ui.trips.DetailsFragment"
-      android:label="@string/trip_details"
-      tools:layout="@layout/fragment_trips_details" />
-  </navigation>
-
-  <fragment
-    android:id="@+id/navigation_statistics"
-    android:name="de.cyface.app.r4r.ui.statistics.StatisticsFragment"
-    android:label="@string/statistics"
-    tools:layout="@layout/fragment_statistics" />
+  <include app:graph="@navigation/statistics_graph" />
 
 </navigation>

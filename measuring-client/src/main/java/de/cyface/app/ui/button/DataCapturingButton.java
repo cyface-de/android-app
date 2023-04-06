@@ -19,7 +19,6 @@
 package de.cyface.app.ui.button;
 
 import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
@@ -75,7 +74,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.MainFragment;
+import de.cyface.app.ui.CapturingFragment;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.camera_service.CameraListener;
 import de.cyface.camera_service.CameraService;
@@ -156,7 +155,7 @@ public class DataCapturingButton
      * {@link Measurement}
      */
     private DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
-    private final MainFragment mainFragment;
+    private final CapturingFragment capturingFragment;
     /**
      * Caching the {@link Track}s of the current {@link Measurement}, so we do not need to ask the database each time
      * the updated track is requested. This is {@code null} if there is no unfinished measurement.
@@ -173,9 +172,9 @@ public class DataCapturingButton
     private boolean isReportingEnabled;
     private ProgressDialog calibrationProgressDialog;
 
-    public DataCapturingButton(@NonNull final MainFragment mainFragment) {
+    public DataCapturingButton(@NonNull final CapturingFragment capturingFragment) {
         this.listener = new HashSet<>();
-        this.mainFragment = mainFragment;
+        this.capturingFragment = capturingFragment;
     }
 
     @Override
@@ -195,7 +194,7 @@ public class DataCapturingButton
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
         // To load the measurement distance
-        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, new DefaultPersistenceBehaviour());
 
         button.setOnClickListener(this);
         button.setOnLongClickListener(this);
@@ -638,7 +637,7 @@ public class DataCapturingButton
             Log.w(TAG, "Context is null, restrictions cannot be checked");
             return false;
         }
-        final Activity activity = mainFragment.getActivity();
+        final Activity activity = capturingFragment.getActivity();
         if (activity == null) {
             Log.w(TAG, "Activity is null. If needed, dialogs wont appear.");
         }
@@ -944,7 +943,7 @@ public class DataCapturingButton
         final List<Event> currentMeasurementsEvents;
         try {
             currentMeasurementsEvents = loadCurrentMeasurementsEvents();
-            mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
+            capturingFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
         } catch (NoSuchMeasurementException e) {
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
                     + "Thus, map.renderMeasurement() is ignored. This should only happen id "

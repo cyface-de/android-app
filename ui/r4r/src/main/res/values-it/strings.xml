@@ -1,38 +1,5 @@
 <resources>
-    <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
-    <string name="trips">Trips</string>
-    <string name="capturing">Capturing</string>
-    <string name="statistics">Statistics</string>
-
-    <!-- Capturing -->
-    <string name="map">Map</string>
-    <string name="speed">Speed</string>
-
-    <!-- Navigation -->
-    <string name="drawer_setting_auto_upload">Caricamento automatico</string>
 
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
-
-    <!-- Trips -->
-    <string name="completed_trips">Completed trips</string>
-    <string name="trip_id">Trip %d</string>
-    <string name="click_to_see_details">Click to see details</string>
-
-    <!-- Trip Details -->
-    <string name="trip_details">Trip details</string>
-    <string name="chart_label">elevation [m]</string>
-    <string name="maximum">Maximum</string>
-    <string name="length">Length</string>
-    <string name="duration">Duration</string>
-    <string name="elevation_profile">Elevation profile</string>
-    <string name="elevation_profile_no_data">Elevation profile (no altitude data available)</string>
-    <string name="ascend">Ascend</string>
-    <string name="avoided_co2">Avoided CO² emission</string>
-    <string name="compared_to_car">Compared to a car</string>
-
-    <!-- Statistics -->
-    <string name="max_length">Maximum Length</string>
-    <string name="elevation">Elevation</string>
-    <string name="total">Total</string>
 </resources>

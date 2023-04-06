@@ -86,8 +86,9 @@
       android:label="@string/title_activity_login" />
 
     <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
+    <!-- But we replaced the Content Provider with a Stub Content provider. -->
     <provider
-      android:name="de.cyface.persistence.content.MeasurementProvider"
+      android:name="de.cyface.persistence.content.StubProvider"
       android:authorities="de.cyface.app.r4r.provider"
       android:exported="false"
       android:process=":persistence_process"

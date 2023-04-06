@@ -28,7 +28,7 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import de.cyface.app.r4r.ServiceProvider
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
@@ -104,7 +104,7 @@ class SettingsFragment : Fragment() {
         binding.centerMapSwitch.isChecked =
             preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
         binding.uploadSwitch.isChecked =
-            preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, false)
+            preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
     }
 
     override fun onDestroyView() {
@@ -120,13 +120,13 @@ class SettingsFragment : Fragment() {
  * @version 1.0.0
  * @since 3.2.0
  */
-class UploadSwitchHandler(
+private class UploadSwitchHandler(
     private val preferences: SharedPreferences,
     private val context: Context?,
     private val capturingService: CyfaceDataCapturingService
 ) : CompoundButton.OnCheckedChangeListener {
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        val current = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, false)
+        val current = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
         if (current != isChecked) {
             // Update both, the preferences and WifiSurveyor's synchronizationEnabled status
             capturingService.wiFiSurveyor.isSyncEnabled = isChecked
