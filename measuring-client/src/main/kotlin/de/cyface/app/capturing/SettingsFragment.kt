@@ -253,7 +253,7 @@ class SettingsFragment : Fragment() {
         binding.centerMapSwitch.isChecked =
             preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
         binding.uploadSwitch.isChecked =
-            preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, false)
+            preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
 
         /*
         // Update camera enabled and mode status view if incorrect
@@ -636,7 +636,7 @@ class UploadSwitchHandler(
     private val capturingService: CyfaceDataCapturingService
 ) : CompoundButton.OnCheckedChangeListener {
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        val current = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, false)
+        val current = preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
         if (current != isChecked) {
             // Update both, the preferences and WifiSurveyor's synchronizationEnabled status
             capturingService.wiFiSurveyor.isSyncEnabled = isChecked
