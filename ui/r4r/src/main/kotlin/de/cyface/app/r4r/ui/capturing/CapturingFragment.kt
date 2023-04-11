@@ -194,6 +194,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             binding.durationTitle.visibility = visibility
             binding.ascendTitle.visibility = visibility
             binding.co2Title.visibility = visibility
+            binding.speedView.visibility = visibility
+            binding.distanceView.visibility = visibility
+            binding.durationView.visibility = visibility
+            binding.ascendView.visibility = visibility
+            binding.co2View.visibility = visibility
 
             // If code duplication increases, we could reduce it by introducing a domain layer
             // see https://developer.android.com/topic/architecture/domain-layer

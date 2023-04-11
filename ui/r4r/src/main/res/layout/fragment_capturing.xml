@@ -45,7 +45,8 @@
       android:layout_marginBottom="8dp"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"
       app:layout_constraintBottom_toTopOf="@+id/speedTitle"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintStart_toStartOf="parent"
+      android:visibility="invisible" />
 
     <TextView
       android:id="@+id/speedTitle"
@@ -103,35 +104,40 @@
       android:layout_height="wrap_content"
       android:layout_marginEnd="16dp"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/speedTitle" />
+      app:layout_constraintTop_toTopOf="@+id/speedTitle"
+      android:visibility="invisible" />
 
     <TextView
       android:id="@+id/distanceView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       app:layout_constraintEnd_toEndOf="@+id/speedView"
-      app:layout_constraintTop_toTopOf="@+id/distanceTitle" />
+      app:layout_constraintTop_toTopOf="@+id/distanceTitle"
+      android:visibility="invisible" />
 
     <TextView
       android:id="@+id/durationView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       app:layout_constraintEnd_toEndOf="@+id/distanceView"
-      app:layout_constraintTop_toTopOf="@+id/durationTitle" />
+      app:layout_constraintTop_toTopOf="@+id/durationTitle"
+      android:visibility="invisible" />
 
     <TextView
       android:id="@+id/ascendView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       app:layout_constraintEnd_toEndOf="@+id/durationView"
-      app:layout_constraintTop_toTopOf="@+id/ascendTitle" />
+      app:layout_constraintTop_toTopOf="@+id/ascendTitle"
+      android:visibility="invisible" />
 
     <TextView
       android:id="@+id/co2View"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       app:layout_constraintEnd_toEndOf="@+id/ascendView"
-      app:layout_constraintTop_toTopOf="@+id/co2Title" />
+      app:layout_constraintTop_toTopOf="@+id/co2Title"
+      android:visibility="invisible" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
       android:id="@+id/startResumeButton"
