@@ -30,13 +30,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.google.android.gms.maps.MapsInitializer
-import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentMapBinding
 import de.cyface.app.r4r.ui.capturing.CapturingViewModel
 import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.Map
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -128,23 +129,33 @@ class MapFragment : Fragment() {
      * The `Runnable` triggered when the `Map` is loaded and ready.
      */
     private val onMapReadyRunnable = Runnable {
+        observeTracks()
+
+        // Only load track if there is an ongoing measurement
         try {
             val measurement = persistence.loadCurrentlyCapturedMeasurement()
             val tracks: List<Track> = persistence.loadTracks(measurement.id)
             capturingViewModel.setTracks(tracks)
-            capturingViewModel.tracks.observe(viewLifecycleOwner) {
-                if (it != null) {
-                    //val events: List<Event> = loadCurrentMeasurementsEvents()
-                    map!!.renderMeasurement(it, ArrayList()/* events */, false)
-                } else {
-                    map!!.clearMap()
-                }
-            }
         } catch (e: NoSuchMeasurementException) {
             Log.d(
                 TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
             )
         }
+    }
+
+    /**
+     * Observes the tracks of the currently captured measurement and renders the tracks on the map.
+     */
+    private fun observeTracks() {
+        val observer = Observer<ArrayList<Track>?> {
+            if (it != null) {
+                //val events: List<Event> = loadCurrentMeasurementsEvents()
+                map!!.renderMeasurement(it, ArrayList()/* events */, false)
+            } else {
+                map!!.clearMap()
+            }
+        }
+        capturingViewModel.tracks.observe(viewLifecycleOwner, observer)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
