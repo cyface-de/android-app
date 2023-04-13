@@ -34,7 +34,6 @@ import io.sentry.Sentry
 /**
  * The implementation of Android's `Application` class for this project.
  *
- *
  * It shows the errors (not handled by [LoginActivity]) as simple [Toast] to the user.
  *
  * @author Klemens Muthmann
