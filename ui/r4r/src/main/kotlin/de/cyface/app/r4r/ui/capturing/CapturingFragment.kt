@@ -354,12 +354,9 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     }
 
     override fun onCapturingStopped() {
-        // Disabled on Android 13+ for workaround, see `stop/pauseCapturing()` [RFR-246]
-        //if (Build.VERSION.SDK_INT < 33) { FIXME: see if bug is still here before uncommenting this
         setCapturingStatus(MeasurementStatus.FINISHED)
         viewModel.setLocation(null)
         viewModel.setMeasurementId(null)
-        //}
     }
 
     /**
@@ -524,28 +521,12 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             capturing.pause(
                 object : ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                     override fun shutDownFinished(measurementIdentifier: Long) {
-                        // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
-                        //if (Build.VERSION.SDK_INT < 33) { FIXME: see if bug is still here before uncommenting this
-                            // The measurement id should always be set [STAD-333]
-                            Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                            setCapturingStatus(MeasurementStatus.PAUSED)
-                            viewModel.setMeasurementId(null)
-                        //}
+                        // The measurement id should always be set [STAD-333]
+                        Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
+                        setCapturingStatus(MeasurementStatus.PAUSED)
+                        viewModel.setMeasurementId(null)
                     }
                 })
-
-            // Workaround for flaky `rebind` on Android 13+ [RFR-246]
-            // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
-            // - Use a static 500ms delay to give the measurement some time to stop.
-            /*if (Build.VERSION.SDK_INT >= 33) { FIXME: see if bug is still here before uncommenting this
-                val timeoutHandler = Handler(requireContext().mainLooper)
-                timeoutHandler.postAtTime({
-                    // The measurement id should always be set [STAD-333]
-                    // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    setCapturingStatus(MeasurementStatus.PAUSED)
-                    viewModel.setMeasurementId(null)
-                }, SystemClock.uptimeMillis() + 500L)
-            }*/
         } catch (e: NoSuchMeasurementException) {
             throw IllegalStateException(e)
         }
@@ -585,30 +566,13 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             capturing.stop(
                 object : ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                     override fun shutDownFinished(measurementIdentifier: Long) {
-                        // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
-                        //if (Build.VERSION.SDK_INT < 33) { FIXME: see if bug is still here before uncommenting this
-                            // The measurement id should always be set [STAD-333]
-                            Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                            viewModel.setTracks(null)
-                            setCapturingStatus(MeasurementStatus.FINISHED)
-                            viewModel.setMeasurementId(null)
-                        //}
+                        // The measurement id should always be set [STAD-333]
+                        Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
+                        viewModel.setTracks(null)
+                        setCapturingStatus(MeasurementStatus.FINISHED)
+                        viewModel.setMeasurementId(null)
                     }
                 })
-
-            // Workaround for flaky `rebind` on Android 13+ [RFR-246]
-            // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
-            // - Use a static 500ms delay to give the measurement some time to stop.
-            /*if (Build.VERSION.SDK_INT >= 33) { FIXME: see if bug is still here before uncommenting this
-                val timeoutHandler = Handler(requireContext().mainLooper)
-                timeoutHandler.postAtTime({
-                    // The measurement id should always be set [STAD-333]
-                    // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    viewModel.setTracks(null)
-                    setCapturingStatus(MeasurementStatus.FINISHED)
-                    viewModel.setMeasurementId(null)
-                }, SystemClock.uptimeMillis() + 500L)
-            }*/
         } catch (e: NoSuchMeasurementException) {
             throw IllegalStateException(e)
         }
