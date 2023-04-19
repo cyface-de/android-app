@@ -30,7 +30,7 @@ import de.cyface.app.ui.MainActivity
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.synchronization.exception.SynchronisationException
+import de.cyface.uploader.exception.SynchronisationException
 
 /**
  * The [androidx.core.view.MenuProvider] for the [de.cyface.app.ui.CapturingFragment] which defines which

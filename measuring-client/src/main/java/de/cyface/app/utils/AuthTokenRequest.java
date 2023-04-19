@@ -29,7 +29,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -38,6 +37,8 @@ import androidx.annotation.NonNull;
 
 import de.cyface.app.ui.LoginActivity;
 import de.cyface.synchronization.CyfaceAuthenticator;
+import de.cyface.synchronization.SyncService;
+import de.cyface.uploader.DefaultAuthenticator;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
@@ -75,8 +76,16 @@ public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRe
         }
         final Account account = getAccount(context);
 
+        // Load authUrl
+        final var preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final var url = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null);
+        if (url == null) {
+            throw new IllegalStateException(
+                    "Server url not available. Please set the applications server url preference.");
+        }
+
         // Explicitly calling CyfaceAuthenticator.getAuthToken(), see its documentation
-        final CyfaceAuthenticator cyfaceAuthenticator = new CyfaceAuthenticator(context);
+        final var cyfaceAuthenticator = new CyfaceAuthenticator(context, new DefaultAuthenticator(url));
         final String authToken;
         try {
             // AsyncTask because this is blocking but only for a short time
@@ -85,7 +94,6 @@ public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRe
         } catch (final NetworkErrorException e) {
             // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
             // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             final boolean isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
             if (isReportingEnabled) {
                 Sentry.captureException(e);

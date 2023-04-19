@@ -26,7 +26,7 @@
  */
 
 buildscript {
-    ext.gradle_version = '7.3.0'
+    ext.gradle_version = '7.4.2'
     ext.kotlin_version = "1.8.0"
     ext.matcher_version = "1.2.4"
 
@@ -55,11 +55,14 @@ ext {
      */
 
     // Cyface dependencies
+    // FIXME: Upgrade SDK to 7.7.0 (uploader library)
     cyfaceAndroidBackendVersion = "7.6.1" // Also update submodule commit ref
-    cyfaceUtilsVersion = "3.3.5" // Maven dependency
+    cyfaceUtilsVersion = "3.3.5"
     cyfaceEnergySettingsVersion = "3.3.1" // Also update submodule commit ref
+    // FIXME: upgrade to version with SDK 7.7.0
     cyfaceCameraServiceVersion = "4.1.10" // Also update submodule commit ref
-    cyfaceSerializationVersion = "2.3.3" // Keep im sync with version in submodule `backend`
+    cyfaceSerializationVersion = "2.3.4" // Keep im sync with version in submodule `backend`
+    cyfaceUploaderVersion = "1.0.0-alpha1" // FIXME
 
     // Android SDK versions
     minSdkVersion = 21 // device support
@@ -83,7 +86,6 @@ ext {
 
     // Other dependencies
     materialDialogsVersion = "3.3.0"
-    googleApiClientVersion = '1.31.5' // transmission protocol
     chartVersion = "v3.1.0"
 
     // Testing
@@ -130,6 +132,14 @@ allprojects {
             }
         }
         maven { url 'https://jitpack.io' } // For MPAndroidChart
+        maven {
+            url = uri("https://maven.pkg.github.com/cyface-de/uploader")
+            // Needed even for public projects: https://github.community/t5/GitHub-API-Development-and/Download-from-Github-Package-Registry-without-authentication/m-p/35255
+            credentials {
+                username = project.findProperty("githubUser")
+                password = project.findProperty("githubToken")
+            }
+        }
     }
 }
 

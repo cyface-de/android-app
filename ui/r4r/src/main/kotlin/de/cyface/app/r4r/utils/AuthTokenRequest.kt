@@ -22,7 +22,6 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.NetworkErrorException
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.preference.PreferenceManager
 import android.util.Log
@@ -31,6 +30,8 @@ import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.SyncService
+import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import java.lang.ref.WeakReference
@@ -63,8 +64,15 @@ abstract class AuthTokenRequest protected constructor(private val context: WeakR
         }
         val account: Account = getAccount(context)
 
+        // Load authUrl
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val url = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null)
+            ?: throw IllegalStateException(
+                "Server url not available. Please set the applications server url preference."
+            )
+
         // Explicitly calling CyfaceAuthenticator.getAuthToken(), see its documentation
-        val cyfaceAuthenticator = CyfaceAuthenticator(context)
+        val cyfaceAuthenticator = CyfaceAuthenticator(context, DefaultAuthenticator(url))
         val authToken: String = try {
             // AsyncTask because this is blocking but only for a short time
             cyfaceAuthenticator.getAuthToken(null, account, Constants.AUTH_TOKEN_TYPE, null)
@@ -72,8 +80,6 @@ abstract class AuthTokenRequest protected constructor(private val context: WeakR
         } catch (e: NetworkErrorException) {
             // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
             // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-            val preferences: SharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(context)
             val isReportingEnabled: Boolean = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
                 Sentry.captureException(e)
