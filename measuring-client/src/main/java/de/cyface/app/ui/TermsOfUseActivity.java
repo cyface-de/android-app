@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,8 +18,8 @@
  */
 package de.cyface.app.ui;
 
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.utils.Constants.ACCEPTED_TERMS_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_TERMS_KEY;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -41,7 +41,7 @@ import de.cyface.app.R;
  * When the current terms are accepted or have been before, the {@link MainActivity} is launched.
  *
  * @author Armin Schnabel
- * @version 1.1.0
+ * @version 1.1.1
  * @since 1.0.0
  */
 public class TermsOfUseActivity extends Activity implements View.OnClickListener {

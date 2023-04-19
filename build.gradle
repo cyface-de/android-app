@@ -21,13 +21,13 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.2.0
+ * @version 2.3.0
  * @since 1.0.0
  */
 
 buildscript {
     ext.gradle_version = '7.3.0'
-    ext.kotlin_version = "1.7.10"
+    ext.kotlin_version = "1.8.0"
     ext.matcher_version = "1.2.4"
 
     repositories {
@@ -45,7 +45,6 @@ buildscript {
 
 ext {
     // This app's version
-    applicationId = "de.cyface.app"
     versionName = "0.0.0" // Automatically overwritten by CI. Version shown to the user
     versionCode = 1 // Automatically incremented by CI. Required for Play Store releases
 
@@ -56,10 +55,10 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.5.0" // Also update submodule commit ref
-    cyfaceUtilsVersion = "3.3.4" // Maven dependency
-    cyfaceEnergySettingsVersion = "3.2.6" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.1.7" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.6.1" // Also update submodule commit ref
+    cyfaceUtilsVersion = "3.3.5" // Maven dependency
+    cyfaceEnergySettingsVersion = "3.3.1" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.1.10" // Also update submodule commit ref
     cyfaceSerializationVersion = "2.3.3" // Keep im sync with version in submodule `backend`
 
     // Android SDK versions
@@ -70,12 +69,14 @@ ext {
 
     // Android dependencies
     multidexVersion = "2.0.1"
-    androidxAnnotationVersion = '1.4.0'
-    androidxAppCompatVersion = "1.6.0-rc01" // RC to fix duplicate lifecycle dependency issue in app
+    androidxAnnotationVersion = '1.6.0'
+    androidxAppCompatVersion = "1.6.1"
     androidPreferencesVersion = '1.2.0'
     localbroadcastmanagerVersion = '1.1.0'
     exifinterfaceVersion = "1.3.6" // Required by Camera Service submodule
-    roomVersion = "2.5.0"
+    roomVersion = "2.5.1"
+    lifecycleVersion = "2.5.0"
+    navigationVersion = "2.5.3"
 
     // Kotlin components
     coroutinesVersion = "1.6.4"
@@ -83,16 +84,19 @@ ext {
     // Other dependencies
     materialDialogsVersion = "3.3.0"
     googleApiClientVersion = '1.31.5' // transmission protocol
+    chartVersion = "v3.1.0"
 
     // Testing
     junitVersion = "1.1.5"
     mockitoVersion = '4.8.0'
+    mockitoKotlinVersion = '4.1.0'
     hamcrestVersion = "1.3"
     rulesVersion = "1.5.0"
     robolectricVersion = "4.8.2"
     androidxTestCoreVersion = '1.4.0'
-    runnerVersion = "1.4.0"
+    runnerVersion = "1.5.2"
     uiAutomatorVersion = "2.2.0"
+    espressoVersion = "3.5.1"
     constrantLayoutVersion = "1.3.2"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -105,10 +109,10 @@ ext {
     sentryAndroidVersion = '6.4.2'
     sentryAndroidGradlePluginVersion = "2.0.1"
     mapPlayServicesVersion = '18.1.0'
-    locationPlayServicesVersion = '20.0.0'
-    materialVersion = '1.6.1'
+    locationPlayServicesVersion = '21.0.1'
+    materialVersion = '1.8.0'
     circelProgressVersion = "1.1.0" // Version > 1.1.0 (1.2.1) is currently not available
-    androidxRecyclerViewVersion = "1.2.1"
+    androidxRecyclerViewVersion = "1.3.0"
 }
 
 // Attention: Overwrites also the repositories used to retrieve the transitive dependencies in the submodules
@@ -125,6 +129,7 @@ allprojects {
                 password = project.findProperty("githubToken")
             }
         }
+        maven { url 'https://jitpack.io' } // For MPAndroidChart
     }
 }
 

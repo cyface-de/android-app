@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
-
-  <!-- Other -->
-  <string name="accept_terms">Accetta condizioni</string>
-  <string name="accept_reports_details">Trasmettere automaticamente i messaggi di errore e l\'utilizzo delle app</string>
-  <string name="accept_terms_details">Ho letto il disclaimer e l\'informativa sulla privacy e accetto queste condizioni.</string>
-  <string name="notification_channel_name_info">Informazioni</string>
-  <string name="notification_channel_name_warning">Avvisi</string>
-  <string name="notification_channel_description_info">Notifiche informative, ad esempio quando l\'upload ha avuto successo.</string>
-  <string name="notification_channel_description_warning">Messaggi di avviso, ad es. quando la memoria è piena e la misurazione ha dovuto essere annullata. Questa notifica non deve essere disabilitata.</string>
-  <string name="toast_last_tracking_crashed">Il tracciamento del tuo ultimo tracking si è interrotto inaspettatamente.</string>
-
   <!-- Dialogs -->
   <string name="dialog_modality_title">Scegliere il tipo di veicolo</string>
   <!-- synchronize the order of the items with Modality enum type and tab selection -->
@@ -23,90 +11,29 @@
     <item>Autobus</item>
     <item>Treno</item>
   </string-array>
-  <string name="modality_car">Auto</string>
-  <string name="modality_bicycle">Bici</string>
-  <string name="modality_walking">Passeggiare</string>
-  <string name="modality_bus">Autobus</string>
-  <string name="modality_train">Treno</string>
-  <string name="modality_motorbike">Motociclo</string>
-
-  <!-- Login -->
-  <string name="login_name">Login</string>
-  <string name="password">Password</string>
-  <string name="log_in">Accedi</string>
-  <string name="your_request">La tua richiesta</string>
-  <string name="no_login_register">Nessuna credenziale? <font color="#3f8730">Registrati ora</font></string>
-  <string name="title_activity_login">Accedi</string>
-  <string name="error_message_field_required">This Quest ocampo è richiesto</string>
-  <string name="error_message_invalid_email">Questa email non è valida</string>
-  <string name="error_message_password_too_short">Questa password è troppo corta</string>
-  <string name="error_message_login_too_short">Questo nome utente è troppo corto</string>
 
   <!-- Capturing -->
-  <string name="synchronize">Carica</string>
-  <string name="distance">Distance</string>
   <string name="measurement_id">Identificativo misura</string>
-  <string name="title_dialog_starting_data_capture">Inizio acquisizione dati</string>
-  <string name="text_button_start">Avvia l\'acquisizione dei dati</string>
-  <string name="error_message_capturing_canceled_no_space">È necessario liberare spazio per iniziare l\'acquisizione.</string>
-  <string name="notification_title_capturing_stopped">La registrazione dei dati è stata bloccata</string>
-  <string name="msg_calibrating">Calibrazione</string>
   <string name="capturing_active">Registrazione dati in corso</string>
+  <string name="toast_measurement_paused">Viaggio in pausa</string>
+  <string name="toast_measurement_resumed">Il viaggio riprende</string>
 
-  <!-- Synchronization -->
-  <string name="error_message_sync_canceled_no_wifi">È necessaria una connessione Wi-Fi per registrare i dati.</string>
-  <string name="error_message_sync_canceled_disabled">La sincronizzazione è disattivata dalle impostazioni.</string>
-
-  <!-- Navigation bar -->
-  <string name="settings">Impostazioni</string>
-  <string name="drawer_title_home">Home</string>
-  <string name="drawer_title_measurements">Misurazioni</string>
-  <string name="drawer_title_feedback">Feedback</string>
-  <string name="drawer_title_guide">Guida all\'impostazione</string>
-  <string name="drawer_title_imprint">Imprint</string>
-  <string name="drawer_title_logout">Logout</string>
-  <string name="drawer_setting_zoom_to_location">Mappa sempre centrata</string>
-  <string name="drawer_setting_synchronize">Sincronizzazione</string>
+  <!-- Navigation -->
   <string name="drawer_setting_speed_sensor">External sensor</string>
   <string name="drawer_setting_pictures">Camera mode</string>
-  <string name="sync_disabled_toast">Senza sincronizzazione, viene utilizzato più spazio di archiviazione.</string>
-  <string name="zoom_to_location_enabled_toast">Quando lo schermo è attivo, viene caricato più materiale della mappa.</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
-  <string name="drawer_settings">Settings</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
 
-  <!-- Measurement page -->
-  <string name="modality_type">Tipo di modalità</string>
-  <string name="mark_all_menu_item">Seleziona tutte le voci</string>
-  <string name="delete_marked_menu_item">Elimina contrassegnato</string>
-  <string name="measurement">Misurazione</string>
-  <string name="toast_export">Esporta:</string>
-  <string name="title_menu_item_export">Esporta tutto</string>
-    <!-- Keep <= 60 characters as Toasts are limited on Android 12+. -->
-  <string name="export_data">Esportazione dati …</string>
-  <string name="export_data_no_permission">È richiesto l\'accesso alla memoria esterna (SD).</string>
-  <string name="delete_data">Cancellazione delle misure contrassegnate …</string>
-  <string name="delete_data_non_selected">Non è stata selezionata alcuna misura. Selezione multipla mediante pressione prolungata.</string>
-  <string name="toast_selection_mode_enabled">Selezione delle misure abilitato</string>
-  <string name="toast_selection_mode_disabled">Selezione delle misure disabilitato</string>
-  <string name="toast_no_locations_found">Nessun dato di posizione registrato</string>
-  <string name="toast_measurement_deletion_success">Le copie delle misure sul server non sono interessate.</string>
-  <string name="toast_item_deletion_success">Le voci selezionate sono state cancellate.</string>
-  <string name="toast_measurement_paused">Viaggio in pausa</string>
-  <string name="toast_measurement_resumed">Il viaggio riprende</string>
-  <string name="toast_select_location">Selezionare una località</string>
-  <string name="toast_item_created_on_tracks_nearest_position">L\'elemento è stato creato e spostato in pista</string>
-
-  <!-- Camera Service -->
+  <!-- Camera -->
   <string name="camera_status">Camera Status</string>
   <string name="camera_status_connected">camera: ready</string>
   <string name="camera_status_paused">camera: paused</string>
   <string name="camera_capturing_active">Camera capturing ongoing</string>
   <string name="experimental_feature_warning">Attenzione: impostazione sperimentale</string>
-  <string name="camera_settings_JPEG_settings">JPEG picture-mode</string>
-  <string name="camera_settings_title_supported_features">Supported Features (main camera)</string>
+  <string name="JPEG_settings">JPEG picture-mode</string>
+  <string name="supported_features_title">Supported Features (main camera)</string>
   <string name="camera_feature_camera2_support_level"> \'camera2\' support level: </string>
   <string name="camera_feature_manual_sensor">Manual sensor control:</string>
   <string name="camera_feature_focus_distance_calibration">Focus distance: </string>
@@ -119,229 +46,4 @@
   <string name="camera_images">images: </string>
   <string name="notification_title_picture_capturing_decreased">Decreased picture capturing rate</string>
   <string name="notification_text_picture_capturing_decreased">Less images were captured than expected by the service.</string>
-
-  <!-- Imprint page -->
-  <string name="publisher">Editore</string>
-  <string name="publisher_content">Cyface GmbH
-        \nFröbelstr. 49
-        \n01159 Dresden
-        \nGermany\n
-
-        \nRepresented by:
-        \nDr. Klemens Muthmann
-        \nArmin Schnabel
-        \nDirk Ackner\n
-
-        \nEmail: mail@cyface.de
-        \nTelefon: +49 351 658 6363 9\n
-
-        \nAmtsgericht Dresden
-        \nHRB: 36726
-        \nUSt.-Id. (VAT no.): DE-312598748</string>
-
-  <!-- Attention: The legal text should be updated first in Confluence! -->
-  <string name="reports">Tracciamento degli errori attraverso Sentry</string>
-  <string name="reports_content">Miglioriamo e sviluppiamo costantemente la nostra app. Tuttavia, non possiamo garantire un funzionamento senza errori dell\'app. Al fine di mantenere i possibili errori di programmazione al minimo, utilizziamo Sentry, un servizio di Functional Software Inc., 132 Hawthorne St., San Francisco, CA 94107, USA (di seguito "Sentry"). La sentinella controlla gli errori che si verificano all\'interno della nostra App e ci informa su di essi. In caso di errore del software, le seguenti informazioni vengono trasmesse automaticamente a Sentry:
-
-        \n \n- Messaggi di errore che si verificano quando si utilizza l\'app
-        \n- Informazioni sull\'utilizzo dell\'app immediatamente prima del verificarsi dell\'errore
-        \n- Data e ora degli errori, ora di inizio dell\'applicazione
-        \n- informazioni sul dispositivo: Sistema operativo, versione app e modello di dispositivo
-        \n- identificatore per l\'identificazione dei guasti dello stesso apparecchio
-        \n- Stato del dispositivo: carica e temperatura della batteria, livello di carica, tempo di avvio del dispositivo, memoria, tipo di connessione (Wi-Fi/dati mobili), spazio di memoria, memoria disponibile, lingua preferita, orientamento del dispositivo, risoluzione e densità dello schermo, fuso orario
-        \n- Indirizzo IP dell\'apparecchio (stabilendo la connessione)
-
-        \n Le informazioni sono raccolte in forma anonima, non vengono utilizzate per scopi personali o per scopi pubblicitari e poi cancellate di nuovo. La base giuridica per il suddetto trattamento dei dati è costituita dall\'art. 6 cpv. 1 lett. f della GDPR.
-
-        \n \n L\'unico scopo dell\'elaborazione è quello di migliorare la stabilità e l\'usabilità dell\'app. Ulteriori informazioni sul trattamento dei dati da parte di Sentry si trovano nell\'Informativa sulla privacy di Sentry: https://sentry.io/privacy/</string>
-
-  <!-- Attention: The legal text should be updated first in Confluence! -->
-  <string name="disclaimer">Disclaimer</string>
-  <string name="disclaimer_content">L\'applicazione \"Cyface\" (di seguito anche: \"App\") è in <b>versione beta</b>. E\' stata sviluppata al meglio delle nostre conoscenze con la massima cura da parte di sviluppatori di software competenti. Stiamo testando l\'applicazione regolarmente e ampiamente sui nostri dispositivi mobili.
-        \nTuttavia, al momento non possiamo garantire che tutto funzioni come previsto e non ci assumiamo alcuna responsabilità per i danni che possono derivare dall\'uso dell\'applicazione. Allo stesso tempo, non possiamo promettervi la disponibilità dei nostri server e servizi come il caricamento dei dati, l\'elaborazione e la visualizzazione dei dati.
-        \n<b>Utilizzando questa applicazione accetti queste condizioni e le condizioni sulla privacy qui sotto.</b></string>
-
-  <!-- Attention: The legal text should be updated first in Confluence! -->
-  <!-- Version 2.1.1 -->
-  <string name="privacy">Consenso al trattamento dei dati</string>
-  <string name="privacy_content"><b>1. Nome e indirizzo della persona responsabile</b>
-        \n\nL\'entità responsabile ai sensi del regolamento generale sulla protezione dei dati e di altre leggi nazionali in materia di protezione dei dati degli Stati membri, nonché di altre disposizioni in materia di protezione dei dati è la seguente:
-
-        \n\nCyface GmbH
-        \nFröbelstr. 49
-        \n01159 Dresden
-        \nGermania
-        \nTelefono: +49 351 658 6363 9
-        \nE-Mail: mail@cyface.de
-        \nSito web: https://cyface.de
-
-        \n\nReferente: Klemens Muthmann
-        \nE-mail: klemens.muthmann@cyface.de
-
-        \n\n<b>2. Informazioni generali sul trattamento dei dati</b>
-        \n\n<b>2.1 Finalità e ambito di applicazione del trattamento dei dati personali</b>
-        \n\nElaboriamo i dati personali dei nostri utenti solo nella misura necessaria per fornire un\'applicazione funzionale e per fornire i nostri contenuti e servizi. Il trattamento dei dati personali dei nostri utenti avviene solo con il consenso dell\'utente. Un\'eccezione si applica ai casi in cui il consenso preventivo non è possibile per motivi reali e solo quando il trattamento dei dati è consentito dalla legge.
-
-        \n\n<b>2.2 Base giuridica per il trattamento dei dati personali</b>
-        \n\nQuando otteniamo il consenso dell\'interessato per il trattamento dei dati personali, Art. 6 comma. 1 lit. un regolamento generale dell\'UE sulla protezione dei dati (GDPR) funge da base giuridica.
-        \nArt. Paragrafo 6 1 lit. b Il GDPR serve come base giuridica per il trattamento dei dati personali necessari per l\'adempimento di un contratto di cui l\'interessato è parte. Ciò vale anche per le procedure di trattamento necessarie per l\'esecuzione di misure precontrattuali.
-        \nSe il trattamento dei dati personali è necessario per adempiere ad un obbligo di legge cui è soggetta la nostra azienda, Art. 6 comma 1 lit. c GDPR serve come base giuridica.
-        \nNel caso in cui gli interessi vitali dell\'interessato o di un\'altra persona fisica richiedano l\'elaborazione di dati personali, l\'art. 6 cpv. 1 lett. c GDPR funge da base giuridica. 6 comma 1 lit. d GDPR serve come base giuridica.
-        \nSe il trattamento è necessario per salvaguardare un interesse legittimo della nostra azienda o di terzi e se gli interessi, i diritti e le libertà fondamentali della persona interessata non superano il primo interesse, l\'art. 6 cpv. 1 lett. d RDPC serve come base giuridica. 6 comma 1 lit. f GDPR serve come base giuridica per il trattamento.
-
-        \n\n<b>2.3 Durata di cancellazione e memorizzazione dei dati</b>
-        \n\nI dati personali dell\'interessato vengono cancellati o bloccati non appena lo scopo della memorizzazione non è più valido. Inoltre, i dati possono essere memorizzati se il legislatore europeo o nazionale lo ha previsto in regolamenti, leggi o altre norme dell\'Unione europea a cui il responsabile è soggetto. I dati saranno inoltre bloccati o cancellati in caso di scadenza di un periodo di conservazione prescritto dalla normativa di cui sopra, a meno che non sia necessario conservare ulteriormente i dati per concludere o adempiere a un contratto.
-
-        \n\n<b>3. Fornitura dell\'applicazione e creazione di file di log</b>
-        \n\n<b>3.1 Descrizione e ambito di applicazione del trattamento dei dati</b>
-        \n\nQuando si utilizza l\'applicazione, vengono raccolti continuamente i seguenti dati:
-
-        \n\n- Coordinate geografiche (longitudine, latitudine e precisione stimata)
-        \n- Dati sull\'accelerazione a 3 assi
-        \n- Dati sull\'accelerazione angolare su 3 assi
-        \n- Dati magnetometrici a 3 assi e 3 assi
-        \n- Un identificatore anonimo che permette di riconoscere i dati dallo stesso dispositivo
-        \n- Un account utente anonimo che ci permette di riconoscere che stai usando una versione valida dell\'App
-        \n- Il modello di smartphone usato per la prima volta
-        \n- La versione del sistema operativo usato sullo smartphone
-
-
-        \n\nQuesti dati provengono direttamente dai sensori del dispositivo mobile utilizzato o vengono generati nell\'applicazione mobile. Raccolta continua significa che i geodati sono raccolti ad intervalli di un secondo o più. I dati di accelerazione, accelerazione angolare e magnetometro sono registrati alla massima frequenza supportata dall\'hardware.
-        \nI dati acquisiti vengono inviati a un server Cyface tramite trasmissione dati senza fili e memorizzati in un database per un\'ulteriore elaborazione. Il Cyface Server si trova attualmente in Germania e continuerà a seguire la legge tedesca anche in futuro.
-        \nI dati saranno memorizzati parzialmente o completamente nei file di log del nostro sistema. Questi dati non saranno memorizzati insieme ad altri dati personali dell\'utente.
-        \nLa base giuridica per la memorizzazione temporanea di dati e file di log è l\'Art. 6 comma 1 lit. f GDPR.
-
-            \n\n<b>3.2 Finalità del trattamento dei dati</b>
-        \n\nUtilizziamo i dati registrati in forma aggregata ed anonima per la presentazione in rappresentazioni cartografiche sul nostro sito web. Inoltre, i dati aggregati e resi anonimi sono messi a disposizione delle nostre aziende partner. I dati offerti in questo modo vengono utilizzati per creare servizi a valore aggiunto come le nostre applicazioni mobili o applicazioni desktop o per effettuare analisi dei dati. I dati pubblicati possono essere utilizzati per ottenere informazioni sullo stato delle strade e sul traffico.
-        \nI file di log vengono utilizzati per garantire la funzionalità dell\'applicazione. I dati vengono utilizzati anche per ottimizzare il sito web e per garantire la sicurezza dei nostri sistemi informatici. In questo contesto non viene effettuata una valutazione dei dati a fini di marketing.
-        \nQuesti scopi costituiscono il nostro legittimo interesse al trattamento dei dati ai sensi dell\'Art. 6 comma 1 lit. f GDPR.
-
-      \n\n<b>3.3 Durata dello stoccaggio</b>
-        \n\nI dati sono cancellati non appena non sono più necessari ai fini della loro raccolta.
-        \nQuando i dati sono memorizzati in file di log, questo è il caso dopo non più di sette giorni. Una memorizzazione che va oltre questo è possibile. In questo caso i dati dell\'utente saranno cancellati o modificati, in modo che un\'assegnazione del cliente non è più possibile.
-
-        \n\n<b>3.4 Possibilità di obiezione e rimozione</b>
-        \n\nLa raccolta dei dati e la loro conservazione in file di log è obbligatoria per il funzionamento dell\'applicazione. Di conseguenza, non vi è alcuna possibilità per l\'utente di opporsi.
-
-        \n\n<b>4. Registrazione</b>
-        \n\nNella nostra applicazione, offriamo agli utenti la possibilità di registrarsi fornendo dati personali. I dati vengono inseriti in una maschera di input e trasmessi a noi e dove sono memorizzati. I dati non saranno trasmessi a terzi. I seguenti dati sono raccolti durante il processo di registrazione:
-
-        \n\n- Un indirizzo e-mail dell\'utente
-        \n- Una password dell\'utente
-        \n- Durante il processo di registrazione, si ottiene il consenso dell\'utente per il trattamento di questi dati.
-
-            \n\n<b>4.1 Base giuridica per l\'elaborazione dei dati</b>
-        \n\nLa base giuridica per il trattamento dei dati è l\'Art. 6 comma 1 lit. a GDPR se l\'utente ha dato il suo consenso.
-        \nSe la registrazione serve all\'adempimento di un contratto di cui l\'utente è parte o se serve all\'attuazione di misure precontrattuali, la base giuridica aggiuntiva per il trattamento dei dati è l\'art. 6 cpv. 1 lett. a RDPC, se l\'utente ha dato il suo consenso. 6 comma 1 lit. b GDPR.
-
-            \n\n<b>4.2 Finalità del trattamento dei dati</b>
-        \n\nLa registrazione dell\'utente è necessaria per la presentazione dei dati raccolti dall\'utente stesso, nonché per la cancellazione di tali dati ai sensi dell\'art. 7 della legge. 17.
-        \nLa registrazione dell\'utente è necessaria per l\'adempimento di un contratto con l\'utente o per l\'esecuzione di misure precontrattuali.
-
-            \n\n<b>4.3 Durata della memorizzazione</b>
-        \n\nI dati sono cancellati non appena non sono più necessari per raggiungere lo scopo per il quale sono stati raccolti.
-        \nQuesto vale per i dati raccolti durante il processo di registrazione se la registrazione viene cancellata o modificata nella nostra domanda.
-        \nQuesto è il caso dei dati raccolti durante il processo di registrazione per adempiere ad un contratto o per attuare misure precontrattuali se i dati non sono più necessari per l\'adempimento del contratto. Anche dopo la fine del contratto, può essere necessario conservare i dati personali del partner contrattuale per adempiere agli obblighi contrattuali o legali.
-
-            \n\n<b>4.4 Possibilità di opposizione e rimozione</b>
-        \n\nCome utente hai la possibilità di cancellare la registrazione in qualsiasi momento. È possibile modificare i dati memorizzati su di te in qualsiasi momento.
-        \nPer revocare la registrazione o modificare i dati memorizzati, si prega di utilizzare le funzioni appropriate nell\'applicazione o sul nostro sito web. Se queste funzioni non sono disponibili, si prega di contattare direttamente il responsabile della protezione dei dati.
-
-            \n\n<b>5. Diritti dell\'interessato</b>
-        \n\nSe i tuoi dati personali sono trattati, sei interessato ai sensi della GDPR e hai i seguenti diritti nei confronti della persona responsabile:
-
-            \n\n<b>5.1 Diritto di informazione</b>
-        \n\nHai il diritto di chiedere al responsabile di confermare se i dati personali che ti riguardano sono oggetto di trattamento da parte nostra.
-        \nNel caso in cui tale trattamento avvenga, potete chiedere al responsabile di fornirvi le seguenti informazioni:
-
-        \n\n- le finalità per le quali i dati personali sono trattati;
-        \n- le categorie di dati personali oggetto del trattamento;
-        \n- i destinatari o le categorie di destinatari ai quali i dati personali che vi riguardano sono stati o saranno comunicati;
-        \n- la durata prevista della conservazione dei dati personali che vi riguardano o, se questo non è possibile, i criteri per determinare la durata della conservazione;
-        \n- l\'esistenza di un diritto di rettifica o cancellazione dei dati personali che vi riguardano, di un diritto di limitare il trattamento effettuato dal responsabile o di opporsi a tale trattamento;
-        \n- l\'esistenza di un diritto di reclamo presso un\'autorità di controllo;
-        \n- qualsiasi informazione disponibile sull\'origine dei dati, se i dati personali non sono raccolti presso l\'interessato;
-        \n- l\'esistenza di un processo decisionale automatizzato, compresa la definizione di profili ai sensi dell\'articolo 22, paragrafi 1 e 4, del RNL e - almeno in questi casi - informazioni significative sulla logica, la portata e gli effetti previsti di tale trattamento per la persona interessata.
-
-        \n\nAvete il diritto di chiedere informazioni circa l\'eventuale trasferimento dei dati personali che vi riguardano verso un paese terzo o verso un\'organizzazione internazionale. In tale contesto, l\'interessato può chiedere di essere informato sulle adeguate misure di sicurezza ai sensi dell\'articolo. 46 GDPR per quanto riguarda il trasferimento dei dati.
-        \nQuesto diritto di accesso può essere limitato nella misura in cui si prevede che renda impossibile o pregiudichi gravemente la realizzazione delle finalità di ricerca o statistiche e che la restrizione sia necessaria per l\'adempimento delle finalità di ricerca o statistiche.
-
-            \n\n<b>5.2 Diritto di rettifica</b>
-        \n\nHai il diritto di chiedere al responsabile di rettificare e/o completare qualsiasi dato personale che ti riguarda e che viene trattato in modo errato o incompleto. La persona responsabile deve effettuare immediatamente la rettifica.
-        \nIl tuo diritto alla rettifica può essere limitato nella misura in cui si prevede che renda impossibile o ostacoli seriamente il raggiungimento degli scopi di ricerca o statistici e che la limitazione sia necessaria per il raggiungimento degli scopi di ricerca o statistici.
-
-            \n\n<b>5.3 Diritto alla limitazione del trattamento</b>
-        \n\nNelle seguenti circostanze, potete richiedere che il trattamento dei vostri dati personali sia limitato:
-
-        \n\n- In caso di contestazione dell\'esattezza dei dati personali che ti riguardano per un periodo di tempo che consenta al responsabile di verificare l\'esattezza dei dati personali;
-        \n- il trattamento è illegale e l\'utente rifiuta la cancellazione dei dati personali e richiede invece la limitazione dell\'utilizzo dei dati personali;
-        \n- il titolare del trattamento non ha più bisogno dei dati personali per le finalità del trattamento, ma è necessario per far valere, esercitare o difendere azioni legali, oppure
-        \n- se si è opposta al trattamento ai sensi dell\'art. 21 comma 1 GDPR e non è stato ancora stabilito se le ragioni giustificate del responsabile del trattamento dei dati superano le vostre ragioni.
-
-        \nSe il trattamento dei dati personali che ti riguardano è stato limitato, tali dati - oltre ad essere memorizzati - possono essere trattati solo con il tuo consenso o per far valere, esercitare o difendere un diritto in giudizio o per la tutela dei diritti di un\'altra persona fisica o giuridica o per motivi di rilevante interesse pubblico dell\'Unione o di uno Stato membro.
-        \nSe la restrizione al trattamento è stata limitata conformemente alle condizioni di cui sopra, il responsabile del trattamento dei dati vi informerà prima che la restrizione venga revocata.
-        \nIl vostro diritto di limitare il trattamento può essere limitato nella misura in cui si prevede che ciò renda impossibile o pregiudichi seriamente il raggiungimento degli scopi di ricerca o statistici e che la limitazione sia necessaria per il raggiungimento degli scopi di ricerca o statistici.
-
-        \n\n<b>5.4 Diritto di cancellazione</b>
-        \n\n<b>Obbligo di cancellare i dati</b>
-        \nPotete chiedere al responsabile del trattamento di cancellare immediatamente i dati personali che vi riguardano e il responsabile del trattamento è obbligato a cancellare immediatamente tali dati se si verifica una delle seguenti ragioni:
-
-        \n\n- I dati personali che ti riguardano non sono più necessari per gli scopi per i quali sono stati raccolti o altrimenti trattati.
-        \n- Lei revoca il consenso su cui si basa il trattamento ai sensi dell\'Art. 6 comma 1 lit. a o Art. 9 cpv. 2 lett. a GDPR e non esiste un\'altra base giuridica per il trattamento.
-        \n- Lei si oppone al trattamento ai sensi dell\'art. 9 cpv. 1 lett. a o dell\'art. 9 cpv. 2 lett. a GDPR e non esiste un\'altra base giuridica per il trattamento. 21 comma 1 GDPR e non esiste un\'altra base giuridica per il trattamento, oppure vi opponete al trattamento ai sensi dell\'articolo 21 cpv. 21 cpv. 2 GDPR.
-        \n- I dati personali che la riguardano sono stati trattati in modo illecito.
-        \n- La cancellazione dei dati personali che vi riguardano è necessaria per adempiere ad un obbligo legale ai sensi del diritto dell\'Unione o del diritto degli Stati membri a cui è soggetto il responsabile del trattamento dei dati.
-        \n- I dati personali che la riguardano sono stati raccolti in relazione ai servizi informativi offerti ai sensi dell\'art. 7 della legge. comma 8 1 GDPR.
-
-        \n\n<b>Informazione a terzi</b>
-        \nSe il responsabile ha reso pubblici i dati personali che vi riguardano e ha l\'obbligo di cancellarli ai sensi dell\'Art. 17 comma 1 GDPR, tale persona prenderà le misure appropriate, anche di natura tecnica, tenendo conto della tecnologia disponibile e dei costi di implementazione, per informare i responsabili del trattamento dei dati che trattano i dati personali che Lei, in qualità di persona interessata, ha chiesto loro di cancellare tutti i link a questi dati personali o copie o repliche di questi dati personali.
-
-        \n\n<b>Eccezioni</b>
-        \nIl diritto alla cancellazione non si applica se il trattamento è necessario.
-
-        \n\n- per esercitare la liberta\' di espressione e di informazione;
-        \n- di adempiere ad un obbligo giuridico imposto dal diritto dell\'Unione o degli Stati membri cui è soggetto il responsabile del trattamento, o di eseguire un compito di interesse pubblico o nell\'esercizio dei pubblici poteri affidati al responsabile del trattamento;
-        \n- per motivi di interesse pubblico nel settore della sanità pubblica ai sensi dell\'art. 9 cpv. 2 lett. h e i e Art. 9 cpv. 3 GDPR;
-        \n- a fini archivistici di pubblico interesse, a fini di ricerca scientifica o storica o a fini statistici ai sensi dell\'art. 9 cpv. 2 lett. h e i e dell\'art. 9 cpv. 3 RDPP; \n- a fini archivistici nell\'interesse pubblico, a fini di ricerca scientifica o storica o a fini statistici ai sensi dell\'art. 9 cpv. 2 lett. h). 89 cpv. 1 GDPR, nella misura in cui la legge di cui al paragrafo "Obbligo di cancellazione dei dati" rende presumibilmente impossibile o pregiudica gravemente il raggiungimento degli obiettivi di tale trattamento, oppure
-        \n- per far valere, esercitare o difendere un\'azione legale.
-
-        \n\n<b>5.5 Diritto a ricevere informazioni</b>
-        \n\nSe avete esercitato il vostro diritto di rettificare, cancellare o limitare il trattamento dei vostri dati personali contro il responsabile, quest\'ultimo è obbligato a notificare a tutti i destinatari a cui sono stati comunicati i dati personali che vi riguardano, la rettifica, la cancellazione o la limitazione del trattamento, a meno che ciò non risulti impossibile o comporti uno sforzo sproporzionato.
-        \nAvete il diritto di essere informati di questi destinatari da parte del titolare del trattamento dei dati.
-
-        \n\n<b>5.6 Diritto di trasferimento dati</b>
-        \n\nHai il diritto di ottenere i dati personali che ti riguardano che hai fornito al titolare del trattamento in un formato strutturato, comune e leggibile a macchina. Inoltre, avete il diritto di trasferire questi dati ad un altro responsabile del trattamento senza che ciò sia ostacolato dal responsabile del trattamento a cui i dati personali sono stati forniti, nella misura in cui
-
-        \n\n- Il trattamento si basa su un consenso ai sensi dell\'Art. 6 comma 1 lit. a GDPR o Art. 9 cpv. 2 lett. a GDPR o su un contratto ai sensi dell\'articolo 6 cpv. 1 lett. a GDPR o su un contratto ai sensi dell\'articolo 6 cpv. 2 lett. a GDPR o dell\'articolo 6 cpv. 1 lett. a GDPR o dell\'articolo 6 cpv. 1 lett. a GDPR. 6 cpv. 1 lit. b GDPR e
-        \n- il trattamento è effettuato con procedure automatizzate.
-
-        \n\nNell\'esercizio di tale diritto, l\'utente ha inoltre il diritto di ottenere che i dati personali che lo riguardano siano comunicati direttamente da un responsabile ad un altro responsabile, per quanto tecnicamente possibile. Le libertà e i diritti delle altre persone non devono essere influenzati da questo.
-        \nIl diritto al trasferimento dei dati non si applica al trattamento dei dati personali necessari per l\'esecuzione di un compito svolto nell\'interesse pubblico o nell\'esercizio dei pubblici poteri affidati al responsabile del trattamento.
-
-            \n\n<b>5.7 Diritto di opposizione</b>
-        \n\nAvete il diritto, per ragioni legate alla vostra situazione particolare, di opporvi in qualsiasi momento al trattamento dei dati personali che vi riguardano, effettuato ai sensi dell\'art. 13 della legge. 6 par. 1 lit. e o f GDPR, compresa la profilazione sulla base di tali disposizioni.
-        \nIl responsabile non tratta più i dati personali che vi riguardano, a meno che non possa dimostrare di avere motivi legittimi per il trattamento, che prevalgono sui vostri interessi, diritti e libertà, o che il trattamento serve all\'affermazione, all\'esercizio o alla difesa di pretese legali.
-        \nSe i dati personali che vi riguardano sono trattati a fini di marketing diretto, avete il diritto di opporvi in qualsiasi momento al trattamento dei dati personali che vi riguardano a fini pubblicitari; ciò vale anche per la profilazione, nella misura in cui essa è collegata a tale marketing diretto.
-        \nSe l\'utente si oppone al trattamento per scopi di marketing diretto, i dati personali che lo riguardano non saranno più trattati per tali scopi.
-        \nAvete il diritto di esercitare il vostro diritto di opposizione attraverso procedure automatizzate con specifiche tecniche in relazione all\'utilizzo dei servizi di informazione, nonostante la direttiva 2002/58/CE.
-        \nAvete inoltre il diritto di opporvi, per motivi connessi alla vostra situazione particolare, al trattamento dei dati personali che vi riguardano per finalità di ricerca scientifica o storica o per fini statistici ai sensi dell\'art. 7 della direttiva 2002/58/CE. Articolo 89 comma 1 GDPR.
-        \nIl tuo diritto di opposizione può essere limitato nella misura in cui si prevede che ciò renda impossibile o pregiudichi seriamente la realizzazione delle finalità di ricerca o statistiche e la limitazione è necessaria per l\'adempimento delle finalità di ricerca o statistiche.
-
-            \n\n<b>5.8 Diritto di revocare la dichiarazione di consenso ai sensi della legge sulla protezione dei dati</b>
-        \n\nHai il diritto di revocare il tuo consenso alla protezione dei dati in qualsiasi momento. La revoca del vostro consenso non pregiudica la legalità del trattamento che ha avuto luogo sulla base del vostro consenso fino a quando non revocate il vostro consenso.
-
-        \n\n<b>5.9 Decisione automatizzata in casi individuali, compresa la profilazione</b>
-        \n\nHai il diritto di non essere soggetto ad alcuna decisione basata esclusivamente sull\'elaborazione automatizzata, inclusa la profilazione, che abbia effetti legali su di te o che ti riguardi in modo significativo. Questo non si applica se la decisione
-
-        \n\n- è necessario per la conclusione o l\'esecuzione di un contratto tra te e la persona responsabile,
-        \n- è autorizzato dalla legislazione dell\'Unione o degli Stati membri cui è soggetta la persona responsabile e contiene misure adeguate per salvaguardare i vostri diritti e libertà e i vostri legittimi interessi, oppure
-        \n- con il suo esplicito consenso.
-
-        \n\nTuttavia, tali decisioni non possono essere basate su categorie particolari di dati personali ai sensi dell\'art. 7 del D.Lgs. n. 196/2003. 9 comma 1 GDPR a meno che l\'art. 9 cpv. 2 lett. a o g GDPR e sono state adottate misure appropriate per proteggere i diritti e le libertà nonché i vostri legittimi interessi.
-        \nPer quanto riguarda i casi di cui ai punti 1. e 3. di cui sopra, il responsabile prenderà le misure appropriate per proteggere i diritti e le libertà così come i vostri interessi legittimi, compreso almeno il diritto di ottenere l\'intervento di una persona da parte del responsabile, di presentare la propria posizione e di contestare la decisione.
-
-            \n\n<b>5.10 Diritto di presentare un reclamo a un\'autorità di vigilanza</b>
-        \n\nSenza pregiudizio di qualsiasi altro ricorso amministrativo o giudiziario, avete il diritto di presentare un reclamo a un\'autorità di controllo, in particolare nello Stato membro in cui risiedete, sul posto di lavoro o nel luogo in cui si è verificata la presunta violazione, se ritenete che il trattamento dei vostri dati personali sia in violazione del GDPR.
-        \nL\'autorità di controllo presso la quale è stato presentato il reclamo informa il ricorrente della situazione e dell\'esito del reclamo, compresa la possibilità di un ricorso giurisdizionale ai sensi dell\'articolo 78 del GDPR.
-    </string>
 </resources>

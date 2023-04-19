@@ -128,7 +128,6 @@ public class DeviceSelectionActivity extends Activity {
         setContentView(R.layout.device_selection_layout);
 
         BluetoothManager bluetoothManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-        assert bluetoothManager != null;
         final BluetoothAdapter adapter = bluetoothManager.getAdapter();
         setBluetoothAdapter(adapter);
 

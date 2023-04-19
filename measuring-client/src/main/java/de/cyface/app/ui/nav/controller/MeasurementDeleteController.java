@@ -18,7 +18,7 @@
  */
 package de.cyface.app.ui.nav.controller;
 
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.externalCyfaceFolderPath;
@@ -49,7 +49,6 @@ import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.content.BaseColumns;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
 import de.cyface.persistence.model.Measurement;
-import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
@@ -57,9 +56,11 @@ import io.sentry.Sentry;
  * Async task to delete measurements with all their data.
  * We use an AsyncTask because this is blocking but should only run for a short time.
  *
+ * FIXME: This needs to move into Trips MenuProvider delete action after camera is re-added.
+ *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.0.3
+ * @version 2.0.4
  * @since 1.0.0
  */
 public final class MeasurementDeleteController extends AsyncTask<ListView, Void, ListView> {
@@ -79,7 +80,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
      */
     public MeasurementDeleteController(@NonNull final Context context) {
         this.contextReference = new WeakReference<>(context);
-        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, new DefaultPersistenceBehaviour());
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
     }
@@ -111,7 +112,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
         Log.d(TAG, "onPostExecute -> clearChoices & setChoiceMode to single");
         listView.clearChoices();
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        Toast.makeText(contextReference.get(), R.string.toast_measurement_deletion_success, Toast.LENGTH_LONG).show();
+        Toast.makeText(contextReference.get(), de.cyface.app.utils.R.string.toast_measurement_deletion_success, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -180,8 +181,6 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
             if (isReportingEnabled) {
                 Sentry.captureException(e);
             }
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
         }
 
         for (int itemPosition = 0; itemPosition < checkedItemPositions.size(); itemPosition++) {
@@ -196,7 +195,7 @@ public final class MeasurementDeleteController extends AsyncTask<ListView, Void,
 
             // Ignoring the ongoing measurement
             if (unFinishedMeasurement == null || selectedMeasurementId != unFinishedMeasurement.getId()) {
-                final var measurement= persistenceLayer.loadMeasurement(selectedMeasurementId);
+                final var measurement = persistenceLayer.loadMeasurement(selectedMeasurementId);
                 ret.add(measurement);
             }
         }

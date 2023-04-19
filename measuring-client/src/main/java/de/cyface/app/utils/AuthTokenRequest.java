@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,7 +18,7 @@
  */
 package de.cyface.app.utils;
 
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
@@ -52,7 +52,7 @@ import io.sentry.Sentry;
  * TODO [CY-3737]: This class should be removed and the methods moved to the WiFiSurveyor with different names
  *
  * @author Armin Schnabel
- * @version 4.0.2
+ * @version 4.0.3
  * @since 1.0.0
  */
 public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRequest.AuthTokenRequestParams> {

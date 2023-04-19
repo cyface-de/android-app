@@ -18,9 +18,8 @@
  */
 package de.cyface.app.ui.button;
 
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
-import static de.cyface.app.utils.Constants.AUTHORITY;
-import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_DISTANCE_BASED_TRIGGERING_ENABLED_KEY;
@@ -46,6 +45,7 @@ import static de.cyface.persistence.model.MeasurementStatus.OPEN;
 import static de.cyface.persistence.model.MeasurementStatus.PAUSED;
 import static de.cyface.utils.DiskConsumption.spaceAvailable;
 
+import de.cyface.app.utils.Map;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -56,7 +56,6 @@ import com.github.lzyzsd.circleprogress.DonutProgress;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ContentProvider;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
@@ -75,9 +74,8 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.MainFragment;
-import de.cyface.app.ui.Map;
-import de.cyface.app.ui.dialog.CalibrationDialogListener;
+import de.cyface.app.ui.CapturingFragment;
+import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.camera_service.CameraListener;
 import de.cyface.camera_service.CameraService;
 import de.cyface.camera_service.Constants;
@@ -102,7 +100,6 @@ import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
-import de.cyface.utils.CursorIsNullException;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -112,7 +109,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.8.2
+ * @version 3.8.3
  * @since 1.0.0
  */
 public class DataCapturingButton
@@ -158,7 +155,7 @@ public class DataCapturingButton
      * {@link Measurement}
      */
     private DefaultPersistenceLayer<DefaultPersistenceBehaviour> persistenceLayer;
-    private final MainFragment mainFragment;
+    private final CapturingFragment capturingFragment;
     /**
      * Caching the {@link Track}s of the current {@link Measurement}, so we do not need to ask the database each time
      * the updated track is requested. This is {@code null} if there is no unfinished measurement.
@@ -175,9 +172,9 @@ public class DataCapturingButton
     private boolean isReportingEnabled;
     private ProgressDialog calibrationProgressDialog;
 
-    public DataCapturingButton(@NonNull final MainFragment mainFragment) {
+    public DataCapturingButton(@NonNull final CapturingFragment capturingFragment) {
         this.listener = new HashSet<>();
-        this.mainFragment = mainFragment;
+        this.capturingFragment = capturingFragment;
     }
 
     @Override
@@ -197,7 +194,7 @@ public class DataCapturingButton
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false);
 
         // To load the measurement distance
-        this.persistenceLayer = new DefaultPersistenceLayer<>(context, AUTHORITY, new DefaultPersistenceBehaviour());
+        this.persistenceLayer = new DefaultPersistenceLayer<>(context, new DefaultPersistenceBehaviour());
 
         button.setOnClickListener(this);
         button.setOnLongClickListener(this);
@@ -271,11 +268,11 @@ public class DataCapturingButton
     private void updateOngoingCapturingInfo(@NonNull final MeasurementStatus status) {
         if (status == OPEN) {
             try {
-                final String measurementIdText = context.getString(R.string.measurement) + " "
+                final String measurementIdText = context.getString(de.cyface.app.utils.R.string.measurement) + " "
                         + persistenceLayer.loadCurrentlyCapturedMeasurement().getId();
                 measurementIdTextView.setText(measurementIdText);
                 cameraInfoTextView.setVisibility(View.VISIBLE);
-            } catch (CursorIsNullException | NoSuchMeasurementException e) {
+            } catch (NoSuchMeasurementException e) {
                 throw new IllegalStateException(e);
             }
         } else {
@@ -496,7 +493,7 @@ public class DataCapturingButton
                     Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
                 }, SystemClock.uptimeMillis() + 500L);
             }
-        } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+        } catch (final NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
 
@@ -557,7 +554,7 @@ public class DataCapturingButton
                     setButtonEnabled(button);
                 }, SystemClock.uptimeMillis() + 500L);
             }
-        } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+        } catch (final NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
 
@@ -590,7 +587,7 @@ public class DataCapturingButton
         // Measurement is stopped, so we start a new measurement
         if (persistenceLayer.hasMeasurement(OPEN) && isProblematicManufacturer()) {
             showToastOnMainThread(
-                    context.getString(R.string.toast_last_tracking_crashed),
+                    context.getString(de.cyface.app.utils.R.string.toast_last_tracking_crashed),
                     true);
         }
 
@@ -623,14 +620,13 @@ public class DataCapturingButton
                                 Log.d(Constants.TAG, "CameraServiceRequested");
                                 try {
                                     startCameraService(measurementIdentifier);
-                                } catch (DataCapturingException | MissingPermissionException
-                                        | CursorIsNullException e) {
+                                } catch (DataCapturingException | MissingPermissionException e) {
                                     throw new IllegalStateException(e);
                                 }
                             }
                         }
                     });
-        } catch (final DataCapturingException | CursorIsNullException | MissingPermissionException e) {
+        } catch (final DataCapturingException | MissingPermissionException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -641,13 +637,13 @@ public class DataCapturingButton
             Log.w(TAG, "Context is null, restrictions cannot be checked");
             return false;
         }
-        final Activity activity = mainFragment.getActivity();
+        final Activity activity = capturingFragment.getActivity();
         if (activity == null) {
             Log.w(TAG, "Activity is null. If needed, dialogs wont appear.");
         }
 
         if (!spaceAvailable()) {
-            showToastOnMainThread(context.getString(R.string.error_message_capturing_canceled_no_space), false);
+            showToastOnMainThread(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space), false);
             setButtonEnabled(button);
             return true;
         }
@@ -694,15 +690,13 @@ public class DataCapturingButton
                                 Log.d(Constants.TAG, "CameraServiceRequested");
                                 try {
                                     startCameraService(measurementIdentifier);
-                                } catch (DataCapturingException | MissingPermissionException
-                                        | CursorIsNullException e) {
+                                } catch (DataCapturingException | MissingPermissionException e) {
                                     throw new IllegalStateException(e);
                                 }
                             }
                         }
                     });
-        } catch (final NoSuchMeasurementException | DataCapturingException | CursorIsNullException
-                | MissingPermissionException e) {
+        } catch (final NoSuchMeasurementException | DataCapturingException | MissingPermissionException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -724,13 +718,12 @@ public class DataCapturingButton
      * @param measurementId the id of the measurement for which camera data is to be captured
      * @throws DataCapturingException If the asynchronous background service did not start successfully or no valid
      *             Android context was available.
-     * @throws CursorIsNullException If {@link ContentProvider} was inaccessible.
      * @throws MissingPermissionException If no Android <code>ACCESS_FINE_LOCATION</code> has been granted. You may
      *             register a {@link UIListener} to ask the user for this permission and prevent the
      *             <code>Exception</code>. If the <code>Exception</code> was thrown the service does not start.
      */
     private void startCameraService(final long measurementId)
-            throws DataCapturingException, MissingPermissionException, CursorIsNullException {
+            throws DataCapturingException, MissingPermissionException {
 
         final boolean rawModeSelected = preferences.getBoolean(PREFERENCES_CAMERA_RAW_MODE_ENABLED_KEY, false);
         final boolean videoModeSelected = preferences.getBoolean(PREFERENCES_CAMERA_VIDEO_MODE_ENABLED_KEY, false);
@@ -771,8 +764,8 @@ public class DataCapturingButton
      * @return A reference to the ProgressDialog which can be used to dismiss it.
      */
     private ProgressDialog createAndShowCalibrationDialog() {
-        return ProgressDialog.show(context, context.getString(R.string.title_dialog_starting_data_capture),
-                context.getString(R.string.msg_calibrating), true, false, dialog -> {
+        return ProgressDialog.show(context, context.getString(de.cyface.app.utils.R.string.title_dialog_starting_data_capture),
+                context.getString(de.cyface.app.utils.R.string.msg_calibrating), true, false, dialog -> {
                     try {
                         dataCapturingService
                                 .stop(new ShutDownFinishedHandler(
@@ -791,7 +784,7 @@ public class DataCapturingButton
                                 }
                             });
                         }
-                    } catch (final NoSuchMeasurementException | CursorIsNullException e) {
+                    } catch (final NoSuchMeasurementException e) {
                         throw new IllegalStateException(e);
                     }
                 });
@@ -842,7 +835,7 @@ public class DataCapturingButton
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
             currentMeasurementsTracks = new ArrayList<>(loadedList);
-        } catch (NoSuchMeasurementException | CursorIsNullException e) {
+        } catch (NoSuchMeasurementException e) {
             throw new RuntimeException(e);
         }
     }
@@ -851,7 +844,7 @@ public class DataCapturingButton
         return currentMeasurementsTracks;
     }
 
-    public List<Event> loadCurrentMeasurementsEvents() throws CursorIsNullException, NoSuchMeasurementException {
+    public List<Event> loadCurrentMeasurementsEvents() throws NoSuchMeasurementException {
         final Measurement measurement = dataCapturingService.loadCurrentlyCapturedMeasurement();
         return persistenceLayer.loadEvents(measurement.getId(), MODALITY_TYPE_CHANGE);
     }
@@ -937,8 +930,6 @@ public class DataCapturingButton
                 Sentry.captureException(e);
             }
             return;
-        } catch (final CursorIsNullException e) {
-            throw new IllegalStateException(e);
         }
         final int distanceMeter = (int)Math.round(measurement.getDistance());
         final double distanceKm = distanceMeter == 0 ? 0.0 : distanceMeter / 1000.0;
@@ -952,15 +943,7 @@ public class DataCapturingButton
         final List<Event> currentMeasurementsEvents;
         try {
             currentMeasurementsEvents = loadCurrentMeasurementsEvents();
-            mainFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
-        } catch (final CursorIsNullException e) {
-            Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
-                    + "Thus, map.renderMeasurement() is ignored. This should only happen id "
-                    + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[1] && isReportingEnabled) {
-                onNewGeoLocationAcquiredExceptionTriggered[1] = true;
-                Sentry.captureException(e);
-            }
+            capturingFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
         } catch (NoSuchMeasurementException e) {
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
                     + "Thus, map.renderMeasurement() is ignored. This should only happen id "

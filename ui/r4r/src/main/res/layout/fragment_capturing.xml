@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".ui.capturing.CapturingFragment">
+
+    <com.google.android.material.tabs.TabLayout
+      android:id="@+id/tabLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/pager"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.tabs.TabItem
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:icon="@drawable/ic_baseline_map_24" />
+
+        <com.google.android.material.tabs.TabItem
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:icon="@drawable/ic_baseline_speed_24" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+      android:id="@+id/pager"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_marginBottom="8dp"
+      app:layout_constraintBottom_toTopOf="@+id/tripTitle"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/tabLayout" />
+
+    <!-- The trip title reflects the measurementId (don't change visibility here) -->
+    <TextView
+      android:id="@+id/tripTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginBottom="8dp"
+      android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+      app:layout_constraintBottom_toTopOf="@+id/speedTitle"
+      app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+      android:id="@+id/speedTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="8dp"
+      android:text="@string/speed"
+      android:visibility="invisible"
+      app:layout_constraintBottom_toTopOf="@+id/distanceTitle"
+      app:layout_constraintStart_toStartOf="@+id/tripTitle" />
+
+    <TextView
+      android:id="@+id/distanceTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="8dp"
+      android:text="@string/distance"
+      android:visibility="invisible"
+      app:layout_constraintBottom_toTopOf="@+id/durationTitle"
+      app:layout_constraintStart_toStartOf="@+id/speedTitle" />
+
+    <TextView
+      android:id="@+id/durationTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="8dp"
+      android:text="@string/duration"
+      android:visibility="invisible"
+      app:layout_constraintBottom_toTopOf="@+id/ascendTitle"
+      app:layout_constraintStart_toStartOf="@+id/distanceTitle" />
+
+    <TextView
+      android:id="@+id/ascendTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="8dp"
+      android:text="@string/ascend"
+      android:visibility="invisible"
+      app:layout_constraintBottom_toTopOf="@+id/co2Title"
+      app:layout_constraintStart_toStartOf="@+id/durationTitle" />
+
+    <TextView
+      android:id="@+id/co2Title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="8dp"
+      android:text="@string/avoided_co2"
+      android:visibility="invisible"
+      app:layout_constraintBottom_toTopOf="@+id/startResumeButton"
+      app:layout_constraintStart_toStartOf="@+id/ascendTitle" />
+
+    <TextView
+      android:id="@+id/speedView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="16dp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/speedTitle"
+      android:visibility="invisible" />
+
+    <TextView
+      android:id="@+id/distanceView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintEnd_toEndOf="@+id/speedView"
+      app:layout_constraintTop_toTopOf="@+id/distanceTitle"
+      android:visibility="invisible" />
+
+    <TextView
+      android:id="@+id/durationView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintEnd_toEndOf="@+id/distanceView"
+      app:layout_constraintTop_toTopOf="@+id/durationTitle"
+      android:visibility="invisible" />
+
+    <TextView
+      android:id="@+id/ascendView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintEnd_toEndOf="@+id/durationView"
+      app:layout_constraintTop_toTopOf="@+id/ascendTitle"
+      android:visibility="invisible" />
+
+    <TextView
+      android:id="@+id/co2View"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintEnd_toEndOf="@+id/ascendView"
+      app:layout_constraintTop_toTopOf="@+id/co2Title"
+      android:visibility="invisible" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/startResumeButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="8dp"
+      android:enabled="false"
+      android:src="@drawable/ic_baseline_play_arrow_24"
+      app:tint="@color/white"
+      app:backgroundTint="@color/button"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/stopButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:enabled="false"
+      android:src="@drawable/ic_baseline_stop_24"
+      app:backgroundTint="@color/button"
+      app:fabSize="mini"
+      app:layout_constraintBottom_toBottomOf="@+id/startResumeButton"
+      app:layout_constraintStart_toEndOf="@+id/startResumeButton"
+      app:tint="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/pauseButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="16dp"
+      android:enabled="false"
+      android:src="@drawable/ic_baseline_pause_24"
+      app:backgroundTint="@color/button"
+      app:fabSize="mini"
+      app:layout_constraintBottom_toBottomOf="@+id/startResumeButton"
+      app:layout_constraintEnd_toStartOf="@+id/startResumeButton"
+      app:tint="@color/white" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

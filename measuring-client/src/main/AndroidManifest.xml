@@ -65,6 +65,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}" />
 
+        <!-- This workaround is required to use GoogleMaps with API 28.
+        From https://issuetracker.google.com/issues/79478779 -->
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
@@ -75,10 +77,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.MainActivity"
             android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
@@ -90,8 +92,9 @@
             android:label="@string/title_activity_login" />
 
         <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
+        <!-- But we replaced the Content Provider with a Stub Content provider. -->
         <provider
-            android:name="de.cyface.persistence.content.MeasurementProvider"
+            android:name="de.cyface.persistence.content.StubProvider"
             android:authorities="de.cyface.app.provider"
             android:exported="false"
             android:process=":persistence_process"

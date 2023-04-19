@@ -1,30 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- standard colors, named -->
-    <color name="orange">#ff5500</color>
-    <color name="red1">#D24444</color>
-    <color name="red2">#A83636</color>
-    <color name="white">#ffffff</color>
-    <color name="transparent">#00000000</color>
-    <color name="date_color">#999999</color>
-    <color name="black">#000000</color>
-    <color name="light_gray">#999</color>
-    <color name="gray">#444</color>
-    <color name="dark_gray">#111</color>
-    <color name="blue">#0066cc</color>
-    <color name="gold">#e6b121</color>
-    <color name="blue_back">#99FFFF</color>
-    <color name="article_color">#3399FF</color>
-    <color name="article_title">#3399FF</color>
-    <color name="cache_color">#8ad0e8</color>
+    <!-- https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors -->
+    <color name="green_700">#3f8730</color>
+    <color name="green_900">#316a25</color>
 
-    <!-- e.g. action bar background-->
-    <color name="primary_color">#3f8730</color>
-    <color name="primary_color_variant">#316a25</color>
-    <color name="text_on_primary_color">@color/white</color>
-
-    <!-- e.g. nav bar background -->
-    <color name="secondary_color">@color/white</color>
-    <color name="secondary_color_variant">@color/gray</color>
-    <color name="text_on_secondary_color">@color/dark_gray</color>
+    <!-- complementary color, see tool above -->
+    <!-- not used -->
 </resources>

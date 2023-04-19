@@ -3,10 +3,7 @@
 
     <uses-sdk tools:overrideLibrary="android_libs.ub_uiautomator" />
     <application>
-        <!-- This workaround is required to use GoogleMaps with API 28
-        but does not fix it currently see CY-4457 so it's disabled as
-        long as we're still testing the SDK integration. It will be
-        enabled again when we release a new version of the android client.
+        <!-- This workaround is required to use GoogleMaps with API 28.
         From https://issuetracker.google.com/issues/79478779 -->
         <uses-library
             android:name="org.apache.http.legacy"

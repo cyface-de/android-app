@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,9 +18,8 @@
  */
 package de.cyface.app.ui.dialog;
 
-import static de.cyface.app.ui.MainFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
-import static de.cyface.app.ui.nav.view.MeasurementOverviewFragment.DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE;
-import static de.cyface.app.utils.Constants.PREFERENCES_MODALITY_KEY;
+import static de.cyface.app.ui.CapturingFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.BICYCLE;
 import static de.cyface.persistence.model.Modality.BUS;
 import static de.cyface.persistence.model.Modality.CAR;
@@ -53,13 +52,19 @@ import de.cyface.utils.Validate;
  * Make sure the order (0, 1, 2 from left(start) to right(end)) in the TabLayout is consistent in here.
  *
  * @author Armin Schnabel
- * @version 2.1.0
+ * @version 2.1.1
  * @since 1.0.0
  */
 public class ModalityDialog extends DialogFragment {
 
     private final static int DIALOG_INITIAL_MODALITY_SELECTION_RESULT_CODE = 201909192;
+    /**
+     * The identifier for the [ModalityDialog] request which asks the user to select a [Modality] when he
+     * adds a new [EventType.MODALITY_TYPE_CHANGE] via UI.
+     */
+    private final static int DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE = 201909193;
     private final static int DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE = 201909194;
+
     /**
      * The id if the {@code Measurement} if this dialog is called for a specific Measurement.
      */

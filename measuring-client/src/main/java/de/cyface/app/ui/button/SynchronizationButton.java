@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,8 +18,8 @@
  */
 package de.cyface.app.ui.button;
 
-import static de.cyface.app.ui.MainFragment.accountWithTokenExists;
-import static de.cyface.app.utils.Constants.PREFERENCES_SYNCHRONIZATION_KEY;
+import static de.cyface.app.ui.MainActivity.accountWithTokenExists;
+import static de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 
 import java.util.Collection;
@@ -38,7 +38,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import de.cyface.app.R;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.Validate;
@@ -48,7 +47,7 @@ import de.cyface.utils.Validate;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.3.4
+ * @version 2.3.5
  * @since 1.0.0
  */
 public class SynchronizationButton implements AbstractButton {
@@ -143,7 +142,7 @@ public class SynchronizationButton implements AbstractButton {
         final boolean isConnected = dataCapturingService.getWiFiSurveyor().isConnected();
         Log.v(WiFiSurveyor.TAG, (isConnected ? "" : "Not ") + "connected to syncable network");
         if (!isConnected) {
-            Toast.makeText(context, context.getString(R.string.error_message_sync_canceled_no_wifi), Toast.LENGTH_SHORT)
+            Toast.makeText(context, context.getString(de.cyface.app.utils.R.string.error_message_sync_canceled_no_wifi), Toast.LENGTH_SHORT)
                     .show();
             return;
         }
@@ -154,7 +153,7 @@ public class SynchronizationButton implements AbstractButton {
         Validate.isTrue(syncEnabled == syncPreferenceEnabled, "sync " + (syncEnabled ? "enabled" : "disabled")
                 + " but syncPreference " + (syncPreferenceEnabled ? "enabled" : "disabled"));
         if (!syncEnabled) {
-            Toast.makeText(context, context.getString(R.string.error_message_sync_canceled_disabled),
+            Toast.makeText(context, context.getString(de.cyface.app.utils.R.string.error_message_sync_canceled_disabled),
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -176,6 +175,7 @@ public class SynchronizationButton implements AbstractButton {
         final boolean validAccountExists = accountWithTokenExists(accountManager);
         if (!validAccountExists) {
             Log.d(TAG, "updateSyncButton: No validAccountExists, doing nothing.");
+            //noinspection UnnecessaryReturnStatement
             return;
         }
 

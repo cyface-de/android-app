@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -19,11 +19,11 @@
 package de.cyface.app.ui.notification;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
-import static de.cyface.app.utils.Constants.CAMERA_ACCESS_LOST_NOTIFICATION_ID;
-import static de.cyface.app.utils.Constants.NOTIFICATION_CHANNEL_ID_RUNNING;
-import static de.cyface.app.utils.Constants.NOTIFICATION_CHANNEL_ID_WARNING;
-import static de.cyface.app.utils.Constants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID;
-import static de.cyface.app.utils.Constants.SPACE_WARNING_NOTIFICATION_ID;
+import static de.cyface.app.utils.SharedConstants.CAMERA_ACCESS_LOST_NOTIFICATION_ID;
+import static de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING;
+import static de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING;
+import static de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID;
+import static de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID;
 import static de.cyface.app.utils.Constants.TAG;
 
 import android.app.Notification;
@@ -52,7 +52,7 @@ import de.cyface.utils.Validate;
  * {@link BackgroundService}.
  *
  * @author Armin Schnabel
- * @version 1.2.1
+ * @version 1.2.2
  * @since 1.0.0
  */
 public class CameraEventHandler implements EventHandlingStrategy {
@@ -184,16 +184,16 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(context, NOTIFICATION_CHANNEL_ID_WARNING,
-                    context.getString(R.string.notification_channel_name_warning),
-                    context.getString(R.string.notification_channel_description_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
                     NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
         }
         // TODO: see if we not create two of those warnings (DCS and CS)
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
                 NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
                         .setSmallIcon(R.drawable.ic_logo_only_c)
-                        .setContentTitle(context.getString(R.string.notification_title_capturing_stopped))
-                        .setContentText(context.getString(R.string.error_message_capturing_canceled_no_space))
+                        .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
+                        .setContentText(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space))
                         .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2).setAutoCancel(true)
                         .setVibrate(new long[] {500, 1500})
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
@@ -225,14 +225,14 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(context, NOTIFICATION_CHANNEL_ID_WARNING,
-                    context.getString(R.string.notification_channel_name_warning),
-                    context.getString(R.string.notification_channel_description_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
                     NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
         }
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
                 NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
                         .setSmallIcon(R.drawable.ic_logo_only_c)
-                        .setContentTitle(context.getString(R.string.notification_title_capturing_stopped))
+                        .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
                         .setContentText(reason)
                         .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2).setAutoCancel(true)
                         .setVibrate(new long[] {500, 1500})
@@ -265,14 +265,14 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(context, NOTIFICATION_CHANNEL_ID_WARNING,
-                    context.getString(R.string.notification_channel_name_warning),
-                    context.getString(R.string.notification_channel_description_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
                     NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
         }
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
                 NOTIFICATION_CHANNEL_ID_WARNING).setContentIntent(onClickPendingIntent)
                         .setSmallIcon(R.drawable.ic_logo_only_c)
-                        .setContentTitle(context.getString(R.string.notification_title_capturing_stopped))
+                        .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
                         .setContentText(
                                 context.getString(de.cyface.camera_service.R.string.notification_text_capturing_stopped_camera_disconnected))
                         .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2).setAutoCancel(true)
@@ -307,8 +307,8 @@ public class CameraEventHandler implements EventHandlingStrategy {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(context, NOTIFICATION_CHANNEL_ID_WARNING,
-                    context.getString(R.string.notification_channel_name_warning),
-                    context.getString(R.string.notification_channel_description_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+                    context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
                     NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true);
         }
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,

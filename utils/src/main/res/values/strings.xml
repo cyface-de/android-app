@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Other -->
+    <string name="accept_terms">Accept terms</string>
+    <string name="accept_reports_details">Automatically transmit error messages and app usage</string>
+    <string name="accept_terms_details">I have read the disclaimer and privacy policy and accept these conditions.</string>
+    <string name="notification_channel_name_info">Info</string>
+    <string name="notification_channel_name_warning">Warnings</string>
+    <string name="notification_channel_description_info">Informative notifications, e.g. when the upload finished successful.</string>
+    <string name="notification_channel_description_warning">Warning messages, e.g. when the storage is full and the measuring had to be canceled. This notification should not be disabled.</string>
+    <string name="toast_last_tracking_crashed">Your last tracking stopped unexpectedly.</string>
+
+    <!-- Login -->
+    <string name="logo_content_description" translatable="false">Logo</string>
+    <string name="login_name">Login</string>
+    <string name="password">Password</string>
+    <string name="log_in">Log in</string>
+    <string name="no_credentials">No credentials?</string>
+    <string name="register_now">Register now</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="error_message_field_required">This field is required</string>
+    <string name="error_message_invalid_email">This email address is invalid</string>
+    <string name="error_message_password_too_short">This password is too short</string>
+    <string name="error_message_login_too_short">This username is too short</string>
+
+    <!-- BottomNavigationView -->
+    <string name="trips">Trips</string>
+    <string name="capturing">Capturing</string>
+    <string name="statistics">Statistics</string>
+
+    <!-- Capturing -->
+    <string name="map">Map</string>
+    <string name="distance">Distance</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+    <string name="title_dialog_starting_data_capture">Starting Data Capture</string>
+    <string name="error_message_capturing_canceled_no_space">You need to free some space to start capturing.</string>
+    <string name="notification_title_capturing_stopped">Stopped Capturing</string>
+    <string name="msg_calibrating">Calibrating</string>
+
+    <!-- Settings -->
+    <string name="auto_center_map">Always centered map</string>
+    <string name="upload_trips">Upload trips</string>
+    <string name="sync_disabled_toast">Without synchronization more space is used.</string>
+    <string name="zoom_to_location_enabled_toast">When the screen is active, more map material is loaded</string>
+
+    <!-- Synchronization -->
+    <string name="error_message_sync_canceled_no_wifi">You need a Wi-Fi connection to upload data.</string>
+    <string name="error_message_sync_canceled_disabled">The synchronisation is disabled via the settings.</string>
+
+    <!-- Navigation -->
+    <string name="settings">Settings</string>
+    <string name="drawer_title_feedback">Feedback</string>
+    <string name="drawer_title_guide">Setup guide</string>
+    <string name="drawer_title_imprint">Imprint</string>
+    <string name="drawer_title_logout">Logout</string>
+
+    <!-- Map -->
+    <string name="modality_car">Car</string>
+    <string name="modality_bicycle">Bicycle</string>
+    <string name="modality_walking">Walking</string>
+    <string name="modality_bus">Bus</string>
+    <string name="modality_train">Train</string>
+    <string name="modality_motorbike">Motorbike</string>
+
+    <!-- Statistics -->
+    <string name="max_length">Maximum Length</string>
+    <string name="elevation">Elevation</string>
+    <string name="total">Total</string>
+
+    <!-- Trips -->
+    <string name="car">Car</string>
+    <string name="bicycle">Bicycle</string>
+    <string name="walking">Walking</string>
+    <string name="bus">Bus</string>
+    <string name="train">Train</string>
+    <string name="ok" translatable="false">OK</string>
+    <string name="completed_trips">Completed trips</string>
+    <string name="trip_id">Trip %d</string>
+    <string name="trip_details_line" translatable="false">%1$s (%2$.3f km)%3$s</string>
+    <string name="click_to_see_details">Click to see details</string>
+    <string name="upload_all">Upload all</string>
+    <string name="modality_type">Modality type</string>
+    <string name="mark_all_menu_item">Select all items</string>
+    <string name="delete_marked_menu_item">Delete marked</string>
+    <string name="measurement">Measurement</string>
+    <string name="toast_export">Exported:</string>
+    <string name="title_menu_item_export">Export all</string>
+    <string name="export_data">Exporting data …</string>
+    <string name="export_data_no_permission">Access to external memory (SD) required.</string>
+    <string name="delete_data">Deleting marked measurements …</string>
+    <string name="delete_data_non_selected">No measurements selected. Multiple selection by long press.</string>
+    <string name="toast_selection_mode_enabled">Selection mode enabled</string>
+    <string name="toast_selection_mode_disabled">Selection mode disabled</string>
+    <string name="toast_no_locations_found">No locations found</string>
+    <string name="toast_measurement_deletion_success">Copies of the measurements on the server are not affected.</string>
+    <string name="toast_item_deletion_success">The selected items were deleted.</string>
+    <string name="toast_select_location">Please select a location</string>
+    <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
+
+    <!-- Trip Details -->
+    <string name="trip_details">Trip details</string>
+    <string name="chart_label">elevation [m]</string>
+    <string name="maximum">Maximum</string>
+    <string name="length">Length</string>
+    <string name="duration">Duration</string>
+    <string name="elevation_profile">Elevation profile</string>
+    <string name="elevation_profile_no_data">Elevation profile (no altitude data available)</string>
+    <string name="ascend">Ascend</string>
+    <string name="avoided_co2">Avoided CO² emission</string>
+    <string name="compared_to_car">Compared to a car</string>
+    <string name="speed">Speed</string>
+    <string name="co2kg" translatable="false">%1$.1f kg</string>
+    <string name="co2kgWithAverage" translatable="false">%1$.1f kg (Ø %2$.1f kg)</string>
+    <string name="distanceKm" translatable="false">%1$.3f km</string>
+    <string name="distanceKmWithAverage" translatable="false">%1$.1f km (Ø %2$.1f km)</string>
+    <string name="speedKph" translatable="false">%1$.0f km/h</string>
+    <string name="speedKphWithAverage" translatable="false">%1$.0f km/h (Ø %2$.0f km/h)"</string>
+    <string name="ascendMeters" translatable="false">%1$.0f m</string>
+    <string name="ascendMetersWithAverage" translatable="false">%1$.0f m (Ø %2.0f m)</string>
+    <string name="hours" translatable="false">%d h</string>
+    <string name="minutes" translatable="false">%d m</string>
+    <string name="seconds" translatable="false">%d s</string>
+    <string name="durationWithAverage" translatable="false">%s (Ø %s)</string>
+
+
+    <!-- Imprint -->
+    <string name="publisher">Publisher</string>
+    <string name="publisher_content">Cyface GmbH
+        \nFröbelstr. 49
+        \n01159 Dresden
+        \nGermany\n
+
+        \nRepresented by:
+        \nDr. Klemens Muthmann\n
+
+        \nEmail: mail@cyface.de
+        \nTelephone: +49 351 658 6363 9\n
+
+        \nDistrict Court Dresden
+        \nHRB: 36726
+        \nUSt.-Id. (VAT no.): DE-312598748</string>
+
+    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <string name="reports">Error tracking by Sentry</string>
+    <string name="reports_content">We are constantly improving and developing our app. Nevertheless, we cannot guarantee error-free operation of the app. In order to keep possible programming errors to a minimum, we use Sentry, a service provided by Functional Software Inc, 132 Hawthorne St, San Francisco, CA 94107, USA (hereinafter "Sentry"). Sentry monitors errors that occur within our App and informs us of them. In the event of a software error, the following information is automatically transmitted to Sentry:
+
+        \n\n- Error messages that occur while using the App
+        \n- Information about the use of the app immediately before the error occurred
+        \n- Date and time of the errors, start time of the app
+        \n- Device information: operating system, app version and device model
+        \n- Identifier to identify errors from the same device
+        \n- Status of the device: battery charge and temperature, charging state, boot time, memory space, connection type (Wi-Fi/mobile data), storage space, available storage, preferred language, device orientation, screen resolution and density, time zone
+        \n- IP address of the machine (when the connection is established)
+
+        \n\nThe information is collected anonymously, not used for personal purposes or for advertising purposes and then deleted again. The legal basis for the above-mentioned data processing is Art. 6, Paragraph 1 lit. f of the GDPR.
+
+        \n\nThe sole purpose of processing is to improve the stability and usability of the app. For further information regarding data processing by Sentry, please refer to the Sentry Privacy Policy: https://sentry.io/privacy/</string>
+
+    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <string name="disclaimer">Disclaimer</string>
+    <string name="disclaimer_content">The application (hereinafter also: \"app\") is in <b>beta state</b>. It was developed to the best of our knowledge with utmost care by trained software developers. We are testing the app regularly and extensively on our own mobile devices.
+        \nHowever, we currently can\'t ensure that everything works as expected and we assume no liability whatsoever for damage that may result from the use of the app. At the same time, we can\'t promise you all time availability of our servers and services such as data upload, data processing and data visualization.
+        \n<b>By using this application you accept these conditions and the privacy conditions below.</b></string>
+
+    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <!-- Version 2.1.1 -->
+    <string name="privacy">Privacy Policy</string>
+    <string name="privacy_content"><b>1. Name and address of the responsible party</b>
+        \n\nThe entity responsible within the meaning of the General Data Protection Regulation and other national data protection laws of the member states as well as other data protection provisions is the:
+
+        \n\nCyface GmbH
+        \nFröbelstr. 49
+        \n01159 Dresden
+        \nGermany
+        \nPhone: +49 351 658 6363 9
+        \nE-mail: mail@cyface.de
+        \nWebsite: https://cyface.de
+
+        \n\nContact: Klemens Muthmann
+        \nE-mail: klemens.muthmann@cyface.de
+
+        \n\n<b>2. General information about the data processing</b>
+        \n\n<b>2.1 Purpose and scope of the personal data processing</b>
+        \n\nWe process personal data of our users only to the extent necessary to provide a functional application and to provide our content and services. The processing of personal data of our users only takes place with the consent of the user. An exception applies to cases in which prior consent is not possible for actual reasons and only when the data processing is permitted by law.
+
+        \n\n<b>2.2 Legal basis for the processing of personal data</b>
+        \n\nWhenever we obtain the consent of the person affected for the processing of personal data , Art. 6 Para. 1 lit. a EU General Data Protection Regulation (GDPR) serves as the legal basis.
+        \nArt. 6 para. 1 lit. b GDPR serves as the legal basis for the processing of personal data that is required to fulfill a contract to which the data subject is a party. This also applies to processing procedures that are necessary for the execution of pre-contractual measures.
+        \nIf the processing of personal data is necessary to fulfill a legal obligation to which our company is subject to, Art. 6 para. 1 lit. c GDPR serves as the legal basis.
+        \nIn the event that vital interests of the data subject or another natural person necessitate the processing of personal data, Art. 6 para. 1 lit. d GDPR serves as the legal basis.
+        \nIf the processing is necessary to safeguard a legitimate interest of our company or a third party and if the interests, fundamental rights and fundamental freedoms of the data subject do not outweigh the first-mentioned interest, Art. 6 para. 1 lit. f GDPR serves as the legal basis for the processing.
+
+        \n\n<b>2.3 Data deletion and storage duration</b>
+        \n\nThe personal data of the data subject will be deleted or blocked as soon as the purpose of storage no longer applies. In addition, the data may be stored if the European or national legislator has provided for this in EU regulations, laws or other rules to which the person responsible is subject. The data will also be blocked or deleted if a storage period prescribed by the aforementioned regulations expires, unless it is necessary to store the data further in order to conclude or fulfill a contract.
+
+        \n\n<b>3. Provision of the application and creation of log files</b>
+        \n\n<b>3.1 Description and scope of the data processing</b>
+        \n\nWhen the app is used, the following data is collected continuously:
+
+        \n\n- Geo coordinates (longitude, latitude and estimated accuracy)
+        \n- 3-axis acceleration data
+        \n- 3-axis angular acceleration data
+        \n- 3-axis magnetometer data
+        \n- An anonymous identifier that allows you to recognize data from the same device
+        \n- An anonymous user account that allows us to recognize that you are using a valid version of the App
+        \n- The model of the smartphone used
+        \n- The version of the operating system used on the smartphone
+
+
+        \n\nThis data comes directly from the sensors of the mobile device used or is generated in the mobile application. Continuous collection means that the geodata is collected at intervals of one second or more. Acceleration, angular acceleration and magnetometer data is recorded at the maximum frequency supported by the hardware.
+        \nThe acquired data is sent to a Cyface server via wireless data transmission and stored there in a database for further processing. The Cyface Server is currently located in Germany and will continue to follow German law in the future.
+        \nThe data will also be stored partially or completely in the log files of our system. These data will not be stored together with other personal data of the user.
+        \nThe legal basis for the temporary storage of data and log files is Art. 6 para. 1 lit. f GDPR.
+
+        \n\n<b>3.2 Purpose of the data processing</b>
+        \n\nWe use the recorded data in an aggregated and anonymized form for presentation in cartographic representations on our website. In addition, the aggregated and anonymized data is made available to our partner companies. The data offered in this way is used to create value-added services such as our own mobile applications or desktop applications or to carry out data analyses. The published data can be used to obtain road condition information and traffic information.
+        \nThe log files are used to ensure the functionality of the application. The data is also used to optimise the website and to ensure the security of our information technology systems. An evaluation of the data for marketing purposes does not take place in this context.
+        \nThese purposes constitute our legitimate interest in data processing according to Art. 6 para. 1 lit. f GDPR.
+
+        \n\n<b>3.3 Duration of storage</b>
+        \n\nThe data is deleted as soon as it is no longer required for the purpose of their collection.
+        \nWhen the data is stored in log files, this is the case after no more than seven days. A storage going beyond this is possible. In this case the data of the user will be deleted or modified, so that an assignment of the client is no longer possible.
+
+        \n\n<b>3.4 Possibility of objection and removal</b>
+        \n\nThe collection of the data and their storage in log files is mandatory for the operation of the application. Consequently, there is no possibility for the user to object.
+
+        \n\n<b>4. Registration</b>
+        \n\nIn our application, we offer users the opportunity to register by providing personal data. The data is entered into an input mask and transmitted to us and where it is stored. The data will not be passed on to third parties. The following data is collected during the registration process:\n
+
+        \n\n- An e-mail address of the user
+        \n- A password of the user
+        \n- During the registration process, the user\'s consent for the processing of this data is obtained.
+
+        \n\n<b>4.1 Legal basis for the data processing</b>
+        \n\nThe legal basis for the processing of data is Art. 6 para. 1 lit. a GDPR if the user has given his consent.
+        \nIf the registration serves the fulfillment of a contract to which the user is a party of or if it serves the implementation of pre-contractual measures, the additional legal basis for the processing of the data is Art. 6 para. 1 lit. b GDPR.
+
+        \n\n<b>4.2 Purpose of the data processing</b>
+        \n\nA registration of the user is necessary for the presentation of the data collected by the user himself as well as the deletion of this data in accordance with Art. 17.
+        \nA registration of the user is necessary for the fulfillment of a contract with the user or for the execution of pre-contractual measures.
+
+        \n\n<b>4.3 Duration of storage</b>
+        \n\nThe data is deleted as soon as it is no longer required to achieve the purpose for which it was collected.
+        \nThis applies to the data collected during the registration process if the registration is cancelled or modified in our application.
+        \nThis is the case for data collected during the registration process to fulfill a contract or to implement pre-contractual measures if the data is no longer required for the fulfillment of the contract. Even after the end of the contract, it may be necessary to store personal data of the contractual partner in order to fulfill contractual or legal obligations.
+
+        \n\n<b>4.4 Possibility of objection and removal</b>
+        \n\nAs a user you have the possibility to cancel the registration at any time. You can change the data stored about you at any time.
+        \nTo revoke the registration or to modify the data stored, please use the appropriate functions in the application or on our website. If these functions are not available, please contact the data protection officer directly.
+
+        \n\n<b>5. Rights of the person affected</b>
+        \n\nIf personal data of you are processed, you are affected in the sense of GDPR and you have the following rights against the responsible person:
+
+        \n\n<b>5.1 Right of information</b>
+        \n\nYou have the right to ask the person in charge to confirm whether personal data concerning you are being processed by us.
+        \nIf such processing takes place, you can ask the person in charge to provide you with the following information:
+
+        \n\n- the purposes for which the personal data are processed;
+        \n- the categories of personal data that are processed;
+        \n- the recipients or categories of recipients to whom the personal data concerning you have been or will be disclosed;
+        \n- the planned duration of the storage of the personal data concerning you or, if this is not possible, the criteria for determining the duration of the storage;
+        \n- the existence of a right to rectify or delete personal data concerning you, a right to limit the processing carried out by the responsible party or a right to object to such processing;
+        \n- the existence of a right to complain to a supervisory authority;
+        \n- any available information about the origin of the data, if the personal data are not collected at the person concerned;
+        \n- the existence of an automated decision-making process including profiling in accordance with Article 22(1) and (4) GDPR and - at least in these cases - meaningful information on the logic involved and the scope and intended effects of such processing for the person concerned.
+
+        \n\You have the right to request information as to whether the personal data concerning you will be transferred to a third country or to an international organization. In this context, you may request to be informed of the adequate safeguards according to art. 46 GDPR regarding the data transfer.
+        \nThis right of access may be restricted to the extent that it is expected to make it impossible or seriously impair the realisation of the research or statistical purposes and that the restriction is necessary for the fulfillment of the research or statistical purposes.
+
+        \n\n<b>5.2 Right of rectification</b>
+        \n\n You have the right to request the responsible party to rectify and/or complete any personal data concerning you that is processed incorrectly or incompletely. The person in charge must carry out the rectification immediately.
+        \nYour right to rectification may be limited to the extent that it is expected to make it impossible or seriously impede the achievement of the research or statistical purposes and that the limitation is necessary for the achievement of the research or statistical purposes.
+
+        \n\n<b>5.3 Right to limitation of processing</b>
+        \n\nIn the following circumstances, you may request that the processing of your personal data is restricted:
+
+        \n\n- if you dispute the accuracy of the personal data concerning you for a period of time that allows the person in charge to verify the accuracy of the personal data;
+        \n- the processing is unlawful and you refuse the deletion of the personal data and instead request the restriction of the use of the personal data;
+        \n- the data controller no longer needs the personal data for the purposes of the processing, but you need it to assert, exercise or defend legal claims, or
+        \n- if you have objected to the processing pursuant to Art. 21 para. 1 GDPR and it has not yet been determined whether the justified reasons of the data controller outweigh your reasons.
+
+        \n\nIf the processing of personal data concerning you has been restricted, such data - apart from being stored - may only be processed with your consent or for the purpose of asserting, exercising or defending legal claims or for the protection of the rights of another natural or legal person or for reasons of an important public interest of the Union or a Member State.
+        \nIf the restriction on processing has been restricted in accordance with the above conditions, you will be informed by the data controller before the restriction is lifted.
+        \nYour right to limit the processing may be limited to the extent that it is expected to make it impossible or seriously impair the fulfillment of the research or statistical purposes and that the limitation is necessary for the fulfillment of the research or statistical purposes.
+
+        \n\n<b>5.4 Right of deletion</b>
+        \n\n<b>Obligation to delete data</b>
+        \n\nYou may request the data controller to delete the personal data concerning you immediately and the data controller is obliged to delete this data immediately if one of the following reasons applies:
+
+        \n\n- The personal data concerning you are no longer necessary for the purposes for which they were collected or otherwise processed.
+        \n- You withdraw your consent on which the processing was based pursuant to Art. 6 para. 1 lit. a or Art. 9 para. 2 lit. a GDPR and there is no other legal basis for the processing.
+        \n- You object to the processing according to Art. 21 para. 1 GDPR and there is no other legal basis for the processing, or you object to the processing according to Art. 21 para. 2 GDPR.
+        \n- The personal data concerning you have been processed unlawfully.
+        \n- The deletion of personal data concerning you is necessary in order to comply with a legal obligation under Union law or the law of the Member States to which the data controller is subject.
+        \n- The personal data concerning you have been collected in relation to the information services offered according to art. 8 par. 1 GDPR.
+
+        \n\n<b>Information to third parties</b>
+        \n\nIf the person responsible has made the personal data concerning you public and is obliged to delete them in accordance with Art. 17 para. 1 GDPR, that person shall take appropriate measures, also of technical nature, taking into account the available technology and the implementation costs, to inform the persons responsible for data processing who processes the personal data that you, as the person concerned, have requested them to delete all links to this personal data or copies or replications of this personal data.
+
+        \n\n<b>Exceptions</b>
+        \n\nThe right to deletion does not apply if the processing is necessary
+
+        \n\n- to exercise freedom of expression and information;
+        \n- to fulfill a legal obligation required by the law of the Union or of the Member States to which the controller is subject to, or to perform a task carried out in the public interest or in the exercise of official authority entrusted to the controller;
+        \n- for reasons of public interest in the field of public health pursuant to Art. 9 para. 2 lit. h and i and Art. 9 para. 3 GDPR;
+        \n- for archival purposes in the public interest, scientific or historical research purposes or for statistical purposes according to Art. 89 para. 1 GDPR, insofar as the law mentioned under section \'Obligation to delete data\' presumably makes it impossible or seriously impairs the attainment of the objectives of such processing, or
+        \n- to assert, exercise or defend legal claims.
+
+        \n\n<b>5.5 Right to receive information</b>
+        \n\nIf you have exercised your right to rectify, delete or limit the processing of your personal data against the responsible party, the latter is obliged to notify all recipients to whom the personal data concerning you have been disclosed of this rectification, deletion or limitation of the processing, unless this proves impossible or involves a disproportionate effort.
+        \nYou have the right to be informed of these recipients by the data controller.
+
+        \n\n<b>5.6 Right of data transfer</b>
+        \n\nYou have the right to obtain the personal data concerning you that you have provided to the data controller in a structured, common and machine-readable format. In addition, you have the right to transfer this data to another data controller without being hindered by the controller to whom the personal data have been provided, insofar as
+
+        \n\n- the processing is based on a consent according to Art. 6 para. 1 lit. a GDPR or Art. 9 para. 2 lit. a GDPR or on a contract according to Art. 6 para. 1 lit. b GDPR and
+        \n- the processing is carried out using automated procedures.
+
+        \n\nIn exercising this right, you also have the right to obtain that the personal data concerning you is communicated directly by a responsible party to another responsible party, as far as this is technically feasible. Freedoms and rights of other persons must not be affected by this.
+        \nThe right to data transfer does not apply to the processing of personal data necessary for the performance of a task carried out in the public interest or in the exercise of official authority entrusted to the controller.
+
+        \n\n<b>5.7 Right of objection</b>
+        \n\n You have the right, for reasons related to your particular situation, to object at any time to the processing of personal data concerning you carried out according to art. 6 par. 1 lit. e or f GDPR, including profiling based on these provisions.
+        \nThe party responsible no longer processes the personal data concerning you, unless he can prove legimate reasons for the processing, which outweigh your interests, rights and freedoms, or the processing serves the assertion, exercise or defence of legal claims.
+        \nIf personal data concerning you are processed for the purpose of direct marketing, you have the right at any time to object to the processing of personal data concerning you for the purpose of such advertising; this also applies to profiling insofar as it is connected with such direct marketing.
+        \nIf you object to the processing for purposes of direct marketing, the personal data concerning you will no longer be processed for these purposes.
+        \nYou have the right to exercise your right of objection through automated procedures using technical specifications in connection with the use of the information services, notwithstanding Directive 2002/58/EC.
+        \nYou also have the right to object, for reasons related to your particular situation, to the processing of personal data concerning you for scientific or historical research purposes or for statistical purposes in accordance with Art. 89 para. 1 GDPR.
+        \nYour right to object may be limited to the extent that it is expected to make it impossible or seriously impair the realization of the research or statistical purposes and the limitation is necessary for the fulfillment of the research or statistical purposes.
+
+        \n\n<b>5.8 Right to revoke declaration of consent under data protection law</b>
+        \n\nYou have the right to revoke your data protection consent at any time. The revocation of your consent does not affect the legality of the processing that took place on the basis of your consent until you revoke your consent.
+
+        \n\n<b>5.9 Automated decision in individual cases including profiling</b>
+        \n\n You have the right not to be subject to any decision based solely on automated processing, including profiling, that has any legal effect on you or similarly significantly affects you. This does not apply if the decision
+
+        \n\n- is necessary for the conclusion or performance of a contract between you and the person responsible,
+        \n- is authorised by legislation of the Union or of the Member States to which the person responsible is subject and contains adequate measures to safeguard your rights and freedoms and your legitimate interests, or
+        \n- with your explicit consent.
+
+        \n\nHowever, these decisions may not be based on special categories of personal data according to Art. 9 para. 1 GDPR unless Art. 9 para. 2 lit. a or g GDPR applies and appropriate measures have been taken to protect the rights and freedoms as well as your legitimate interests.
+        \nWith regard to the cases mentioned in 1. and 3. above, the responsible party shall take appropriate measures in order to protect the rights and freedoms as well as your legitimate interests, including at least the right to obtain the intervention of a person on the part of the responsible party, to present his own position and to contest the decision.
+
+        \n\n<b>5.10 Right to complain to a supervisory authority</b>
+        \n\nWithout prejudice to any other administrative or judicial remedy, you have the right to complain to a supervisory authority, in particular in the Member State where you reside, at your place of work or at the place where the suspected violation occurred, if you believe that the processing of your personal data is in breach of the GDPR.
+        \nThe supervisory authority with which the complaint was lodged shall inform the complainant of the status and outcome of the complaint, including the possibility of a judicial remedy under Article 78 GDPR.
+    </string>
+</resources>

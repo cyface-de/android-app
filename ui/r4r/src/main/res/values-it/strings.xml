@@ -1,0 +1,5 @@
+<resources>
+
+    <!-- Speed -->
+    <string name="capturing_inactive">capturing inactive</string>
+</resources>

@@ -20,7 +20,6 @@ package de.cyface.app.ui;
 
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.AUTHORITY;
-import static de.cyface.app.utils.Constants.PREFERENCES_SERVER_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
 
@@ -47,7 +46,6 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import de.cyface.app.BuildConfig;
@@ -57,6 +55,7 @@ import de.cyface.app.utils.AuthTokenRequest;
 import de.cyface.app.utils.Constants;
 import de.cyface.synchronization.CyfaceAuthenticator;
 import de.cyface.synchronization.ErrorHandler;
+import de.cyface.synchronization.SyncService;
 import de.cyface.synchronization.WiFiSurveyor;
 import de.cyface.utils.Validate;
 
@@ -223,28 +222,28 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         boolean valid = true;
         if (login == null || login.isEmpty()) {
-            loginInput.setError(getString(R.string.error_message_field_required));
+            loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_field_required));
             loginInput.requestFocus();
             valid = false;
         } else if (login.length() < 4) {
-            loginInput.setError(getString(R.string.error_message_login_too_short));
+            loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_login_too_short));
             loginInput.requestFocus();
             valid = false;
         } else if (loginMustBeAnEmailAddress && !eMailPattern.matcher(login).matches()) {
-            loginInput.setError(getString(R.string.error_message_invalid_email));
+            loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_invalid_email));
             loginInput.requestFocus();
             valid = false;
         }
         if (password == null || password.isEmpty()) {
-            passwordInput.setError(getString(R.string.error_message_field_required));
+            passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_field_required));
             passwordInput.requestFocus();
             valid = false;
         } else if (password.length() < 4) {
-            passwordInput.setError(getString(R.string.error_message_password_too_short));
+            passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_password_too_short));
             passwordInput.requestFocus();
             valid = false;
         } else if (password.length() > 20) {
-            passwordInput.setError(getString(R.string.error_message_password_too_short));
+            passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_password_too_short));
             passwordInput.requestFocus();
             valid = false;
         }
@@ -258,12 +257,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
      * effect.
      */
     private void setServerUrl() {
-        final String storedServer = preferences.getString(Constants.PREFERENCES_SERVER_KEY, null);
+        final String storedServer = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null);
         Validate.notNull(BuildConfig.cyfaceServer);
         if (storedServer == null || !storedServer.equals(BuildConfig.cyfaceServer)) {
             Log.d(TAG, "Updating Cyface Server API URL from " + storedServer + "to" + BuildConfig.cyfaceServer);
             final SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(PREFERENCES_SERVER_KEY, BuildConfig.cyfaceServer);
+            editor.putString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer);
             editor.apply();
         }
     }

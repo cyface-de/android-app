@@ -18,7 +18,7 @@
  */
 package de.cyface.app;
 
-import static de.cyface.app.utils.Constants.ACCEPTED_REPORTING_KEY;
+import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -65,7 +65,7 @@ public class MeasuringClient extends MultiDexApplication {
         Toast.makeText(MeasuringClient.this, String.format("%s - %s", errorMessage, appName), Toast.LENGTH_LONG).show();
 
         // There are two cases we can have network errors
-        // 1. during authentication (AuthTokenRequest), ether login or before upload
+        // 1. during authentication (AuthTokenRequest), either login or before upload
         // 2. during upload (SyncPerformer/SyncAdapter)
         // In the first case we get the full stacktrace by a Sentry capture in AuthTokenRequest
         // but in the second case we cannot get the stacktrace as it's only available in the SDK.
