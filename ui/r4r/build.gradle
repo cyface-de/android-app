@@ -64,6 +64,9 @@ android {
 
         // Load Google Maps API key
         manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key.r4r')}"]
+
+        // Load hCaptcha API key
+        buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key.r4r')}\""
     }
 
     buildTypes {
@@ -183,6 +186,9 @@ dependencies {
     // Kotlin components
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
+
+    // HCaptcha
+    implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

@@ -40,6 +40,8 @@ cyface.api=
 google.maps_api_key=
 google.maps-api_key.r4r=
 
+hCaptcha.key.r4r=
+
 cyface.demo_api=
 cyface.local_api=
 cyface.emulator_api=

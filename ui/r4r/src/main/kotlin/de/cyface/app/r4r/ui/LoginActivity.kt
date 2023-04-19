@@ -25,18 +25,19 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
 import android.util.Patterns
 import android.view.View
+import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textview.MaterialTextView
 import de.cyface.app.r4r.Application.Companion.errorHandler
 import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.R
@@ -81,6 +82,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
      */
     var loginInput: TextInputEditText? = null
     private var passwordInput: TextInputEditText? = null
+    /**
+     * Intent for opening the registration activity when the user clicks the link.
+     */
+    private var callRegistrationActivityIntent: Intent? = null
 
     /**
      * Needs to be resettable for testing. That's the only way to mock a single method of Android's Activity's
@@ -109,8 +114,27 @@ class LoginActivity : AccountAuthenticatorActivity() {
         loginButton = findViewById(R.id.login_button)
         loginButton!!.setOnClickListener { attemptLogin() }
         progressBar = findViewById(R.id.login_progress_bar)
+        callRegistrationActivityIntent = Intent(this, RegistrationActivity::class.java)
         registerRegistrationLink()
         errorHandler!!.addListener(errorListener)
+    }
+
+    override fun onResume() {
+        // Show message from intent
+        val registered = intent.getBooleanExtra("registered", false)
+        val messageView = findViewById<MaterialTextView>(R.id.login_message)
+        if (registered) {
+            messageView.text = "Nutzerkonto angelegt. Bitte klicken Sie auf den Bestätigungslink in der Aktivierungsemail um sich einloggen zu können."
+            messageView.visibility = VISIBLE
+        }
+
+        super.onResume()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // Required to get the latest intent in `onResume`, when using `singleTask` launch mode
+        setIntent(intent)
     }
 
     override fun onDestroy() {
@@ -207,10 +231,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private fun credentialsAreValid(
         login: String?,
         password: String?,
-        loginMustBeAnEmailAddress: Boolean
+        @Suppress("SameParameterValue") loginMustBeAnEmailAddress: Boolean
     ): Boolean {
         var valid = true
-        if (login == null || login.isEmpty()) {
+        if (login.isNullOrEmpty()) {
             loginInput!!.error =
                 getString(de.cyface.app.utils.R.string.error_message_field_required)
             loginInput!!.requestFocus()
@@ -225,7 +249,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
             loginInput!!.requestFocus()
             valid = false
         }
-        if (password == null || password.isEmpty()) {
+        if (password.isNullOrEmpty()) {
             passwordInput!!.error =
                 getString(de.cyface.app.utils.R.string.error_message_field_required)
             passwordInput!!.requestFocus()
@@ -264,10 +288,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun registerRegistrationLink() {
-        val browserIntent =
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://app.cyface.de/registration"))
         val registrationLink = findViewById<View>(R.id.login_link_registration)
-        registrationLink.setOnClickListener { v: View? -> startActivity(browserIntent) }
+        registrationLink.setOnClickListener { v: View? -> startActivity(callRegistrationActivityIntent); /* just open registration on top (don't finish) so we can return to login activity */ }
     }
 
     companion object {
