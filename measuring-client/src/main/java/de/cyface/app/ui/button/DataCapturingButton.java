@@ -468,31 +468,13 @@ public class DataCapturingButton
                     new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                         @Override
                         public void shutDownFinished(final long measurementIdentifier) {
-                            // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
-                            if (Build.VERSION.SDK_INT < 33) {
-
-                                // The measurement id should always be set [STAD-333]
-                                Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                                setButtonStatus(button, PAUSED);
-                                setButtonEnabled(button);
-                                Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
-                            }
+                            // The measurement id should always be set [STAD-333]
+                            Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
+                            setButtonStatus(button, PAUSED);
+                            setButtonEnabled(button);
+                            Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
                         }
                     });
-
-            // Workaround for flaky `rebind` on Android 13+ [RFR-246]
-            // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
-            // - Use a static 500ms delay to give the measurement some time to stop.
-            if (Build.VERSION.SDK_INT >= 33) {
-                final var timeoutHandler = new Handler(context.getMainLooper());
-                timeoutHandler.postAtTime(() -> {
-                    // The measurement id should always be set [STAD-333]
-                    // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    setButtonStatus(button, PAUSED);
-                    setButtonEnabled(button);
-                    Toast.makeText(context, R.string.toast_measurement_paused, Toast.LENGTH_SHORT).show();
-                }, SystemClock.uptimeMillis() + 500L);
-            }
         } catch (final NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
@@ -528,32 +510,14 @@ public class DataCapturingButton
                     new ShutDownFinishedHandler(de.cyface.datacapturing.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                         @Override
                         public void shutDownFinished(final long measurementIdentifier) {
-                            // Disabled on Android 13+ for workaround, see `timeoutHandler` below [RFR-246]
-                            if (Build.VERSION.SDK_INT < 33) {
-
-                                // The measurement id should always be set [STAD-333]
-                                Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                                currentMeasurementsTracks = null;
-                                setButtonStatus(button, FINISHED);
-                                setButtonEnabled(button);
-                            }
+                            // The measurement id should always be set [STAD-333]
+                            Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
+                            currentMeasurementsTracks = null;
+                            setButtonStatus(button, FINISHED);
+                            setButtonEnabled(button);
                         }
                     });
             runOnUiThread(() -> map.clearMap());
-
-            // Workaround for flaky `rebind` on Android 13+ [RFR-246]
-            // - Don't wait for `shutDownFinished` to be called (flaky due to the bug).
-            // - Use a static 500ms delay to give the measurement some time to stop.
-            if (Build.VERSION.SDK_INT >= 33) {
-                final var timeoutHandler = new Handler(context.getMainLooper());
-                timeoutHandler.postAtTime(() -> {
-                    // The measurement id should always be set [STAD-333]
-                    // Validate.isTrue(measurementIdentifier != -1, "Missing measurement id");
-                    currentMeasurementsTracks = null;
-                    setButtonStatus(button, FINISHED);
-                    setButtonEnabled(button);
-                }, SystemClock.uptimeMillis() + 500L);
-            }
         } catch (final NoSuchMeasurementException e) {
             throw new IllegalStateException(e);
         }
@@ -1017,10 +981,7 @@ public class DataCapturingButton
 
     @Override
     public void onCapturingStopped() {
-        // Disabled on Android 13+ for workaround, see `stop/pauseCapturing()` [RFR-246]
-        if (Build.VERSION.SDK_INT < 33) {
-            setButtonStatus(button, FINISHED);
-        }
+        setButtonStatus(button, FINISHED);
     }
 
     /*
