@@ -47,6 +47,7 @@ cyface.local_api=
 cyface.emulator_api=
 
 cyface.staging_api=
+cyface.staging_auth_api=
 cyface.staging_user=
 cyface.staging_password=
 

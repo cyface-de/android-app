@@ -62,7 +62,7 @@ ext {
     // FIXME: upgrade to version with SDK 7.7.0
     cyfaceCameraServiceVersion = "4.1.10" // Also update submodule commit ref
     cyfaceSerializationVersion = "2.3.4" // Keep im sync with version in submodule `backend`
-    cyfaceUploaderVersion = "1.0.0-alpha1" // FIXME
+    cyfaceUploaderVersion = "0.1.0-alpha2" // FIXME
 
     // Android SDK versions
     minSdkVersion = 21 // device support

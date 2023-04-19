@@ -39,17 +39,37 @@ import com.hcaptcha.sdk.HCaptchaException
 import com.hcaptcha.sdk.HCaptchaSize
 import com.hcaptcha.sdk.HCaptchaTheme
 import com.hcaptcha.sdk.HCaptchaTokenResponse
-import de.cyface.app.r4r.Application.Companion.errorHandler
 import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.TAG
-import de.cyface.synchronization.ErrorHandler
-import de.cyface.synchronization.ErrorHandler.ErrorCode
-import de.cyface.synchronization.SyncService
+import de.cyface.app.utils.SharedConstants
+import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.uploader.DefaultAuthenticator
+import de.cyface.uploader.HttpConnection
+import de.cyface.uploader.Result
+import de.cyface.uploader.exception.AccountNotActivated
+import de.cyface.uploader.exception.BadRequestException
+import de.cyface.uploader.exception.ConflictException
+import de.cyface.uploader.exception.EntityNotParsableException
+import de.cyface.uploader.exception.ForbiddenException
+import de.cyface.uploader.exception.HostUnresolvable
+import de.cyface.uploader.exception.InternalServerErrorException
+import de.cyface.uploader.exception.NetworkUnavailableException
+import de.cyface.uploader.exception.ServerUnavailableException
+import de.cyface.uploader.exception.SynchronisationException
+import de.cyface.uploader.exception.TooManyRequestsException
+import de.cyface.uploader.exception.UnauthorizedException
+import de.cyface.uploader.exception.UnexpectedResponseCode
 import de.cyface.utils.Validate
+import io.sentry.Sentry
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.regex.Pattern
-
 
 /**
  * A registration screen that offers registration via email/password and captcha.
@@ -59,6 +79,7 @@ import java.util.regex.Pattern
  * @since 3.3.0
  */
 class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentActivity */ {
+
     private lateinit var context: WeakReference<Context>
     private var preferences: SharedPreferences? = null
 
@@ -91,16 +112,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
     private lateinit var hCaptcha: HCaptcha
     private var tokenResponse: HCaptchaTokenResponse? = null
 
-    // FIXME: test typical error from registration (see web-app)
-    private val errorListener = ErrorHandler.ErrorListener { errorCode, errorMessage ->
-        if (errorCode == ErrorCode.UNAUTHORIZED) {
-            passwordInput!!.error = errorMessage
-            passwordInput!!.requestFocus()
-
-            // All other errors are shown as toast by the MeasuringClient
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registration)
@@ -118,7 +129,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         progressBar = findViewById(R.id.registration_progress_bar)
         callLoginActivityIntent = Intent(this, LoginActivity::class.java)
         registerLoginLink()
-        errorHandler!!.addListener(errorListener)
 
         // HCaptcha
         hCaptcha = HCaptcha.getClient(context.get()!!).setup(hCaptchaConfig())
@@ -126,7 +136,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
     }
 
     override fun onDestroy() {
-        errorHandler!!.removeListener(errorListener)
         super.onDestroy()
     }
 
@@ -142,13 +151,13 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         hCaptcha
             .addOnSuccessListener { response: HCaptchaTokenResponse ->
                 tokenResponse = response
-                //val userResponseToken = response.tokenResult // FIXME
-                returnToLogin(true)
+                register(response.tokenResult)
             }
             .addOnFailureListener { e: HCaptchaException ->
+                progressBar!!.visibility = GONE
+                registrationButton!!.isEnabled = true
                 Log.d(TAG, "hCaptcha failed: " + e.message + "(" + e.statusCode + ")")
-                messageView!!.text =
-                    "Captcha failed, please try again or contact support @??" // FIXME
+                messageView!!.text = getString(de.cyface.app.utils.R.string.captcha_failed)
                 messageView!!.visibility = VISIBLE
                 tokenResponse = null
             }
@@ -165,83 +174,115 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
      * errors are presented and no actual registration attempt is made.
      */
     private fun attemptRegistration() {
-        /*if (loginTask != null) { FIXME
-            Log.d(TAG, "Auth is already in progress, ignoring attemptLogin().")
-            return  // Auth is already in progress
-        }*/
-
         // Update view
         emailInput!!.error = null
         passwordInput!!.error = null
         passwordConfirmationInput!!.error = null
+        messageView!!.visibility = GONE
+        messageView!!.text = ""
         registrationButton!!.isEnabled = false
 
         // Check for valid credentials
         Validate.notNull(emailInput!!.text)
         Validate.notNull(passwordInput!!.text)
         Validate.notNull(passwordConfirmationInput!!.text)
-        val login = emailInput!!.text.toString()
+        val email = emailInput!!.text.toString()
         val password = passwordInput!!.text.toString()
         val passwordConfirmation = passwordConfirmationInput!!.text.toString()
-        if (!credentialsAreValid(login, password, passwordConfirmation)) {
+        if (!credentialsAreValid(email, password, passwordConfirmation)) {
             registrationButton!!.isEnabled = true
             return
         }
 
         // Update view
         progressBar!!.isIndeterminate = true
-        progressBar!!.visibility = View.VISIBLE
+        progressBar!!.visibility = VISIBLE
+        hCaptcha.verifyWithHCaptcha() // calls register() on success
+    }
 
-        // FIXME: on failure: see below - this is just a placeholder
-        progressBar!!.visibility = View.GONE
-        registrationButton!!.isEnabled = true
-        hCaptcha.verifyWithHCaptcha(/*hCaptchaConfig()*//* args */)
-        //returnToLogin(true)
+    private fun register(captcha: String) {
 
-        // FIXME: send registration task below
-        // when successful, forward to Login page and show "registration successful, check emails to activate account before you can log in"
+        val email = emailInput!!.text.toString()
+        val password = passwordInput!!.text.toString()
+        GlobalScope.launch {
+            // Load authUrl
+            val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            val apiEndpoint =
+                preferences.getString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+                    ?: throw IllegalStateException("Auth server url not available.")
+            val registrationEndpoint =
+                URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "user")
 
-        // Send async login attempt
-        // TODO [CY-3737]: warning will be resolved when moving the task to WifiSurveyor
-        /*loginTask = object : AuthTokenRequest(context) {
-            override fun onPostExecute(params: AuthTokenRequestParams?) {
-                loginTask = null
-                progressBar!!.visibility = View.GONE
-                if (!params!!.isSuccessful) {
-                    Log.d(TAG, "Login failed - removing account to allow new login.")
+            // FIXME: Move registration task to new class in utils
+            val http = HttpConnection()
+            var connection: HttpURLConnection? = null
+            try {
+                connection = http.open(registrationEndpoint, false)
+
+                // Try to send the request and handle expected errors
+                val response = http.register(connection, email, password, captcha)
+                Log.d(TAG, "Response $response")
+
+                if (response != Result.UPLOAD_SUCCESSFUL) { // FIXME
+                    runOnUiThread {
+                        progressBar!!.visibility = GONE
+                        // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
+                        registrationButton!!.isEnabled = true
+                        messageView!!.visibility = VISIBLE
+                        messageView!!.text = getString(de.cyface.app.utils.R.string.registration_failed)
+                    }
+                    return@launch
+                }
+                runOnUiThread {
+                    progressBar!!.visibility = GONE
+                }
+                returnToLogin(true)
+            } catch (e: Exception) {
+                val reportingEnabled =
+                    preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+                when (e) {
+                    is ConflictException -> {
+                        runOnUiThread {
+                            emailInput!!.error =
+                                getString(de.cyface.app.utils.R.string.error_message_email_taken)
+                            emailInput!!.requestFocus()
+                        }
+                    }
+                    // FIXME: password "asda" is malformed (length 4), check provider
+
+                    // FIXME: handle different exceptions
+                    is SynchronisationException, is BadRequestException, is UnauthorizedException, is ForbiddenException, is EntityNotParsableException,
+                    is InternalServerErrorException, is NetworkUnavailableException, is TooManyRequestsException, is HostUnresolvable, is ServerUnavailableException,
+                    is UnexpectedResponseCode, is AccountNotActivated -> {
+                        if (reportingEnabled) {
+                            Sentry.captureException(e)
+                            Log.e(TAG, "Registration failed with exception", e)
+                        } else {
+                            Log.e(TAG, "Registration failed, error reporting disabled.", e)
+                        }
+                    }
+
+                    else -> {
+                        if (reportingEnabled) {
+                            Sentry.captureException(e)
+                            Log.e(TAG, "Registration failed with exception", e)
+                        } else {
+                            Log.e(TAG, "Registration failed, error reporting disabled.", e)
+                        }
+                        throw e
+                    }
+                }
+                runOnUiThread {
+                    progressBar!!.visibility = GONE
                     // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
-                    deleteAccount(context.get()!!, params.getAccount())
-                    loginButton!!.isEnabled = true
-                    return
+                    registrationButton!!.isEnabled = true
+                    messageView!!.visibility = VISIBLE
+                    messageView!!.text = getString(de.cyface.app.utils.R.string.registration_failed)
                 }
-
-                // Equals tutorial's "finishLogin()"
-                val intent = Intent()
-                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, params.getAccount().name)
-                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, ACCOUNT_TYPE)
-                intent.putExtra(AccountManager.KEY_AUTHTOKEN, Constants.AUTH_TOKEN_TYPE)
-
-                // Return the information back to the Authenticator
-                setAccountAuthenticatorResult(intent.extras)
-                setResult(RESULT_OK, intent)
-
-                // Hide the keyboard or else it can overlap the permission request
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    loginButton!!.windowInsetsController!!.hide(WindowInsetsCompat.Type.ime())
-                } else {
-                    ViewCompat.getWindowInsetsController(loginButton!!)!!
-                        .hide(WindowInsetsCompat.Type.ime())
-                }
-                finish()
-            }
-
-            override fun onCancelled() {
-                Log.d(TAG, "LoginTask canceled.")
-                loginTask = null
-                progressBar!!.visibility = View.GONE
+            } finally {
+                connection?.disconnect()
             }
         }
-        loginTask!!.execute()*/
     }
 
     /**
@@ -306,15 +347,14 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
      * effect.
      */
     private fun setServerUrl() {
-        val storedServer = preferences!!.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null)
-        Validate.notNull(BuildConfig.cyfaceServer)
-        if (storedServer == null || storedServer != BuildConfig.cyfaceServer) {
-            Log.d(
-                TAG,
-                "Updating Cyface Server API URL from " + storedServer + "to" + BuildConfig.cyfaceServer
-            )
+        val stored =
+            preferences!!.getString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+        val currentUrl = BuildConfig.authServer
+        Validate.notNull(currentUrl)
+        if (stored == null || stored != currentUrl) {
+            Log.d(TAG, "Updating Auth API URL from $stored to $currentUrl")
             val editor = preferences!!.edit()
-            editor.putString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer)
+            editor.putString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, currentUrl)
             editor.apply()
         }
     }
@@ -326,10 +366,14 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
 
     private fun returnToLogin(registrationSuccessful: Boolean) {
         callLoginActivityIntent!!.putExtra(
-            "registered",
+            REGISTERED_EXTRA,
             registrationSuccessful
-        ) // FIXME hard-coded key
+        )
         startActivity(callLoginActivityIntent)
         finish()
+    }
+
+    companion object {
+        public const val REGISTERED_EXTRA = "de.cyface.registration.successful"
     }
 }
