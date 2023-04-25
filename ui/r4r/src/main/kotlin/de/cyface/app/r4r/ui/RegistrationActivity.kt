@@ -316,7 +316,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                 getString(de.cyface.app.utils.R.string.error_message_field_required)
             passwordInput!!.requestFocus()
             valid = false
-        } else if (password.length < 4) {
+        } else if (password.length < 6) {
             passwordInput!!.error =
                 getString(de.cyface.app.utils.R.string.error_message_password_too_short)
             passwordInput!!.requestFocus()

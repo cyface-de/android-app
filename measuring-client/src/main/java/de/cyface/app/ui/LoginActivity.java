@@ -225,7 +225,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_field_required));
             loginInput.requestFocus();
             valid = false;
-        } else if (login.length() < 4) {
+        } else if (login.length() < 6) {
             loginInput.setError(getString(de.cyface.app.utils.R.string.error_message_login_too_short));
             loginInput.requestFocus();
             valid = false;
@@ -238,7 +238,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_field_required));
             passwordInput.requestFocus();
             valid = false;
-        } else if (password.length() < 4) {
+        } else if (password.length() < 6) {
             passwordInput.setError(getString(de.cyface.app.utils.R.string.error_message_password_too_short));
             passwordInput.requestFocus();
             valid = false;
