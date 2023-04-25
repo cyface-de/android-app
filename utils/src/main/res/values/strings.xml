@@ -32,7 +32,7 @@
     <string name="error_message_email_taken">There is already an account with this email address</string>
     <string name="registration_failed">Registration failed</string>
     <string name="captcha_failed">Captcha failed. Please try again</string>
-    <string name="registration_successful">Account created. Click on the link in the activation email to log in</string>
+    <string name="registration_successful">Account created. Click on the link in the activation email before you can log in</string>
 
     <!-- BottomNavigationView -->
     <string name="trips">Trips</string>

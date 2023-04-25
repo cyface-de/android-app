@@ -43,6 +43,7 @@ import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants
+import de.cyface.model.Activation
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.uploader.HttpConnection
@@ -220,7 +221,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                 connection = http.open(registrationEndpoint, false)
 
                 // Try to send the request and handle expected errors
-                val response = http.register(connection, email, password, captcha)
+                val response = http.register(connection, email, password, captcha, Activation.R4R_ANDROID) // FIXME: CY_Android in CY UI
                 Log.d(TAG, "Response $response")
 
                 if (response != Result.UPLOAD_SUCCESSFUL) { // FIXME

@@ -32,7 +32,7 @@
     <string name="error_message_email_taken">Es existiert bereits ein Account mit dieser E-Mail Adresse</string>
     <string name="registration_failed">Registrierung fehlgeschlagen</string>
     <string name="captcha_failed">Captcha fehlgeschlagen. Bitte erneut probieren</string>
-    <string name="registration_successful">Nutzerkonto angelegt. Bitte klicken Sie auf den Bestätigungslink in der Aktivierungsemail um sich einloggen zu können</string>
+    <string name="registration_successful">Nutzerkonto angelegt. Klicken Sie auf den Bestätigungslink in der Aktivierungsemail bevor Sie sich einloggen zu können</string>
 
     <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
     <string name="trips">Fahrten</string>
