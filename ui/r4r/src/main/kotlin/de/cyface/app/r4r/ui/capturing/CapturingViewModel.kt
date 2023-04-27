@@ -21,10 +21,10 @@ package de.cyface.app.r4r.ui.capturing
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.switchMap
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
@@ -79,7 +79,7 @@ class CapturingViewModel(
      *
      * Additionally, [LiveData] is lifecycle-aware and only observes changes while the UI is active.
      */
-    var measurement: LiveData<Measurement?> = Transformations.switchMap(measurementId) { id ->
+    var measurement: LiveData<Measurement?> = measurementId.switchMap { id ->
         if (id != null) {
             repository.observeById(id).asLiveData()
         } else {

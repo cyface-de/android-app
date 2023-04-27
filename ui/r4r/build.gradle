@@ -137,7 +137,9 @@ android {
 
     // Avoid `2 files found with path ...` error
     packagingOptions {
-        exclude("META-INF/DEPENDENCIES")
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
     }
 
     buildFeatures {

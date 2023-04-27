@@ -249,7 +249,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                             emailInput!!.requestFocus()
                         }
                     }
-                    // FIXME: password "asda" is malformed (length 4), check provider
 
                     // FIXME: handle different exceptions
                     is SynchronisationException, is BadRequestException, is UnauthorizedException, is ForbiddenException, is EntityNotParsableException,

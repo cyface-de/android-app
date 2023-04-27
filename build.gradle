@@ -26,7 +26,7 @@
  */
 
 buildscript {
-    ext.gradle_version = '7.4.2'
+    ext.gradle_version = '7.4.2' // Major release available but breaks publish [RFR-412]
     ext.kotlin_version = "1.8.0"
     ext.matcher_version = "1.2.4"
 
@@ -55,12 +55,10 @@ ext {
      */
 
     // Cyface dependencies
-    // FIXME: Upgrade SDK to 7.7.0 (uploader library)
-    cyfaceAndroidBackendVersion = "7.6.1" // Also update submodule commit ref
-    cyfaceUtilsVersion = "3.3.5"
-    cyfaceEnergySettingsVersion = "3.3.1" // Also update submodule commit ref
-    // FIXME: upgrade to version with SDK 7.7.0
-    cyfaceCameraServiceVersion = "4.1.10" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.6.2-alpha9" /* FIXME */ // Also update submodule commit ref
+    cyfaceUtilsVersion = "3.3.7"
+    cyfaceEnergySettingsVersion = "3.3.3" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.1.11-alpha2" /*FIXME*/ // Also update submodule commit ref
     // Maybe keep this in sync with the serialization library version used in `uploader` lib
     cyfaceSerializationVersion = "2.3.7" // Keep im sync with version in submodule `backend`
     cyfaceUploaderVersion = "1.0.0-beta2" // FIXME
@@ -79,7 +77,7 @@ ext {
     localbroadcastmanagerVersion = '1.1.0'
     exifinterfaceVersion = "1.3.6" // Required by Camera Service submodule
     roomVersion = "2.5.1"
-    lifecycleVersion = "2.5.0"
+    lifecycleVersion = "2.6.1"
     navigationVersion = "2.5.3"
 
     // Kotlin components
@@ -92,7 +90,7 @@ ext {
 
     // Testing
     junitVersion = "1.1.5"
-    mockitoVersion = '4.8.0'
+    mockitoVersion = '5.2.0'
     mockitoKotlinVersion = '4.1.0'
     hamcrestVersion = "1.3"
     rulesVersion = "1.5.0"
