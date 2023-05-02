@@ -167,7 +167,7 @@ class CapturingViewModel(
     }
 
     /*
-    var events: LiveData<List<Event>?> = Transformations.switchMap(measurementId) { measurementId ->
+    var events: LiveData<List<Event>?> = measurementId.switchMap { measurementId ->
         if (measurementId != null) {
             eventRepository.observeAllByMeasurementId(measurementId).asLiveData()
         } else {

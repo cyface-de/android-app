@@ -70,7 +70,6 @@ ext {
     buildToolsVersion = '33.0.0' // optional, if defined, use latest (SDK Manager > SDK Tools)
 
     // Android dependencies
-    multidexVersion = "2.0.1"
     androidxAnnotationVersion = '1.6.0'
     androidxAppCompatVersion = "1.6.1"
     androidPreferencesVersion = '1.2.0'

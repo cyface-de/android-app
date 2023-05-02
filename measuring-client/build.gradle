@@ -57,7 +57,6 @@ android {
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
 
-        multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("String", "localHostIp", '"10.0.2.2"')
@@ -182,8 +181,6 @@ dependencies {
     // Exception tracking
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
-    // To build an app with > 64K methods
-    implementation "androidx.multidex:multidex:$rootProject.ext.multidexVersion"
     // To change the material design
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
@@ -204,6 +201,9 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
+
+    // HCaptcha
+    implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

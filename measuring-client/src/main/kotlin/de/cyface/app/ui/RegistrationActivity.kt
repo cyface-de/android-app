@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui
+package de.cyface.app.ui
 
 import android.content.Context
 import android.content.Intent
@@ -39,9 +39,9 @@ import com.hcaptcha.sdk.HCaptchaException
 import com.hcaptcha.sdk.HCaptchaSize
 import com.hcaptcha.sdk.HCaptchaTheme
 import com.hcaptcha.sdk.HCaptchaTokenResponse
-import de.cyface.app.r4r.BuildConfig
-import de.cyface.app.r4r.R
-import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.BuildConfig
+import de.cyface.app.R
+import de.cyface.app.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants
 import de.cyface.model.Activation
 import de.cyface.synchronization.CyfaceAuthenticator

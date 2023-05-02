@@ -136,6 +136,7 @@ android {
 
     // Avoid `2 files found with path ...` error
     packagingOptions {
+        // To resolve the conflict warning after adding google-api-client dependency
         resources {
             excludes += ['META-INF/DEPENDENCIES']
             excludes += ['META-INF/INDEX.LIST']
