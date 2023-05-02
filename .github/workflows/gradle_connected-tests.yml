@@ -64,6 +64,7 @@ jobs:
         run: |
           # This mock API accepts all credentials and allows the UI test to skip the login
           echo "cyface.staging_api=https://demo.cyface.de/api/v2" >> gradle.properties
+          echo "cyface.staging_auth_api=https://demo.cyface.de/api/v2" >> gradle.properties
           echo "cyface.staging_user=guestLogin" >> gradle.properties
           echo "cyface.staging_password=guestPassword" >> gradle.properties
 

@@ -108,7 +108,6 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
-            // FIXME: Replace via CI
             buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }

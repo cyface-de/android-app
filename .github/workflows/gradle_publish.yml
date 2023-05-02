@@ -49,8 +49,9 @@ jobs:
           cp gradle.properties.template gradle.properties
           echo "githubUser=${{ github.actor }}" >> gradle.properties
           echo "githubToken=${{ secrets.GITHUB_TOKEN }}" >> gradle.properties
-          # Inject Cyface API URL
+          # Inject Cyface APIs URL
           echo "cyface.api=${{ secrets.PUBLIC_API }}" >> gradle.properties
+          echo "cyface.auth_api=${{ secrets.PUBLIC_AUTH_API }}" >> gradle.properties
           # Inject Google Maps API key
           echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> gradle.properties
           echo "google.maps_api_key.r4r=${{ secrets.GOOGLE_MAPS_KEY_R4R }}" >> gradle.properties
