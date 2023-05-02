@@ -22,6 +22,7 @@ import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
+import static de.cyface.synchronization.CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY;
 
 import java.lang.ref.WeakReference;
 
@@ -78,10 +79,10 @@ public abstract class AuthTokenRequest extends AsyncTask<Void, Void, AuthTokenRe
 
         // Load authUrl
         final var preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final var url = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null);
+        final var url = preferences.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null);
         if (url == null) {
             throw new IllegalStateException(
-                    "Server url not available. Please set the applications server url preference.");
+                    "Auth url not available. Please set the applications server url preference.");
         }
 
         // Explicitly calling CyfaceAuthenticator.getAuthToken(), see its documentation

@@ -45,31 +45,25 @@ import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants
 import de.cyface.model.Activation
 import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.ErrorHandler
+import de.cyface.synchronization.ErrorHandler.ErrorCode
 import de.cyface.uploader.DefaultAuthenticator
-import de.cyface.uploader.HttpConnection
 import de.cyface.uploader.Result
-import de.cyface.uploader.exception.AccountNotActivated
-import de.cyface.uploader.exception.BadRequestException
 import de.cyface.uploader.exception.ConflictException
-import de.cyface.uploader.exception.EntityNotParsableException
 import de.cyface.uploader.exception.ForbiddenException
 import de.cyface.uploader.exception.HostUnresolvable
 import de.cyface.uploader.exception.InternalServerErrorException
 import de.cyface.uploader.exception.NetworkUnavailableException
+import de.cyface.uploader.exception.RegistrationFailed
 import de.cyface.uploader.exception.ServerUnavailableException
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.uploader.exception.TooManyRequestsException
-import de.cyface.uploader.exception.UnauthorizedException
 import de.cyface.uploader.exception.UnexpectedResponseCode
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.lang.ref.WeakReference
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.regex.Pattern
 
 /**
@@ -152,6 +146,10 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         hCaptcha
             .addOnSuccessListener { response: HCaptchaTokenResponse ->
                 tokenResponse = response
+                // As we directly use the token we don't listen to the token timeout event
+                // but instead mark the token instantly as used, to prevent "Captcha failed" error
+                // after the correct error is shown in the Registration UI (and some time passed)
+                response.markUsed()
                 register(response.tokenResult)
             }
             .addOnFailureListener { e: HCaptchaException ->
@@ -208,60 +206,77 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         GlobalScope.launch {
             // Load authUrl
             val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            val apiEndpoint =
+            val url =
                 preferences.getString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
                     ?: throw IllegalStateException("Auth server url not available.")
-            val registrationEndpoint =
-                URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "user")
 
             // FIXME: Move registration task to new class in utils
-            val http = HttpConnection()
-            var connection: HttpURLConnection? = null
             try {
-                connection = http.open(registrationEndpoint, false)
+                val authenticator = DefaultAuthenticator(url)
 
                 // Try to send the request and handle expected errors
-                val response = http.register(connection, email, password, captcha, Activation.R4R_ANDROID) // FIXME: CY_Android in CY UI
+                // `CyfaceAuthenticator` can only throw `NetworkErrorException` but here we don't
+                // have this limitation and don't need to use `sendErrorIntent()`.
+                val response = authenticator.register(
+                    email,
+                    password,
+                    captcha,
+                    Activation.R4R_ANDROID
+                ) // FIXME: CY_Android in CY UI
                 Log.d(TAG, "Response $response")
 
-                if (response != Result.UPLOAD_SUCCESSFUL) { // FIXME
-                    runOnUiThread {
-                        progressBar!!.visibility = GONE
-                        // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
-                        registrationButton!!.isEnabled = true
-                        messageView!!.visibility = VISIBLE
-                        messageView!!.text = getString(de.cyface.app.utils.R.string.registration_failed)
+                when (response) {
+                    Result.UPLOAD_SUCCESSFUL -> { // 201 created
+                        runOnUiThread {
+                            progressBar!!.visibility = GONE
+                        }
+                        returnToLogin(true)
                     }
-                    return@launch
+
+                    else -> {
+                        error("Unexpected response ($response), API only defines the above.")
+                    }
                 }
-                runOnUiThread {
-                    progressBar!!.visibility = GONE
-                }
-                returnToLogin(true)
             } catch (e: Exception) {
                 val reportingEnabled =
                     preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+
                 when (e) {
-                    is ConflictException -> {
-                        runOnUiThread {
-                            emailInput!!.error =
-                                getString(de.cyface.app.utils.R.string.error_message_email_taken)
-                            emailInput!!.requestFocus()
+                    is RegistrationFailed -> {
+                        when (e.cause) {
+                            is ConflictException -> {
+                                runOnUiThread {
+                                    emailInput!!.error =
+                                        getString(de.cyface.app.utils.R.string.error_message_email_taken)
+                                    emailInput!!.requestFocus()
+                                }
+                            }
+
+                            // FIXME: Show message for these expected exceptions in UI
+                            /*is SynchronisationException,
+                            is ForbiddenException,
+                            is NetworkUnavailableException,
+                            is TooManyRequestsException,
+                            is HostUnresolvable,
+                            is ServerUnavailableException,
+                            is UnexpectedResponseCode,
+                            is InternalServerErrorException*/
+                            else -> {
+                                /*ErrorHandler.sendErrorIntent(
+                                    context.get(),
+                                    ErrorCode.SERVER_UNAVAILABLE.code,
+                                    e.message
+                                )*/
+                                if (reportingEnabled) {
+                                    Sentry.captureException(e)
+                                    Log.e(TAG, "Registration failed with exception", e)
+                                } else {
+                                    Log.e(TAG, "Registration failed, error reporting disabled.", e)
+                                }
+                            }
                         }
                     }
-
-                    // FIXME: handle different exceptions
-                    is SynchronisationException, is BadRequestException, is UnauthorizedException, is ForbiddenException, is EntityNotParsableException,
-                    is InternalServerErrorException, is NetworkUnavailableException, is TooManyRequestsException, is HostUnresolvable, is ServerUnavailableException,
-                    is UnexpectedResponseCode, is AccountNotActivated -> {
-                        if (reportingEnabled) {
-                            Sentry.captureException(e)
-                            Log.e(TAG, "Registration failed with exception", e)
-                        } else {
-                            Log.e(TAG, "Registration failed, error reporting disabled.", e)
-                        }
-                    }
-
+                    // Throwing unexpected exceptions hard
                     else -> {
                         if (reportingEnabled) {
                             Sentry.captureException(e)
@@ -269,7 +284,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                         } else {
                             Log.e(TAG, "Registration failed, error reporting disabled.", e)
                         }
-                        throw e
                     }
                 }
                 runOnUiThread {
@@ -279,8 +293,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                     messageView!!.visibility = VISIBLE
                     messageView!!.text = getString(de.cyface.app.utils.R.string.registration_failed)
                 }
-            } finally {
-                connection?.disconnect()
             }
         }
     }
@@ -374,6 +386,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
     }
 
     companion object {
-        public const val REGISTERED_EXTRA = "de.cyface.registration.successful"
+        const val REGISTERED_EXTRA = "de.cyface.registration.successful"
     }
 }

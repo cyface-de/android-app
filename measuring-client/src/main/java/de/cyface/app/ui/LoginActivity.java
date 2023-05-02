@@ -22,6 +22,7 @@ import static de.cyface.app.utils.Constants.ACCOUNT_TYPE;
 import static de.cyface.app.utils.Constants.AUTHORITY;
 import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE;
+import static de.cyface.synchronization.CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY;
 
 import java.util.regex.Pattern;
 
@@ -257,12 +258,12 @@ public class LoginActivity extends AccountAuthenticatorActivity {
      * effect.
      */
     private void setServerUrl() {
-        final String storedServer = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null);
+        final var storedServer = preferences.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null);
         Validate.notNull(BuildConfig.cyfaceServer);
         if (storedServer == null || !storedServer.equals(BuildConfig.cyfaceServer)) {
-            Log.d(TAG, "Updating Cyface Server API URL from " + storedServer + "to" + BuildConfig.cyfaceServer);
-            final SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer);
+            Log.d(TAG, "Updating Cyface Auth API URL from " + storedServer + "to" + BuildConfig.cyfaceServer);
+            final var editor = preferences.edit();
+            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer);
             editor.apply();
         }
     }

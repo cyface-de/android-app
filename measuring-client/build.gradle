@@ -137,6 +137,7 @@ android {
             pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/license.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE']
             // To resolve the conflict warning after adding google-api-client dependency
             excludes += ['META-INF/DEPENDENCIES']
+            excludes += ['META-INF/INDEX.LIST']
         }
     }
 

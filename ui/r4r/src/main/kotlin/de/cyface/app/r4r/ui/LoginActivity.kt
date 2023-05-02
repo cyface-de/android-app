@@ -48,6 +48,7 @@ import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
 import de.cyface.synchronization.SyncService
@@ -179,7 +180,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
             // Load authUrl
             val preferences = PreferenceManager.getDefaultSharedPreferences(context.get())
-            val url = preferences.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null)
+            val url = preferences.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
                 ?: throw IllegalStateException(
                     "Server url not available. Please set the applications server url preference."
                 )
@@ -191,12 +192,12 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 // AsyncTask because this is blocking but only for a short time
                 cyfaceAuthenticator.getAuthToken(null, account, Constants.AUTH_TOKEN_TYPE, null)
                     .getString(AccountManager.KEY_AUTHTOKEN)!!
-            } catch (e: NetworkErrorException) {
+            } catch (e: NetworkErrorException) { // FIXME: Are RuntimeExceptions thrown? We are in async block. See RegistrationActivity `catch (e: Exception)`
                 // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
                 // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-                val isReportingEnabled: Boolean =
+                val reportingEnabled =
                     preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
-                if (isReportingEnabled) {
+                if (reportingEnabled) {
                     Sentry.captureException(e)
                 }
                 // "the authenticator could not honor the request due to a network error"
@@ -308,15 +309,15 @@ class LoginActivity : AccountAuthenticatorActivity() {
      * effect.
      */
     private fun setServerUrl() {
-        val storedServer = preferences!!.getString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, null)
+        val storedServer = preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
         Validate.notNull(BuildConfig.cyfaceServer)
         if (storedServer == null || storedServer != BuildConfig.cyfaceServer) {
             Log.d(
                 TAG,
-                "Updating Cyface Server API URL from " + storedServer + "to" + BuildConfig.cyfaceServer
+                "Updating Cyface Auth API URL from " + storedServer + "to" + BuildConfig.cyfaceServer
             )
             val editor = preferences!!.edit()
-            editor.putString(SyncService.SYNC_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer)
+            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer)
             editor.apply()
         }
     }
