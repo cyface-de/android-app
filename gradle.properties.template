@@ -40,6 +40,7 @@ cyface.api=
 google.maps_api_key=
 google.maps-api_key.r4r=
 
+hCaptcha.key=
 hCaptcha.key.r4r=
 
 cyface.demo_api=

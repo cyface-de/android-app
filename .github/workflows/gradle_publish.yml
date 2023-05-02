@@ -54,6 +54,8 @@ jobs:
           # Inject Google Maps API key
           echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> gradle.properties
           echo "google.maps_api_key.r4r=${{ secrets.GOOGLE_MAPS_KEY_R4R }}" >> gradle.properties
+          echo "google.hCaptcha.key=${{ secrets.H_CAPTCHA_KEY }}" >> gradle.properties
+          echo "google.hCaptcha.key.r4r=${{ secrets.H_CAPTCHA_KEY_R4R }}" >> gradle.properties
 
       # As we previously published the app with version code up to 320, we need add this as offset
       - name: Calculate versionCode

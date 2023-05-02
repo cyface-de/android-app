@@ -73,6 +73,9 @@ android {
 
         // Load Google Maps API key
         manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
+
+        // Load hCaptcha API key
+        buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key')}\""
     }
 
     buildTypes {
