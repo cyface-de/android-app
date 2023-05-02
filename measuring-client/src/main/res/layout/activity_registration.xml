@@ -41,7 +41,7 @@
       android:contentDescription="@string/logo_content_description"
       android:minHeight="48dp"
       android:scaleType="fitXY"
-      custom:srcCompat="@drawable/ic_launcher_foreground"
+      custom:srcCompat="@drawable/ic_logo_text_only"
       tools:ignore="MissingPrefix" />
   </LinearLayout>
 

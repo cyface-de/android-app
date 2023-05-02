@@ -198,16 +198,11 @@ class LoginActivity : AccountAuthenticatorActivity() {
                     null
                 )
                     .getString(AccountManager.KEY_AUTHTOKEN)!!
-            } catch (e: NetworkErrorException) { // FIXME: Are RuntimeExceptions thrown? We are in async block. See RegistrationActivity `catch (e: Exception)`
-                // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
-                // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-                val reportingEnabled =
-                    preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
-                if (reportingEnabled) {
-                    Sentry.captureException(e)
-                }
-                // "the authenticator could not honor the request due to a network error"
-                Log.d(TAG, "Login failed - removing account to allow new login.")
+            } catch (e: Exception) {
+                // Using ErrorHandler to show soft error like "account not activated" instead
+                // when (e) { is LoginFailed -> { when (e.cause) {
+
+                reportError(e)
                 runOnUiThread {
                     progressBar!!.visibility = View.GONE
                     // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
@@ -251,6 +246,17 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 finish()
             }
         }
+    }
+
+    private fun reportError(e: Exception) {
+        // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
+        // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
+        val reportingEnabled = preferences!!.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+        if (reportingEnabled) {
+            Sentry.captureException(e)
+        }
+        // "the authenticator could not honor the request due to a network error"
+        Log.d(TAG, "Login failed - removing account to allow new login.", e)
     }
 
     /**
@@ -323,14 +329,15 @@ class LoginActivity : AccountAuthenticatorActivity() {
      */
     private fun setServerUrl() {
         val storedServer = preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
-        Validate.notNull(BuildConfig.cyfaceServer)
-        if (storedServer == null || storedServer != BuildConfig.cyfaceServer) {
+        val server = BuildConfig.authServer
+        Validate.notNull(server)
+        if (storedServer == null || storedServer != server) {
             Log.d(
                 TAG,
-                "Updating Cyface Auth API URL from " + storedServer + "to" + BuildConfig.cyfaceServer
+                "Updating Cyface Auth API URL from " + storedServer + "to" + server
             )
             val editor = preferences!!.edit()
-            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer)
+            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, server)
             editor.apply()
         }
     }

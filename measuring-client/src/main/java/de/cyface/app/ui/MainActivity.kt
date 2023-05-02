@@ -181,6 +181,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 Constants.AUTHORITY,
                 Constants.ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
+                BuildConfig.authServer,
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency

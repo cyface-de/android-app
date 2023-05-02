@@ -21,7 +21,6 @@ package de.cyface.app.r4r.ui
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
 import android.accounts.AccountManager
-import android.accounts.NetworkErrorException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -45,13 +44,15 @@ import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.TAG
-import de.cyface.app.utils.SharedConstants
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
 import de.cyface.uploader.DefaultAuthenticator
+import de.cyface.uploader.exception.ConflictException
+import de.cyface.uploader.exception.RegistrationFailed
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.GlobalScope
@@ -195,16 +196,11 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 // AsyncTask because this is blocking but only for a short time
                 cyfaceAuthenticator.getAuthToken(null, account, Constants.AUTH_TOKEN_TYPE, null)
                     .getString(AccountManager.KEY_AUTHTOKEN)!!
-            } catch (e: NetworkErrorException) { // FIXME: Are RuntimeExceptions thrown? We are in async block. See RegistrationActivity `catch (e: Exception)`
-                // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
-                // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-                val reportingEnabled =
-                    preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
-                if (reportingEnabled) {
-                    Sentry.captureException(e)
-                }
-                // "the authenticator could not honor the request due to a network error"
-                Log.d(TAG, "Login failed - removing account to allow new login.")
+            } catch (e: Exception) { // all exceptions or else login is skipped upon exception
+                // Using ErrorHandler to show soft error like "account not activated" instead
+                // when (e) { is LoginFailed -> { when (e.cause) {
+
+                reportError(e)
                 runOnUiThread {
                     progressBar!!.visibility = View.GONE
                     // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
@@ -241,6 +237,17 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 finish()
             }
         }
+    }
+
+    private fun reportError(e: Exception) {
+        // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
+        // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
+        val reportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
+        if (reportingEnabled) {
+            Sentry.captureException(e)
+        }
+        // "the authenticator could not honor the request due to a network error"
+        Log.d(TAG, "Login failed - removing account to allow new login.", e)
     }
 
     /**
@@ -313,14 +320,15 @@ class LoginActivity : AccountAuthenticatorActivity() {
      */
     private fun setServerUrl() {
         val storedServer = preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
-        Validate.notNull(BuildConfig.cyfaceServer)
-        if (storedServer == null || storedServer != BuildConfig.cyfaceServer) {
+        val server = BuildConfig.authServer
+        Validate.notNull(server)
+        if (storedServer == null || storedServer != server) {
             Log.d(
                 TAG,
-                "Updating Cyface Auth API URL from " + storedServer + "to" + BuildConfig.cyfaceServer
+                "Updating Cyface Auth API URL from " + storedServer + "to" + server
             )
             val editor = preferences!!.edit()
-            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, BuildConfig.cyfaceServer)
+            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, server)
             editor.apply()
         }
     }

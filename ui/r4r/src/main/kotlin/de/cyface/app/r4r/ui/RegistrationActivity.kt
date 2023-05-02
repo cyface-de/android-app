@@ -43,6 +43,7 @@ import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.model.Activation
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.uploader.DefaultAuthenticator
@@ -212,7 +213,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                     password,
                     captcha,
                     Activation.R4R_ANDROID
-                ) // FIXME: CY_Android in CY UI
+                )
                 Log.d(TAG, "Response $response")
 
                 when (response) {
@@ -228,8 +229,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                     }
                 }
             } catch (e: Exception) {
-                val reportingEnabled =
-                    preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+                val reportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
 
                 when (e) {
                     is RegistrationFailed -> {
@@ -259,21 +259,13 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                                 )*/
                                 if (reportingEnabled) {
                                     Sentry.captureException(e)
-                                    Log.e(TAG, "Registration failed with exception", e)
-                                } else {
-                                    Log.e(TAG, "Registration failed, error reporting disabled.", e)
                                 }
+                                Log.e(TAG, "Registration failed with exception", e)
                             }
                         }
                     }
-                    // Throwing unexpected exceptions hard
                     else -> {
-                        if (reportingEnabled) {
-                            Sentry.captureException(e)
-                            Log.e(TAG, "Registration failed with exception", e)
-                        } else {
-                            Log.e(TAG, "Registration failed, error reporting disabled.", e)
-                        }
+                        reportError(e)
                     }
                 }
                 runOnUiThread {
@@ -285,6 +277,14 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                 }
             }
         }
+    }
+
+    private fun reportError(e: Exception) {
+        val reportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
+        if (reportingEnabled) {
+            Sentry.captureException(e)
+        }
+        Log.e(TAG, "Registration failed with exception", e)
     }
 
     /**

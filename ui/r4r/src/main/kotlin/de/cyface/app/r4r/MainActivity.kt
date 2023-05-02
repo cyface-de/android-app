@@ -159,6 +159,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 AUTHORITY,
                 ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
+                BuildConfig.authServer,
                 CapturingEventHandler(),
                 unInterestedListener,
                 DEFAULT_SENSOR_FREQUENCY
