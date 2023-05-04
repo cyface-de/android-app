@@ -92,10 +92,13 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private var callRegistrationActivityIntent: Intent? = null
 
     /**
-     * Needs to be resettable for testing. That's the only way to mock a single method of Android's Activity's
+     * Needs to be nullable and resettable for testing as Android's `Patterns` is null in unit test.
+     *
+     * That's the only way to mock a single method of Android's Activity's.
      */
     @JvmField
-    var eMailPattern: Pattern = Patterns.EMAIL_ADDRESS
+    var eMailPattern: Pattern? = Patterns.EMAIL_ADDRESS
+
     private val errorListener = ErrorHandler.ErrorListener { errorCode, errorMessage ->
         if (errorCode == ErrorCode.UNAUTHORIZED) {
             passwordInput!!.error = errorMessage
@@ -287,7 +290,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 getString(de.cyface.app.utils.R.string.error_message_login_too_short)
             loginInput!!.requestFocus()
             valid = false
-        } else if (loginMustBeAnEmailAddress && !eMailPattern.matcher(login).matches()) {
+        } else if (loginMustBeAnEmailAddress && !eMailPattern!!.matcher(login).matches()) {
             loginInput!!.error = getString(de.cyface.app.utils.R.string.error_message_invalid_email)
             loginInput!!.requestFocus()
             valid = false
