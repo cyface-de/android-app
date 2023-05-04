@@ -295,7 +295,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 getString(de.cyface.app.utils.R.string.error_message_field_required)
             loginInput!!.requestFocus()
             valid = false
-        } else if (login.length < 6) {
+        } else if (login.length < 4) {
             loginInput!!.error =
                 getString(de.cyface.app.utils.R.string.error_message_login_too_short)
             loginInput!!.requestFocus()
