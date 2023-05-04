@@ -221,6 +221,7 @@ dependencies {
     androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
+    androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
     // UiAutomator Testing
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"
     androidTestImplementation "org.hamcrest:hamcrest-integration:$rootProject.ext.hamcrestVersion"
