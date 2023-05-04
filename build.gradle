@@ -61,7 +61,7 @@ ext {
     cyfaceCameraServiceVersion = "4.1.11" // Also update submodule commit ref
     // Maybe keep this in sync with the serialization library version used in `uploader` lib
     cyfaceSerializationVersion = "2.3.7" // Keep im sync with version in submodule `backend`
-    cyfaceUploaderVersion = "1.0.0-beta6" // FIXME
+    cyfaceUploaderVersion = "1.0.0"
 
     // Android SDK versions
     minSdkVersion = 21 // device support

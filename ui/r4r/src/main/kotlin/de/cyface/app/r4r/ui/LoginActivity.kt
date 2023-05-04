@@ -47,12 +47,10 @@ import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.CyfaceAuthenticator
-import de.cyface.synchronization.CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
+import de.cyface.synchronization.SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.uploader.DefaultAuthenticator
-import de.cyface.uploader.exception.ConflictException
-import de.cyface.uploader.exception.RegistrationFailed
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.GlobalScope

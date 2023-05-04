@@ -42,10 +42,9 @@ import com.hcaptcha.sdk.HCaptchaTokenResponse
 import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.TAG
-import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.model.Activation
-import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.uploader.Result
 import de.cyface.uploader.exception.ConflictException
@@ -198,7 +197,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
             // Load authUrl
             val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
             val url =
-                preferences.getString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+                preferences.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
                     ?: throw IllegalStateException("Auth server url not available.")
 
             // FIXME: Move registration task to new class in utils
@@ -350,13 +349,13 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
      */
     private fun setServerUrl() {
         val stored =
-            preferences!!.getString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+            preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
         val currentUrl = BuildConfig.authServer
         Validate.notNull(currentUrl)
         if (stored == null || stored != currentUrl) {
             Log.d(TAG, "Updating Auth API URL from $stored to $currentUrl")
             val editor = preferences!!.edit()
-            editor.putString(CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY, currentUrl)
+            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, currentUrl)
             editor.apply()
         }
     }

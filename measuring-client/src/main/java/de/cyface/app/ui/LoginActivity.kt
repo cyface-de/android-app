@@ -21,7 +21,6 @@ package de.cyface.app.ui
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
 import android.accounts.AccountManager
-import android.accounts.NetworkErrorException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -46,9 +45,9 @@ import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants
 import de.cyface.synchronization.CyfaceAuthenticator
-import de.cyface.synchronization.CyfaceAuthenticator.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
+import de.cyface.synchronization.SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.utils.Validate
 import io.sentry.Sentry
