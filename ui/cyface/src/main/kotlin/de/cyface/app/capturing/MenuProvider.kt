@@ -26,7 +26,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import de.cyface.app.R
 import de.cyface.app.ui.CapturingFragmentDirections
-import de.cyface.app.ui.MainActivity
+import de.cyface.app.MainActivity
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings

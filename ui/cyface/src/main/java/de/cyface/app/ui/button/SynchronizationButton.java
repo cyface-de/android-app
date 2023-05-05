@@ -18,7 +18,7 @@
  */
 package de.cyface.app.ui.button;
 
-import static de.cyface.app.ui.MainActivity.accountWithTokenExists;
+import static de.cyface.app.MainActivity.accountWithTokenExists;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY;
 import static de.cyface.app.utils.Constants.TAG;
 

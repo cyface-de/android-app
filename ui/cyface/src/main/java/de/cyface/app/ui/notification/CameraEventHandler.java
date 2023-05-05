@@ -42,7 +42,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.MainActivity;
+import de.cyface.app.MainActivity;
 import de.cyface.camera_service.BackgroundService;
 import de.cyface.camera_service.EventHandlingStrategy;
 import de.cyface.utils.Validate;

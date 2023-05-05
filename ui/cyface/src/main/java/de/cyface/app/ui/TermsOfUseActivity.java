@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import de.cyface.app.BuildConfig;
+import de.cyface.app.MainActivity;
 import de.cyface.app.R;
 
 /**

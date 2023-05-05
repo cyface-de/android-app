@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui.nav.controller;
+package de.cyface.app.controller;
 
 import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.Constants.AUTHORITY;

@@ -28,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import de.cyface.app.LoginActivity;
 import de.cyface.utils.Validate;
 
 /**

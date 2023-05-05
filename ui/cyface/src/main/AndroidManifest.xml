@@ -82,19 +82,19 @@
         </activity>
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".MainActivity"
             android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
         </activity>
 
         <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_login"
             android:launchMode="singleTask" /> <!-- when we switch back from Registration, see https://stackoverflow.com/a/45292292/5815054 -->
 
         <!-- The RegistrationActivity can be launched via (on top of) the LoginActivity -->
         <activity
-            android:name=".ui.RegistrationActivity"
+            android:name=".RegistrationActivity"
             android:label="@string/sign_up" />
 
         <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->

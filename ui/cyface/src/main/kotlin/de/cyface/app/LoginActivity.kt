@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui
+package de.cyface.app
 
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
@@ -40,6 +40,7 @@ import com.google.android.material.textview.MaterialTextView
 import de.cyface.app.BuildConfig
 import de.cyface.app.MeasuringClient.Companion.errorHandler
 import de.cyface.app.R
+import de.cyface.app.RegistrationActivity
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.TAG

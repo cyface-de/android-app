@@ -40,7 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.MainActivity;
+import de.cyface.app.MainActivity;
 import de.cyface.datacapturing.EventHandlingStrategy;
 import de.cyface.datacapturing.backend.DataCapturingBackgroundService;
 import de.cyface.utils.Validate;
