@@ -141,7 +141,7 @@ See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Col
 * `versionName` and `versionCode` in root `build.gradle` are automatically set by the CI
 * Just tag the release and push the tag to Github
 * After pushing the release tag the CI builds and signs the App Bundle automatically
-* Checkout that build, copy the `measuring-client-release.aab` from the artifacts and upload it to Play Store
+* Checkout that build, copy the `cyface-release.aab` from the artifacts and upload it to Play Store
 * The tag is automatically marked as a 'new Release' on https://github.com/cyface-de/android-app/releases[Github]
 
 
