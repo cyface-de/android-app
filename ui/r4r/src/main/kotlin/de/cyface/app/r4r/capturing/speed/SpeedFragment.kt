@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.capturing.speed
+package de.cyface.app.r4r.capturing.speed
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,8 +27,8 @@ import androidx.fragment.app.activityViewModels
 import de.cyface.app.r4r.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentSpeedBinding
-import de.cyface.app.r4r.ui.capturing.CapturingViewModel
-import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.capturing.CapturingViewModel
+import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer

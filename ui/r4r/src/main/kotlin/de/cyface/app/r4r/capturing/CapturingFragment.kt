@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.capturing
+package de.cyface.app.r4r.capturing
 
 import android.app.Activity
 import android.app.ProgressDialog
@@ -47,8 +47,8 @@ import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
-import de.cyface.app.r4r.ui.capturing.map.MapFragment
-import de.cyface.app.r4r.ui.capturing.speed.SpeedFragment
+import de.cyface.app.r4r.capturing.map.MapFragment
+import de.cyface.app.r4r.capturing.speed.SpeedFragment
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.datacapturing.CyfaceDataCapturingService

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.capturing.map
+package de.cyface.app.r4r.capturing.map
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -33,8 +33,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.google.android.gms.maps.MapsInitializer
 import de.cyface.app.r4r.databinding.FragmentMapBinding
-import de.cyface.app.r4r.ui.capturing.CapturingViewModel
-import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.capturing.CapturingViewModel
+import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider

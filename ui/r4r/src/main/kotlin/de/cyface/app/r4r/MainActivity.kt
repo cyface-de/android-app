@@ -36,8 +36,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.r4r.databinding.ActivityMainBinding
-import de.cyface.app.r4r.ui.capturing.CapturingViewModel
-import de.cyface.app.r4r.ui.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.capturing.CapturingViewModel
+import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL

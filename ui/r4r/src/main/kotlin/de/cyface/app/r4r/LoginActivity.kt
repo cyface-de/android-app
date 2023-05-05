@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui
+package de.cyface.app.r4r
 
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
@@ -39,8 +39,6 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
 import de.cyface.app.r4r.Application.Companion.errorHandler
-import de.cyface.app.r4r.BuildConfig
-import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.TAG

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui.capturing
+package de.cyface.app.r4r.capturing
 
 import android.content.Context
 import android.content.SharedPreferences

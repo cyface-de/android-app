@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui
+package de.cyface.app.r4r
 
 import android.app.Activity
 import android.content.Intent
@@ -27,9 +27,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
-import de.cyface.app.r4r.BuildConfig
-import de.cyface.app.r4r.MainActivity
-import de.cyface.app.r4r.R
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.utils.SharedConstants.ACCEPTED_TERMS_KEY
 
