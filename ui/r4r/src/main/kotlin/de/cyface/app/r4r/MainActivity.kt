@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
      * just registers and unregisters itself.
      *
-     * FIXME: Change interface of DCS constructor to not force us to do this.
+     * TODO: Change interface of DCS constructor to not force us to do this.
      */
     private val unInterestedListener = object : DataCapturingListener {
         override fun onFixAcquired() {}

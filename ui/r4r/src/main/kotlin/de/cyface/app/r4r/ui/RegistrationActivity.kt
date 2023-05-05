@@ -200,7 +200,6 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                 preferences.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
                     ?: throw IllegalStateException("Auth server url not available.")
 
-            // FIXME: Move registration task to new class in utils
             try {
                 val authenticator = DefaultAuthenticator(url)
 
@@ -241,7 +240,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                                 }
                             }
 
-                            // FIXME: Show message for these expected exceptions in UI
+                            // TODO: Show message for these expected exceptions in UI
                             /*is SynchronisationException,
                             is ForbiddenException,
                             is NetworkUnavailableException,

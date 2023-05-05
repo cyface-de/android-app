@@ -637,7 +637,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                         Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
                         Log.v(TAG, "startUpFinished")
                         viewModel.setMeasurementId(measurementIdentifier)
-                        // FIXME: Status should also be in ViewModel (maybe via currMId and observed M)
+                        // TODO: Status should also be in ViewModel (maybe via currMId and observed M)
                         // the button should then just change on itself based on the live data measurement
                         setCapturingStatus(MeasurementStatus.OPEN)
 

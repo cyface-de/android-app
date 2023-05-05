@@ -159,7 +159,7 @@ class CapturingEventHandler : EventHandlingStrategy {
         // What works is: use a png to replace the icon on API < 21 or to reuse the same vector icon
         // The most elegant solution seems to be to have PNGs for the icons and the vector xml in drawable-anydpi-v21,
         // see https://stackoverflow.com/a/37334176/5815054
-        // FIXME: test this on old devices / emulator and add those PNGs if crashing
+        // TODO: test this on old devices / emulator and add those PNGs if crashing
         builder.setSmallIcon(R.drawable.ic_logo_white)
         return builder.build()
     }

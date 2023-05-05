@@ -189,7 +189,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             startSynchronization()
-            // FIXME: dataCapturingService!!.addConnectionStatusListener(this)
+            // TODO: dataCapturingService!!.addConnectionStatusListener(this)
             cameraService = CameraService(
                 this.applicationContext,
                 CameraEventHandler(),
