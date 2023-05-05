@@ -73,7 +73,7 @@ jobs:
       #- name: Assemble with Gradle
       #  run: ./gradlew assemble
       #- name: Test with Gradle
-      #  run: ./gradlew :measuring-client:test
+      #  run: ./gradlew :ui:cyface:test :ui:r4r:test
 
       # Add caching to speed up connected tests below (see `actions/android-emulator-runner`)
       - name: Gradle cache
@@ -114,6 +114,6 @@ jobs:
           #   but this lead to `Timeout waiting for emulator` error
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew :measuring-client:connectedDebugAndroidTest
+          script: ./gradlew :ui:cyface:connectedDebugAndroidTest
           # To execute a single test class
-          #script: ./gradlew :measuring-client:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=de.cyface.app.CapturingNotificationTest
+          #script: ./gradlew :ui:cyface:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=de.cyface.app.CapturingNotificationTest

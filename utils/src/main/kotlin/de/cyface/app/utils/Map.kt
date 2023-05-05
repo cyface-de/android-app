@@ -439,7 +439,7 @@ class Map(
     }
 
     override fun onLocationChanged(location: Location) {
-        // This is used by `measuring-client`, the `ui/r4r` uses `onLocationResult`
+        // This is used by `ui/cyface`, the `ui/r4r` uses `onLocationResult`
         if (isAutoCenterMapEnabled) {
             moveToLocation(true, location)
         }

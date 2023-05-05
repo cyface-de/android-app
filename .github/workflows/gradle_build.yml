@@ -55,6 +55,6 @@ jobs:
       # Executing build here on Ubuntu stack (1/10th costs of MacOS stack)
       # Not using "gradle build" as we don't want to run the tests of all dependencies (e.g. backend)
       - name: Assemble with Gradle
-        run: ./gradlew :measuring-client:assembleDebug
+        run: ./gradlew :ui:cyface:assembleDebug :ui:r4r:assembleDebug
       - name: Test with Gradle
-        run: ./gradlew :measuring-client:testDebugUnitTest
+        run: ./gradlew :ui:cyface:testDebugUnitTest :ui:r4r:testDebugUnitTest
