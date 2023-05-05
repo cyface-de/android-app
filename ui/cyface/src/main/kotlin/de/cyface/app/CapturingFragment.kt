@@ -37,7 +37,7 @@ import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import de.cyface.app.capturing.MenuProvider
 import de.cyface.app.databinding.FragmentCapturingBinding
 import de.cyface.app.ui.button.DataCapturingButton
-import de.cyface.app.ui.button.SynchronizationButton
+import de.cyface.app.button.SynchronizationButton
 import de.cyface.app.dialog.ModalityDialog
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
