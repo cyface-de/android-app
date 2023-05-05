@@ -73,7 +73,7 @@
 
         <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
         <!-- `exported="true"` or else the app cannot be launched after installation! -->
-        <activity android:name=".ui.TermsOfUseActivity"
+        <activity android:name=".TermsOfUseActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

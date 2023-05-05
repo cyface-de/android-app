@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.utils;
+package de.cyface.app.utils
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-
-import de.cyface.utils.Validate;
+import android.content.Context
+import android.net.ConnectivityManager
+import de.cyface.utils.Validate
 
 /**
  * Basic class which provides info about the connection status
@@ -33,19 +31,14 @@ import de.cyface.utils.Validate;
  *
  * TODO Should move to the SDK (Wifi-Surveyor)
  */
-public class ConnectionInfo {
-
-    private Context context;
-
-    public ConnectionInfo(Context context) {
-        this.context = context;
-    }
-
-    public boolean isConnectedToWifi() {
-        final ConnectivityManager manager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        Validate.notNull(manager);
-        final NetworkInfo networkInfo = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        Validate.notNull(networkInfo);
-        return networkInfo.isConnected();
-    }
+class ConnectionInfo(private val context: Context) {
+    val isConnectedToWifi: Boolean
+        get() {
+            val manager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            Validate.notNull(manager)
+            val networkInfo = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+            Validate.notNull(networkInfo)
+            return networkInfo!!.isConnected
+        }
 }

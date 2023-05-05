@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.utils;
+package de.cyface.app.utils
 
 /**
  * This class holds all constants required by multiple classes. This avoids unnecessary dependencies
@@ -27,15 +27,14 @@ package de.cyface.app.utils;
  * @version 3.4.0
  * @since 1.0.0
  */
-public class Constants {
-
-    public final static String PACKAGE = "de.cyface.app";
-    public final static String TAG = PACKAGE; // This can be references as default TAG for this app
-    public final static String SUPPORT_EMAIL = "support@cyface.de";
+object Constants {
+    const val PACKAGE = "de.cyface.app"
+    const val TAG = PACKAGE // This can be references as default TAG for this app
+    const val SUPPORT_EMAIL = "support@cyface.de"
 
     /**
      * must be different from other SDK using apps
      */
-    public final static String AUTHORITY = "de.cyface.app.provider";
-    public final static String ACCOUNT_TYPE = "de.cyface.app.pro";
+    const val AUTHORITY = "de.cyface.app.provider"
+    const val ACCOUNT_TYPE = "de.cyface.app.pro"
 }
