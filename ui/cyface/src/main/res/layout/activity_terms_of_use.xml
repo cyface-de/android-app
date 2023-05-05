@@ -5,7 +5,7 @@
   android:layout_height="match_parent"
   android:orientation="vertical"
   android:weightSum="5"
-  tools:context=".ui.TermsOfUseActivity">
+  tools:context=".TermsOfUseActivity">
 
   <RelativeLayout
     android:id="@+id/terms_of_reports_view"

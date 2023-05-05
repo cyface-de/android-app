@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -16,36 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r
+package de.cyface.app
 
+import android.Manifest
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.preference.PreferenceManager
 import android.util.Log
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import de.cyface.app.r4r.databinding.ActivityMainBinding
-import de.cyface.app.r4r.capturing.CapturingViewModel
-import de.cyface.app.r4r.capturing.CapturingViewModelFactory
-import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
-import de.cyface.app.r4r.utils.Constants.AUTHORITY
-import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
-import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.databinding.ActivityMainBinding
+import de.cyface.app.notification.CameraEventHandler
+import de.cyface.app.notification.DataCapturingEventHandler
+import de.cyface.app.utils.Constants
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
+import de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
+import de.cyface.camera_service.CameraListener
+import de.cyface.camera_service.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -56,24 +61,24 @@ import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
-import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import java.io.IOException
+import java.lang.ref.WeakReference
 
 /**
- * The base `Activity` for the actual Cyface measurement client. It's called by the
- * [de.cyface.app.r4r.ui.TermsOfUseActivity] class.
+ * The base `Activity` for the actual Cyface measurement client. It's called by the [TermsOfUseActivity]
+ * class.
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
- * @since 3.2.0
+ * @version 3.3.1
+ * @since 1.0.0
  */
-class MainActivity : AppCompatActivity(), ServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -81,9 +86,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private lateinit var binding: ActivityMainBinding
 
     /**
-     * The capturing service object which controls data capturing and synchronization.
+     * The `DataCapturingService` which represents the API of the Cyface Android SDK.
      */
     override lateinit var capturing: CyfaceDataCapturingService
+
+    /**
+     * The `CameraService` which collects camera data if the user did activate this feature.
+     */
+    override lateinit var cameraService: CameraService
 
     /**
      * The controller which allows to navigate through the navigation graph.
@@ -93,22 +103,20 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private lateinit var preferences: SharedPreferences
+    private var preferences: SharedPreferences? = null
 
     /**
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
      * just registers and unregisters itself.
-     *
-     * TODO: Change interface of DCS constructor to not force us to do this.
      */
-    private val unInterestedListener = object : DataCapturingListener {
+    private val unInterestedListener: DataCapturingListener = object : DataCapturingListener {
         override fun onFixAcquired() {}
         override fun onFixLost() {}
-        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) {}
-        override fun onNewSensorDataAcquired(data: CapturedData?) {}
-        override fun onLowDiskSpace(allocation: DiskConsumption?) {}
+        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation) {}
+        override fun onNewSensorDataAcquired(data: CapturedData) {}
+        override fun onLowDiskSpace(allocation: DiskConsumption) {}
         override fun onSynchronizationSuccessful() {}
-        override fun onErrorState(e: Exception?) {}
+        override fun onErrorState(e: Exception) {}
         override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
             return false
         }
@@ -116,62 +124,74 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         override fun onCapturingStopped() {}
     }
 
-    /**
-     * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
-     */
-    @Suppress("unused") // Used by Fragments
-    private val capturingViewModel: CapturingViewModel by viewModels {
-        val persistence = capturing.persistenceLayer
-        CapturingViewModelFactory(
-            persistence.measurementRepository!!, persistence.eventRepository!!
-        )
+    private val unInterestedCameraListener: CameraListener = object : CameraListener {
+        override fun onNewPictureAcquired(picturesCaptured: Int) {}
+        override fun onNewVideoStarted() {}
+        override fun onVideoStopped() {}
+        override fun onLowDiskSpace(allocation: DiskConsumption) {}
+        override fun onErrorState(e: Exception) {}
+        override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
+            return false
+        }
+
+        override fun onCapturingStopped() {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        // The location permissions are requested in MapFragment which needs to react to results
+        // Location permissions are requested by MainFragment which needs to react to results
 
         // If camera service is requested, check needed permissions
-        /* final boolean cameraCapturingEnabled = preferences.getBoolean(PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY, false);
-        final boolean permissionsMissing = ContextCompat.checkSelfPermission(this,
-            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-        /*
+        val cameraEnabled = preferences!!.getBoolean(
+            de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY,
+            false
+        )
+        val permissionsMissing = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.CAMERA
+        ) != PackageManager.PERMISSION_GRANTED /*
          * No permissions needed as we write the data to the app specific directory.
          * || ContextCompat.checkSelfPermission(this,
          * Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
          * || ContextCompat.checkSelfPermission(this,
          * Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-         */;
-        if (cameraCapturingEnabled && permissionsMissing) {
-            ActivityCompat.requestPermissions(this,
-                new String[] {Manifest.permission.CAMERA/*
+         */
+        if (cameraEnabled && permissionsMissing) {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    Manifest.permission.CAMERA /*
                                                              * , Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                                              * Manifest.permission.READ_EXTERNAL_STORAGE
-                                                             */},
-                PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION);
-        }*/
+                                                             */
+                ),
+                de.cyface.camera_service.Constants.PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION
+            )
+        }
 
         // Start DataCapturingService and CameraService
+        val sensorFrequency =
+            preferences!!.getInt(PREFERENCES_SENSOR_FREQUENCY_KEY, DEFAULT_SENSOR_FREQUENCY)
         try {
             capturing = CyfaceDataCapturingService(
-                applicationContext,
-                AUTHORITY,
-                ACCOUNT_TYPE,
+                this.applicationContext,
+                Constants.AUTHORITY,
+                Constants.ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
                 BuildConfig.authServer,
-                CapturingEventHandler(),
-                unInterestedListener,
-                DEFAULT_SENSOR_FREQUENCY
+                DataCapturingEventHandler(),
+                unInterestedListener,  // here was the capturing button but it registers itself, too
+                sensorFrequency
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             startSynchronization()
-            // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
-            /*cameraService = CameraService(
-                fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
-                de.cyface.app.utils.Constants.AUTHORITY, CameraEventHandler(), dataCapturingButton
-            )*/
+            // TODO: dataCapturingService!!.addConnectionStatusListener(this)
+            cameraService = CameraService(
+                this.applicationContext,
+                CameraEventHandler(),
+                unInterestedCameraListener // here was the capturing button but it registers itself, too
+            )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }
@@ -198,14 +218,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 // Adding top-level destinations so they are added to the back stack while navigating
                 setOf(
                     de.cyface.app.utils.R.id.navigation_trips,
-                    R.id.navigation_capturing,
-                    de.cyface.app.utils.R.id.navigation_statistics
+                    R.id.navigation_capturing/*,
+                    R.id.navigation_statistics*/
                 )
             )
         )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
-        showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL)
+        showProblematicManufacturerDialog(this, false, Constants.SUPPORT_EMAIL)
     }
 
     /**
@@ -230,7 +250,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val isReportingEnabled = preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+            val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
                 Sentry.captureException(e)
             }
@@ -241,9 +261,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * Starts the synchronization.
      *
-     * Creates an [Account] if there is none as an account is required for synchronization. If there was
-     * no account the synchronization is started when the async account creation future returns to ensure
-     * the account is available at that point.
+     * Creates an [Account] if there is none as an account is required
+     * for synchronization. If there was no account the synchronization is started when the async account
+     * creation future returns to ensure the account is available at that point.
      */
     fun startSynchronization() {
         val accountManager = AccountManager.get(this.applicationContext)
@@ -253,7 +273,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 Log.d(TAG, "startSynchronization: Starting WifiSurveyor with exiting account.")
                 capturing.startWifiSurveyor()
             } catch (e: SetupException) {
-                throw java.lang.IllegalStateException(e)
+                throw IllegalStateException(e)
             }
             return
         }
@@ -261,8 +281,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // The LoginActivity is called by Android which handles the account creation
         Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
-            ACCOUNT_TYPE,
-            AUTH_TOKEN_TYPE,
+            Constants.ACCOUNT_TYPE,
+            de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE,
             null,
             null,
             this,
@@ -274,24 +294,25 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
                     // The LoginActivity created a temporary account which cannot be used for synchronization.
                     // As the login was successful we now register the account correctly:
-                    val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
+                    val account = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)[0]
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference =
-                        preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+                    val syncEnabledPreference = preferences!!
+                        .getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
                     )
                     capturing.wiFiSurveyor.makeAccountSyncable(
-                        account, syncEnabledPreference
+                        account,
+                        syncEnabledPreference
                     )
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {
                     // Remove temp account when LoginActivity is closed during login [CY-5087]
-                    val accounts = accountManager1.getAccountsByType(ACCOUNT_TYPE)
+                    val accounts = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)
                     if (accounts.isNotEmpty()) {
                         val account = accounts[0]
                         accountManager1.removeAccount(account, null, null)
@@ -299,11 +320,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     // This closes the app when the LoginActivity is closed
                     this.finish()
                 } catch (e: AuthenticatorException) {
-                    throw java.lang.IllegalStateException(e)
+                    throw IllegalStateException(e)
                 } catch (e: IOException) {
-                    throw java.lang.IllegalStateException(e)
+                    throw IllegalStateException(e)
                 } catch (e: SetupException) {
-                    throw java.lang.IllegalStateException(e)
+                    throw IllegalStateException(e)
                 }
             },
             null
@@ -311,15 +332,70 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     /**
-     * Checks if there is an account with an authToken.
+     * Handles incoming inter process communication messages from services used by this application.
+     * This is required to update the UI based on changes within those services (e.g. status).
+     * - The Handler code runs all on the same (e.g. UI) thread.
+     * - We don't use Broadcasts here to reduce the amount of broadcasts.
      *
-     * @param accountManager A reference to the [AccountManager]
-     * @return true if there is an account with an authToken
-     * @throws RuntimeException if there is more than one account
+     * @author Klemens Muthmann
+     * @author Armin Schnabel
+     * @version 1.0.2
+     * @since 1.0.0
+     * @property context The context [MainActivity] for this message handler.
      */
-    private fun accountWithTokenExists(accountManager: AccountManager): Boolean {
-        val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
-        Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
-        return existingAccounts.isNotEmpty()
+    private class IncomingMessageHandler(context: MainActivity) :
+        Handler(context.mainLooper) {
+        /**
+         * A weak reference to the context activity this handler handles messages for. The weak reference is
+         * necessary since the lifetime of the handler might be longer than the activity's and a normal reference would
+         * hinder the garbage collector to destroy the activity in that instance.
+         */
+        private val context: WeakReference<MainActivity>
+
+        init {
+            this.context = WeakReference(context)
+        }
+
+        override fun handleMessage(msg: Message) {
+            val activity = context.get()
+                ?: // noinspection UnnecessaryReturnStatement
+                return
+            /*
+             * switch (msg.what) {
+             * case Message.WARNING_SPACE:
+             * Log.d(TAG, "received MESSAGE about WARNING SPACE: Unbinding services !");
+             * activity.unbindDataCapturingService();
+             * final MainFragment mainFragment = (MainFragment)activity.getFragmentManager()
+             * .findFragmentByTag(MAIN_FRAGMENT_TAG);
+             * if (mainFragment != null) { // the fragment was switch just now this one can be null
+             * mainFragment.dataCapturingButton.setDeactivated();
+             * }
+             * break;
+             * default:
+             * super.handleMessage(msg);
+             * }
+             */
+        }
+    }
+
+    companion object {
+        /**
+         * The tag used to identify logging messages send to logcat.
+         */
+        const val TAG = Constants.PACKAGE
+
+        /**
+         * Checks if there is an account with an authToken.
+         *
+         * @param accountManager A reference to the [AccountManager]
+         * @return true if there is an account with an authToken
+         * @throws RuntimeException if there is more than one account
+         */
+        @JvmStatic
+        fun accountWithTokenExists(accountManager: AccountManager): Boolean {
+            val existingAccounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE)
+            Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
+            return existingAccounts.isNotEmpty()
+        }
     }
 }

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.capturing
+package de.cyface.app.r4r.capturing
 
 import android.content.Intent
 import android.view.Menu
@@ -24,17 +24,16 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
-import de.cyface.app.R
-import de.cyface.app.CapturingFragmentDirections
-import de.cyface.app.MainActivity
-import de.cyface.app.utils.Constants.SUPPORT_EMAIL
+import de.cyface.app.r4r.MainActivity
+import de.cyface.app.r4r.R
+import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.uploader.exception.SynchronisationException
 
 /**
- * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
- * options are shown in the action bar at the top right.
+ * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
+ * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
  * @version 1.0.0

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r
+package de.cyface.app
 
 import android.app.Application
 import android.content.IntentFilter
@@ -37,10 +37,10 @@ import io.sentry.Sentry
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.5.2
+ * @version 1.5.1
  * @since 1.0.0
  */
-class Application : Application() {
+class MeasuringClient : Application() {
     /**
      * Stores the user's preferences.
      */
@@ -53,7 +53,7 @@ class Application : Application() {
         ErrorHandler.ErrorListener { errorCode: ErrorCode, errorMessage: String ->
             val appName = applicationContext.getString(R.string.app_name)
             Toast.makeText(
-                this@Application,
+                this@MeasuringClient,
                 String.format("%s - %s", errorMessage, appName),
                 Toast.LENGTH_LONG
             ).show()
