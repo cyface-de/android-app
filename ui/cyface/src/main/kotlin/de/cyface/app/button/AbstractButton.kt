@@ -16,33 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui.button;
+package de.cyface.app.button
 
-import com.github.lzyzsd.circleprogress.DonutProgress;
-
-import android.view.View;
-import android.widget.ImageButton;
+import android.view.View
+import android.widget.ImageButton
+import com.github.lzyzsd.circleprogress.DonutProgress
 
 /**
- * Interface for {@code onClickListener} for buttons as used by the Cyface main fragment.
+ * Interface for `onClickListener` for buttons as used by the Cyface main fragment.
  *
  * @author Klemens Muthmann
  * @version 1.0.2
  * @since 1.0.0
  */
-public interface AbstractButton extends View.OnClickListener {
+interface AbstractButton : View.OnClickListener {
+    /**
+     * This method should be called each time the view containing this button is destroyed. Usually this happens as part
+     * of the `Fragment#onDestroyView()` method.
+     */
+    fun onCreateView(button: ImageButton?, progress: DonutProgress?)
 
     /**
      * This method should be called each time the view containing this button is destroyed. Usually this happens as part
-     * of the {@code Fragment#onDestroyView()} method.
+     * of the `Fragment#onDestroyView()` method.
      */
-    void onCreateView(ImageButton button, DonutProgress progress);
-
-    /**
-     * This method should be called each time the view containing this button is destroyed. Usually this happens as part
-     * of the {@code Fragment#onDestroyView()} method.
-     */
-    void onDestroyView();
-
-    void addButtonListener(ButtonListener buttonListener);
+    fun onDestroyView()
+    fun addButtonListener(buttonListener: ButtonListener?)
 }

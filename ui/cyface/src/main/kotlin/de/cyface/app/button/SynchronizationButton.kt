@@ -28,8 +28,6 @@ import android.widget.ImageButton
 import android.widget.Toast
 import com.github.lzyzsd.circleprogress.DonutProgress
 import de.cyface.app.MainActivity.Companion.accountWithTokenExists
-import de.cyface.app.ui.button.AbstractButton
-import de.cyface.app.ui.button.ButtonListener
 import de.cyface.app.utils.Constants.TAG
 import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
@@ -70,11 +68,11 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
         this.dataCapturingService = dataCapturingService
     }
 
-    override fun onCreateView(button: ImageButton, progressView: DonutProgress) {
+    override fun onCreateView(button: ImageButton?, progress: DonutProgress?) {
         Validate.notNull(button)
-        context = button.context
+        context = button!!.context
         this.button = button
-        this.progressView = progressView
+        this.progressView = progress
         preferences = PreferenceManager.getDefaultSharedPreferences(context)
         onResume() // TODO[MOV-621] the parent's onResume, thus, this class's onResume should automatically be called
         button.setOnClickListener(this)
@@ -192,8 +190,8 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
         button!!.setOnClickListener(null)
     }
 
-    override fun addButtonListener(buttonListener: ButtonListener) {
+    override fun addButtonListener(buttonListener: ButtonListener?) {
         Validate.notNull(buttonListener)
-        listener.add(buttonListener)
+        listener.add(buttonListener!!)
     }
 }

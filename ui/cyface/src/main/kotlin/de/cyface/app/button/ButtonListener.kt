@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui.button;
+package de.cyface.app.button
 
 /**
  * Listener interface for events happening to a button.
@@ -25,11 +25,11 @@ package de.cyface.app.ui.button;
  * @version 1.0.2
  * @since 1.0.0
  */
-public interface ButtonListener {
+interface ButtonListener {
     /**
      * This method is invoked every time the button has been pressed.
      *
      * @param button The pressed button.
      */
-    void onClick(AbstractButton button);
+    fun onClick(button: AbstractButton?)
 }

@@ -45,6 +45,8 @@ import static de.cyface.persistence.model.MeasurementStatus.OPEN;
 import static de.cyface.persistence.model.MeasurementStatus.PAUSED;
 import static de.cyface.utils.DiskConsumption.spaceAvailable;
 
+import de.cyface.app.button.AbstractButton;
+import de.cyface.app.button.ButtonListener;
 import de.cyface.app.utils.Map;
 import java.util.ArrayList;
 import java.util.Collection;
