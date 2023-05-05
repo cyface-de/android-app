@@ -63,11 +63,22 @@ google.maps_api_key=SECRET_KEY
 google.maps_api_key.r4f=SECRET_KEY
 ....
 
-==== Cyface Guest Credentials
+==== HCaptcha
 
 Add the following to your `gradle.properties` file:
+
 ....
-cyface.guest_password=GUEST_PASSWORD
+hCaptcha.key=SECRET_KEY
+hCaptcha.key.r4r=SECRET_KEY
+....
+
+==== Authentication and Data Collection APIs
+
+Add the following to your `gradle.properties` file:
+
+....
+cyface.api=https://some.url.com/api/v3
+cyface.auth_api=https://some.url.com/auth/api/v1
 ....
 
 

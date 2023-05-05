@@ -57,7 +57,6 @@ android {
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
 
-        multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("String", "localHostIp", '"10.0.2.2"')
@@ -73,6 +72,9 @@ android {
 
         // Load Google Maps API key
         manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
+
+        // Load hCaptcha API key
+        buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key')}\""
     }
 
     buildTypes {
@@ -97,6 +99,7 @@ android {
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.staging_auth_api')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
@@ -113,6 +116,7 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
@@ -134,6 +138,7 @@ android {
             pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/license.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE']
             // To resolve the conflict warning after adding google-api-client dependency
             excludes += ['META-INF/DEPENDENCIES']
+            excludes += ['META-INF/INDEX.LIST']
         }
     }
 
@@ -176,8 +181,6 @@ dependencies {
     // Exception tracking
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
-    // To build an app with > 64K methods
-    implementation "androidx.multidex:multidex:$rootProject.ext.multidexVersion"
     // To change the material design
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
@@ -199,6 +202,9 @@ dependencies {
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
 
+    // HCaptcha
+    implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
+
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
     implementation project(':datacapturing')
@@ -215,6 +221,7 @@ dependencies {
     androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
+    androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
     // UiAutomator Testing
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"
     androidTestImplementation "org.hamcrest:hamcrest-integration:$rootProject.ext.hamcrestVersion"

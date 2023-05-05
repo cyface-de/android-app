@@ -64,6 +64,9 @@ android {
 
         // Load Google Maps API key
         manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key.r4r')}"]
+
+        // Load hCaptcha API key
+        buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key.r4r')}\""
     }
 
     buildTypes {
@@ -88,6 +91,7 @@ android {
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.staging_auth_api')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
@@ -104,6 +108,7 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
@@ -127,6 +132,15 @@ android {
 
     kotlinOptions {
         jvmTarget = rootProject.ext.kotlinTargetJavaVersion
+    }
+
+    // Avoid `2 files found with path ...` error
+    packagingOptions {
+        // To resolve the conflict warning after adding google-api-client dependency
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+            excludes += ['META-INF/INDEX.LIST']
+        }
     }
 
     buildFeatures {
@@ -178,6 +192,9 @@ dependencies {
     // Kotlin components
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
+
+    // HCaptcha
+    implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

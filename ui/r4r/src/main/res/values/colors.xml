@@ -6,7 +6,6 @@
     <color name="green_700">#299463</color> <!-- icon color -->
     <color name="green_900">#1f6242</color>
 
-    <!-- complementary color, see tool above -->
     <color name="red_200">#fc99b7</color>
     <color name="red_700">#cf3666</color>
 </resources>

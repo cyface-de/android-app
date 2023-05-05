@@ -36,15 +36,20 @@ githubUser=
 githubToken=
 
 cyface.api=
+cyface.auth_api
 
 google.maps_api_key=
 google.maps-api_key.r4r=
+
+hCaptcha.key=
+hCaptcha.key.r4r=
 
 cyface.demo_api=
 cyface.local_api=
 cyface.emulator_api=
 
 cyface.staging_api=
+cyface.staging_auth_api=
 cyface.staging_user=
 cyface.staging_password=
 

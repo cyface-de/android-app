@@ -89,7 +89,13 @@
         <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
         <activity
             android:name=".ui.LoginActivity"
-            android:label="@string/title_activity_login" />
+            android:label="@string/title_activity_login"
+            android:launchMode="singleTask" /> <!-- when we switch back from Registration, see https://stackoverflow.com/a/45292292/5815054 -->
+
+        <!-- The RegistrationActivity can be launched via (on top of) the LoginActivity -->
+        <activity
+            android:name=".ui.RegistrationActivity"
+            android:label="@string/sign_up" />
 
         <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
         <!-- But we replaced the Content Provider with a Stub Content provider. -->

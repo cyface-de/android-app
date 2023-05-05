@@ -23,6 +23,17 @@
     <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
     <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
 
+    <!-- Registration -->
+    <string name="email">E-Mail Adresse</string>
+    <string name="password_confirmation">Passwort bestätigen</string>
+    <string name="sign_up">Registrieren</string>
+    <string name="already_registered">Bereits registriert?</string>
+    <string name="error_message_passwords_do_not_match">Die Passwörter stimmen nicht überein</string>
+    <string name="error_message_email_taken">Es existiert bereits ein Account mit dieser E-Mail Adresse</string>
+    <string name="registration_failed">Registrierung fehlgeschlagen</string>
+    <string name="captcha_failed">Captcha fehlgeschlagen. Bitte erneut probieren</string>
+    <string name="registration_successful">Nutzerkonto angelegt. Klicken Sie auf den Bestätigungslink in der Aktivierungsemail bevor Sie sich einloggen zu können</string>
+
     <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
     <string name="trips">Fahrten</string>
     <string name="capturing">Aufzeichnen</string>

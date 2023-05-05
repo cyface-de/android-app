@@ -1084,7 +1084,7 @@ val permissionsGranted = ActivityCompat.checkSelfPermission(
 applicationContext,
 Manifest.permission.CAMERA
 ) == PackageManager.PERMISSION_GRANTED
-/* FIXME: if (!permissionsGranted) {
+/* TODO: if (!permissionsGranted) {
 ActivityCompat.requestPermissions(mainActivity,
 new String[] {Manifest.permission.CAMERA},
 PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION);

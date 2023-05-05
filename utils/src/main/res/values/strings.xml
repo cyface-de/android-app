@@ -24,10 +24,21 @@
     <string name="error_message_password_too_short">This password is too short</string>
     <string name="error_message_login_too_short">This username is too short</string>
 
+    <!-- Registration -->
+    <string name="email">Email address</string>
+    <string name="password_confirmation">Password confirmation</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="error_message_passwords_do_not_match">The passwords don\'t match</string>
+    <string name="error_message_email_taken">There is already an account with this email address</string>
+    <string name="registration_failed">Registration failed</string>
+    <string name="captcha_failed">Captcha failed. Please try again</string>
+    <string name="registration_successful">Account created. Click on the link in the activation email before you can log in</string>
+
     <!-- BottomNavigationView -->
     <string name="trips">Trips</string>
     <string name="capturing">Capturing</string>
     <string name="statistics">Statistics</string>
+    <string name="already_registered">Already registered?</string>
 
     <!-- Capturing -->
     <string name="map">Map</string>

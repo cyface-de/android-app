@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.ui
+package de.cyface.app.ui
 
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
@@ -31,21 +31,19 @@ import android.preference.PreferenceManager
 import android.util.Log
 import android.util.Patterns
 import android.view.View
-import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
-import de.cyface.app.r4r.Application.Companion.errorHandler
-import de.cyface.app.r4r.BuildConfig
-import de.cyface.app.r4r.R
-import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
-import de.cyface.app.r4r.utils.Constants.AUTHORITY
-import de.cyface.app.r4r.utils.Constants.TAG
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.synchronization.Constants
+import de.cyface.app.BuildConfig
+import de.cyface.app.MeasuringClient.Companion.errorHandler
+import de.cyface.app.R
+import de.cyface.app.utils.Constants
+import de.cyface.app.utils.Constants.ACCOUNT_TYPE
+import de.cyface.app.utils.Constants.TAG
+import de.cyface.app.utils.SharedConstants
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
@@ -133,7 +131,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
         val messageView = findViewById<MaterialTextView>(R.id.login_message)
         if (registered) {
             messageView.text = getString(de.cyface.app.utils.R.string.registration_successful)
-            messageView.visibility = VISIBLE
+            messageView.visibility = View.VISIBLE
         }
 
         super.onResume()
@@ -174,7 +172,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
         // Update view
         progressBar!!.isIndeterminate = true
-        progressBar!!.visibility = VISIBLE
+        progressBar!!.visibility = View.VISIBLE
 
         // The CyfaceAuthenticator reads the credentials from the account so we store them there
         updateAccount(this, login, password)
@@ -195,9 +193,14 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 CyfaceAuthenticator(context.get()!!, DefaultAuthenticator(url))
             val authToken = try {
                 // AsyncTask because this is blocking but only for a short time
-                cyfaceAuthenticator.getAuthToken(null, account, Constants.AUTH_TOKEN_TYPE, null)
+                cyfaceAuthenticator.getAuthToken(
+                    null,
+                    account,
+                    de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE,
+                    null
+                )
                     .getString(AccountManager.KEY_AUTHTOKEN)!!
-            } catch (e: Exception) { // all exceptions or else login is skipped upon exception
+            } catch (e: Exception) {
                 // Using ErrorHandler to show soft error like "account not activated" instead
                 // when (e) { is LoginFailed -> { when (e.cause) {
 
@@ -213,14 +216,21 @@ class LoginActivity : AccountAuthenticatorActivity() {
             Validate.notNull(authToken)
             Log.d(TAG, "Setting auth token to: **" + authToken.substring(authToken.length - 7))
             val accountManager = AccountManager.get(context.get())
-            accountManager.setAuthToken(account, Constants.AUTH_TOKEN_TYPE, authToken)
+            accountManager.setAuthToken(
+                account,
+                de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE,
+                authToken
+            )
             //return@async AuthTokenRequestParams(account, true)
 
             // Equals tutorial's "finishLogin()"
             val intent = Intent()
             intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name)
             intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, ACCOUNT_TYPE)
-            intent.putExtra(AccountManager.KEY_AUTHTOKEN, Constants.AUTH_TOKEN_TYPE)
+            intent.putExtra(
+                AccountManager.KEY_AUTHTOKEN,
+                de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
+            )
 
             // Return the information back to the Authenticator
             setAccountAuthenticatorResult(intent.extras)
@@ -243,7 +253,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private fun reportError(e: Exception) {
         // We cannot capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
         // We also don't want to capture the errors in the error handler as we don't have the stacktrace there
-        val reportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
+        val reportingEnabled = preferences!!.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         if (reportingEnabled) {
             Sentry.captureException(e)
         }
@@ -274,10 +284,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
      * @param loginMustBeAnEmailAddress True if the login should be checked to be a valid email address
      * @return true is the credentials are in a valid format
      */
-    private fun credentialsAreValid(
+    fun credentialsAreValid(
         login: String?,
         password: String?,
-        @Suppress("SameParameterValue") loginMustBeAnEmailAddress: Boolean
+        loginMustBeAnEmailAddress: Boolean
     ): Boolean {
         var valid = true
         if (login.isNullOrEmpty()) {
@@ -409,10 +419,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
             val newAccount = Account(username, ACCOUNT_TYPE)
             Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
             Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
-            Log.v(Constants.TAG, "New account added")
-            ContentResolver.setSyncAutomatically(newAccount, AUTHORITY, false)
+            Log.v(de.cyface.synchronization.Constants.TAG, "New account added")
+            ContentResolver.setSyncAutomatically(newAccount, Constants.AUTHORITY, false)
             // Synchronization can be disabled via {@link CyfaceDataCapturingService#setSyncEnabled}
-            ContentResolver.setIsSyncable(newAccount, AUTHORITY, 1)
+            ContentResolver.setIsSyncable(newAccount, Constants.AUTHORITY, 1)
             // Do not use validateAccountFlags in production code as periodicSync flags are set async
 
             // PeriodicSync and syncAutomatically is set dynamically by the {@link WifiSurveyor}
@@ -429,7 +439,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
          * @param account the `Account` to be removed
          */
         private fun deleteAccount(context: Context, account: Account) {
-            ContentResolver.removePeriodicSync(account, AUTHORITY, Bundle.EMPTY)
+            ContentResolver.removePeriodicSync(account, Constants.AUTHORITY, Bundle.EMPTY)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
                 AccountManager.get(context).removeAccount(account, null, null)
             } else {

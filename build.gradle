@@ -26,7 +26,7 @@
  */
 
 buildscript {
-    ext.gradle_version = '7.3.0'
+    ext.gradle_version = '7.4.2' // Major release available but breaks publish [RFR-412]
     ext.kotlin_version = "1.8.0"
     ext.matcher_version = "1.2.4"
 
@@ -55,11 +55,13 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.6.1" // Also update submodule commit ref
-    cyfaceUtilsVersion = "3.3.5" // Maven dependency
-    cyfaceEnergySettingsVersion = "3.3.1" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.1.10" // Also update submodule commit ref
-    cyfaceSerializationVersion = "2.3.3" // Keep im sync with version in submodule `backend`
+    cyfaceAndroidBackendVersion = "7.7.0" // Also update submodule commit ref
+    cyfaceUtilsVersion = "3.3.7"
+    cyfaceEnergySettingsVersion = "3.3.3" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.1.11" // Also update submodule commit ref
+    // Maybe keep this in sync with the serialization library version used in `uploader` lib
+    cyfaceSerializationVersion = "2.3.7" // Keep im sync with version in submodule `backend`
+    cyfaceUploaderVersion = "1.0.0"
 
     // Android SDK versions
     minSdkVersion = 21 // device support
@@ -68,14 +70,13 @@ ext {
     buildToolsVersion = '33.0.0' // optional, if defined, use latest (SDK Manager > SDK Tools)
 
     // Android dependencies
-    multidexVersion = "2.0.1"
     androidxAnnotationVersion = '1.6.0'
     androidxAppCompatVersion = "1.6.1"
     androidPreferencesVersion = '1.2.0'
     localbroadcastmanagerVersion = '1.1.0'
     exifinterfaceVersion = "1.3.6" // Required by Camera Service submodule
     roomVersion = "2.5.1"
-    lifecycleVersion = "2.5.0"
+    lifecycleVersion = "2.6.1"
     navigationVersion = "2.5.3"
 
     // Kotlin components
@@ -83,12 +84,12 @@ ext {
 
     // Other dependencies
     materialDialogsVersion = "3.3.0"
-    googleApiClientVersion = '1.31.5' // transmission protocol
     chartVersion = "v3.1.0"
+    hCaptchaVersion = "3.8.1"
 
     // Testing
     junitVersion = "1.1.5"
-    mockitoVersion = '4.8.0'
+    mockitoVersion = '5.2.0'
     mockitoKotlinVersion = '4.1.0'
     hamcrestVersion = "1.3"
     rulesVersion = "1.5.0"
@@ -129,7 +130,15 @@ allprojects {
                 password = project.findProperty("githubToken")
             }
         }
-        maven { url 'https://jitpack.io' } // For MPAndroidChart
+        maven { url 'https://jitpack.io' } // For MPAndroidChart and HCaptcha
+        maven {
+            url = uri("https://maven.pkg.github.com/cyface-de/uploader")
+            // Needed even for public projects: https://github.community/t5/GitHub-API-Development-and/Download-from-Github-Package-Registry-without-authentication/m-p/35255
+            credentials {
+                username = project.findProperty("githubUser")
+                password = project.findProperty("githubToken")
+            }
+        }
     }
 }
 

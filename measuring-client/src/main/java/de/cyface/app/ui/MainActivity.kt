@@ -65,7 +65,7 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.synchronization.exception.SynchronisationException
+import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
@@ -181,6 +181,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 Constants.AUTHORITY,
                 Constants.ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
+                BuildConfig.authServer,
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency
@@ -188,7 +189,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             startSynchronization()
-            // FIXME: dataCapturingService!!.addConnectionStatusListener(this)
+            // TODO: dataCapturingService!!.addConnectionStatusListener(this)
             cameraService = CameraService(
                 this.applicationContext,
                 CameraEventHandler(),

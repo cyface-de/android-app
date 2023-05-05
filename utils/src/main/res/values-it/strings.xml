@@ -23,6 +23,17 @@
   <string name="error_message_password_too_short">Questa password è troppo corta</string>
   <string name="error_message_login_too_short">Questo nome utente è troppo corto</string>
 
+  <!-- Registration -->
+  <string name="email">Email address</string>
+  <string name="password_confirmation">Password confirmation</string>
+  <string name="sign_up">Sign Up</string>
+  <string name="already_registered">Already registered?</string>
+  <string name="error_message_passwords_do_not_match">The passwords don\'t match</string>
+  <string name="error_message_email_taken">There is already an account with this email address</string>
+  <string name="registration_failed">Registration failed</string>
+  <string name="captcha_failed">Captcha failed. Please try again</string>
+  <string name="registration_successful">Account created. Click on the link in the activation email before you can log in</string>
+
   <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
   <string name="trips">Trips</string>
   <string name="capturing">Capturing</string>

@@ -71,7 +71,7 @@ public final class LoginActivityTest {
         oocut.eMailPattern = EMAIL_ADDRESS;
 
         // Correct credential format
-        boolean validInputResult = oocut.credentialsAreValid("test@cyface.de", "test", true);
+        boolean validInputResult = oocut.credentialsAreValid("test@cyface.de", "test12", true);
         // Missing password
         boolean invalidInputResult1 = oocut.credentialsAreValid("test@cyface.de", "", true);
         // Missing email

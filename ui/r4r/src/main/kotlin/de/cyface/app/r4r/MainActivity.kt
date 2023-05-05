@@ -58,7 +58,7 @@ import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProces
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.synchronization.exception.SynchronisationException
+import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
      * just registers and unregisters itself.
      *
-     * FIXME: Change interface of DCS constructor to not force us to do this.
+     * TODO: Change interface of DCS constructor to not force us to do this.
      */
     private val unInterestedListener = object : DataCapturingListener {
         override fun onFixAcquired() {}
@@ -159,6 +159,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 AUTHORITY,
                 ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
+                BuildConfig.authServer,
                 CapturingEventHandler(),
                 unInterestedListener,
                 DEFAULT_SENSOR_FREQUENCY

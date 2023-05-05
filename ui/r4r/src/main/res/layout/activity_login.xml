@@ -95,6 +95,18 @@
           android:inputType="textPassword" />
       </com.google.android.material.textfield.TextInputLayout>
 
+      <!-- Messages, e.g. "registration successful, please activate your account -->
+      <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/login_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textColor="@color/defaultPrimary"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="8dp" />
+
       <!-- Progress bar: Invisible by default. Visible during authentication. -->
       <RelativeLayout
         android:layout_width="match_parent"

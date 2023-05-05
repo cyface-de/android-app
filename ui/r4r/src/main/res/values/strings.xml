@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Ready for Robots</string>
+    <string name="app_name" translatable="false">Ready4Robots</string>
 
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
