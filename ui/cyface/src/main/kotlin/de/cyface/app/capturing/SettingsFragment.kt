@@ -29,7 +29,7 @@ import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import de.cyface.app.databinding.FragmentSettingsBinding
-import de.cyface.app.ui.dialog.ExposureTimeDialog
+import de.cyface.app.dialog.ExposureTimeDialog
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY

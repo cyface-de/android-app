@@ -38,7 +38,7 @@ import de.cyface.app.capturing.MenuProvider
 import de.cyface.app.databinding.FragmentCapturingBinding
 import de.cyface.app.ui.button.DataCapturingButton
 import de.cyface.app.ui.button.SynchronizationButton
-import de.cyface.app.ui.dialog.ModalityDialog
+import de.cyface.app.dialog.ModalityDialog
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
