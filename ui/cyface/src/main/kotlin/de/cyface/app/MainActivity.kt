@@ -44,8 +44,8 @@ import de.cyface.app.BuildConfig
 import de.cyface.app.CameraServiceProvider
 import de.cyface.app.R
 import de.cyface.app.databinding.ActivityMainBinding
-import de.cyface.app.ui.notification.CameraEventHandler
-import de.cyface.app.ui.notification.DataCapturingEventHandler
+import de.cyface.app.notification.CameraEventHandler
+import de.cyface.app.notification.DataCapturingEventHandler
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
