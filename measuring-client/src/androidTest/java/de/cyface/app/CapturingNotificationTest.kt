@@ -53,10 +53,19 @@ class CapturingNotificationTest {
      */
     private var device: UiDevice? = null
 
+    /**
+     * As `POST_NOTIFICATIONS` leads to `GrantPermissionRule Failed` on Android < 13, we add
+     * course location as a second permission to allow this version check.
+     */
     @get:Rule
-    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
-        android.Manifest.permission.POST_NOTIFICATIONS
-    )
+    val permissionRule: GrantPermissionRule = if (Build.VERSION.SDK_INT >= 33) {
+        GrantPermissionRule.grant(
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.POST_NOTIFICATIONS
+        )
+    } else {
+        GrantPermissionRule.grant(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+    }
 
     /**
      * Starts the Cyface App before running tests.
@@ -129,6 +138,7 @@ class CapturingNotificationTest {
         @Suppress("SpellCheckingInspection")
         val navigationScroller = By.res("com.android.systemui:id/notification_stack_scroller")
         val notificationArea = device!!.findObject(navigationScroller)
+        device!!.waitForIdle()
 
         // Assert: Notification is shown
         val notificationText = context.getText(R.string.capturing_active).toString()
