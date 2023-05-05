@@ -25,7 +25,7 @@ import android.view.MenuItem
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import de.cyface.app.R
-import de.cyface.app.ui.CapturingFragmentDirections
+import de.cyface.app.CapturingFragmentDirections
 import de.cyface.app.MainActivity
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -33,7 +33,7 @@ import de.cyface.energy_settings.TrackingSettings
 import de.cyface.uploader.exception.SynchronisationException
 
 /**
- * The [androidx.core.view.MenuProvider] for the [de.cyface.app.ui.CapturingFragment] which defines which
+ * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
  * options are shown in the action bar at the top right.
  *
  * @author Armin Schnabel

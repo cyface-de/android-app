@@ -18,7 +18,7 @@
  */
 package de.cyface.app.ui.dialog;
 
-import static de.cyface.app.ui.CapturingFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
+import static de.cyface.app.CapturingFragment.DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
 import static de.cyface.persistence.model.Modality.BICYCLE;
 import static de.cyface.persistence.model.Modality.BUS;

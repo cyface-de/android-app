@@ -62,7 +62,6 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -74,7 +73,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import de.cyface.app.R;
-import de.cyface.app.ui.CapturingFragment;
+import de.cyface.app.CapturingFragment;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.camera_service.CameraListener;
 import de.cyface.camera_service.CameraService;

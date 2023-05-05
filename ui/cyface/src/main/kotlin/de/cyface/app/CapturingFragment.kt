@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.ui
+package de.cyface.app
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -34,8 +34,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import de.cyface.app.CameraServiceProvider
-import de.cyface.app.R
 import de.cyface.app.capturing.MenuProvider
 import de.cyface.app.databinding.FragmentCapturingBinding
 import de.cyface.app.ui.button.DataCapturingButton
