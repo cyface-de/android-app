@@ -48,6 +48,7 @@ import de.cyface.app.r4r.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
 import de.cyface.app.r4r.capturing.map.MapFragment
+import de.cyface.app.r4r.capturing.marker.MarkerFragment
 import de.cyface.app.r4r.capturing.speed.SpeedFragment
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.CalibrationDialogListener
@@ -271,6 +272,14 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             viewLifecycleOwner,
             Lifecycle.State.RESUMED
         )
+
+        // Dynamically add tabs (dynamically show MarkerFragment)
+        val tabLayout = binding.tabLayout
+        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.ic_baseline_map_24))
+        if (!MarkerFragment.eventPassed()) {
+            tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.baseline_pin_drop_24))
+        }
+        tabLayout.addTab(tabLayout.newTab().setIcon(R.drawable.ic_baseline_speed_24))
 
         return root
     }
@@ -863,12 +872,16 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             // Ordered list, make sure titles list match this order
             return if (position == 0) {
                 MapFragment()
-            } else SpeedFragment()
+            } else if (position == 1 && !MarkerFragment.eventPassed()) {
+                MarkerFragment()
+            } else {
+                SpeedFragment()
+            }
         }
 
         override fun getItemCount(): Int {
             // List size
-            return 2
+            return if (MarkerFragment.eventPassed()) 2 else 3
         }
     }
 
