@@ -1,134 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context="de.cyface.app.utils.trips.TripsFragment">
+
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/tripsList"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:paddingStart="8dp"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingEnd="8dp"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    app:layout_constraintBottom_toTopOf="@+id/achievements"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:listitem="@layout/trips_item" />
+
+  <!-- achievements section -->
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/achievements"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="de.cyface.app.utils.trips.TripsFragment">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/tripsList">
 
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/tripsList"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
-      tools:listitem="@layout/trips_item"
-      android:paddingTop="@dimen/activity_vertical_margin"
-      android:paddingBottom="@dimen/activity_vertical_margin"
-      android:paddingStart="8dp"
-      android:paddingEnd="8dp"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintBottom_toTopOf="@+id/achievements"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent" />
-
-    <!-- achievements section -->
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/achievements"
+    <com.google.android.material.divider.MaterialDivider
+      android:id="@+id/achievementsDivider"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:paddingBottom="16dp"
-      app:layout_constraintTop_toBottomOf="@id/tripsList"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
+      app:dividerColor="@color/grey_200"
+      app:layout_constraintTop_toTopOf="@id/achievements" />
+
+    <!-- progress -->
+
+    <LinearLayout
+      android:id="@+id/achievementsProgress"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
       android:visibility="gone"
-      android:orientation="vertical">
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/achievementsDivider">
 
-        <com.google.android.material.divider.MaterialDivider
-          android:id="@+id/achievementsDivider"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          app:layout_constraintTop_toTopOf="@id/achievements"
-          app:dividerColor="@color/grey_200" />
+      <TextView
+        android:id="@+id/achievementsProgressContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="@string/achievements_progress"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        app:drawableLeftCompat="@drawable/baseline_workspace_premium_24" />
 
-        <!-- progress -->
+      <ProgressBar
+        android:id="@+id/achievementsProgressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:progressBackgroundTint="@color/grey_200"
+        android:progressTint="@color/defaultPrimary" />
+    </LinearLayout>
 
-        <TextView
-          android:id="@+id/achievementsProgressContent"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          app:layout_constraintTop_toBottomOf="@id/achievementsDivider"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          android:visibility="gone"
-          android:padding="16dp"
-          android:text="@string/achievements_progress"
-          android:textAppearance="?attr/textAppearanceSubtitle1"
-          app:drawableLeftCompat="@drawable/baseline_workspace_premium_24"
-          android:drawablePadding="8dp"/>
+    <!-- unlocked -->
 
-        <ProgressBar
-          android:id="@+id/achievementsProgress"
-          android:layout_width="match_parent"
-          android:layout_height="4dp"
-          app:layout_constraintTop_toBottomOf="@id/achievementsProgressContent"
-          style="@android:style/Widget.ProgressBar.Horizontal"
-          android:progressTint="@color/defaultPrimary"
-          android:progressBackgroundTint="@color/grey_200"
-          android:visibility="gone" />
+    <LinearLayout
+      android:id="@+id/achievementsUnlocked"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/achievementsDivider">
 
-        <!-- unlocked -->
+      <TextView
+        android:id="@+id/achievementsUnlockedContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="@string/achievements_unlocked"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        app:drawableLeftCompat="@drawable/baseline_verified_24" />
 
-        <TextView
-          android:id="@+id/achievementsUnlockedContent"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          app:layout_constraintTop_toBottomOf="@id/achievementsDivider"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          android:visibility="gone"
-          android:padding="16dp"
-          android:text="@string/achievements_unlocked"
-          android:textAppearance="?attr/textAppearanceSubtitle1"
-          app:drawableLeftCompat="@drawable/baseline_verified_24"
-          android:drawablePadding="8dp"/>
+      <Button
+        android:id="@+id/achievementsUnlockedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/show_voucher" />
+    </LinearLayout>
 
-        <Button
-          android:id="@+id/unlockAchievement"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:visibility="gone"
-          app:layout_constraintTop_toBottomOf="@id/achievementsUnlockedContent"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          android:text="@string/show_voucher"/>
+    <!-- received -->
 
-        <!-- received -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/achievementsReceived"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/achievementsDivider">
 
-        <TextView
-          android:id="@+id/achievementReceived"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          app:layout_constraintTop_toBottomOf="@id/achievementsDivider"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          android:visibility="gone"
-          android:paddingTop="16dp"
-          android:paddingBottom="16dp"
-          android:text="@string/voucher_code"
-          android:textAppearance="?attr/textAppearanceSubtitle1" />
-        <TextView
-          android:id="@+id/achievementValidUntil"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          app:layout_constraintTop_toBottomOf="@id/achievementReceived"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          android:visibility="gone"
-          android:paddingBottom="16dp"
-          android:text="@string/valid_until"
-          android:textAppearance="?attr/textAppearanceSubtitle1" />
+      <TextView
+        android:id="@+id/achievementsReceivedContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/achievementsReceived"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
 
-        <Button
-          android:id="@+id/copyAchievement"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:visibility="gone"
-          app:layout_constraintTop_toBottomOf="@id/achievementValidUntil"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          android:text="@string/copy_voucher_code"/>
+      <TextView
+        android:id="@+id/achievementValidUntil"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementsReceivedContent"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
 
+      <Button
+        android:id="@+id/copyAchievement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementValidUntil"
+        android:text="@string/copy_voucher_code" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
