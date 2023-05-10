@@ -112,6 +112,14 @@
     <string name="toast_select_location">Please select a location</string>
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
 
+    <!-- Achievements in Trips View -->
+    <string name="achievements_progress">%1$.0 km to unlock the nextbike voucher</string>
+    <string name="achievements_unlocked">nextbike voucher unlocked</string>
+    <string name="show_voucher">show voucher</string>
+    <string name="voucher_code">nextbike voucher: %s</string>
+    <string name="valid_until">valid until: %s</string>
+    <string name="copy_voucher_code">copy voucher code</string>
+
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>
     <string name="chart_label">elevation [m]</string>
