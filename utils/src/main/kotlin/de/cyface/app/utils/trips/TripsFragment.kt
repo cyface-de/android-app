@@ -170,30 +170,35 @@ class TripsFragment : Fragment() {
                 val distanceGoalKm = 1.0 // FIXME
                 val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
                 if (progress < 100) {
-                    val missingKm = distanceGoalKm - totalDistanceKm
+                    binding.achievementsUnlocked.visibility = GONE
+                    binding.achievementsReceived.visibility = GONE
                     binding.achievementsProgress.visibility = VISIBLE
-                    binding.achievementsProgressContent.text = getString(R.string.achievements_progress, missingKm)
+                    val missingKm = distanceGoalKm - totalDistanceKm
+                    binding.achievementsProgressContent.text =
+                        getString(R.string.achievements_progress, missingKm)
                     binding.achievementsProgressBar.progress = progress.roundToInt()
-
-                    binding.achievementsUnlocked.visibility = GONE
-                    binding.achievementsReceived.visibility = GONE
-                } else if (true) { // FIXME: check if voucher received
-                    binding.achievementsUnlocked.visibility = VISIBLE
-
-                    binding.achievementsProgress.visibility = GONE
-                    binding.achievementsReceived.visibility = GONE
                 } else {
-                    binding.achievementsReceived.visibility = VISIBLE
-                    binding.achievementsReceivedContent.text = getString(R.string.voucher_code, "Jd38hd3hhd3kw") // FIXME
-                    // Format until date into local format
-                    val locale = Locale.getDefault()
-                    val validUntil = Calendar.getInstance()
-                    validUntil.set(2023, 11 /* 11 = December */, 31) //FIXME
-                    val untilText = SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG, locale).format(validUntil.time)
-                    binding.achievementValidUntil.text = getString(R.string.valid_until, untilText)
-
-                    binding.achievementsUnlocked.visibility = GONE
                     binding.achievementsProgress.visibility = GONE
+                    binding.achievementsReceived.visibility = GONE
+                    binding.achievementsUnlocked.visibility = VISIBLE
+                    binding.achievementsUnlockedButton.setOnClickListener {
+                        // FIXME: request voucher from API
+                        // Show voucher
+                        binding.achievementsUnlocked.visibility = GONE
+                        binding.achievementsProgress.visibility = GONE
+                        binding.achievementsReceived.visibility = VISIBLE
+                        binding.achievementsReceivedContent.text =
+                            getString(R.string.voucher_code, "Jd38hd3hhd3kw") // FIXME
+                        // Format until date into local format
+                        val locale = Locale.getDefault()
+                        val validUntil = Calendar.getInstance()
+                        validUntil.set(2023, 11 /* 11 = December */, 31) //FIXME
+                        val untilText =
+                            SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG, locale)
+                                .format(validUntil.time)
+                        binding.achievementValidUntil.text =
+                            getString(R.string.valid_until, untilText)
+                    }
                 }
             }
         }
