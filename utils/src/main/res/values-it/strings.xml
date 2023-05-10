@@ -110,7 +110,7 @@
   <string name="toast_item_created_on_tracks_nearest_position">L\'elemento è stato creato e spostato in pista</string>
 
   <!-- Achievements in Trips View -->
-  <string name="achievements_progress">%1$.0 km to unlock the nextbike voucher</string>
+  <string name="achievements_progress">%1$.0f km to unlock the nextbike voucher</string>
   <string name="achievements_unlocked">nextbike voucher unlocked</string>
   <string name="show_voucher">show voucher</string>
   <string name="voucher_code">nextbike voucher: %s</string>

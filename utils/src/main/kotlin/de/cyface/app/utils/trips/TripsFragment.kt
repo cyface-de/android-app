@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
@@ -34,12 +35,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.lang.Double.min
 import java.lang.ref.WeakReference
+import kotlin.math.roundToInt
 
 /**
  * The [Fragment] which shows all finished measurements to the user.
@@ -146,8 +150,38 @@ class TripsFragment : Fragment() {
         tripsList.addItemDecoration(divider)
 
         // Update adapters with the updates from the ViewModel
+        val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
         tripsViewModel.measurements.observe(viewLifecycleOwner) { measurements ->
             measurements?.let { adapter.submitList(it) }
+
+            // Achievements
+            if (showAchievements) {
+                binding.achievements.visibility = VISIBLE
+
+                // Calculate achievements progress
+                var totalDistanceKm = 0.0
+                measurements.forEach { measurement ->
+                    val distanceKm = measurement.distance.div(1000.0)
+                    totalDistanceKm += distanceKm
+                }
+                val distanceGoalKm = 1.0 // FIXME
+                val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
+                if (progress < 100) {
+                    val missingKm = distanceGoalKm - totalDistanceKm
+                    binding.achievementsProgressContent.visibility = VISIBLE
+                    binding.achievementsProgressContent.text = getString(R.string.achievements_progress, missingKm)
+                    binding.achievementsProgress.visibility = VISIBLE
+                    binding.achievementsProgress.progress = progress.roundToInt()
+                    binding.achievementsUnlockedContent.visibility = GONE
+                    binding.unlockAchievement.visibility = GONE
+                } else {
+                    // FIXME: check if voucher received
+                    binding.achievementsProgressContent.visibility = GONE
+                    binding.achievementsProgress.visibility = GONE
+                    binding.achievementsUnlockedContent.visibility = VISIBLE
+                    binding.unlockAchievement.visibility = VISIBLE
+                }
+            }
         }
 
         // Add items to menu (top right)
@@ -160,14 +194,6 @@ class TripsFragment : Fragment() {
                 WeakReference<Context>(requireContext().applicationContext)
             ), viewLifecycleOwner, Lifecycle.State.RESUMED
         )
-
-        // Achievements
-        val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
-        if (showAchievements) {
-            binding.achievements.visibility = VISIBLE
-            binding.achievementsProgressContent.visibility = VISIBLE
-            binding.achievementsProgress.visibility = VISIBLE
-        }
 
         return binding.root
     }

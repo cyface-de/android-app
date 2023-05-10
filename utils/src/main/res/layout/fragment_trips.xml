@@ -65,8 +65,7 @@
           style="@android:style/Widget.ProgressBar.Horizontal"
           android:progressTint="@color/defaultPrimary"
           android:progressBackgroundTint="@color/grey_200"
-          android:visibility="gone"
-          android:progress="25"/>
+          android:visibility="gone" />
 
         <!-- unlocked -->
 
