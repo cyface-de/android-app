@@ -34,11 +34,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
+import de.cyface.app.button.SynchronizationButton
 import de.cyface.app.capturing.MenuProvider
 import de.cyface.app.databinding.FragmentCapturingBinding
-import de.cyface.app.ui.button.DataCapturingButton
-import de.cyface.app.button.SynchronizationButton
 import de.cyface.app.dialog.ModalityDialog
+import de.cyface.app.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
@@ -148,7 +148,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         val currentMeasurementsEvents: List<Event>
         try {
             currentMeasurementsEvents = dataCapturingButton!!.loadCurrentMeasurementsEvents()
-            map!!.renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false)
+            map!!.render(currentMeasurementsTracks, currentMeasurementsEvents, false, ArrayList())
         } catch (e: NoSuchMeasurementException) {
             val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
@@ -314,18 +314,23 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             Modality.CAR.name -> {
                 tabLayout.getTabAt(0)
             }
+
             Modality.BICYCLE.name -> {
                 tabLayout.getTabAt(1)
             }
+
             Modality.WALKING.name -> {
                 tabLayout.getTabAt(2)
             }
+
             Modality.BUS.name -> {
                 tabLayout.getTabAt(3)
             }
+
             Modality.TRAIN.name -> {
                 tabLayout.getTabAt(4)
             }
+
             else -> {
                 throw IllegalArgumentException("Unknown Modality id: $modality")
             }

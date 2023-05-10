@@ -232,18 +232,25 @@ class Map(
         }
     }
 
+    fun renderMarkers(markers: List<MarkerOptions>) {
+        markers.forEach { googleMap!!.addMarker(it) }
+    }
+
     /**
      * Renders the provided {@param tracks} and {@param events} onto this classes map.
      *
      * @param tracks a list of [Track]s which can be rendered to a map
      * @param events a list of [Event]s which can be rendered to a map
      * @param moveCameraToBounds `True` if the camera of the map should be moved to the track boundaries
+     * @param markers a list of [MarkerOptions] to render on the map
      */
-    fun renderMeasurement(
+    fun render(
         tracks: List<Track>, events: List<Event>,
-        moveCameraToBounds: Boolean
+        moveCameraToBounds: Boolean,
+        markers: List<MarkerOptions>
     ) {
         googleMap!!.clear()
+        renderMarkers(markers)
 
         // Calculate geo boundaries
         val builder = LatLngBounds.Builder()

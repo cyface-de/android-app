@@ -16,12 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.capturing.map
+package de.cyface.app.r4r.capturing.marker
 
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,35 +26,26 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.google.android.gms.maps.MapsInitializer
-import de.cyface.app.r4r.capturing.CapturingViewModel
-import de.cyface.app.r4r.capturing.CapturingViewModelFactory
-import de.cyface.app.r4r.capturing.marker.MarkerFragment
-import de.cyface.app.r4r.databinding.FragmentMapBinding
-import de.cyface.app.r4r.utils.Constants.TAG
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import de.cyface.app.r4r.databinding.FragmentMarkerBinding
 import de.cyface.app.utils.Map
-import de.cyface.app.utils.ServiceProvider
-import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
-import de.cyface.persistence.DefaultPersistenceLayer
-import de.cyface.persistence.exception.NoSuchMeasurementException
-import de.cyface.persistence.model.Track
+import java.util.Calendar
 
 /**
- * The [Fragment] which shows a map to the user.
+ * The [Fragment] which shows a map with markers to the user.
  *
  * @author Armin Schnabel
  * @version 1.0.0
- * @since 3.2.0
+ * @since 3.2.1
  */
-class MapFragment : Fragment() {
+class MarkerFragment : Fragment() {
 
     /**
      * This property is only valid between onCreateView and onDestroyView.
      */
-    private var _binding: FragmentMapBinding? = null
+    private var _binding: FragmentMarkerBinding? = null
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -65,34 +53,9 @@ class MapFragment : Fragment() {
     private val binding get() = _binding!!
 
     /**
-     * The `Map` used to visualize the ongoing capturing.
+     * The `Map` used to visualize data.
      */
     private var map: Map? = null
-
-    /**
-     * The capturing service object which controls data capturing and synchronization.
-     */
-    private lateinit var capturing: CyfaceDataCapturingService
-
-    /**
-     * An implementation of the persistence layer which caches some data during capturing.
-     */
-    private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
-
-    /**
-     * The data holder for users preferences.
-     */
-    private var preferences: SharedPreferences? = null
-
-    /**
-     * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
-     */
-    private val capturingViewModel: CapturingViewModel by activityViewModels {
-        CapturingViewModelFactory(
-            persistence.measurementRepository!!,
-            persistence.eventRepository!!
-        )
-    }
 
     /**
      * Can be launched to request permissions.
@@ -130,46 +93,7 @@ class MapFragment : Fragment() {
      * The `Runnable` triggered when the `Map` is loaded and ready.
      */
     private val onMapReadyRunnable = Runnable {
-        map!!.renderMarkers(MarkerFragment.markers)
-        observeTracks()
-
-        // Only load track if there is an ongoing measurement
-        try {
-            val measurement = persistence.loadCurrentlyCapturedMeasurement()
-            val tracks: List<Track> = persistence.loadTracks(measurement.id)
-            capturingViewModel.setTracks(tracks)
-        } catch (e: NoSuchMeasurementException) {
-            Log.d(
-                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
-            )
-        }
-    }
-
-    /**
-     * Observes the tracks of the currently captured measurement and renders the tracks on the map.
-     */
-    private fun observeTracks() {
-        val observer = Observer<ArrayList<Track>?> {
-            if (it != null) {
-                //val events: List<Event> = loadCurrentMeasurementsEvents()
-                map!!.render(it, ArrayList()/* events */, false, MarkerFragment.markers)
-            } else {
-                map!!.clearMap()
-                map!!.renderMarkers(MarkerFragment.markers)
-            }
-        }
-        capturingViewModel.tracks.observe(viewLifecycleOwner, observer)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        if (activity is ServiceProvider) {
-            capturing = (activity as ServiceProvider).capturing
-            persistence = capturing.persistenceLayer
-        } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
-        }
+        map!!.renderMarkers(markers)
     }
 
     override fun onCreateView(
@@ -177,15 +101,13 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        @Suppress("SpellCheckingInspection")
         // Using the new map renderer, which must be called before MapView is initialized:
         // https://developers.google.com/maps/documentation/android-sdk/renderer
         MapsInitializer.initialize(requireContext(), MapsInitializer.Renderer.LATEST) {}
 
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
+        _binding = FragmentMarkerBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
 
         return root
@@ -206,9 +128,25 @@ class MapFragment : Fragment() {
         _binding = null
     }
 
-    /*@Throws(NoSuchMeasurementException::class)
-    fun loadCurrentMeasurementsEvents(): List<Event> {
-        val (id) = capturing.loadCurrentlyCapturedMeasurement()
-        return persistence.loadEvents(id, EventType.MODALITY_TYPE_CHANGE)!!
-    }*/
+    companion object {
+        fun eventPassed(): Boolean {
+            val now = Calendar.getInstance()
+            val endDate = Calendar.getInstance()
+            endDate.set(2023, 5 /* June = 5! */, 26)
+            return now.after(endDate)
+        }
+
+        val markers = if (eventPassed()) emptyList() else arrayListOf(
+            // Schkeuditz
+            MarkerOptions()
+                .position(LatLng(51.39877, 12.20104)).title("Station: Nähe Globana"),
+            MarkerOptions()
+                .position(LatLng(51.38995, 12.22101)).title("Station: Stadtmuseum"),
+            MarkerOptions()
+                .position(LatLng(51.38848, 12.23337)).title("Station: Elsterbrücke"),
+            MarkerOptions()
+                .position(LatLng(51.40696, 12.22106)).title("Station: Fußballfeld")
+            // Köthen
+        )
+    }
 }

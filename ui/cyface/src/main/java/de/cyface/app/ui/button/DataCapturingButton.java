@@ -18,9 +18,9 @@
  */
 package de.cyface.app.ui.button;
 
+import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY;
 import static de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY;
-import static de.cyface.app.utils.Constants.TAG;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_DISTANCE_BASED_TRIGGERING_ENABLED_KEY;
 import static de.cyface.camera_service.Constants.PREFERENCES_CAMERA_RAW_MODE_ENABLED_KEY;
@@ -45,9 +45,6 @@ import static de.cyface.persistence.model.MeasurementStatus.OPEN;
 import static de.cyface.persistence.model.MeasurementStatus.PAUSED;
 import static de.cyface.utils.DiskConsumption.spaceAvailable;
 
-import de.cyface.app.button.AbstractButton;
-import de.cyface.app.button.ButtonListener;
-import de.cyface.app.utils.Map;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -74,9 +71,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
-import de.cyface.app.R;
 import de.cyface.app.CapturingFragment;
+import de.cyface.app.R;
+import de.cyface.app.button.AbstractButton;
+import de.cyface.app.button.ButtonListener;
 import de.cyface.app.utils.CalibrationDialogListener;
+import de.cyface.app.utils.Map;
 import de.cyface.camera_service.CameraListener;
 import de.cyface.camera_service.CameraService;
 import de.cyface.camera_service.Constants;
@@ -91,7 +91,6 @@ import de.cyface.datacapturing.exception.DataCapturingException;
 import de.cyface.datacapturing.exception.MissingPermissionException;
 import de.cyface.datacapturing.model.CapturedData;
 import de.cyface.datacapturing.ui.Reason;
-import de.cyface.persistence.strategy.DefaultLocationCleaning;
 import de.cyface.persistence.DefaultPersistenceBehaviour;
 import de.cyface.persistence.DefaultPersistenceLayer;
 import de.cyface.persistence.exception.NoSuchMeasurementException;
@@ -101,6 +100,7 @@ import de.cyface.persistence.model.MeasurementStatus;
 import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
+import de.cyface.persistence.strategy.DefaultLocationCleaning;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -608,7 +608,8 @@ public class DataCapturingButton
         }
 
         if (!spaceAvailable()) {
-            showToastOnMainThread(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space), false);
+            showToastOnMainThread(
+                    context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space), false);
             setButtonEnabled(button);
             return true;
         }
@@ -729,7 +730,8 @@ public class DataCapturingButton
      * @return A reference to the ProgressDialog which can be used to dismiss it.
      */
     private ProgressDialog createAndShowCalibrationDialog() {
-        return ProgressDialog.show(context, context.getString(de.cyface.app.utils.R.string.title_dialog_starting_data_capture),
+        return ProgressDialog.show(context,
+                context.getString(de.cyface.app.utils.R.string.title_dialog_starting_data_capture),
                 context.getString(de.cyface.app.utils.R.string.msg_calibrating), true, false, dialog -> {
                     try {
                         dataCapturingService
@@ -908,7 +910,8 @@ public class DataCapturingButton
         final List<Event> currentMeasurementsEvents;
         try {
             currentMeasurementsEvents = loadCurrentMeasurementsEvents();
-            capturingFragment.getMap().renderMeasurement(currentMeasurementsTracks, currentMeasurementsEvents, false);
+            capturingFragment.getMap().render(currentMeasurementsTracks, currentMeasurementsEvents, false,
+                    new ArrayList<>());
         } catch (NoSuchMeasurementException e) {
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
                     + "Thus, map.renderMeasurement() is ignored. This should only happen id "
