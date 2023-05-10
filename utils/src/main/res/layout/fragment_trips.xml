@@ -134,7 +134,7 @@
         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
       <Button
-        android:id="@+id/copyAchievement"
+        android:id="@+id/achievementsReceivedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

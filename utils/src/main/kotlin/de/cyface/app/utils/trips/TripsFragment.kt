@@ -18,6 +18,8 @@
  */
 package de.cyface.app.utils.trips
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -30,6 +32,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -47,6 +50,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.roundToInt
+
 
 /**
  * The [Fragment] which shows all finished measurements to the user.
@@ -183,21 +187,29 @@ class TripsFragment : Fragment() {
                     binding.achievementsUnlocked.visibility = VISIBLE
                     binding.achievementsUnlockedButton.setOnClickListener {
                         // FIXME: request voucher from API
+                        val voucherCode = "Jd38hd3hhd3kw"
                         // Show voucher
                         binding.achievementsUnlocked.visibility = GONE
                         binding.achievementsProgress.visibility = GONE
                         binding.achievementsReceived.visibility = VISIBLE
                         binding.achievementsReceivedContent.text =
-                            getString(R.string.voucher_code, "Jd38hd3hhd3kw") // FIXME
-                        // Format until date into local format
-                        val locale = Locale.getDefault()
+                            getString(R.string.nextbike_voucher_is, voucherCode) // FIXME
                         val validUntil = Calendar.getInstance()
                         validUntil.set(2023, 11 /* 11 = December */, 31) //FIXME
                         val untilText =
-                            SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG, locale)
-                                .format(validUntil.time)
+                            SimpleDateFormat.getDateInstance(
+                                SimpleDateFormat.LONG,
+                                Locale.getDefault()
+                            ).format(validUntil.time)
                         binding.achievementValidUntil.text =
                             getString(R.string.valid_until, untilText)
+                        binding.achievementsReceivedButton.setOnClickListener {
+                            val clipboard: ClipboardManager? =
+                                getSystemService(requireContext(), ClipboardManager::class.java)
+                            val clip =
+                                ClipData.newPlainText(getString(R.string.voucher_code), voucherCode)
+                            clipboard!!.setPrimaryClip(clip)
+                        }
                     }
                 }
             }

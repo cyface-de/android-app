@@ -113,9 +113,10 @@
     <string name="achievements_progress">Noch %1$.0f km bis zum nextbike Gutschein</string>
     <string name="achievements_unlocked">nextbike Gutschein freigeschaltet</string>
     <string name="show_voucher">Gutschein anzeigen</string>
-    <string name="voucher_code">nextbike Gutschein: %s</string>
+    <string name="nextbike_voucher_is">nextbike Gutschein: %s</string>
     <string name="valid_until">gültig bis: %s</string>
     <string name="copy_voucher_code">Gutscheincode kopieren</string>
+    <string name="voucher_code">Gutscheincode</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>
