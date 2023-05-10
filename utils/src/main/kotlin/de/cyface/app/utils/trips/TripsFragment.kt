@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -159,6 +160,14 @@ class TripsFragment : Fragment() {
                 WeakReference<Context>(requireContext().applicationContext)
             ), viewLifecycleOwner, Lifecycle.State.RESUMED
         )
+
+        // Achievements
+        val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
+        if (showAchievements) {
+            binding.achievements.visibility = VISIBLE
+            binding.achievementsProgressContent.visibility = VISIBLE
+            binding.achievementsProgress.visibility = VISIBLE
+        }
 
         return binding.root
     }
