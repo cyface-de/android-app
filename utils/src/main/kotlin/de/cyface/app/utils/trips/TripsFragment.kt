@@ -23,6 +23,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
@@ -42,12 +43,12 @@ import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import de.cyface.persistence.model.Measurement
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Double.min
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -156,61 +157,38 @@ class TripsFragment : Fragment() {
         )
         tripsList.addItemDecoration(divider)
 
-        // Update adapters with the updates from the ViewModel
+        // Achievements
         val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
+        // Check voucher availability
+        Handler().postDelayed({
+            val availableVouchers = 100 // FIXME: add actual request + error "Keine Verbindung zum Server"
+            if (showAchievements && availableVouchers > 0) {
+                // Can be null when switching tab before response returns
+                _binding?.achievementsVouchersLeft?.text =
+                    getString(R.string.voucher_left, availableVouchers)
+                _binding?.achievements?.visibility = VISIBLE
+            }
+        }, 1000)
+
+        // Update adapters with the updates from the ViewModel
         tripsViewModel.measurements.observe(viewLifecycleOwner) { measurements ->
             measurements?.let { adapter.submitList(it) }
 
             // Achievements
             if (showAchievements) {
-                binding.achievements.visibility = VISIBLE
-
-                // Calculate achievements progress
-                var totalDistanceKm = 0.0
-                measurements.forEach { measurement ->
-                    val distanceKm = measurement.distance.div(1000.0)
-                    totalDistanceKm += distanceKm
-                }
-                val distanceGoalKm = 1.0 // FIXME
+                val totalDistanceKm = totalDistanceKm(measurements)
+                val distanceGoalKm = 2.0 // FIXME
                 val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
+
                 if (progress < 100) {
-                    binding.achievementsUnlocked.visibility = GONE
-                    binding.achievementsReceived.visibility = GONE
-                    binding.achievementsProgress.visibility = VISIBLE
-                    val missingKm = distanceGoalKm - totalDistanceKm
-                    binding.achievementsProgressContent.text =
-                        getString(R.string.achievements_progress, missingKm)
-                    binding.achievementsVouchersLeft.text = getString(R.string.voucher_left, 100) // FIXME
-                    binding.achievementsProgressBar.progress = progress.roundToInt()
+                    showProgress(progress, distanceGoalKm, totalDistanceKm)
                 } else {
+                    // Show request voucher button
                     binding.achievementsProgress.visibility = GONE
                     binding.achievementsReceived.visibility = GONE
                     binding.achievementsUnlocked.visibility = VISIBLE
                     binding.achievementsUnlockedButton.setOnClickListener {
-                        // FIXME: request voucher from API
-                        val voucherCode = "0123456789"
-                        // Show voucher
-                        binding.achievementsUnlocked.visibility = GONE
-                        binding.achievementsProgress.visibility = GONE
-                        binding.achievementsReceived.visibility = VISIBLE
-                        binding.achievementsReceivedContent.text =
-                            getString(R.string.voucher_code_is, voucherCode) // FIXME
-                        val validUntil = Calendar.getInstance()
-                        validUntil.set(2024, 4 /* 04 = May */, 31) //FIXME
-                        val untilText =
-                            SimpleDateFormat.getDateInstance(
-                                SimpleDateFormat.LONG,
-                                Locale.getDefault()
-                            ).format(validUntil.time)
-                        binding.achievementValidUntil.text =
-                            getString(R.string.valid_until, untilText)
-                        binding.achievementsReceivedButton.setOnClickListener {
-                            val clipboard: ClipboardManager? =
-                                getSystemService(requireContext(), ClipboardManager::class.java)
-                            val clip =
-                                ClipData.newPlainText(getString(R.string.voucher_code), voucherCode)
-                            clipboard!!.setPrimaryClip(clip)
-                        }
+                        showVoucher()
                     }
                 }
             }
@@ -228,6 +206,55 @@ class TripsFragment : Fragment() {
         )
 
         return binding.root
+    }
+
+    private fun showProgress(
+        progress: Double,
+        @Suppress("SameParameterValue") distanceGoalKm: Double,
+        totalDistanceKm: Double
+    ) {
+        binding.achievementsUnlocked.visibility = GONE
+        binding.achievementsReceived.visibility = GONE
+        binding.achievementsProgress.visibility = VISIBLE
+        val missingKm = distanceGoalKm - totalDistanceKm
+        binding.achievementsProgressContent.text =
+            getString(R.string.achievements_progress, missingKm)
+        binding.achievementsProgressBar.progress = progress.roundToInt()
+    }
+
+    private fun totalDistanceKm(measurements: List<Measurement>): Double {
+        var totalDistanceKm = 0.0
+        measurements.forEach { measurement ->
+            val distanceKm = measurement.distance.div(1000.0)
+            totalDistanceKm += distanceKm
+        }
+        return totalDistanceKm
+    }
+
+    private fun showVoucher() {
+        // FIXME: request voucher from API
+        val voucherCode = "0123456789"
+        val until = "2024-05-31T23:59:59Z"
+        // FIXME: Handle 204 - no content (when the last voucher just got assigned)
+
+        binding.achievementsUnlocked.visibility = GONE
+        binding.achievementsProgress.visibility = GONE
+        binding.achievementsReceived.visibility = VISIBLE
+        binding.achievementsReceivedContent.text = getString(R.string.voucher_code_is, voucherCode)
+        @Suppress("SpellCheckingInspection")
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+        val validUntil = format.parse(until)
+        val untilText =
+            SimpleDateFormat.getDateInstance(
+                SimpleDateFormat.LONG,
+                Locale.getDefault()
+            ).format(validUntil!!.time)
+        binding.achievementValidUntil.text = getString(R.string.valid_until, untilText)
+        binding.achievementsReceivedButton.setOnClickListener {
+            val clipboard = getSystemService(requireContext(), ClipboardManager::class.java)
+            val clip = ClipData.newPlainText(getString(R.string.voucher_code), voucherCode)
+            clipboard!!.setPrimaryClip(clip)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
