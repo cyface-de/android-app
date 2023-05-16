@@ -48,6 +48,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:orientation="vertical"
+      android:gravity="center"
       android:visibility="gone"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
@@ -61,7 +62,8 @@
         android:padding="16dp"
         android:text="@string/achievements_progress"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        app:drawableLeftCompat="@drawable/baseline_workspace_premium_24" />
+        app:drawableLeftCompat="@drawable/baseline_workspace_premium_24"
+        app:drawableTint="@color/text" />
 
       <ProgressBar
         android:id="@+id/achievementsProgressBar"
@@ -70,6 +72,15 @@
         android:layout_height="4dp"
         android:progressBackgroundTint="@color/grey_200"
         android:progressTint="@color/defaultPrimary" />
+
+      <TextView
+        android:id="@+id/achievementsVouchersLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2"
+        app:drawableTint="@color/text" />
     </LinearLayout>
 
     <!-- unlocked -->
@@ -92,7 +103,8 @@
         android:padding="16dp"
         android:text="@string/achievements_unlocked"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        app:drawableLeftCompat="@drawable/baseline_verified_24" />
+        app:drawableLeftCompat="@drawable/baseline_verified_24"
+        app:drawableTint="@color/text" />
 
       <Button
         android:id="@+id/achievementsUnlockedButton"
@@ -124,14 +136,36 @@
         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
       <TextView
-        android:id="@+id/achievementValidUntil"
+        android:id="@+id/achievementVoucherDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/achievementsReceivedContent"
         android:paddingBottom="16dp"
-        android:textAppearance="?attr/textAppearanceSubtitle1" />
+        android:textAppearance="?attr/textAppearanceSubtitle2"
+        android:text="@string/voucher_details"/>
+
+      <TextView
+        android:id="@+id/achievementVoucherDetails2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2"
+        android:text="@string/voucher_details2"/>
+
+      <TextView
+        android:id="@+id/achievementValidUntil"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails2"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
       <Button
         android:id="@+id/achievementsReceivedButton"

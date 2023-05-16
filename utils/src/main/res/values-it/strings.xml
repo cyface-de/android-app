@@ -113,10 +113,13 @@
   <string name="achievements_progress">%1$.0f km to unlock the nextbike voucher</string>
   <string name="achievements_unlocked">nextbike voucher unlocked</string>
   <string name="show_voucher">show voucher</string>
-  <string name="nextbike_voucher_is">nextbike voucher: %s</string>
+  <string name="voucher_code_is">voucher code: %s</string>
   <string name="valid_until">valid until: %s</string>
   <string name="copy_voucher_code">copy voucher code</string>
   <string name="voucher_code">voucher code</string>
+  <string name="voucher_left">%d 15 minutes vouchers left</string>
+  <string name="voucher_details">15 free minutes on the next rental</string>
+  <string name="voucher_details2">in Schkeuditz, redeemable once per account</string>
 
   <!-- Trip Details -->
   <string name="trip_details">Trip details</string>

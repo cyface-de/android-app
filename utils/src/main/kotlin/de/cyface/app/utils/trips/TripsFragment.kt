@@ -180,6 +180,7 @@ class TripsFragment : Fragment() {
                     val missingKm = distanceGoalKm - totalDistanceKm
                     binding.achievementsProgressContent.text =
                         getString(R.string.achievements_progress, missingKm)
+                    binding.achievementsVouchersLeft.text = getString(R.string.voucher_left, 100) // FIXME
                     binding.achievementsProgressBar.progress = progress.roundToInt()
                 } else {
                     binding.achievementsProgress.visibility = GONE
@@ -187,15 +188,15 @@ class TripsFragment : Fragment() {
                     binding.achievementsUnlocked.visibility = VISIBLE
                     binding.achievementsUnlockedButton.setOnClickListener {
                         // FIXME: request voucher from API
-                        val voucherCode = "Jd38hd3hhd3kw"
+                        val voucherCode = "0123456789"
                         // Show voucher
                         binding.achievementsUnlocked.visibility = GONE
                         binding.achievementsProgress.visibility = GONE
                         binding.achievementsReceived.visibility = VISIBLE
                         binding.achievementsReceivedContent.text =
-                            getString(R.string.nextbike_voucher_is, voucherCode) // FIXME
+                            getString(R.string.voucher_code_is, voucherCode) // FIXME
                         val validUntil = Calendar.getInstance()
-                        validUntil.set(2023, 11 /* 11 = December */, 31) //FIXME
+                        validUntil.set(2024, 4 /* 04 = May */, 31) //FIXME
                         val untilText =
                             SimpleDateFormat.getDateInstance(
                                 SimpleDateFormat.LONG,
