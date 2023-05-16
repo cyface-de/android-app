@@ -145,8 +145,24 @@ class MarkerFragment : Fragment() {
             MarkerOptions()
                 .position(LatLng(51.38848, 12.23337)).title("Station: Elsterbrücke"),
             MarkerOptions()
-                .position(LatLng(51.40696, 12.22106)).title("Station: Fußballfeld")
+                .position(LatLng(51.40696, 12.22106)).title("Station: Fußballfeld"),
             // Köthen
+            MarkerOptions()
+                .position(LatLng(51.751117, 11.973984)).title("Start und Ziel: Marktplatz Köthen"),
+            MarkerOptions()
+                .position(LatLng(51.75243880654433, 11.948543178133846)).title("Station: Piratenspielplatz"),
+            MarkerOptions()
+                .position(LatLng(51.766749, 11.931790)).title("Station: Forellenhof"),
+            MarkerOptions()
+                .position(LatLng(51.766687, 11.983936)).title("Station: Kinder- und Bowlingwelt Köthen"),
+            MarkerOptions()
+                .position(LatLng(51.754960, 12.001494)).title("Station: Kaufland Köthen (Merziener Straße)"),
+            MarkerOptions()
+                .position(LatLng(51.747082, 12.005348)).title("Station: Gnetscher Straße, Nähe Stadtbäckerei Rödel"),
+            MarkerOptions()
+                .position(LatLng(51.743019, 11.971916)).title("Station: Jürgenweg (Höhe NP)"),
+            MarkerOptions()
+                .position(LatLng(51.755023, 11.976503)).title("Station: Schloss Köthen, Haus des Dürerbundes")
         )
     }
 }
