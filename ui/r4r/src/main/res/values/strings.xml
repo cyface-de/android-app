@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name" translatable="false">Ready4Robots</string>
 
+    <!-- Registration -->
+    <!-- Keep in Sync with `Groups` enum and `groups` translations! -->
+    <string name="choose_municipality">Choose Municipality</string>
+
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
 </resources>

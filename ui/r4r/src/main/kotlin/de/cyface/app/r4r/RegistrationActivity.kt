@@ -28,8 +28,11 @@ import android.util.Patterns
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.Spinner
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
@@ -61,7 +64,8 @@ import java.util.regex.Pattern
  * @version 1.0.0
  * @since 3.3.0
  */
-class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentActivity */ {
+class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentActivity */,
+    AdapterView.OnItemSelectedListener {
 
     private lateinit var context: WeakReference<Context>
     private var preferences: SharedPreferences? = null
@@ -80,6 +84,12 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
     private var emailInput: TextInputEditText? = null
     private var passwordInput: TextInputEditText? = null
     private var passwordConfirmationInput: TextInputEditText? = null
+    private lateinit var groupSpinner: Spinner
+
+    /**
+     * The group selected by the user during registration.
+     */
+    private var group: Group? = null
     private var messageView: MaterialTextView? = null
 
     /**
@@ -102,10 +112,22 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
         setServerUrl() // TODO [CY-3735]: via Android's settings
 
-        // Set up the login form
+        // Set up the form
         emailInput = findViewById(R.id.input_email)
         passwordInput = findViewById(R.id.input_password)
         passwordConfirmationInput = findViewById(R.id.input_password_confirmation)
+        groupSpinner = findViewById(R.id.group_spinner)
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.groups,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            groupSpinner.adapter = adapter
+        }
+        groupSpinner.onItemSelectedListener = this
         messageView = findViewById(R.id.registration_message)
         registrationButton = findViewById(R.id.registration_button)
         registrationButton!!.setOnClickListener { attemptRegistration() }
@@ -118,8 +140,16 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         setupHCaptcha(hCaptcha)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        val selected = parent!!.getItemAtPosition(position).toString()
+        val group = Group.fromSpinnerText(selected)
+        Validate.notNull(group, "Unknown spinner text: $selected")
+        this.group = group
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        // Another interface callback
+        Log.d(TAG, "onNothingSelected")
     }
 
     private fun hCaptchaConfig(): HCaptchaConfig {
@@ -173,6 +203,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         Validate.notNull(emailInput!!.text)
         Validate.notNull(passwordInput!!.text)
         Validate.notNull(passwordConfirmationInput!!.text)
+        Validate.notNull(group)
         val email = emailInput!!.text.toString()
         val password = passwordInput!!.text.toString()
         val passwordConfirmation = passwordConfirmationInput!!.text.toString()
@@ -260,6 +291,7 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
                             }
                         }
                     }
+
                     else -> {
                         reportError(e)
                     }
