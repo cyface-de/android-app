@@ -113,16 +113,16 @@
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">%1$.0f km to unlock the nextbike voucher</string>
+    <string name="achievements_progress">%1$.0f of %2$.0f km to unlock the voucher</string>
     <string name="achievements_unlocked">nextbike voucher unlocked</string>
     <string name="show_voucher">show voucher</string>
     <string name="voucher_code_is">voucher code: %s</string>
     <string name="valid_until">valid until: %s</string>
     <string name="copy_voucher_code">copy voucher code</string>
     <string name="voucher_code">voucher code</string>
-    <string name="voucher_left">%d x 15 minutes vouchers left</string>
-    <string name="voucher_details">15 free minutes on the next rental</string>
-    <string name="voucher_details2">in Schkeuditz, redeemable once per account</string>
+    <string name="voucher_left">%d x 15 minutes nextbike vouchers left</string>
+    <string name="voucher_details">1x 15 free minutes on the next rental</string>
+    <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>

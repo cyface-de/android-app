@@ -110,16 +110,16 @@
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">Noch %1$.0f km bis zum nextbike Gutschein</string>
+    <string name="achievements_progress">Noch %1$.0f von %2$.0f km bis zum Gutschein</string>
     <string name="achievements_unlocked">nextbike Gutschein freigeschaltet</string>
     <string name="show_voucher">Gutschein anzeigen</string>
     <string name="voucher_code_is">Gutscheincode: %s</string>
     <string name="valid_until">gültig bis: %s</string>
     <string name="copy_voucher_code">Gutscheincode kopieren</string>
     <string name="voucher_code">Gutscheincode</string>
-    <string name="voucher_left">%d x 15 Minuten Gutscheine übrig</string>
-    <string name="voucher_details">15 Freiminuten auf die nächste Ausleihe</string>
-    <string name="voucher_details2">in Schkeuditz, einmal pro Account einlösbar</string>
+    <string name="voucher_left">%d x 15 Minuten nextbike Gutscheine übrig</string>
+    <string name="voucher_details">1x 15 Freiminuten auf die nächste Ausleihe</string>
+    <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>

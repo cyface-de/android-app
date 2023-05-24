@@ -88,6 +88,12 @@ class TripsFragment : Fragment() {
     private var tracker: androidx.recyclerview.selection.SelectionTracker<Long>? = null
 
     /**
+     * defined by E-Mail from Matthias Koss, 23.05.23
+     */
+    @Suppress("SpellCheckingInspection")
+    private val distanceGoalKm = 15.0
+
+    /**
      * The [TripsViewModel] which holds the UI data.
      */
     private val tripsViewModel: TripsViewModel by viewModels {
@@ -177,7 +183,6 @@ class TripsFragment : Fragment() {
             // Achievements
             if (showAchievements) {
                 val totalDistanceKm = totalDistanceKm(measurements)
-                val distanceGoalKm = 2.0 // FIXME
                 val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
 
                 if (progress < 100) {
@@ -218,7 +223,7 @@ class TripsFragment : Fragment() {
         binding.achievementsProgress.visibility = VISIBLE
         val missingKm = distanceGoalKm - totalDistanceKm
         binding.achievementsProgressContent.text =
-            getString(R.string.achievements_progress, missingKm)
+            getString(R.string.achievements_progress, missingKm, distanceGoalKm)
         binding.achievementsProgressBar.progress = progress.roundToInt()
     }
 
