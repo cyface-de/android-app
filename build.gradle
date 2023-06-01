@@ -87,6 +87,8 @@ ext {
     materialDialogsVersion = "3.3.0"
     chartVersion = "v3.1.0"
     hCaptchaVersion = "3.8.1"
+    appAuthVersion = "0.11.1"
+    okioVersion = "2.10.0"
 
     // Testing
     junitVersion = "1.1.5"

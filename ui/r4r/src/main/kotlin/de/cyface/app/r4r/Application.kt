@@ -24,6 +24,7 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
