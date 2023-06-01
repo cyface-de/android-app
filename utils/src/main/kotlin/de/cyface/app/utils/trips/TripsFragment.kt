@@ -42,8 +42,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.databinding.FragmentTripsBinding
+import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.model.Measurement
+import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.SyncService
+import de.cyface.uploader.DefaultAuthenticator
+import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Double.min
@@ -94,6 +99,11 @@ class TripsFragment : Fragment() {
     private val distanceGoalKm = 15.0
 
     /**
+     * The API to get the voucher data from.
+     */
+    private lateinit var incentives: Incentives
+
+    /**
      * The [TripsViewModel] which holds the UI data.
      */
     private val tripsViewModel: TripsViewModel by viewModels {
@@ -128,6 +138,9 @@ class TripsFragment : Fragment() {
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
+        val authApi = authApi(requireContext())!!
+        val authenticator = DefaultAuthenticator(authApi)
+        this.incentives = Incentives(CyfaceAuthenticator(requireContext(), authenticator))
     }
 
     override fun onCreateView(
@@ -165,16 +178,18 @@ class TripsFragment : Fragment() {
 
         // Achievements
         val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
-        // Check voucher availability
-        Handler().postDelayed({
-            val availableVouchers = 100 // FIXME: add actual request + error "Keine Verbindung zum Server"
-            if (showAchievements && availableVouchers > 0) {
-                // Can be null when switching tab before response returns
-                _binding?.achievementsVouchersLeft?.text =
-                    getString(R.string.voucher_left, availableVouchers)
-                _binding?.achievements?.visibility = VISIBLE
-            }
-        }, 1000)
+        if (showAchievements) {
+            // Check voucher availability
+            Handler().postDelayed({ // FIXME
+                val availableVouchers = incentives.availableVouchers()
+                if (availableVouchers > 0) {
+                    // Can be null when switching tab before response returns
+                    _binding?.achievementsVouchersLeft?.text =
+                        getString(R.string.voucher_left, availableVouchers)
+                    _binding?.achievements?.visibility = VISIBLE
+                }
+            }, 1000)
+        }
 
         // Update adapters with the updates from the ViewModel
         tripsViewModel.measurements.observe(viewLifecycleOwner) { measurements ->
@@ -236,19 +251,35 @@ class TripsFragment : Fragment() {
         return totalDistanceKm
     }
 
+    /**
+     * Reads the Auth URL from the preferences.
+     *
+     * @param context The `Context` required to read the preferences
+     * @return The URL as string
+     */
+    private fun authApi(context: Context): String? {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val apiEndpoint = preferences.getString(SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+        Validate.notNull(
+            apiEndpoint,
+            "Sync canceled: Auth url not available. Please set the applications server url preference."
+        )
+        return apiEndpoint
+    }
+
     private fun showVoucher() {
-        // FIXME: request voucher from API
-        val voucherCode = "0123456789"
-        val until = "2024-05-31T23:59:59Z"
-        // FIXME: Handle 204 - no content (when the last voucher just got assigned)
+        // FIXME: disable button while request is sent
+        // FIXME: content is replaced asynchronously when request returns voucher
+        // FIXME: handle errors: button should be reset
+        val voucher = incentives.voucher()
 
         binding.achievementsUnlocked.visibility = GONE
         binding.achievementsProgress.visibility = GONE
         binding.achievementsReceived.visibility = VISIBLE
-        binding.achievementsReceivedContent.text = getString(R.string.voucher_code_is, voucherCode)
+        binding.achievementsReceivedContent.text = getString(R.string.voucher_code_is, voucher.code)
         @Suppress("SpellCheckingInspection")
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-        val validUntil = format.parse(until)
+        val validUntil = format.parse(voucher.until)
         val untilText =
             SimpleDateFormat.getDateInstance(
                 SimpleDateFormat.LONG,
@@ -257,7 +288,7 @@ class TripsFragment : Fragment() {
         binding.achievementValidUntil.text = getString(R.string.valid_until, untilText)
         binding.achievementsReceivedButton.setOnClickListener {
             val clipboard = getSystemService(requireContext(), ClipboardManager::class.java)
-            val clip = ClipData.newPlainText(getString(R.string.voucher_code), voucherCode)
+            val clip = ClipData.newPlainText(getString(R.string.voucher_code), voucher.code)
             clipboard!!.setPrimaryClip(clip)
         }
     }
