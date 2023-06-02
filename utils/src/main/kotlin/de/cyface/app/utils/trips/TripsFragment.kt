@@ -46,6 +46,7 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.app.utils.trips.incentives.Incentives
+import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.model.Measurement
 import de.cyface.synchronization.CyfaceAuthenticator
@@ -103,9 +104,9 @@ class TripsFragment : Fragment() {
     private val distanceGoalKm = 15.0
 
     /**
-     * The API to get the voucher data from.
+     * The API to get the voucher data from or `null` when no such things show be shown to the user.
      */
-    private lateinit var incentives: Incentives
+    private var incentives: Incentives? = null
 
     /**
      * The [TripsViewModel] which holds the UI data.
@@ -142,11 +143,16 @@ class TripsFragment : Fragment() {
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
-        val authApi = authApi(requireContext())!!
+        val authApi = authApi(requireContext())
         val authenticator = DefaultAuthenticator(authApi)
-        val incentivesApi = "https://staging.cyface.de/incentives/api/v1" // FIXME
-        this.incentives =
-            Incentives(CyfaceAuthenticator(requireContext(), authenticator), incentivesApi)
+
+        // Load incentivesUrl - only send requests in RFR app
+        val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
+        if (rfr) {
+            val incentivesApi = incentivesApi(requireContext())
+            this.incentives =
+                Incentives(CyfaceAuthenticator(requireContext(), authenticator), incentivesApi)
+        }
     }
 
     override fun onCreateView(
@@ -183,12 +189,11 @@ class TripsFragment : Fragment() {
         tripsList.addItemDecoration(divider)
 
         // Check voucher availability
-        val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
-        if (showAchievements) {
+        if (incentives != null) {
             GlobalScope.launch {
                 withContext(Dispatchers.IO) {
                     try {
-                        incentives.availableVouchers(
+                        incentives!!.availableVouchers(
                             requireContext(),
                             { response ->
                                 val availableVouchers = response.getInt("vouchers")
@@ -229,7 +234,7 @@ class TripsFragment : Fragment() {
             measurements?.let { adapter.submitList(it) }
 
             // Show achievements progress
-            if (showAchievements) {
+            if (incentives != null) {
                 val totalDistanceKm = totalDistanceKm(measurements)
                 val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
 
@@ -294,19 +299,35 @@ class TripsFragment : Fragment() {
      * @param context The `Context` required to read the preferences
      * @return The URL as string
      */
-    private fun authApi(context: Context): String? {
+    private fun authApi(context: Context): String {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
         val apiEndpoint = preferences.getString(SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
         Validate.notNull(
             apiEndpoint,
-            "Sync canceled: Auth url not available. Please set the applications server url preference."
+            "TripsFragment: Auth url not available. Please set the applications server url preference."
         )
-        return apiEndpoint
+        return apiEndpoint!!
+    }
+
+    /**
+     * Reads the Incentives API URL from the preferences.
+     *
+     * @param context The `Context` required to read the preferences
+     * @return The URL as string
+     */
+    private fun incentivesApi(context: Context): String {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val apiEndpoint = preferences.getString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, null)
+        Validate.notNull(
+            apiEndpoint,
+            "TripsFragment: Incentives url not available. Please set the applications server url preference."
+        )
+        return apiEndpoint!!
     }
 
     private fun showVoucher() {
         try {
-            incentives.voucher(
+            incentives!!.voucher(
                 requireContext(),
                 { response ->
                     val code = response.getString("code")

@@ -380,7 +380,8 @@ class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentAct
         val stored =
             preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
         val currentUrl = BuildConfig.authServer
-        Validate.notNull(currentUrl)
+        @Suppress("KotlinConstantConditions")
+        Validate.isTrue(currentUrl != "null")
         if (stored == null || stored != currentUrl) {
             Log.d(TAG, "Updating Auth API URL from $stored to $currentUrl")
             val editor = preferences!!.edit()

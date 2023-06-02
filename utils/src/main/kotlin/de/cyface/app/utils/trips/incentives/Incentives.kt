@@ -186,4 +186,11 @@ class Incentives(private val authenticator: CyfaceAuthenticator, private val api
     private fun voucherEndpoint(): URL {
         return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "voucher")
     }
+
+    companion object {
+        /**
+         * The settings key used to identify the settings storing the URL of the server to get incentives from.
+         */
+        const val INCENTIVES_ENDPOINT_URL_SETTINGS_KEY = "de.cyface.incentives.endpoint"
+    }
 }

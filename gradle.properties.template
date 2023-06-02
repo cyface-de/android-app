@@ -36,7 +36,8 @@ githubUser=
 githubToken=
 
 cyface.api=
-cyface.auth_api
+cyface.auth_api=
+cyface.incentives_api=
 
 google.maps_api_key=
 google.maps-api_key.r4r=
@@ -50,6 +51,7 @@ cyface.emulator_api=
 
 cyface.staging_api=
 cyface.staging_auth_api=
+cyface.staging_incentives_api=
 cyface.staging_user=
 cyface.staging_password=
 

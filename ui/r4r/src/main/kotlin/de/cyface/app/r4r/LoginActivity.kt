@@ -320,7 +320,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private fun setServerUrl() {
         val storedServer = preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
         val server = BuildConfig.authServer
-        Validate.notNull(server)
+        @Suppress("KotlinConstantConditions")
+        Validate.isTrue(server != "null")
         if (storedServer == null || storedServer != server) {
             Log.d(
                 TAG,
