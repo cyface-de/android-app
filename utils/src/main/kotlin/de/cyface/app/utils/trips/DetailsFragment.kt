@@ -42,7 +42,7 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows details about a single, finished measurement.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class DetailsFragment : Fragment() {

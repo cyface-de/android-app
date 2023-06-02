@@ -61,7 +61,7 @@ import java.util.regex.Pattern
  * A registration screen that offers registration via email/password and captcha.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 3.3.0
  */
 class RegistrationActivity : FragmentActivity() /* HCaptcha requires FragmentActivity */,

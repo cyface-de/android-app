@@ -66,7 +66,7 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows all finished measurements to the user.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class TripsFragment : Fragment() {
@@ -305,9 +305,6 @@ class TripsFragment : Fragment() {
     }
 
     private fun showVoucher() {
-        // FIXME: disable button while request is sent
-        // FIXME: content is replaced asynchronously when request returns voucher
-        // FIXME: handle errors: button should be reset
         try {
             incentives.voucher(
                 requireContext(),

@@ -50,6 +50,13 @@ import java.net.URL
  */
 class Incentives(private val authenticator: CyfaceAuthenticator, private val apiEndpoint: String) {
 
+    /**
+     * Requests the number of available vouchers.
+     *
+     * @param context the context required to load the account manager and to create cache dirs
+     * @param handler the handler which receives the response in case of success
+     * @param failureHandler the handler which receives the errors
+     */
     fun availableVouchers(
         context: Context,
         handler: Listener<JSONObject>,
@@ -75,6 +82,13 @@ class Incentives(private val authenticator: CyfaceAuthenticator, private val api
         queue.add(request)
     }
 
+    /**
+     * Requests a voucher for the currently logged in user.
+     *
+     * @param context the context required to load the account manager and to create cache dirs
+     * @param handler the handler which receives the response in case of success
+     * @param failureHandler the handler which receives the errors
+     */
     fun voucher(
         context: Context,
         handler: Listener<JSONObject>,
