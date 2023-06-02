@@ -25,11 +25,19 @@ import android.accounts.NetworkErrorException
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import com.android.volley.Response.ErrorListener
+import com.android.volley.Response.Listener
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.SyncAdapter
+import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.uploader.exception.SynchronizationInterruptedException
 import de.cyface.utils.Validate
+import org.json.JSONObject
+import java.net.URL
+
 
 /**
  * The API to get the voucher data from.
@@ -37,28 +45,65 @@ import de.cyface.utils.Validate
  * @author Armin Schnabel
  * @version 1.0.0
  * @since 3.3.0
- * @param authenticator The authenticator to get the auth token from
+ * @property authenticator The authenticator to get the auth token from
+ * @property apiEndpoint An API endpoint running a Cyface Incentives API, like `https://some.url/api/v1`
  */
-class Incentives (private val authenticator: CyfaceAuthenticator) {
+class Incentives(private val authenticator: CyfaceAuthenticator, private val apiEndpoint: String) {
 
-    fun availableVouchers(context: Context): Int {
+    fun availableVouchers(
+        context: Context,
+        handler: Listener<JSONObject>,
+        failureHandler: ErrorListener
+    ) {
         // Acquire new auth token before each request (old one could be expired)
         val jwtAuthToken = getAuthToken(authenticator, getAccount(context))
 
-        // FIXME: add voucher_count request, see `HttpConnection`
-        val availableVouchers = 100 // TODO: handle error when no connection to server
-        return availableVouchers
+        // Try to send the request and handle expected errors
+        val queue = Volley.newRequestQueue(context)
+        val url = voucherCountEndpoint().toString()
+        val request = object : JsonObjectRequest(
+            Method.GET,
+            url,
+            null,
+            handler,
+            failureHandler
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                return headers(jwtAuthToken)
+            }
+        }
+        queue.add(request)
     }
 
-    fun voucher(context: Context): Voucher {
+    fun voucher(
+        context: Context,
+        handler: Listener<JSONObject>,
+        failureHandler: ErrorListener
+    ) {
         // Acquire new auth token before each request (old one could be expired)
         val jwtAuthToken = getAuthToken(authenticator, getAccount(context))
 
-        // FIXME: add voucher request, see `HttpConnection`
-        val code = "0123456789"
-        val until = "2024-05-31T23:59:59Z"
-        // FIXME: Handle 204 - no content (when the last voucher just got assigned)
-        return Voucher(code, until)
+        // Try to send the request and handle expected errors
+        val queue = Volley.newRequestQueue(context)
+        val url = voucherEndpoint().toString()
+        val request = object : JsonObjectRequest(
+            Method.GET,
+            url,
+            null,
+            handler,
+            failureHandler
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                return headers(jwtAuthToken)
+            }
+        }
+        queue.add(request)
+    }
+
+    private fun headers(jwtAuthToken: String): MutableMap<String, String> {
+        val headers: MutableMap<String, String> = HashMap()
+        headers["Authorization"] = "Bearer $jwtAuthToken"
+        return headers
     }
 
     /**
@@ -111,7 +156,20 @@ class Incentives (private val authenticator: CyfaceAuthenticator) {
             Validate.isTrue(Thread.interrupted())
             throw SynchronizationInterruptedException("Sync interrupted, aborting sync.")
         }
-        Log.d(SyncAdapter.TAG, "Login authToken: **" + jwtAuthToken.substring(jwtAuthToken.length - 7))
+        Log.d(
+            SyncAdapter.TAG,
+            "Login authToken: **" + jwtAuthToken.substring(jwtAuthToken.length - 7)
+        )
         return jwtAuthToken
+    }
+
+    @Suppress("MemberVisibilityCanBePrivate") // Part of the API
+    private fun voucherCountEndpoint(): URL {
+        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "voucher_count")
+    }
+
+    @Suppress("MemberVisibilityCanBePrivate") // Part of the API
+    private fun voucherEndpoint(): URL {
+        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "voucher")
     }
 }

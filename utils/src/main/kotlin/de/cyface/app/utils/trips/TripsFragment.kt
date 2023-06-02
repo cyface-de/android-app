@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -42,6 +43,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -59,7 +61,6 @@ import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.roundToInt
-
 
 /**
  * The [Fragment] which shows all finished measurements to the user.
@@ -143,7 +144,9 @@ class TripsFragment : Fragment() {
         }
         val authApi = authApi(requireContext())!!
         val authenticator = DefaultAuthenticator(authApi)
-        this.incentives = Incentives(CyfaceAuthenticator(requireContext(), authenticator))
+        val incentivesApi = "https://staging.cyface.de/incentives/api/v1" // FIXME
+        this.incentives =
+            Incentives(CyfaceAuthenticator(requireContext(), authenticator), incentivesApi)
     }
 
     override fun onCreateView(
@@ -179,33 +182,53 @@ class TripsFragment : Fragment() {
         )
         tripsList.addItemDecoration(divider)
 
-        // Achievements
+        // Check voucher availability
         val showAchievements = requireContext().packageName.equals("de.cyface.app.r4r")
         if (showAchievements) {
-            // Check voucher availability
-            Handler().postDelayed({ // FIXME
-                GlobalScope.launch {
-                    var availableVouchers: Int?
-                    withContext(Dispatchers.IO) {
-                        availableVouchers = incentives.availableVouchers(requireContext())
-                    }
-                    if (availableVouchers!! > 0) {
+            GlobalScope.launch {
+                withContext(Dispatchers.IO) {
+                    try {
+                        incentives.availableVouchers(
+                            requireContext(),
+                            { response ->
+                                val availableVouchers = response.getInt("vouchers")
+                                if (availableVouchers > 0) {
+                                    Handler(Looper.getMainLooper()).post {
+                                        // Can be null when switching tab before response returns
+                                        _binding?.achievementsVouchersLeft?.text =
+                                            getString(R.string.voucher_left, availableVouchers)
+                                        _binding?.achievements?.visibility = VISIBLE
+                                    }
+                                }
+                            },
+                            {
+                                Handler(Looper.getMainLooper()).post {
+                                    Toast.makeText(
+                                        context,
+                                        "Gutscheinprüfung fehlgeschlagen: ${it.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            })
+                    } catch (e: Exception) {
                         Handler(Looper.getMainLooper()).post {
-                            // Can be null when switching tab before response returns
-                            _binding?.achievementsVouchersLeft?.text =
-                                getString(R.string.voucher_left, availableVouchers)
-                            _binding?.achievements?.visibility = VISIBLE
+                            Toast.makeText(
+                                context,
+                                "Gutscheinprüfung nicht möglich",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
+                        Log.e(TAG, "availableVouchers crashed", e)
                     }
                 }
-            }, 1000)
+            }
         }
 
         // Update adapters with the updates from the ViewModel
         tripsViewModel.measurements.observe(viewLifecycleOwner) { measurements ->
             measurements?.let { adapter.submitList(it) }
 
-            // Achievements
+            // Show achievements progress
             if (showAchievements) {
                 val totalDistanceKm = totalDistanceKm(measurements)
                 val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
@@ -218,7 +241,11 @@ class TripsFragment : Fragment() {
                     binding.achievementsReceived.visibility = GONE
                     binding.achievementsUnlocked.visibility = VISIBLE
                     binding.achievementsUnlockedButton.setOnClickListener {
-                        showVoucher()
+                        GlobalScope.launch {
+                            withContext(Dispatchers.IO) {
+                                showVoucher()
+                            }
+                        }
                     }
                 }
             }
@@ -281,25 +308,53 @@ class TripsFragment : Fragment() {
         // FIXME: disable button while request is sent
         // FIXME: content is replaced asynchronously when request returns voucher
         // FIXME: handle errors: button should be reset
-        val voucher = incentives.voucher(requireContext())
-
-        binding.achievementsUnlocked.visibility = GONE
-        binding.achievementsProgress.visibility = GONE
-        binding.achievementsReceived.visibility = VISIBLE
-        binding.achievementsReceivedContent.text = getString(R.string.voucher_code_is, voucher.code)
-        @Suppress("SpellCheckingInspection")
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-        val validUntil = format.parse(voucher.until)
-        val untilText =
-            SimpleDateFormat.getDateInstance(
-                SimpleDateFormat.LONG,
-                Locale.getDefault()
-            ).format(validUntil!!.time)
-        binding.achievementValidUntil.text = getString(R.string.valid_until, untilText)
-        binding.achievementsReceivedButton.setOnClickListener {
-            val clipboard = getSystemService(requireContext(), ClipboardManager::class.java)
-            val clip = ClipData.newPlainText(getString(R.string.voucher_code), voucher.code)
-            clipboard!!.setPrimaryClip(clip)
+        try {
+            incentives.voucher(
+                requireContext(),
+                { response ->
+                    val code = response.getString("code")
+                    val until = response.getString("until")
+                    Handler(Looper.getMainLooper()).post {
+                        binding.achievementsUnlocked.visibility = GONE
+                        binding.achievementsProgress.visibility = GONE
+                        binding.achievementsReceived.visibility = VISIBLE
+                        binding.achievementsReceivedContent.text =
+                            getString(R.string.voucher_code_is, code)
+                        @Suppress("SpellCheckingInspection")
+                        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+                        val validUntil = format.parse(until)
+                        val untilText =
+                            SimpleDateFormat.getDateInstance(
+                                SimpleDateFormat.LONG,
+                                Locale.getDefault()
+                            ).format(validUntil!!.time)
+                        binding.achievementValidUntil.text =
+                            getString(R.string.valid_until, untilText)
+                        binding.achievementsReceivedButton.setOnClickListener {
+                            val clipboard =
+                                getSystemService(requireContext(), ClipboardManager::class.java)
+                            val clip = ClipData.newPlainText(getString(R.string.voucher_code), code)
+                            clipboard!!.setPrimaryClip(clip)
+                        }
+                    }
+                },
+                {
+                    // FIXME: Handle 204 - no content (when the last voucher just got assigned)
+                    Toast.makeText(
+                        context,
+                        "Gutscheinanfrage fehlgeschlagen: ${it.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                })
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(
+                    context,
+                    "Gutscheinanfrage nicht möglich",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            Log.e(TAG, "availableVouchers crashed", e)
         }
     }
 
