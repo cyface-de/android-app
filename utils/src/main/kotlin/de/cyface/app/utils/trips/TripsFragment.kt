@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
@@ -49,8 +50,10 @@ import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.SyncService
 import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.utils.Validate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Double.min
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
@@ -181,12 +184,19 @@ class TripsFragment : Fragment() {
         if (showAchievements) {
             // Check voucher availability
             Handler().postDelayed({ // FIXME
-                val availableVouchers = incentives.availableVouchers()
-                if (availableVouchers > 0) {
-                    // Can be null when switching tab before response returns
-                    _binding?.achievementsVouchersLeft?.text =
-                        getString(R.string.voucher_left, availableVouchers)
-                    _binding?.achievements?.visibility = VISIBLE
+                GlobalScope.launch {
+                    var availableVouchers: Int?
+                    withContext(Dispatchers.IO) {
+                        availableVouchers = incentives.availableVouchers(requireContext())
+                    }
+                    if (availableVouchers!! > 0) {
+                        Handler(Looper.getMainLooper()).post {
+                            // Can be null when switching tab before response returns
+                            _binding?.achievementsVouchersLeft?.text =
+                                getString(R.string.voucher_left, availableVouchers)
+                            _binding?.achievements?.visibility = VISIBLE
+                        }
+                    }
                 }
             }, 1000)
         }
@@ -271,7 +281,7 @@ class TripsFragment : Fragment() {
         // FIXME: disable button while request is sent
         // FIXME: content is replaced asynchronously when request returns voucher
         // FIXME: handle errors: button should be reset
-        val voucher = incentives.voucher()
+        val voucher = incentives.voucher(requireContext())
 
         binding.achievementsUnlocked.visibility = GONE
         binding.achievementsProgress.visibility = GONE

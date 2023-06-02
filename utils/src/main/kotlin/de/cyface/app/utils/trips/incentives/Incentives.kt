@@ -22,6 +22,7 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AuthenticatorException
 import android.accounts.NetworkErrorException
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import de.cyface.synchronization.Constants
@@ -40,24 +41,39 @@ import de.cyface.utils.Validate
  */
 class Incentives (private val authenticator: CyfaceAuthenticator) {
 
-    fun availableVouchers(): Int {
+    fun availableVouchers(context: Context): Int {
         // Acquire new auth token before each request (old one could be expired)
-        //val jwtAuthToken = getAuthToken(authenticator, account)
+        val jwtAuthToken = getAuthToken(authenticator, getAccount(context))
 
         // FIXME: add voucher_count request, see `HttpConnection`
         val availableVouchers = 100 // TODO: handle error when no connection to server
         return availableVouchers
     }
 
-    fun voucher(): Voucher {
+    fun voucher(context: Context): Voucher {
         // Acquire new auth token before each request (old one could be expired)
-        //val jwtAuthToken = getAuthToken(authenticator, account)
+        val jwtAuthToken = getAuthToken(authenticator, getAccount(context))
 
         // FIXME: add voucher request, see `HttpConnection`
         val code = "0123456789"
         val until = "2024-05-31T23:59:59Z"
         // FIXME: Handle 204 - no content (when the last voucher just got assigned)
         return Voucher(code, until)
+    }
+
+    /**
+     * Returns the Cyface account. Throws a Runtime Exception if no or more than one account exists.
+     *
+     * @param context the Context to load the AccountManager
+     * @return the only existing account
+     */
+    private fun getAccount(context: Context): Account {
+        val accountType = "de.cyface.app.r4r"
+        val accountManager = AccountManager.get(context)
+        val existingAccounts = accountManager.getAccountsByType(accountType)
+        Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
+        Validate.isTrue(existingAccounts.isNotEmpty(), "No account exists.")
+        return existingAccounts[0]
     }
 
     /**
