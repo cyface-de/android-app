@@ -21,7 +21,7 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.3.0
+ * @version 2.4.0
  * @since 1.0.0
  */
 
@@ -55,7 +55,7 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.7.1" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.7.2" // Also update submodule commit ref
     cyfaceUtilsVersion = "3.3.7"
     cyfaceEnergySettingsVersion = "3.3.3" // Also update submodule commit ref
     cyfaceCameraServiceVersion = "4.1.11" // Also update submodule commit ref
@@ -78,6 +78,7 @@ ext {
     roomVersion = "2.5.1"
     lifecycleVersion = "2.6.1"
     navigationVersion = "2.5.3"
+    volleyVersion = "1.2.1"
 
     // Kotlin components
     coroutinesVersion = "1.6.4"

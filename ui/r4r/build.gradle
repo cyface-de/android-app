@@ -92,6 +92,7 @@ android {
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
             buildConfigField "String", "authServer", "\"${project.findProperty('cyface.staging_auth_api')}\""
+            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
@@ -109,6 +110,7 @@ android {
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
             buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api')}\""
+            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }

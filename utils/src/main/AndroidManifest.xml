@@ -10,4 +10,9 @@
   <!-- Google Maps Android API permission -->
   <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
+  <!-- Incentives need "GET_ACCOUNTS" permission to read information about accounts. -->
+  <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+  <!-- To send HTTP Requests -->
+  <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Keep in Sync with `Group` enum and `groups` translations! -->
+  <string-array name="groups">
+    <item>Kommune auswählen</item>
+    <item>Köthen</item>
+    <item>Schkeuditz</item>
+  </string-array>
+</resources>

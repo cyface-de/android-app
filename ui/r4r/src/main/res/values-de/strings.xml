@@ -1,5 +1,9 @@
 <resources>
 
+    <!-- Registration -->
+    <!-- Keep in Sync with `Groups` enum and `groups` translations! -->
+    <string name="choose_municipality">Kommune auswählen</string>
+
     <!-- Speed -->
     <string name="capturing_inactive">Datenerfassung inaktiv</string>
 </resources>

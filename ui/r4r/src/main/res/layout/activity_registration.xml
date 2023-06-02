@@ -111,6 +111,13 @@
           android:inputType="textPassword" />
       </com.google.android.material.textfield.TextInputLayout>
 
+      <!-- Select event/group e.g. for voucher achievements -->
+      <!-- there is no simple Material Design Spinner, only weird workarounds -->
+      <Spinner
+        android:id="@+id/group_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/md_listitem_height" />
+
       <!-- Messages, e.g. "registration successful, please activate your account -->
       <com.google.android.material.textview.MaterialTextView
         android:id="@+id/registration_message"

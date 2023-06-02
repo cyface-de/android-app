@@ -1,22 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="de.cyface.app.utils.trips.TripsFragment">
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context="de.cyface.app.utils.trips.TripsFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/tripsList"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
-      tools:listitem="@layout/trips_item"
-      android:paddingTop="@dimen/activity_vertical_margin"
-      android:paddingBottom="@dimen/activity_vertical_margin"
-      android:paddingStart="8dp"
-      android:paddingEnd="8dp"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent" />
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/tripsList"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:paddingStart="8dp"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingEnd="8dp"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    app:layout_constraintBottom_toTopOf="@+id/achievements"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:listitem="@layout/trips_item" />
+
+  <!-- achievements section -->
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/achievements"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/tripsList">
+
+    <com.google.android.material.divider.MaterialDivider
+      android:id="@+id/achievementsDivider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:dividerColor="@color/grey_200"
+      app:layout_constraintTop_toTopOf="@id/achievements" />
+
+    <!-- progress -->
+
+    <LinearLayout
+      android:id="@+id/achievementsProgress"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:gravity="center"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/achievementsDivider">
+
+      <TextView
+        android:id="@+id/achievementsProgressContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="@string/achievements_progress"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        app:drawableLeftCompat="@drawable/baseline_workspace_premium_24"
+        app:drawableTint="@color/text" />
+
+      <ProgressBar
+        android:id="@+id/achievementsProgressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:progressBackgroundTint="@color/grey_200"
+        android:progressTint="@color/defaultPrimary" />
+
+      <TextView
+        android:id="@+id/achievementsVouchersLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2"
+        app:drawableTint="@color/text" />
+    </LinearLayout>
+
+    <!-- unlocked -->
+
+    <LinearLayout
+      android:id="@+id/achievementsUnlocked"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/achievementsDivider">
+
+      <TextView
+        android:id="@+id/achievementsUnlockedContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="@string/achievements_unlocked"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        app:drawableLeftCompat="@drawable/baseline_verified_24"
+        app:drawableTint="@color/text" />
+
+      <Button
+        android:id="@+id/achievementsUnlockedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/show_voucher" />
+    </LinearLayout>
+
+    <!-- received -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/achievementsReceived"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/achievementsDivider">
+
+      <TextView
+        android:id="@+id/achievementsReceivedContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/achievementsReceived"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+      <TextView
+        android:id="@+id/achievementVoucherDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementsReceivedContent"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2"
+        android:text="@string/voucher_details"/>
+
+      <TextView
+        android:id="@+id/achievementVoucherDetails2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2"
+        android:text="@string/voucher_details2"/>
+
+      <TextView
+        android:id="@+id/achievementValidUntil"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails2"
+        android:paddingBottom="16dp"
+        android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+      <Button
+        android:id="@+id/achievementsReceivedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/achievementValidUntil"
+        android:text="@string/copy_voucher_code" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

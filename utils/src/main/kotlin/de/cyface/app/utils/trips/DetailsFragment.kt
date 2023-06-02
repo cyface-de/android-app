@@ -42,7 +42,7 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows details about a single, finished measurement.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class DetailsFragment : Fragment() {
@@ -137,10 +137,11 @@ class DetailsFragment : Fragment() {
         // Chart
         val chart = root.findViewById(R.id.chart) as LineChart
         val altitudes = persistence.loadAltitudes(measurementId)
-        if (altitudes == null || altitudes.isEmpty()) {
+        if (altitudes.isNullOrEmpty()) {
             binding.elevationProfileTitle.text = getString(R.string.elevation_profile_no_data)
             chart.visibility = GONE
         } else {
+            // We could also show the relative elevation profile (starting at elevation 0)
             val allEntries = ArrayList<List<Entry>>()
             var x = 1
             val values = altitudes.sumOf { trackAltitudes -> trackAltitudes.count() }

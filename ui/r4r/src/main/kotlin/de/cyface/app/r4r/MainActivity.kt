@@ -46,6 +46,8 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
+import de.cyface.app.utils.trips.incentives.Incentives
+import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -57,6 +59,7 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
+import de.cyface.synchronization.SyncService
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
@@ -206,6 +209,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
         showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL)
+
+        // Inject the Incentives API URL into the preferences, as the `Incentives` from `utils`
+        // cannot reach the `ui.rfr.BuildConfig`.
+        setIncentivesServerUrl()
     }
 
     /**
@@ -321,5 +328,26 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
         Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
         return existingAccounts.isNotEmpty()
+    }
+
+    /**
+     * As long as the server URL is hardcoded we want to reset it when it's different from the
+     * default URL set in the [BuildConfig]. If not, hardcoded updates would not have an
+     * effect.
+     */
+    private fun setIncentivesServerUrl() {
+        val storedServer = preferences.getString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, null)
+        val server = BuildConfig.incentivesServer
+        @Suppress("KotlinConstantConditions")
+        Validate.isTrue(server != "null")
+        if (storedServer == null || storedServer != server) {
+            Log.d(
+                TAG,
+                "Updating Cyface Incentives API URL from " + storedServer + "to" + server
+            )
+            val editor = preferences.edit()
+            editor.putString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, server)
+            editor.apply()
+        }
     }
 }
