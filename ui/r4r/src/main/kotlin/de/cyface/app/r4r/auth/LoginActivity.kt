@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -23,18 +23,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.View.VISIBLE
-import android.widget.AdapterView
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorRes
@@ -56,11 +47,9 @@ import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.browser.BrowserMatcher
-import net.openid.appauth.browser.ExactBrowserMatcher
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -108,14 +97,10 @@ class LoginActivity : AppCompatActivity() {
             mExecutor.submit { initializeAppAuth() }
         }
         findViewById<View>(R.id.start_auth).setOnClickListener { startAuth() }
-        (findViewById<View>(R.id.login_hint_value) as EditText).addTextChangedListener(
-            LoginHintChangeHandler(this@LoginActivity)
-        )
         if (!mConfiguration.isValid) {
             displayError(mConfiguration.configurationError!!, false)
             return
         }
-        configureBrowserSelector()
         if (mConfiguration.hasConfigurationChanged()) {
             // discard any existing authorization state due to the change of configuration
             Log.i(TAG, "Configuration change detected, discarding old state")
@@ -164,8 +149,6 @@ class LoginActivity : AppCompatActivity() {
     @MainThread
     fun startAuth() {
         displayLoading("Making authorization request")
-        mUsePendingIntents =
-            (findViewById<View>(R.id.pending_intents_checkbox) as CheckBox).isChecked
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
@@ -292,41 +275,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     /**
-     * Enumerates the browsers installed on the device and populates a spinner, allowing the
-     * demo user to easily test the authorization flow against different browser and custom
-     * tab configurations.
-     */
-    @MainThread
-    private fun configureBrowserSelector() {
-        val spinner = findViewById<View>(R.id.browser_selector) as Spinner
-        val adapter = BrowserSelectionAdapter(this)
-        spinner.adapter = adapter
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val info = adapter.getItem(position)
-                if (info == null) {
-                    mBrowserMatcher = AnyBrowserMatcher.INSTANCE
-                    return
-                } else {
-                    mBrowserMatcher = ExactBrowserMatcher(info.mDescriptor)
-                }
-                recreateAuthorizationService()
-                createAuthRequest(this@LoginActivity, getLoginHint(this@LoginActivity))
-                warmUpBrowser(this@LoginActivity)
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                mBrowserMatcher = AnyBrowserMatcher.INSTANCE
-            }
-        }
-    }
-
-    /**
      * Performs the authorization request, using the browser selected in the spinner,
      * and a user-provided `login_hint` if available.
      */
@@ -337,7 +285,7 @@ class LoginActivity : AppCompatActivity() {
         } catch (ex: InterruptedException) {
             Log.w(TAG, "Interrupted while waiting for auth intent")
         }
-        if (mUsePendingIntents) {
+        if (mUsePendingIntents) { // TODO: We currently always use the other option below
             val completionIntent = Intent(this, TokenActivity::class.java)
             val cancelIntent = Intent(this, LoginActivity::class.java)
             cancelIntent.putExtra(EXTRA_FAILED, true)
@@ -408,7 +356,7 @@ class LoginActivity : AppCompatActivity() {
 
     @MainThread
     private fun initializeAuthRequest() {
-        createAuthRequest(this@LoginActivity, getLoginHint(this@LoginActivity))
+        createAuthRequest(this@LoginActivity)
         warmUpBrowser(this@LoginActivity)
         displayAuthOptions()
     }
@@ -418,22 +366,6 @@ class LoginActivity : AppCompatActivity() {
         findViewById<View>(R.id.auth_container).visibility = VISIBLE
         findViewById<View>(R.id.loading_container).visibility = View.GONE
         findViewById<View>(R.id.error_container).visibility = View.GONE
-        val state: AuthState = mAuthStateManager.current
-        val config = state.authorizationServiceConfiguration
-        var authEndpointStr = if (config!!.discoveryDoc != null) {
-            "Discovered auth endpoint: \n"
-        } else {
-            "Static auth endpoint: \n"
-        }
-        authEndpointStr += config.authorizationEndpoint
-        (findViewById<View>(R.id.auth_endpoint) as TextView).text = authEndpointStr
-        var clientIdStr = if (state.lastRegistrationResponse != null) {
-            "Dynamic client ID: \n"
-        } else {
-            "Static client ID: \n"
-        }
-        clientIdStr += mClientId
-        (findViewById<View>(R.id.client_id) as TextView).text = clientIdStr
     }
 
     private fun displayAuthCancelled() {
@@ -454,48 +386,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Responds to changes in the login hint. After a "debounce" delay, warms up the browser
-     * for a request with the new login hint; this avoids constantly re-initializing the
-     * browser while the user is typing.
-     */
-    private class LoginHintChangeHandler(val loginActivity: LoginActivity) : TextWatcher {
-        private val mHandler = Handler(Looper.getMainLooper())
-        private var mTask: RecreateAuthRequestTask
-
-        init {
-            mTask = RecreateAuthRequestTask(loginActivity)
-        }
-
-        override fun beforeTextChanged(cs: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(cs: CharSequence, start: Int, before: Int, count: Int) {
-            mTask.cancel()
-            mTask = RecreateAuthRequestTask(loginActivity)
-            mHandler.postDelayed(mTask, DEBOUNCE_DELAY_MS.toLong())
-        }
-
-        override fun afterTextChanged(ed: Editable) {}
-
-        companion object {
-            private const val DEBOUNCE_DELAY_MS = 500
-        }
-    }
-
-    private class RecreateAuthRequestTask(val loginActivity: LoginActivity) : Runnable {
-        private val mCanceled = AtomicBoolean()
-        override fun run() {
-            if (mCanceled.get()) {
-                return
-            }
-            createAuthRequest(loginActivity, getLoginHint(loginActivity))
-            warmUpBrowser(loginActivity)
-        }
-
-        fun cancel() {
-            mCanceled.set(true)
-        }
-    }
-
     companion object {
         private fun warmUpBrowser(loginActivity: LoginActivity) {
             loginActivity.mAuthIntentLatch = CountDownLatch(1)
@@ -510,8 +400,8 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        private fun createAuthRequest(loginActivity: LoginActivity, loginHint: String?) {
-            Log.i(loginActivity.TAG, "Creating auth request for login hint: $loginHint")
+        private fun createAuthRequest(loginActivity: LoginActivity) {
+            Log.i(loginActivity.TAG, "Creating auth request")
             val authRequestBuilder = AuthorizationRequest.Builder(
                 loginActivity.mAuthStateManager.current.authorizationServiceConfiguration!!,
                 loginActivity.mClientId.get(),
@@ -519,17 +409,7 @@ class LoginActivity : AppCompatActivity() {
                 loginActivity.mConfiguration.redirectUri
             )
                 .setScope(loginActivity.mConfiguration.scope)
-            if (!TextUtils.isEmpty(loginHint)) {
-                authRequestBuilder.setLoginHint(loginHint)
-            }
             loginActivity.mAuthRequest.set(authRequestBuilder.build())
-        }
-
-        private fun getLoginHint(loginActivity: LoginActivity): String {
-            return (loginActivity.findViewById<View>(R.id.login_hint_value) as EditText)
-                .text
-                .toString()
-                .trim { it <= ' ' }
         }
     }
 }

@@ -54,6 +54,12 @@ import java.util.concurrent.atomic.AtomicReference
  * by performing an authorization code exchange if necessary. After this, the activity provides
  * additional post-authorization operations if available, such as fetching user info and refreshing
  * access tokens.
+ *
+ * I.e. this activity especially takes care of the third stage:
+ * 1. Discovering or specifying the endpoints to interact with the provider.
+ * 2. Authorizing the user, via a browser, in order to obtain an authorization code.
+ * 3. Exchanging the authorization code with the authorization server, to obtain a refresh token and/or ID token.
+ * 4. Using access tokens derived from the refresh token to interact with a resource server for further access to user data.
  */
 class TokenActivity : AppCompatActivity() {
     private lateinit var mAuthService: AuthorizationService
