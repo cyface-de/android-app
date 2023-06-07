@@ -31,9 +31,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.preference.PreferenceManager
 import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.MainThread
@@ -45,11 +42,9 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.snackbar.Snackbar
 import de.cyface.app.r4r.auth.AuthStateManager
 import de.cyface.app.r4r.auth.Configuration
 import de.cyface.app.r4r.auth.LoginActivity
-import de.cyface.app.r4r.auth.TokenActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.databinding.ActivityMainBinding
@@ -88,12 +83,7 @@ import net.openid.appauth.ClientAuthentication
 import net.openid.appauth.EndSessionRequest
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
-import java.nio.charset.Charset
-import java.util.Date
-import java.util.concurrent.Executors
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the
@@ -268,8 +258,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         mConfiguration = Configuration.getInstance(this)
         val config = Configuration.getInstance(this)
         if (config.hasConfigurationChanged()) {
-            Toast.makeText(this, "Authentifizierung ist abgelaufen", Toast.LENGTH_SHORT).show()
-            signOut()
+            show("Authentifizierung ist abgelaufen")
+            Handler().postDelayed({signOut()}, 2000)
             return
         }
         mAuthService = AuthorizationService(
@@ -283,11 +273,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     override fun onStart() {
         super.onStart()
 
-        // Authorization
+        // All good, user is authorized
         if (mStateManager.current.isAuthorized) {
-            displayAuthorized()
+            //displayAuthorized()
             return
         }
+
         // the stored AuthState is incomplete, so check if we are currently receiving the result of
         // the authorization flow from the browser.
         val response = AuthorizationResponse.fromIntent(intent)
@@ -297,12 +288,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
         if (response?.authorizationCode != null) {
             // authorization code exchange is required
+            show("onStart: not authorized - exchange auth code")
             mStateManager.updateAfterAuthorization(response, ex)
             exchangeAuthorizationCode(response)
         } else if (ex != null) {
-            displayNotAuthorized("Authorization flow failed: " + ex.message)
+            displayNotAuthorized("Auth flow failed: " + ex.message)
         } else {
-            displayNotAuthorized("No authorization state retained - reauthorization required")
+            // This happens when the user is not logged in / logged out -> LoginActivity is called
+            displayNotAuthorized("No auth state retained - re-auth required")
         }
     }
 
@@ -312,8 +305,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
         // Authorization
         if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            signOut()
-            finish()
+            Handler().postDelayed({signOut(); finish()}, 2000)
         } else {
             displayEndSessionCancelled()
         }
@@ -462,18 +454,18 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     @MainThread
     private fun displayNotAuthorized(explanation: String) {
-        showSnackbar("unauthorized, logging out ...")
+        show("unauthorized, logging out ... ($explanation)")
         Handler().postDelayed({signOut()}, 2000)
     }
 
     @MainThread
     private fun displayLoading(message: String) {
-        showSnackbar("loading ...")
+        show(message)
     }
 
     @MainThread
-    private fun displayAuthorized() {
-        showSnackbar("authorized!")
+    private fun displayAuthorized(message: String) {
+        show("authorized ($message)")
         val state = mStateManager.current
         //refreshTokenInfoView.text = if (state.refreshToken == null) "no_refresh_token_returned" else "refresh_token_returned"
         //idTokenInfoView.text = if (state.idToken == null) "no_id_token_returned" else "id_token_returned"
@@ -586,7 +578,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         authException: AuthorizationException?
     ) {
         mStateManager.updateAfterTokenResponse(tokenResponse, authException)
-        runOnUiThread { displayAuthorized() }
+        runOnUiThread { displayAuthorized("handleAccessTokenResponse") }
     }
 
     @WorkerThread
@@ -602,7 +594,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             // WrongThread inference is incorrect for lambdas
             runOnUiThread { displayNotAuthorized(message) }
         } else {
-            runOnUiThread { displayAuthorized() }
+            // This is called when the code exchange was successful (after user just logged in)
+            runOnUiThread { displayAuthorized("handleCodeExchangeResponse") }
         }
     }
 
@@ -630,7 +623,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         if (ex != null) {
             Log.e(TAG, "Token refresh failed when fetching user info")
             //mUserInfoJson.set(null)
-            runOnUiThread { displayAuthorized() }
+            runOnUiThread { displayAuthorized("fetchUserInfo") }
             return
         }
         val discovery = mStateManager.current
@@ -660,7 +653,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     private fun displayEndSessionCancelled() {
-        showSnackbar("Sign out canceled")
+        show("Sign out canceled")
     }
 
     @MainThread
@@ -698,13 +691,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     @MainThread
-    private fun showSnackbar(message: String) {
-        Snackbar.make(
+    private fun show(message: String) {
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        /*Snackbar.make(
             findViewById(R.id.container),
             message,
             Snackbar.LENGTH_SHORT
         )
-            .show()
+            .show()*/
     }
 
     companion object {

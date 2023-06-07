@@ -89,14 +89,21 @@ class LoginActivity : AppCompatActivity() {
         mExecutor = Executors.newSingleThreadExecutor()
         mAuthStateManager = AuthStateManager.getInstance(this)
         mConfiguration = Configuration.getInstance(this)
+
+        // Already authorized
         if (mAuthStateManager.current.isAuthorized
             && !mConfiguration.hasConfigurationChanged()
         ) {
-            Log.i(TAG, "User is already authenticated, proceeding to token activity")
-            startActivity(Intent(this, MainActivity::class.java))
+            // As the LoginActivity should only be shown when the user is not authenticated
+            // we can't forward to `MainActivity` just like that as this would lead to a loop.
+            //Log.i(TAG, "User is already authenticated, processing to token activity")
+            Log.e(TAG, "User is already authenticated")
+            showSnackbar("User is already authenticated")
+            //startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
+
         setContentView(R.layout.activity_login)
         findViewById<View>(R.id.retry).setOnClickListener {
             mExecutor.submit { initializeAppAuth() }
@@ -113,7 +120,7 @@ class LoginActivity : AppCompatActivity() {
             mConfiguration.acceptConfiguration()
         }
         if (intent.getBooleanExtra(EXTRA_FAILED, false)) {
-            displayAuthCancelled()
+            showSnackbar("Authorization canceled")
         }
         displayLoading("Initializing")
         mExecutor.submit { initializeAppAuth() }
@@ -143,7 +150,7 @@ class LoginActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         displayAuthOptions()
         if (resultCode == RESULT_CANCELED) {
-            displayAuthCancelled()
+            showSnackbar("Authorization canceled")
         } else {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtras(data!!.extras!!)
@@ -373,10 +380,12 @@ class LoginActivity : AppCompatActivity() {
         findViewById<View>(R.id.error_container).visibility = View.GONE
     }
 
-    private fun displayAuthCancelled() {
+    @Suppress("SameParameterValue")
+    @MainThread
+    private fun showSnackbar(message: String) {
         Snackbar.make(
-            findViewById(R.id.coordinator),
-            "Authorization canceled",
+            findViewById(R.id.container),
+            message,
             Snackbar.LENGTH_SHORT
         )
             .show()
