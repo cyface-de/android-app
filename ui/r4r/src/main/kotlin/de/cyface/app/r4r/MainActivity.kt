@@ -23,11 +23,21 @@ import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
+import android.app.Activity
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.util.Log
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.MainThread
+import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
@@ -35,9 +45,14 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import de.cyface.app.r4r.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
+import de.cyface.app.r4r.auth.AuthStateManager
+import de.cyface.app.r4r.auth.Configuration
+import de.cyface.app.r4r.auth.LoginActivity
+import de.cyface.app.r4r.auth.TokenActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
@@ -46,7 +61,6 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
-import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -59,21 +73,39 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
-import de.cyface.synchronization.SyncService
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import net.openid.appauth.AppAuthConfiguration
+import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.ClientAuthentication
+import net.openid.appauth.EndSessionRequest
+import net.openid.appauth.TokenRequest
+import net.openid.appauth.TokenResponse
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.IOException
+import java.nio.charset.Charset
+import java.util.Date
+import java.util.concurrent.Executors
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the
- * [de.cyface.app.r4r.ui.TermsOfUseActivity] class.
+ * [de.cyface.app.r4r.TermsOfUseActivity] class.
+ *
+ * It calls the [de.cyface.app.r4r.auth.LoginActivity] if the user is unauthorized and uses the
+ * outcome of the OAuth 2 authorization flow to negotiate the final authorized state. This is done
+ * by performing the "authorization code exchange" if required.
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 3.2.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider {
@@ -97,6 +129,21 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * The `SharedPreferences` used to store the user's preferences.
      */
     private lateinit var preferences: SharedPreferences
+
+    /**
+     * The service used for authorization.
+     */
+    private lateinit var mAuthService: AuthorizationService
+
+    /**
+     * The authorization state.
+     */
+    private lateinit var mStateManager: AuthStateManager
+
+    /**
+     * The configuration of the OAuth 2 endpoint to authorize against.
+     */
+    private lateinit var mConfiguration: Configuration
 
     /**
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
@@ -169,7 +216,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            startSynchronization()
+            //FIXME: startSynchronization() - to disable endless loop after adding new auth flow
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
@@ -179,6 +226,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             throw IllegalStateException(e)
         }
 
+        /****************************************************************************************/
         // Crashes with RuntimeException: capturing not initialized when this is at the top of `onCreate`
         super.onCreate(savedInstanceState)
 
@@ -213,6 +261,62 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // Inject the Incentives API URL into the preferences, as the `Incentives` from `utils`
         // cannot reach the `ui.rfr.BuildConfig`.
         setIncentivesServerUrl()
+
+        // Authorization
+        mStateManager = AuthStateManager.getInstance(this)
+        //mExecutor = Executors.newSingleThreadExecutor()
+        mConfiguration = Configuration.getInstance(this)
+        val config = Configuration.getInstance(this)
+        if (config.hasConfigurationChanged()) {
+            Toast.makeText(this, "Authentifizierung ist abgelaufen", Toast.LENGTH_SHORT).show()
+            signOut()
+            return
+        }
+        mAuthService = AuthorizationService(
+            this,
+            AppAuthConfiguration.Builder()
+                .setConnectionBuilder(config.connectionBuilder)
+                .build()
+        )
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        // Authorization
+        if (mStateManager.current.isAuthorized) {
+            displayAuthorized()
+            return
+        }
+        // the stored AuthState is incomplete, so check if we are currently receiving the result of
+        // the authorization flow from the browser.
+        val response = AuthorizationResponse.fromIntent(intent)
+        val ex = AuthorizationException.fromIntent(intent)
+        if (response != null || ex != null) {
+            mStateManager.updateAfterAuthorization(response, ex)
+        }
+        if (response?.authorizationCode != null) {
+            // authorization code exchange is required
+            mStateManager.updateAfterAuthorization(response, ex)
+            exchangeAuthorizationCode(response)
+        } else if (ex != null) {
+            displayNotAuthorized("Authorization flow failed: " + ex.message)
+        } else {
+            displayNotAuthorized("No authorization state retained - reauthorization required")
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // Authorization
+        if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            signOut()
+            finish()
+        } else {
+            displayEndSessionCancelled()
+        }
     }
 
     /**
@@ -231,18 +335,23 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     override fun onDestroy() {
         super.onDestroy()
+
         // Clean up CyfaceDataCapturingService
         try {
             // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val isReportingEnabled = preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+            val isReportingEnabled =
+                preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
+
+        // Authorization
+        mAuthService.dispose()
     }
 
     /**
@@ -349,5 +458,256 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             editor.putString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, server)
             editor.apply()
         }
+    }
+
+    @MainThread
+    private fun displayNotAuthorized(explanation: String) {
+        showSnackbar("unauthorized, logging out ...")
+        Handler().postDelayed({signOut()}, 2000)
+    }
+
+    @MainThread
+    private fun displayLoading(message: String) {
+        showSnackbar("loading ...")
+    }
+
+    @MainThread
+    private fun displayAuthorized() {
+        showSnackbar("authorized!")
+        val state = mStateManager.current
+        //refreshTokenInfoView.text = if (state.refreshToken == null) "no_refresh_token_returned" else "refresh_token_returned"
+        //idTokenInfoView.text = if (state.idToken == null) "no_id_token_returned" else "id_token_returned"
+        /*if (state.accessToken == null) {
+            accessTokenInfoView.text = "no_access_token_returned"
+        } else {
+            val expiresAt = state.accessTokenExpirationTime
+            if (expiresAt == null) {
+                accessTokenInfoView.text = "no_access_token_expiry"
+            } else if (expiresAt < System.currentTimeMillis()) {
+                accessTokenInfoView.text = "access_token_expired"
+            } else {
+                val template = "access_token_expires_at"
+                accessTokenInfoView.text = java.lang.String.format(
+                    template,
+                    Date(expiresAt).toString()
+                )
+            }
+        }*/
+
+        /*val refreshTokenButton = findViewById<View>(R.id.refresh_token) as Button
+        refreshTokenButton.visibility = if (state.refreshToken != null) View.VISIBLE else View.GONE
+        refreshTokenButton.setOnClickListener { refreshAccessToken() }*/
+
+        /*val viewProfileButton = findViewById<View>(R.id.view_profile) as Button
+        val discoveryDoc = state.authorizationServiceConfiguration!!.discoveryDoc
+        if ((discoveryDoc?.userinfoEndpoint == null) && mConfiguration.userInfoEndpointUri == null) {
+            viewProfileButton.visibility = View.GONE
+        } else {
+            viewProfileButton.visibility = View.VISIBLE
+            viewProfileButton.setOnClickListener { fetchUserInfo() }
+        }*/
+
+        //findViewById<View>(R.id.sign_out).setOnClickListener { endSession() }
+
+        /*val userInfoCard: View = findViewById(R.id.userinfo_card)
+        val userInfo: JSONObject? = mUserInfoJson.get()
+        if (userInfo == null) {
+            userInfoCard.visibility = View.INVISIBLE
+        } else {
+            try {
+                var name = "???"
+                if (userInfo.has("name")) {
+                    name = userInfo.getString("name")
+                }
+                (findViewById<View>(R.id.userinfo_name) as TextView).text = name
+                /*if (userInfo.has("picture")) {
+                    GlideApp.with(this@TokenActivity)
+                        .load(Uri.parse(userInfo.getString("picture")))
+                        .fitCenter()
+                        .into(findViewById<View>(R.id.userinfo_profile) as ImageView?)
+                }*/
+                (findViewById<View>(R.id.userinfo_json) as TextView).text = mUserInfoJson.toString()
+                userInfoCard.visibility = View.VISIBLE
+            } catch (ex: JSONException) {
+                Log.e(TAG, "Failed to read userinfo JSON", ex)
+            }
+        }*/
+    }
+
+    @MainThread
+    private fun refreshAccessToken() {
+        displayLoading("Refreshing access token")
+        performTokenRequest(mStateManager.current.createTokenRefreshRequest()) { tokenResponse: TokenResponse?, authException: AuthorizationException? ->
+            handleAccessTokenResponse(
+                tokenResponse,
+                authException
+            )
+        }
+    }
+
+    @MainThread
+    private fun exchangeAuthorizationCode(authorizationResponse: AuthorizationResponse) {
+        displayLoading("Exchanging authorization code")
+        performTokenRequest(
+            authorizationResponse.createTokenExchangeRequest()
+        ) { tokenResponse: TokenResponse?, authException: AuthorizationException? ->
+            handleCodeExchangeResponse(
+                tokenResponse,
+                authException
+            )
+        }
+    }
+
+    @MainThread
+    private fun performTokenRequest(
+        request: TokenRequest,
+        callback: AuthorizationService.TokenResponseCallback
+    ) {
+        val clientAuthentication = try {
+            mStateManager.current.clientAuthentication
+        } catch (ex: ClientAuthentication.UnsupportedAuthenticationMethod) {
+            Log.d(
+                TAG, "Token request cannot be made, client authentication for the token "
+                        + "endpoint could not be constructed (%s)", ex
+            )
+            displayNotAuthorized("Client authentication method is unsupported")
+            return
+        }
+        mAuthService.performTokenRequest(
+            request,
+            clientAuthentication,
+            callback
+        )
+    }
+
+    @WorkerThread
+    private fun handleAccessTokenResponse(
+        tokenResponse: TokenResponse?,
+        authException: AuthorizationException?
+    ) {
+        mStateManager.updateAfterTokenResponse(tokenResponse, authException)
+        runOnUiThread { displayAuthorized() }
+    }
+
+    @WorkerThread
+    private fun handleCodeExchangeResponse(
+        tokenResponse: TokenResponse?,
+        authException: AuthorizationException?
+    ) {
+        mStateManager.updateAfterTokenResponse(tokenResponse, authException)
+        if (!mStateManager.current.isAuthorized) {
+            val message = ("Authorization Code exchange failed"
+                    + if (authException != null) authException.error else "")
+
+            // WrongThread inference is incorrect for lambdas
+            runOnUiThread { displayNotAuthorized(message) }
+        } else {
+            runOnUiThread { displayAuthorized() }
+        }
+    }
+
+    /**
+     * Demonstrates the use of [AuthState.performActionWithFreshTokens] to retrieve
+     * user info from the IDP's user info endpoint. This callback will negotiate a new access
+     * token / id token for use in a follow-up action, or provide an error if this fails.
+     */
+    @MainThread
+    private fun fetchUserInfo() {
+        displayLoading("Fetching user info")
+        mStateManager.current.performActionWithFreshTokens(
+            mAuthService
+        ) { accessToken: String?, idToken: String?, ex: AuthorizationException? ->
+            this.fetchUserInfo(
+                accessToken!!,
+                idToken!!,
+                ex
+            )
+        }
+    }
+
+    @MainThread
+    private fun fetchUserInfo(accessToken: String, idToken: String, ex: AuthorizationException?) {
+        if (ex != null) {
+            Log.e(TAG, "Token refresh failed when fetching user info")
+            //mUserInfoJson.set(null)
+            runOnUiThread { displayAuthorized() }
+            return
+        }
+        val discovery = mStateManager.current
+            .authorizationServiceConfiguration!!.discoveryDoc
+        val userInfoEndpoint = if (mConfiguration.userInfoEndpointUri != null) Uri.parse(
+            mConfiguration.userInfoEndpointUri.toString()
+        ) else Uri.parse(discovery!!.userinfoEndpoint.toString())
+        /*mExecutor.submit {
+            try {
+                val conn = mConfiguration.connectionBuilder.openConnection(
+                    userInfoEndpoint
+                )
+                conn.setRequestProperty("Authorization", "Bearer $accessToken")
+                conn.instanceFollowRedirects = false
+                val response: String = conn.inputStream.source().buffer()
+                    .readString(Charset.forName("UTF-8"))
+                mUserInfoJson.set(JSONObject(response))
+            } catch (ioEx: IOException) {
+                Log.e(TAG, "Network error when querying userinfo endpoint", ioEx)
+                showSnackbar("Fetching user info failed")
+            } catch (jsonEx: JSONException) {
+                Log.e(TAG, "Failed to parse userinfo response")
+                showSnackbar("Failed to parse user info")
+            }
+            runOnUiThread { displayAuthorized() }
+        }*/
+    }
+
+    private fun displayEndSessionCancelled() {
+        showSnackbar("Sign out canceled")
+    }
+
+    @MainThread
+    private fun endSession() {
+        val currentState: AuthState = mStateManager.current
+        val config: AuthorizationServiceConfiguration =
+            currentState.authorizationServiceConfiguration!!
+        if (config.endSessionEndpoint != null) {
+            val endSessionIntent: Intent = mAuthService.getEndSessionRequestIntent(
+                EndSessionRequest.Builder(config)
+                    .setIdTokenHint(currentState.idToken)
+                    .setPostLogoutRedirectUri(mConfiguration.endSessionRedirectUri)
+                    .build()
+            )
+            startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE)
+        } else {
+            signOut()
+        }
+    }
+
+    @MainThread
+    private fun signOut() {
+        // discard the authorization and token state, but retain the configuration and
+        // dynamic client registration (if applicable), to save from retrieving them again.
+        val currentState: AuthState = mStateManager.current
+        val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
+        if (currentState.lastRegistrationResponse != null) {
+            clearedState.update(currentState.lastRegistrationResponse)
+        }
+        mStateManager.replace(clearedState)
+        val mainIntent = Intent(this, LoginActivity::class.java)
+        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(mainIntent)
+        finish()
+    }
+
+    @MainThread
+    private fun showSnackbar(message: String) {
+        Snackbar.make(
+            findViewById(R.id.container),
+            message,
+            Snackbar.LENGTH_SHORT
+        )
+            .show()
+    }
+
+    companion object {
+        private const val END_SESSION_REQUEST_CODE = 911
     }
 }

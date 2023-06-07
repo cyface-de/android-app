@@ -34,6 +34,7 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.android.material.snackbar.Snackbar
+import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
@@ -54,6 +55,10 @@ import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A login screen that offers login via email/password.
+ *
+ * *ATTENTION*:
+ * The browser page opened by this activity stops working on the emulator after some time.
+ * Use a real device to test the auth workflow for now.
  *
  * @author Armin Schnabel
  * @version 4.0.0
@@ -88,7 +93,7 @@ class LoginActivity : AppCompatActivity() {
             && !mConfiguration.hasConfigurationChanged()
         ) {
             Log.i(TAG, "User is already authenticated, proceeding to token activity")
-            startActivity(Intent(this, TokenActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
@@ -140,7 +145,7 @@ class LoginActivity : AppCompatActivity() {
         if (resultCode == RESULT_CANCELED) {
             displayAuthCancelled()
         } else {
-            val intent = Intent(this, TokenActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             intent.putExtras(data!!.extras!!)
             startActivity(intent)
         }
@@ -286,7 +291,7 @@ class LoginActivity : AppCompatActivity() {
             Log.w(TAG, "Interrupted while waiting for auth intent")
         }
         if (mUsePendingIntents) { // TODO: We currently always use the other option below
-            val completionIntent = Intent(this, TokenActivity::class.java)
+            val completionIntent = Intent(this, MainActivity::class.java)
             val cancelIntent = Intent(this, LoginActivity::class.java)
             cancelIntent.putExtra(EXTRA_FAILED, true)
             cancelIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP

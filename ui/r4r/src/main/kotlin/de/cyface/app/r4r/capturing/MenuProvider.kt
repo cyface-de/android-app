@@ -22,14 +22,19 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.annotation.MainThread
+import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
+import de.cyface.app.r4r.auth.AuthStateManager
+import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.uploader.exception.SynchronisationException
+import net.openid.appauth.AuthState
 
 /**
  * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
@@ -50,6 +55,11 @@ class MenuProvider(
      */
     private lateinit var emailIntent: Intent
 
+    /**
+     * The authorization state.
+     */
+    private lateinit var mStateManager: AuthStateManager
+
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.capturing, menu)
 
@@ -59,6 +69,9 @@ class MenuProvider(
             activity.getString(de.cyface.energy_settings.R.string.feedback_error_description),
             SUPPORT_EMAIL
         )
+
+        // Authorization
+        mStateManager = AuthStateManager.getInstance(activity)
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -98,7 +111,8 @@ class MenuProvider(
             }
             R.id.logout_item -> {
                 try {
-                    capturingService.removeAccount(capturingService.wiFiSurveyor.account.name)
+                    //FIXME: capturingService.removeAccount(capturingService.wiFiSurveyor.account.name)
+                    signOut()
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
@@ -110,5 +124,21 @@ class MenuProvider(
                 false
             }
         }
+    }
+
+    @MainThread
+    private fun signOut() {
+        // discard the authorization and token state, but retain the configuration and
+        // dynamic client registration (if applicable), to save from retrieving them again.
+        val currentState: AuthState = mStateManager.current
+        val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
+        if (currentState.lastRegistrationResponse != null) {
+            clearedState.update(currentState.lastRegistrationResponse)
+        }
+        mStateManager.replace(clearedState)
+        val mainIntent = Intent(activity, LoginActivity::class.java)
+        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        activity.startActivity(mainIntent)
+        activity.finish()
     }
 }
