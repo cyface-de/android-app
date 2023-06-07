@@ -27,6 +27,7 @@ import android.util.Log
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorRes
 import androidx.annotation.MainThread
@@ -36,6 +37,8 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.google.android.material.snackbar.Snackbar
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
+import de.cyface.synchronization.AuthStateManager
+import de.cyface.synchronization.Configuration
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -383,12 +386,13 @@ class LoginActivity : AppCompatActivity() {
     @Suppress("SameParameterValue")
     @MainThread
     private fun showSnackbar(message: String) {
-        Snackbar.make(
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        /*Snackbar.make(
             findViewById(R.id.container),
             message,
             Snackbar.LENGTH_SHORT
         )
-            .show()
+            .show()*/
     }
 
     @TargetApi(Build.VERSION_CODES.M)

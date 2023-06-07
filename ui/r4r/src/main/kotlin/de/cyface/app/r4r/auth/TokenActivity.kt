@@ -27,6 +27,8 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import de.cyface.app.r4r.R
+import de.cyface.synchronization.AuthStateManager
+import de.cyface.synchronization.Configuration
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException

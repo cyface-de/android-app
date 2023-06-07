@@ -23,12 +23,11 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.annotation.MainThread
-import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
-import de.cyface.app.r4r.auth.AuthStateManager
+import de.cyface.synchronization.AuthStateManager
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService

@@ -24,9 +24,12 @@ import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
+import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.preference.PreferenceManager
@@ -42,12 +45,13 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import de.cyface.app.r4r.auth.AuthStateManager
-import de.cyface.app.r4r.auth.Configuration
+import de.cyface.synchronization.AuthStateManager
+import de.cyface.synchronization.Configuration
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.databinding.ActivityMainBinding
+import de.cyface.app.r4r.utils.Constants
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
@@ -68,6 +72,7 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
@@ -206,7 +211,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            //FIXME: startSynchronization() - to disable endless loop after adding new auth flow
+            startSynchronization() //FIXME: disabled as this fails until accounts are created
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
@@ -595,7 +600,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             runOnUiThread { displayNotAuthorized(message) }
         } else {
             // This is called when the code exchange was successful (after user just logged in)
-            runOnUiThread { displayAuthorized("handleCodeExchangeResponse") }
+            // updateAccount() as we did in the pre-OAuth2 `LoginActivity.attemptLogin()` flow
+
+            // The CyfaceAuthenticator reads the credentials from the account so we store them there
+            updateAccount(this, "fixmeUser", "fixmeToken") // FIXME
+
+            runOnUiThread { displayAuthorized("code exchanged, account updated") }
         }
     }
 
@@ -688,6 +698,95 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(mainIntent)
         finish()
+    }
+
+    /**
+     * Updates the credentials
+     *
+     * @param context The [Context] required to add an [Account]
+     * @param login The username of the account
+     * @param password The password of the account
+     */
+    private fun updateAccount(context: Context, login: String, password: String) {
+        Validate.notEmpty(login)
+        Validate.notEmpty(password)
+        val accountManager = AccountManager.get(context)
+        val account = Account(login, ACCOUNT_TYPE)
+
+        // Update credentials if the account already exists
+        var accountUpdated = false
+        val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
+        for (existingAccount in existingAccounts) {
+            if (existingAccount == account) {
+                accountManager.setPassword(account, password) // FIXME: set exchange token?
+                accountUpdated = true
+                Log.d(TAG, "Updated existing account.")
+            }
+        }
+
+        // Add new account when it does not yet exist
+        if (!accountUpdated) {
+
+            // Delete unused Cyface accounts
+            for (existingAccount in existingAccounts) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    accountManager.removeAccountExplicitly(existingAccount)
+                } else {
+                    accountManager.removeAccount(account, null, null)
+                }
+                Log.d(TAG, "Removed existing account: $existingAccount")
+            }
+            createAccount(context, login, password)
+        }
+        Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
+    }
+
+    /**
+     * Creates a temporary `Account` which can only be used to check the credentials.
+     *
+     * **ATTENTION:** If the login is successful you need to use `WiFiSurveyor.makeAccountSyncable`
+     * to ensure the `WifiSurveyor` works as expected. We cannot inject the `WiFiSurveyor` as the
+     * [LoginActivity] is called by Android.
+     *
+     * @param context The current Android context (i.e. Activity or Service).
+     * @param username The username of the account to be created.
+     * @param password The password of the account to be created. May be null if a custom [CyfaceAuthenticator] is
+     * used instead of a LoginActivity to return tokens as in `MovebisDataCapturingService`.
+     */
+    private fun createAccount(
+        context: Context, username: String,
+        password: String
+    ) {
+        val accountManager = AccountManager.get(context)
+        val newAccount = Account(username, ACCOUNT_TYPE)
+        Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
+        Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
+        Log.v(de.cyface.synchronization.Constants.TAG, "New account added")
+        ContentResolver.setSyncAutomatically(newAccount, Constants.AUTHORITY, false)
+        // Synchronization can be disabled via {@link CyfaceDataCapturingService#setSyncEnabled}
+        ContentResolver.setIsSyncable(newAccount, Constants.AUTHORITY, 1)
+        // Do not use validateAccountFlags in production code as periodicSync flags are set async
+
+        // PeriodicSync and syncAutomatically is set dynamically by the {@link WifiSurveyor}
+    }
+
+    /**
+     * This method removes the existing account. This is useful as we add a temporary account to check
+     * the credentials but we have to remove it when the credentials are incorrect.
+     *
+     * This static method must be implemented as in the non-static `WiFiSurveyor.deleteAccount`.
+     * We cannot inject the `WiFiSurveyor` as the [LoginActivity] is called by Android.
+     *
+     * @param context The [Context] to get the [AccountManager]
+     * @param account the `Account` to be removed
+     */
+    private fun deleteAccount(context: Context, account: Account) {
+        ContentResolver.removePeriodicSync(account, Constants.AUTHORITY, Bundle.EMPTY)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
+            AccountManager.get(context).removeAccount(account, null, null)
+        } else {
+            AccountManager.get(context).removeAccountExplicitly(account)
+        }
     }
 
     @MainThread
