@@ -19,21 +19,29 @@
 package de.cyface.app.r4r.capturing
 
 import android.content.Intent
+import android.os.Handler
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
-import de.cyface.app.r4r.MainActivity
+import com.google.android.material.snackbar.Snackbar
+import de.cyface.app.r4r.MainActivity.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.app.r4r.R
-import de.cyface.synchronization.AuthStateManager
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
+import de.cyface.synchronization.AuthStateManager
+import de.cyface.synchronization.Configuration
 import de.cyface.uploader.exception.SynchronisationException
+import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.EndSessionRequest
 
 /**
  * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
@@ -55,9 +63,19 @@ class MenuProvider(
     private lateinit var emailIntent: Intent
 
     /**
+     * The service used for authorization.
+     */
+    private lateinit var mAuthService: AuthorizationService
+
+    /**
      * The authorization state.
      */
     private lateinit var mStateManager: AuthStateManager
+
+    /**
+     * The configuration of the OAuth 2 endpoint to authorize against.
+     */
+    private lateinit var mConfiguration: Configuration
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.capturing, menu)
@@ -70,7 +88,24 @@ class MenuProvider(
         )
 
         // Authorization
-        mStateManager = AuthStateManager.getInstance(activity)
+        val context = activity.applicationContext
+        mStateManager = AuthStateManager.getInstance(context)
+        //mExecutor = Executors.newSingleThreadExecutor()
+        mConfiguration = Configuration.getInstance(context)
+        val config = Configuration.getInstance(context)
+        if (config.hasConfigurationChanged()) {
+            // This happens when starting the app after a fresh installation
+            throw IllegalArgumentException("config changed (MenuProvider)")
+            //Toast.makeText(context, "Authentifizierung ist abgelaufen", Toast.LENGTH_SHORT).show()
+            //Handler().postDelayed({ signOut() }, 2000)
+            //return
+        }
+        mAuthService = AuthorizationService(
+            activity.applicationContext,
+            AppAuthConfiguration.Builder()
+                .setConnectionBuilder(config.connectionBuilder)
+                .build()
+        )
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -89,6 +124,7 @@ class MenuProvider(
                 }
                 true
             }
+
             R.id.feedback_item -> {
                 activity.startActivity(
                     Intent.createChooser(
@@ -98,27 +134,33 @@ class MenuProvider(
                 )
                 true
             }
+
             R.id.imprint_item -> {
                 val action = CapturingFragmentDirections.actionCapturingToImprint()
                 navController.navigate(action)
                 true
             }
+
             R.id.settings_item -> {
                 val action = CapturingFragmentDirections.actionCapturingToSettings()
                 navController.navigate(action)
                 true
             }
+
             R.id.logout_item -> {
                 try {
-                    //FIXME: capturingService.removeAccount(capturingService.wiFiSurveyor.account.name)
-                    signOut()
+                    Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
+                    // This inform the auth server that the user wants to end its session
+                    endSession()
+                    //signOut() // instead of `endSession()` to sign out softly for testing
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                (activity as MainActivity).startSynchronization()
+                //(activity as MainActivity).startSynchronization() FIXME: This is already done be endSession()
                 true
             }
+
             else -> {
                 false
             }
@@ -126,18 +168,24 @@ class MenuProvider(
     }
 
     @MainThread
-    private fun signOut() {
-        // discard the authorization and token state, but retain the configuration and
-        // dynamic client registration (if applicable), to save from retrieving them again.
+    private fun endSession() {
         val currentState: AuthState = mStateManager.current
-        val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
-        if (currentState.lastRegistrationResponse != null) {
-            clearedState.update(currentState.lastRegistrationResponse)
+        val config: AuthorizationServiceConfiguration =
+            currentState.authorizationServiceConfiguration!!
+        if (config.endSessionEndpoint != null) {
+            val endSessionIntent: Intent = mAuthService.getEndSessionRequestIntent(
+                EndSessionRequest.Builder(config)
+                    .setIdTokenHint(currentState.idToken)
+                    .setPostLogoutRedirectUri(mConfiguration.endSessionRedirectUri)
+                    .build()
+            )
+            // This opens a browser window to inform the auth server that the user wants to log out.
+            // The window closes after a split second and calls `MainActivity.onActivityResult`
+            // where `signOut()` is executed which also removes the account from the account manager.
+            activity.startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE)
+        } else {
+            throw IllegalStateException("Auth server does not provide an end session endpoint")
+            //signOut()
         }
-        mStateManager.replace(clearedState)
-        val mainIntent = Intent(activity, LoginActivity::class.java)
-        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        activity.startActivity(mainIntent)
-        activity.finish()
     }
 }

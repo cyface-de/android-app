@@ -27,6 +27,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
+import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.utils.SharedConstants.ACCEPTED_TERMS_KEY
 
@@ -76,7 +77,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
         preferences = PreferenceManager.getDefaultSharedPreferences(
             applicationContext
         )
-        callMainActivityIntent = Intent(this, MainActivity::class.java)
+        callMainActivityIntent = Intent(this, MainActivity/*LoginActivity*/::class.java)
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent)
             finish()

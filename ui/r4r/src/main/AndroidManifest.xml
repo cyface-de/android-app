@@ -74,25 +74,21 @@
       </intent-filter>
     </activity>
 
+    <!-- FIXME: we might open LoginActivity instead from notification, i.e. that one would need to be exported=true instead -->
+    <!-- See https://github.com/openid/AppAuth-Android/blob/master/app/AndroidManifest.xml
+    for more details on how to handle AppAuth redirects and app links. Activity is called by LoginActivity. -->
     <activity
       android:name=".MainActivity"
       android:exported="true"
       android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
     </activity>
 
-    <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
+    <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator FIXME: we might launch LoginActivity as default Activity which switches to MainActivity -->
     <activity
       android:name=".auth.LoginActivity"
       android:label="@string/title_activity_login"
       android:exported="false"
       android:launchMode="singleTask" /> <!-- when we switch back from Registration, see https://stackoverflow.com/a/45292292/5815054 -->
-
-    <!-- See https://github.com/openid/AppAuth-Android/blob/master/app/AndroidManifest.xml
-    for more details on how to handle AppAuth redirects and app links. Activity is called by LoginActivity. -->
-    <activity
-      android:name=".auth.TokenActivity"
-      android:windowSoftInputMode="stateHidden" >
-    </activity>
 
     <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
     <!-- But we replaced the Content Provider with a Stub Content provider. -->

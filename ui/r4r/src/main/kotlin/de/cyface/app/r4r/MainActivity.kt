@@ -45,8 +45,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import de.cyface.synchronization.AuthStateManager
-import de.cyface.synchronization.Configuration
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
@@ -71,6 +69,8 @@ import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
+import de.cyface.synchronization.AuthStateManager
+import de.cyface.synchronization.Configuration
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.WiFiSurveyor
@@ -83,9 +83,7 @@ import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
-import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientAuthentication
-import net.openid.appauth.EndSessionRequest
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
 import java.io.IOException
@@ -128,7 +126,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * The service used for authorization.
      */
-    private lateinit var mAuthService: AuthorizationService
+    private var mAuthService: AuthorizationService? = null
 
     /**
      * The authorization state.
@@ -211,7 +209,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            startSynchronization() //FIXME: disabled as this fails until accounts are created
+            //startSynchronization() //FIXME: we do this in displayAuthorized() instead!
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
@@ -264,7 +262,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         val config = Configuration.getInstance(this)
         if (config.hasConfigurationChanged()) {
             show("Authentifizierung ist abgelaufen")
-            Handler().postDelayed({signOut()}, 2000)
+            Handler().postDelayed({ signOut(false) }, 2000)
             return
         }
         mAuthService = AuthorizationService(
@@ -280,7 +278,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
         // All good, user is authorized
         if (mStateManager.current.isAuthorized) {
-            //displayAuthorized()
+            displayAuthorized("onStart")
             return
         }
 
@@ -293,14 +291,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
         if (response?.authorizationCode != null) {
             // authorization code exchange is required
-            show("onStart: not authorized - exchange auth code")
             mStateManager.updateAfterAuthorization(response, ex)
             exchangeAuthorizationCode(response)
         } else if (ex != null) {
             displayNotAuthorized("Auth flow failed: " + ex.message)
         } else {
-            // This happens when the user is not logged in / logged out -> LoginActivity is called
-            displayNotAuthorized("No auth state retained - re-auth required")
+            // The user is not logged in / logged out -> LoginActivity is called
+            displayNotAuthorized("No auth state retained - re-auth required", false)
         }
     }
 
@@ -310,7 +307,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
         // Authorization
         if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Handler().postDelayed({signOut(); finish()}, 2000)
+            Handler().postDelayed({ signOut(true); finish() }, 2000)
         } else {
             displayEndSessionCancelled()
         }
@@ -348,7 +345,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
 
         // Authorization
-        mAuthService.dispose()
+        mAuthService?.dispose()
     }
 
     /**
@@ -458,9 +455,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     @MainThread
-    private fun displayNotAuthorized(explanation: String) {
-        show("unauthorized, logging out ... ($explanation)")
-        Handler().postDelayed({signOut()}, 2000)
+    private fun displayNotAuthorized(explanation: String, explain: Boolean = true) {
+        if (explain) {
+            show("unauthorized, logging out ... ($explanation)")
+            Handler().postDelayed({ signOut(false) }, 2000)
+        } else {
+            signOut(false)
+        }
     }
 
     @MainThread
@@ -470,7 +471,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     @MainThread
     private fun displayAuthorized(message: String) {
-        show("authorized ($message)")
+        Log.d(TAG, "authorized ($message)")
+        startSynchronization() // FIXME: here instead of onCreate
         val state = mStateManager.current
         //refreshTokenInfoView.text = if (state.refreshToken == null) "no_refresh_token_returned" else "refresh_token_returned"
         //idTokenInfoView.text = if (state.idToken == null) "no_id_token_returned" else "id_token_returned"
@@ -544,7 +546,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     @MainThread
     private fun exchangeAuthorizationCode(authorizationResponse: AuthorizationResponse) {
-        displayLoading("Exchanging authorization code")
+        Log.d(TAG, "Exchanging authorization code")
         performTokenRequest(
             authorizationResponse.createTokenExchangeRequest()
         ) { tokenResponse: TokenResponse?, authException: AuthorizationException? ->
@@ -570,7 +572,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             displayNotAuthorized("Client authentication method is unsupported")
             return
         }
-        mAuthService.performTokenRequest(
+        mAuthService!!.performTokenRequest(
             request,
             clientAuthentication,
             callback
@@ -603,7 +605,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             // updateAccount() as we did in the pre-OAuth2 `LoginActivity.attemptLogin()` flow
 
             // The CyfaceAuthenticator reads the credentials from the account so we store them there
-            updateAccount(this, "fixmeUser", "fixmeToken") // FIXME
+            val username =
+                mStateManager.current.parsedIdToken!!.additionalClaims["preferred_username"].toString()
+            val accessToken = mStateManager.current.accessToken.toString()
+            val refreshToken = mStateManager.current.refreshToken.toString()
+            updateAccount(this, username, accessToken, refreshToken)
 
             runOnUiThread { displayAuthorized("code exchanged, account updated") }
         }
@@ -618,7 +624,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private fun fetchUserInfo() {
         displayLoading("Fetching user info")
         mStateManager.current.performActionWithFreshTokens(
-            mAuthService
+            mAuthService!!
         ) { accessToken: String?, idToken: String?, ex: AuthorizationException? ->
             this.fetchUserInfo(
                 accessToken!!,
@@ -666,34 +672,35 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         show("Sign out canceled")
     }
 
+    /**
+     * When the user explicitly wants to sign out, we need to send an `endSession` request to the
+     * auth server, see `MenuProvider.logout`.
+     *
+     * Here we only want to clear the local data about the current session, when something changes.
+     */
     @MainThread
-    private fun endSession() {
-        val currentState: AuthState = mStateManager.current
-        val config: AuthorizationServiceConfiguration =
-            currentState.authorizationServiceConfiguration!!
-        if (config.endSessionEndpoint != null) {
-            val endSessionIntent: Intent = mAuthService.getEndSessionRequestIntent(
-                EndSessionRequest.Builder(config)
-                    .setIdTokenHint(currentState.idToken)
-                    .setPostLogoutRedirectUri(mConfiguration.endSessionRedirectUri)
-                    .build()
-            )
-            startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE)
-        } else {
-            signOut()
-        }
-    }
-
-    @MainThread
-    private fun signOut() {
+    private fun signOut(removeAccount: Boolean = false) {
         // discard the authorization and token state, but retain the configuration and
         // dynamic client registration (if applicable), to save from retrieving them again.
         val currentState: AuthState = mStateManager.current
-        val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
-        if (currentState.lastRegistrationResponse != null) {
-            clearedState.update(currentState.lastRegistrationResponse)
+        // FIXME: Is null when the app is freshly started and no configuration exists, yet
+        // but only when we use the flow: MainActivity -> ...
+        if (currentState.authorizationServiceConfiguration != null) {
+            // Replace the state with a fresh `AuthState`
+            val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
+            if (currentState.lastRegistrationResponse != null) {
+                clearedState.update(currentState.lastRegistrationResponse)
+            }
+            mStateManager.replace(clearedState)
         }
-        mStateManager.replace(clearedState)
+
+        // E.g. `MainActivity.onStart()` calls `signOut()` when the user is already signed out
+        // so there is no account to be removed.
+        if (removeAccount) {
+            // Also remove account from account manager
+            capturing.removeAccount(capturing.wiFiSurveyor.account.name)
+        }
+
         val mainIntent = Intent(this, LoginActivity::class.java)
         mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(mainIntent)
@@ -704,21 +711,29 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * Updates the credentials
      *
      * @param context The [Context] required to add an [Account]
-     * @param login The username of the account
-     * @param password The password of the account
+     * @param username The username of the account
+     * @param accessToken The token to generate new tokens
+     * @param accessToken The token to access user data
      */
-    private fun updateAccount(context: Context, login: String, password: String) {
-        Validate.notEmpty(login)
-        Validate.notEmpty(password)
+    private fun updateAccount(
+        context: Context,
+        username: String,
+        accessToken: String,
+        refreshToken: String
+    ) {
+        Validate.notEmpty(username)
+        Validate.notEmpty(accessToken)
+        Validate.notEmpty(refreshToken)
         val accountManager = AccountManager.get(context)
-        val account = Account(login, ACCOUNT_TYPE)
+        val account = Account(username, ACCOUNT_TYPE)
 
         // Update credentials if the account already exists
         var accountUpdated = false
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
         for (existingAccount in existingAccounts) {
             if (existingAccount == account) {
-                accountManager.setPassword(account, password) // FIXME: set exchange token?
+                accountManager.setUserData(account, "refresh_token", refreshToken)
+                accountManager.setAuthToken(account, AUTH_TOKEN_TYPE, accessToken)
                 accountUpdated = true
                 Log.d(TAG, "Updated existing account.")
             }
@@ -736,7 +751,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 }
                 Log.d(TAG, "Removed existing account: $existingAccount")
             }
-            createAccount(context, login, password)
+            createAccount(context, username, accessToken, refreshToken)
         }
         Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
     }
@@ -750,16 +765,25 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      *
      * @param context The current Android context (i.e. Activity or Service).
      * @param username The username of the account to be created.
+     * @param accessToken The token to generate new tokens
+     * @param accessToken The token to access user data
      * @param password The password of the account to be created. May be null if a custom [CyfaceAuthenticator] is
      * used instead of a LoginActivity to return tokens as in `MovebisDataCapturingService`.
      */
     private fun createAccount(
-        context: Context, username: String,
-        password: String
+        context: Context,
+        username: String,
+        accessToken: String,
+        refreshToken: String
     ) {
         val accountManager = AccountManager.get(context)
         val newAccount = Account(username, ACCOUNT_TYPE)
-        Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
+        val userData = Bundle()
+        userData.putString("refresh_token", refreshToken)
+        // As we use OAuth2 the password is not known to this client and is set to `null`.
+        // The same occurs in alternative Authenticators such as in `MovebisDataCapturingService`.
+        Validate.isTrue(accountManager.addAccountExplicitly(newAccount, null, userData))
+        accountManager.setAuthToken(newAccount, AUTH_TOKEN_TYPE, accessToken)
         Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
         Log.v(de.cyface.synchronization.Constants.TAG, "New account added")
         ContentResolver.setSyncAutomatically(newAccount, Constants.AUTHORITY, false)
@@ -801,6 +825,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     companion object {
-        private const val END_SESSION_REQUEST_CODE = 911
+        public const val END_SESSION_REQUEST_CODE = 911
     }
 }

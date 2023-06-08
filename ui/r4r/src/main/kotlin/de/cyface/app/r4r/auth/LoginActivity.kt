@@ -34,7 +34,6 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
-import com.google.android.material.snackbar.Snackbar
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.synchronization.AuthStateManager
@@ -101,8 +100,8 @@ class LoginActivity : AppCompatActivity() {
             // we can't forward to `MainActivity` just like that as this would lead to a loop.
             //Log.i(TAG, "User is already authenticated, processing to token activity")
             Log.e(TAG, "User is already authenticated")
-            showSnackbar("User is already authenticated")
-            //startActivity(Intent(this, MainActivity::class.java))
+            show("User is already authenticated")
+            //startActivity(Intent(this, MainActivity::class.java)) // FIXME: only if we stick with the flow LoginActivity -> MainActivity
             finish()
             return
         }
@@ -123,7 +122,7 @@ class LoginActivity : AppCompatActivity() {
             mConfiguration.acceptConfiguration()
         }
         if (intent.getBooleanExtra(EXTRA_FAILED, false)) {
-            showSnackbar("Authorization canceled")
+            show("Authorization canceled")
         }
         displayLoading("Initializing")
         mExecutor.submit { initializeAppAuth() }
@@ -153,11 +152,14 @@ class LoginActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         displayAuthOptions()
         if (resultCode == RESULT_CANCELED) {
-            showSnackbar("Authorization canceled")
+            show("Authorization canceled")
         } else {
+            show("Logging in ...")
+            //Toast.makeText(applicationContext, "Logging in ...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtras(data!!.extras!!)
             startActivity(intent)
+            finish() // FIXME added because of our workflow
         }
     }
 
@@ -385,7 +387,7 @@ class LoginActivity : AppCompatActivity() {
 
     @Suppress("SameParameterValue")
     @MainThread
-    private fun showSnackbar(message: String) {
+    private fun show(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         /*Snackbar.make(
             findViewById(R.id.container),
