@@ -47,6 +47,8 @@ hCaptcha.key.r4r=
 
 cyface.demo_api=
 cyface.local_api=
+cyface.local_auth_api=
+cyface.local_incentives_api=
 cyface.emulator_api=
 
 cyface.staging_api=

@@ -45,6 +45,7 @@
   <!-- allowBackup=false as we did not yet define what we really want to backup-->
   <!-- usesCleartextTraffic only API 23+, ignored below. only for debugging -->
   <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
+  <!-- tools:replace="android:usesCleartextTraffic" required when testing against local collector -->
   <application
     android:name=".Application"
     android:allowBackup="false"

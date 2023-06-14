@@ -138,8 +138,9 @@ class MarkerFragment : Fragment() {
 
         val markers = if (eventPassed()) emptyList() else arrayListOf(
             // Schkeuditz
+            // FIXME: Start/Ziel: Stand am Stadtfest: 51.39554154202172, 12.223122188347885
             MarkerOptions()
-                .position(LatLng(51.39877, 12.20104)).title("Station: Nähe Globana"),
+                .position(LatLng(51.39877, 12.20104)).title("Station: Nähe Globana"), // FIXME: ändere Globana auf 51.39874, 12.20011
             MarkerOptions()
                 .position(LatLng(51.38995, 12.22101)).title("Station: Stadtmuseum"),
             MarkerOptions()
@@ -147,6 +148,7 @@ class MarkerFragment : Fragment() {
             MarkerOptions()
                 .position(LatLng(51.40696, 12.22106)).title("Station: Fußballfeld"),
             // Köthen
+            // FIXME: Start/Ziel Köthen: 51.751117, 11.973984 "Marktplatz Köthen"
             MarkerOptions()
                 .position(LatLng(51.751117, 11.973984)).title("Start und Ziel: Marktplatz Köthen"),
             MarkerOptions()

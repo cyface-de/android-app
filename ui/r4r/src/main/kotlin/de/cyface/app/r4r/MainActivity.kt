@@ -368,7 +368,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             return
         }
 
-        // The LoginActivity is called by Android which handles the account creation
+        // The LoginActivity is called by Android which handles the account creation (authentication)
         Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
             ACCOUNT_TYPE,
@@ -613,59 +613,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
             runOnUiThread { displayAuthorized("code exchanged, account updated") }
         }
-    }
-
-    /**
-     * Demonstrates the use of [AuthState.performActionWithFreshTokens] to retrieve
-     * user info from the IDP's user info endpoint. This callback will negotiate a new access
-     * token / id token for use in a follow-up action, or provide an error if this fails.
-     */
-    @MainThread
-    private fun fetchUserInfo() {
-        displayLoading("Fetching user info")
-        mStateManager.current.performActionWithFreshTokens(
-            mAuthService!!
-        ) { accessToken: String?, idToken: String?, ex: AuthorizationException? ->
-            this.fetchUserInfo(
-                accessToken!!,
-                idToken!!,
-                ex
-            )
-        }
-    }
-
-    @MainThread
-    private fun fetchUserInfo(accessToken: String, idToken: String, ex: AuthorizationException?) {
-        if (ex != null) {
-            Log.e(TAG, "Token refresh failed when fetching user info")
-            //mUserInfoJson.set(null)
-            runOnUiThread { displayAuthorized("fetchUserInfo") }
-            return
-        }
-        val discovery = mStateManager.current
-            .authorizationServiceConfiguration!!.discoveryDoc
-        val userInfoEndpoint = if (mConfiguration.userInfoEndpointUri != null) Uri.parse(
-            mConfiguration.userInfoEndpointUri.toString()
-        ) else Uri.parse(discovery!!.userinfoEndpoint.toString())
-        /*mExecutor.submit {
-            try {
-                val conn = mConfiguration.connectionBuilder.openConnection(
-                    userInfoEndpoint
-                )
-                conn.setRequestProperty("Authorization", "Bearer $accessToken")
-                conn.instanceFollowRedirects = false
-                val response: String = conn.inputStream.source().buffer()
-                    .readString(Charset.forName("UTF-8"))
-                mUserInfoJson.set(JSONObject(response))
-            } catch (ioEx: IOException) {
-                Log.e(TAG, "Network error when querying userinfo endpoint", ioEx)
-                showSnackbar("Fetching user info failed")
-            } catch (jsonEx: JSONException) {
-                Log.e(TAG, "Failed to parse userinfo response")
-                showSnackbar("Failed to parse user info")
-            }
-            runOnUiThread { displayAuthorized() }
-        }*/
     }
 
     private fun displayEndSessionCancelled() {

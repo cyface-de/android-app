@@ -128,6 +128,10 @@ dependencies {
     // Http Requests
     implementation "com.android.volley:volley:$rootProject.ext.volleyVersion"
 
+    // OAuth 2.0 with OpenID Connect
+    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion"
+    implementation "com.squareup.okio:okio:$rootProject.ext.okioVersion" // FIXME: replace config file
+
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
     implementation project(':datacapturing')

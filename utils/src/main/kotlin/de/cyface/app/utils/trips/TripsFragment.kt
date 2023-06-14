@@ -31,6 +31,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.View.resolveSizeAndState
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -41,6 +42,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.volley.NetworkError
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.TAG
@@ -49,9 +51,6 @@ import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.model.Measurement
-import de.cyface.synchronization.CyfaceAuthenticator
-import de.cyface.synchronization.SyncService
-import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.utils.Validate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -59,6 +58,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.Double.min
 import java.lang.ref.WeakReference
+import java.net.ConnectException
+import java.net.UnknownHostException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -101,7 +102,7 @@ class TripsFragment : Fragment() {
      * defined by E-Mail from Matthias Koss, 23.05.23
      */
     @Suppress("SpellCheckingInspection")
-    private val distanceGoalKm = 15.0
+    private val distanceGoalKm = 0.0 // FIXME
 
     /**
      * The API to get the voucher data from or `null` when no such things show be shown to the user.
@@ -127,7 +128,7 @@ class TripsFragment : Fragment() {
                 } else {
                     Toast.makeText(
                         context,
-                        requireContext().getString(de.cyface.app.utils.R.string.export_data_no_permission),
+                        requireContext().getString(R.string.export_data_no_permission),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -143,15 +144,12 @@ class TripsFragment : Fragment() {
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
-        val authApi = authApi(requireContext())
-        val authenticator = DefaultAuthenticator(authApi)
 
         // Load incentivesUrl - only send requests in RFR app
         val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
         if (rfr) {
             val incentivesApi = incentivesApi(requireContext())
-            this.incentives =
-                Incentives(CyfaceAuthenticator(requireContext(), authenticator), incentivesApi)
+            this.incentives = Incentives(requireContext(), incentivesApi)
         }
     }
 
@@ -214,6 +212,21 @@ class TripsFragment : Fragment() {
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
+                                // FIXME: Report to Sentry, to add error handling later
+                            },
+                            {
+                                // FIXME: handle refresh token error, e.g. when server is not reachable
+                                var reason = "Authentifizierung fehlgeschlagen: ${it.message}"
+                                if (it.cause is UnknownHostException || it.cause is ConnectException) {
+                                    reason = "Server nicht erreichbar." // e.g. device is offline
+                                } else {
+                                    // FIXME: Report to Sentry, to add error handling later
+                                }
+                                Toast.makeText(
+                                    context,
+                                    reason,
+                                    Toast.LENGTH_LONG
+                                ).show()
                             })
                     } catch (e: Exception) {
                         Handler(Looper.getMainLooper()).post {
@@ -224,6 +237,7 @@ class TripsFragment : Fragment() {
                             ).show()
                         }
                         Log.e(TAG, "availableVouchers crashed", e)
+                        // FIXME: Report to Sentry, to add error handling later
                     }
                 }
             }
@@ -294,22 +308,6 @@ class TripsFragment : Fragment() {
     }
 
     /**
-     * Reads the Auth URL from the preferences.
-     *
-     * @param context The `Context` required to read the preferences
-     * @return The URL as string
-     */
-    private fun authApi(context: Context): String {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val apiEndpoint = preferences.getString(SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
-        Validate.notNull(
-            apiEndpoint,
-            "TripsFragment: Auth url not available. Please set the applications server url preference."
-        )
-        return apiEndpoint!!
-    }
-
-    /**
      * Reads the Incentives API URL from the preferences.
      *
      * @param context The `Context` required to read the preferences
@@ -363,6 +361,21 @@ class TripsFragment : Fragment() {
                         "Gutscheinanfrage fehlgeschlagen: ${it.message}",
                         Toast.LENGTH_LONG
                     ).show()
+                    // FIXME: Report to Sentry, to add error handling later
+                },
+                {
+                    // FIXME: handle refresh token error, e.g. when server is not reachable
+                    var reason = "Authentifizierung fehlgeschlagen: ${it.message}"
+                    if (it.cause is UnknownHostException || it.cause is ConnectException) {
+                        reason = "Server nicht erreichbar." // e.g. device is offline
+                    } else {
+                        // FIXME: Report to Sentry, to add error handling later
+                    }
+                    Toast.makeText(
+                        context,
+                        reason,
+                        Toast.LENGTH_LONG
+                    ).show()
                 })
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
@@ -373,6 +386,7 @@ class TripsFragment : Fragment() {
                 ).show()
             }
             Log.e(TAG, "availableVouchers crashed", e)
+            // FIXME: Report to Sentry, to add error handling later
         }
     }
 
