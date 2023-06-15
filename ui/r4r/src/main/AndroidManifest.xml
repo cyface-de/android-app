@@ -54,6 +54,7 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:theme="@style/Theme.R4R"
     tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
+    tools:replace="android:usesCleartextTraffic"
     android:usesCleartextTraffic="${usesCleartextTraffic}">
     <!--tools:targetApi="31"> targetApi 31 was added by the generated code, not sure why -->
 

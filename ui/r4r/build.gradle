@@ -86,6 +86,8 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "authServer", "\"${project.findProperty('cyface.local_auth_api')}\""
+            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.local_incentives_api')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
