@@ -190,7 +190,7 @@ class LoginActivity : AppCompatActivity() {
         // if we are not using discovery, build the authorization service configuration directly
         // from the static configuration values.
         if (mConfiguration.discoveryUri == null) {
-            Log.i(TAG, "Creating auth config from res/raw/auth_config.json")
+            Log.i(TAG, "Creating auth config")
             val config = AuthorizationServiceConfiguration(
                 mConfiguration.authEndpointUri!!,
                 mConfiguration.tokenEndpointUri!!,

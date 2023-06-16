@@ -68,10 +68,13 @@ android {
             googleMapsApiKey:"${project.findProperty('google.maps_api_key.r4r')}",
 
             // Define app link scheme for AppAuth redirect
-            // Make sure this is consistent with the redirect URI used in res/raw/auth_config.json,
+            // Ensure this is consistent with the redirect URI defined below in `oauthRedirect`
             // or specify additional redirect URIs in AndroidManifest.xml
             'appAuthRedirectScheme': 'de.cyface.app.r4r'
         ]
+
+        // oauth redirect uri
+        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect')}\""
 
         // Load hCaptcha API key
         buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key.r4r')}\""
@@ -101,8 +104,8 @@ android {
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
-            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.staging_auth_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
+            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
@@ -119,8 +122,8 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
-            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
+            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }

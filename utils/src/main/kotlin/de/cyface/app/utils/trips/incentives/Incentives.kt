@@ -19,7 +19,6 @@
 package de.cyface.app.utils.trips.incentives
 
 import android.content.Context
-import android.os.Handler
 import com.android.volley.Response.ErrorListener
 import com.android.volley.Response.Listener
 import com.android.volley.toolbox.JsonObjectRequest
@@ -31,9 +30,7 @@ import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationService
 import org.json.JSONObject
-import java.lang.Exception
 import java.net.URL
-import java.util.function.Consumer
 
 /**
  * The API to get the voucher data from.
@@ -67,11 +64,11 @@ class Incentives(private val context: Context, private val apiEndpoint: String) 
         //mExecutor = Executors.newSingleThreadExecutor()
         mConfiguration = Configuration.getInstance(context)
         val config = Configuration.getInstance(context)
-        if (config.hasConfigurationChanged()) {
-            throw IllegalStateException("Authentifizierung ist abgelaufen")
+        /*if (config.hasConfigurationChanged()) {
+            throw IllegalStateException("config changed (Incentives)")
             //Handler().postDelayed({ signOut(false) }, 2000)
             //return
-        }
+        }*/
         mAuthService = AuthorizationService(
             context,
             AppAuthConfiguration.Builder()

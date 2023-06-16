@@ -28,7 +28,6 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -86,6 +85,7 @@ import net.openid.appauth.AuthorizationService
 import net.openid.appauth.ClientAuthentication
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
+import org.json.JSONObject
 import java.io.IOException
 
 /**
@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 AUTHORITY,
                 ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
-                BuildConfig.authServer,
+                oauthConfig(),
                 CapturingEventHandler(),
                 unInterestedListener,
                 DEFAULT_SENSOR_FREQUENCY
@@ -260,17 +260,28 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         //mExecutor = Executors.newSingleThreadExecutor()
         mConfiguration = Configuration.getInstance(this)
         val config = Configuration.getInstance(this)
-        if (config.hasConfigurationChanged()) {
-            show("Authentifizierung ist abgelaufen")
-            Handler().postDelayed({ signOut(false) }, 2000)
-            return
-        }
+        //if (config.hasConfigurationChanged()) {
+            //show("Authentifizierung ist abgelaufen (Konfigurationsänderung)")
+            // FIXME: This is normal after a fresh installation to open the login screen
+            //Handler().postDelayed({ signOut(false) }, 2000)
+            //return
+        //}
         mAuthService = AuthorizationService(
             this,
             AppAuthConfiguration.Builder()
                 .setConnectionBuilder(config.connectionBuilder)
                 .build()
         )
+    }
+
+    private fun oauthConfig(): JSONObject {
+        return JSONObject()
+            .put("client_id", "android-app")
+            .put("redirect_uri", BuildConfig.oauthRedirect)
+            .put("end_session_redirect_uri", BuildConfig.oauthRedirect)
+            .put("authorization_scope", "openid email profile")
+            .put("discovery_uri", BuildConfig.oauthDiscovery)
+            .put("https_required", true)
     }
 
     override fun onStart() {

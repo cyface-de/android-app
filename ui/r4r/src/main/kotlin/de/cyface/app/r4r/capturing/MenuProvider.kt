@@ -19,7 +19,6 @@
 package de.cyface.app.r4r.capturing
 
 import android.content.Intent
-import android.os.Handler
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -27,10 +26,8 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
-import com.google.android.material.snackbar.Snackbar
 import de.cyface.app.r4r.MainActivity.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.app.r4r.R
-import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
@@ -93,13 +90,13 @@ class MenuProvider(
         //mExecutor = Executors.newSingleThreadExecutor()
         mConfiguration = Configuration.getInstance(context)
         val config = Configuration.getInstance(context)
-        if (config.hasConfigurationChanged()) {
+        /*if (config.hasConfigurationChanged()) {
             // This happens when starting the app after a fresh installation
-            throw IllegalArgumentException("config changed (MenuProvider)")
-            //Toast.makeText(context, "Authentifizierung ist abgelaufen", Toast.LENGTH_SHORT).show()
+            //throw IllegalArgumentException("config changed (MenuProvider)")
+            Toast.makeText(context, "Ignoring: config changed (SyncAdapter)", Toast.LENGTH_SHORT).show()
             //Handler().postDelayed({ signOut() }, 2000)
             //return
-        }
+        }*/
         mAuthService = AuthorizationService(
             activity.applicationContext,
             AppAuthConfiguration.Builder()

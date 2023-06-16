@@ -37,10 +37,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textview.MaterialTextView
-import de.cyface.app.BuildConfig
 import de.cyface.app.MeasuringClient.Companion.errorHandler
-import de.cyface.app.R
-import de.cyface.app.RegistrationActivity
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.TAG
@@ -48,7 +45,7 @@ import de.cyface.app.utils.SharedConstants
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
-import de.cyface.synchronization.SyncService.AUTH_ENDPOINT_URL_SETTINGS_KEY
+import de.cyface.synchronization.SyncService.OAUTH_CONFIG_SETTINGS_KEY
 import de.cyface.uploader.DefaultAuthenticator
 import de.cyface.utils.Validate
 import io.sentry.Sentry
@@ -184,7 +181,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
             // Load authUrl
             val preferences = PreferenceManager.getDefaultSharedPreferences(context.get())
-            val url = preferences.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+            val url = preferences.getString(OAUTH_CONFIG_SETTINGS_KEY, null)
                 ?: throw IllegalStateException(
                     "Server url not available. Please set the applications server url preference."
                 )
@@ -331,7 +328,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
      * effect.
      */
     private fun setServerUrl() {
-        val storedServer = preferences!!.getString(AUTH_ENDPOINT_URL_SETTINGS_KEY, null)
+        val storedServer = preferences!!.getString(OAUTH_CONFIG_SETTINGS_KEY, null)
         val server = BuildConfig.authServer
         @Suppress("KotlinConstantConditions")
         Validate.isTrue(server != "null")
@@ -341,7 +338,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 "Updating Cyface Auth API URL from " + storedServer + "to" + server
             )
             val editor = preferences!!.edit()
-            editor.putString(AUTH_ENDPOINT_URL_SETTINGS_KEY, server)
+            editor.putString(OAUTH_CONFIG_SETTINGS_KEY, server)
             editor.apply()
         }
     }

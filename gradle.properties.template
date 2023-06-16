@@ -35,15 +35,21 @@ android.enableJetifier=false
 githubUser=
 githubToken=
 
-cyface.api=
-cyface.auth_api=
-cyface.incentives_api=
-
 google.maps_api_key=
 google.maps-api_key.r4r=
 
 hCaptcha.key=
 hCaptcha.key.r4r=
+
+cyface.oauth_redirect=
+
+# api/v4 (rfr)
+cyface.api=
+cyface.incentives_api=
+cyface.oauth_discovery=
+# api/v3 (cy)
+cyface.api_v3
+cyface.auth_api_v3=
 
 cyface.demo_api=
 cyface.local_api=
@@ -51,10 +57,14 @@ cyface.local_auth_api=
 cyface.local_incentives_api=
 cyface.emulator_api=
 
+# api/v4 (rfr)
 cyface.staging_api=
-cyface.staging_auth_api=
 cyface.staging_incentives_api=
+cyface.staging_oauth_discovery=
 cyface.staging_user=
 cyface.staging_password=
+# api/v3 (cy)
+cyface.staging_api_v3=
+cyface.staging_auth_api_v3=
 
 # keep an empty line at the end for the CI to inject new lines easily
