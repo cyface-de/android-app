@@ -213,7 +213,6 @@ dependencies {
 
     // OAuth 2.0 with OpenID Connect
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion"
-    implementation "com.squareup.okio:okio:$rootProject.ext.okioVersion" // FIXME: replace config file
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

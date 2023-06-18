@@ -70,8 +70,16 @@ android {
         missingDimensionStrategy 'project', 'cyface'
         missingDimensionStrategy 'mode', 'full'
 
-        // Load Google Maps API key
-        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
+        // Placeholders for AndroidManifest.xml
+        manifestPlaceholders = [
+                // Load Google Maps API key
+                googleMapsApiKey:"${project.findProperty('google.maps_api_key')}",
+
+                // Define app link scheme for AppAuth redirect
+                // Ensure this is consistent with the redirect URI defined below in `oauthRedirect`
+                // or specify additional redirect URIs in AndroidManifest.xml
+                'appAuthRedirectScheme': 'de.cyface.app'
+        ]
 
         // Load hCaptcha API key
         buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key')}\""
@@ -204,6 +212,9 @@ dependencies {
 
     // HCaptcha
     implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
+
+    // OAuth 2.0 with OpenID Connect
+    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

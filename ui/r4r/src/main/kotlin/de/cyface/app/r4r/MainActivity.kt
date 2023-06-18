@@ -256,18 +256,17 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         setIncentivesServerUrl()
 
         // Authorization
-        mStateManager = AuthStateManager.getInstance(this)
-        //mExecutor = Executors.newSingleThreadExecutor()
-        mConfiguration = Configuration.getInstance(this)
-        val config = Configuration.getInstance(this)
-        //if (config.hasConfigurationChanged()) {
-            //show("Authentifizierung ist abgelaufen (Konfigurationsänderung)")
-            // FIXME: This is normal after a fresh installation to open the login screen
-            //Handler().postDelayed({ signOut(false) }, 2000)
+        mStateManager = AuthStateManager.getInstance(applicationContext)
+        mConfiguration = Configuration.getInstance(applicationContext)
+        val config = Configuration.getInstance(applicationContext)
+        /*if (config.hasConfigurationChanged()) {
+            //throw IllegalArgumentException("config changed (SyncAdapter)")
+            Toast.makeText(context, "Ignoring: config changed (SyncAdapter)", Toast.LENGTH_SHORT).show()
+            //Handler().postDelayed({signOut()}, 2000)
             //return
-        //}
+        }*/
         mAuthService = AuthorizationService(
-            this,
+            applicationContext,
             AppAuthConfiguration.Builder()
                 .setConnectionBuilder(config.connectionBuilder)
                 .build()

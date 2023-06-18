@@ -77,7 +77,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
         preferences = PreferenceManager.getDefaultSharedPreferences(
             applicationContext
         )
-        callMainActivityIntent = Intent(this, MainActivity/*LoginActivity*/::class.java)
+        callMainActivityIntent = Intent(this, MainActivity::class.java)
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent)
             finish()
