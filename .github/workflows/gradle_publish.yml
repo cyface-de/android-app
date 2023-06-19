@@ -51,7 +51,11 @@ jobs:
           echo "githubToken=${{ secrets.GITHUB_TOKEN }}" >> gradle.properties
           # Inject Cyface APIs URL
           echo "cyface.api=${{ secrets.PUBLIC_API }}" >> gradle.properties
-          echo "cyface.auth_api=${{ secrets.PUBLIC_AUTH_API }}" >> gradle.properties
+          echo "cyface.incentives_api=${{ secrets.PUBLIC_INCENTIVES_API }}" >> gradle.properties
+          echo "cyface.oauth_discovery=${{ secrets.PUBLIC_OAUTH_DISCOVERY }}" >> gradle.properties
+          # Inject OAuth redirect URIs
+          echo "cyface.oauth_redirect=de.cyface.app:/oauth2redirect" >> gradle.properties
+          echo "cyface.oauth_redirect.r4r=de.cyface.app.r4r:/oauth2redirect" >>gradle.properties
           # Inject Google Maps API key
           echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> gradle.properties
           echo "google.maps_api_key.r4r=${{ secrets.GOOGLE_MAPS_KEY_R4R }}" >> gradle.properties
