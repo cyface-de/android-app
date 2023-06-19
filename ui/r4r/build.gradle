@@ -74,7 +74,7 @@ android {
         ]
 
         // oauth redirect uri
-        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect')}\""
+        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect.r4r')}\""
 
         // Load hCaptcha API key
         buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key.r4r')}\""

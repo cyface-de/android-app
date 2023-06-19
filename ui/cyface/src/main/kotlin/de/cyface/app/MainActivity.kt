@@ -196,8 +196,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         try {
             capturing = CyfaceDataCapturingService(
                 this.applicationContext,
-                Constants.AUTHORITY,
-                Constants.ACCOUNT_TYPE,
+                AUTHORITY,
+                ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
                 OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery),
                 DataCapturingEventHandler(),
@@ -350,7 +350,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         // The LoginActivity is called by Android which handles the account creation (authentication)
         Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
-            Constants.ACCOUNT_TYPE,
+            ACCOUNT_TYPE,
             de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE,
             null,
             null,
@@ -363,7 +363,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
 
                     // The LoginActivity created a temporary account which cannot be used for synchronization.
                     // As the login was successful we now register the account correctly:
-                    val account = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)[0]
+                    val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
@@ -381,7 +381,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {
                     // Remove temp account when LoginActivity is closed during login [CY-5087]
-                    val accounts = accountManager1.getAccountsByType(Constants.ACCOUNT_TYPE)
+                    val accounts = accountManager1.getAccountsByType(ACCOUNT_TYPE)
                     if (accounts.isNotEmpty()) {
                         val account = accounts[0]
                         accountManager1.removeAccount(account, null, null)
@@ -537,7 +537,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
          */
         @JvmStatic
         fun accountWithTokenExists(accountManager: AccountManager): Boolean {
-            val existingAccounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE)
+            val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
             Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
             return existingAccounts.isNotEmpty()
         }
