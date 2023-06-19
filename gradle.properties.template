@@ -31,13 +31,11 @@ android.nonTransitiveRClass=true
 
 android.builder.sdkDownload=true
 android.enableJetifier=false
+android.defaults.buildfeatures.buildconfig=true
+android.nonFinalResIds=false
 
 githubUser=
 githubToken=
-
-cyface.api=
-cyface.auth_api=
-cyface.incentives_api=
 
 google.maps_api_key=
 google.maps-api_key.r4r=
@@ -45,14 +43,29 @@ google.maps-api_key.r4r=
 hCaptcha.key=
 hCaptcha.key.r4r=
 
-cyface.demo_api=
-cyface.local_api=
-cyface.emulator_api=
+cyface.oauth_redirect=
+cyface.oauth_redirect.r4r=
+
+cyface.api=
+cyface.incentives_api=
+cyface.oauth_discovery=
 
 cyface.staging_api=
-cyface.staging_auth_api=
 cyface.staging_incentives_api=
+cyface.staging_oauth_discovery=
 cyface.staging_user=
 cyface.staging_password=
+
+cyface.demo_api=
+cyface.demo_incentives_api=
+cyface.demo_oauth_discovery=
+
+cyface.local_api=
+cyface.local_incentives_api=
+cyface.local_oauth_discovery=
+
+cyface.emulator_api=
+cyface.emulator_incentives_api=
+cyface.emulator_oauth_discovery=
 
 # keep an empty line at the end for the CI to inject new lines easily

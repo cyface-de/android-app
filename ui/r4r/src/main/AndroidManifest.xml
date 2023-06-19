@@ -45,6 +45,7 @@
   <!-- allowBackup=false as we did not yet define what we really want to backup-->
   <!-- usesCleartextTraffic only API 23+, ignored below. only for debugging -->
   <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
+  <!-- tools:replace="android:usesCleartextTraffic" required when testing against local collector -->
   <application
     android:name=".Application"
     android:allowBackup="false"
@@ -53,6 +54,7 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:theme="@style/Theme.R4R"
     tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
+    tools:replace="android:usesCleartextTraffic"
     android:usesCleartextTraffic="${usesCleartextTraffic}">
     <!--tools:targetApi="31"> targetApi 31 was added by the generated code, not sure why -->
 
@@ -74,6 +76,8 @@
       </intent-filter>
     </activity>
 
+    <!-- See https://github.com/openid/AppAuth-Android/blob/master/app/AndroidManifest.xml
+    for more details on how to handle AppAuth redirects and app links. Activity is called by LoginActivity. -->
     <activity
       android:name=".MainActivity"
       android:exported="true"
@@ -82,14 +86,10 @@
 
     <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
     <activity
-      android:name=".LoginActivity"
+      android:name=".auth.LoginActivity"
       android:label="@string/title_activity_login"
+      android:exported="false"
       android:launchMode="singleTask" /> <!-- when we switch back from Registration, see https://stackoverflow.com/a/45292292/5815054 -->
-
-    <!-- The RegistrationActivity can be launched via (on top of) the LoginActivity -->
-    <activity
-      android:name=".RegistrationActivity"
-      android:label="@string/sign_up" />
 
     <!-- This overwrites the provider in the SDK. This way the app can be installed next to other SDK using apps -->
     <!-- But we replaced the Content Provider with a Stub Content provider. -->

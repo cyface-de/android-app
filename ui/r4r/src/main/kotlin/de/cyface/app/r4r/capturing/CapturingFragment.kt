@@ -33,7 +33,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.core.view.MenuHost
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
@@ -44,6 +43,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
@@ -265,8 +265,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
             requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         requireActivity().addMenuProvider(
             MenuProvider(
-                capturing,
-                requireActivity(),
+                requireActivity() as MainActivity,
                 navHostFragment.navController
             ),
             viewLifecycleOwner,

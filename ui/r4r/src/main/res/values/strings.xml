@@ -7,4 +7,7 @@
 
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
+
+    <!-- Auth -->
+    <string name="custom_tab_label" translatable="false">"%1$s (custom tab)"</string>
 </resources>

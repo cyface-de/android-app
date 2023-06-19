@@ -70,8 +70,19 @@ android {
         missingDimensionStrategy 'project', 'cyface'
         missingDimensionStrategy 'mode', 'full'
 
-        // Load Google Maps API key
-        manifestPlaceholders = [ googleMapsApiKey:"${project.findProperty('google.maps_api_key')}"]
+        // Placeholders for AndroidManifest.xml
+        manifestPlaceholders = [
+                // Load Google Maps API key
+                googleMapsApiKey:"${project.findProperty('google.maps_api_key')}",
+
+                // Define app link scheme for AppAuth redirect
+                // Ensure this is consistent with the redirect URI defined below in `oauthRedirect`
+                // or specify additional redirect URIs in AndroidManifest.xml
+                'appAuthRedirectScheme': 'de.cyface.app'
+        ]
+
+        // oauth redirect uri
+        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect')}\""
 
         // Load hCaptcha API key
         buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key')}\""
@@ -86,26 +97,32 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
-            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.staging_auth_api')}\""
+            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
+            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
         }
         release {
@@ -116,7 +133,8 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
-            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api')}\""
+            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
+            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }
@@ -204,6 +222,9 @@ dependencies {
 
     // HCaptcha
     implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
+
+    // OAuth 2.0 with OpenID Connect
+    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

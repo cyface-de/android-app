@@ -22,12 +22,12 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.fragment.app.FragmentActivity
+import android.widget.Toast
+import androidx.annotation.MainThread
 import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
-import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.uploader.exception.SynchronisationException
 
@@ -36,12 +36,11 @@ import de.cyface.uploader.exception.SynchronisationException
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.2.0
  */
 class MenuProvider(
-    private val capturingService: CyfaceDataCapturingService,
-    private val activity: FragmentActivity,
+    private val activity: MainActivity,
     private val navController: NavController
 ) : androidx.core.view.MenuProvider {
 
@@ -77,6 +76,7 @@ class MenuProvider(
                 }
                 true
             }
+
             R.id.feedback_item -> {
                 activity.startActivity(
                     Intent.createChooser(
@@ -86,26 +86,35 @@ class MenuProvider(
                 )
                 true
             }
+
             R.id.imprint_item -> {
                 val action = CapturingFragmentDirections.actionCapturingToImprint()
                 navController.navigate(action)
                 true
             }
+
             R.id.settings_item -> {
                 val action = CapturingFragmentDirections.actionCapturingToSettings()
                 navController.navigate(action)
                 true
             }
-            R.id.logout_item -> {
+
+            /*R.id.logout_item -> {
                 try {
-                    capturingService.removeAccount(capturingService.wiFiSurveyor.account.name)
+                    Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
+                    // This inform the auth server that the user wants to end its session
+                    activity.auth.endSession(activity)
+                    //signOut() // instead of `endSession()` to sign out softly for testing
+                    activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.account.name)
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                (activity as MainActivity).startSynchronization()
+                // This is done by MainActivity.onActivityResult -> signOut()
+                //(activity as MainActivity).startSynchronization()
                 true
-            }
+            }*/
+
             else -> {
                 false
             }

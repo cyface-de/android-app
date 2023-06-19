@@ -34,6 +34,7 @@ import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -104,6 +105,7 @@ class CapturingNotificationTest {
      * This test is flaky on the Bitrise CI.
      */
     @Test
+    @Ignore("OAuth needs to be skipped [RFR-587]")
     fun test() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 

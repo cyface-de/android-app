@@ -48,9 +48,12 @@ jobs:
           echo "githubToken=${{ secrets.GH_READ_TOKEN }}" >> gradle.properties
           # This mock API accepts all credentials and allows the UI test to skip the login
           echo "cyface.staging_api=https://demo.cyface.de/api/v2" >> gradle.properties
-          echo "cyface.staging_auth_api=https://demo.cyface.de/api/v2" >> gradle.properties
+          echo "cyface.staging_incentives_api=https://demo.cyface.de/incentives" >> gradle.properties
+          echo "cyface.staging_oauth_discovery=https://demo.cyface.de/auth" >> gradle.properties
           echo "cyface.staging_user=guestLogin" >> gradle.properties
           echo "cyface.staging_password=guestPassword" >> gradle.properties
+          echo "cyface.oauth_redirect=de.cyface.app:/oauth2redirect" >> gradle.properties
+          echo "cyface.oauth_redirect.r4r=de.cyface.app.r4r:/oauth2redirect" >> gradle.properties
 
       # Executing build here on Ubuntu stack (1/10th costs of MacOS stack)
       # Not using "gradle build" as we don't want to run the tests of all dependencies (e.g. backend)

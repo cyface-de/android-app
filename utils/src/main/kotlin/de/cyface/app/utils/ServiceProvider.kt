@@ -19,15 +19,17 @@
 package de.cyface.app.utils
 
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import de.cyface.synchronization.Auth
 
 /**
  * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from
  * the `Fragments`.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 7.5.0
  */
 interface ServiceProvider {
     val capturing: CyfaceDataCapturingService
+    val auth: Auth
 }

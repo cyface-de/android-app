@@ -29,7 +29,7 @@ To download the Cyface libraries (SDK, Energy Settings, Camera Service):
 
 [arabic]
 * You need a Github account with read-access to these Github repositories
-* Create a https://github.com/settings/tokens[personal access token on Github] with "write:packages" permissions
+* Create a https://github.com/settings/tokens[personal access token on Github] with `read:packages` and `repo` permissions to download the sub-modules and `android-publish` dependency.
 * Copy `gradle.properties.template` to `gradle.properties` and adjust:
 +
 ....

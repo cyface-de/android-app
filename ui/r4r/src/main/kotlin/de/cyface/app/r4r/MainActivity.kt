@@ -23,11 +23,16 @@ import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
+import android.app.Activity
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
@@ -35,9 +40,10 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import de.cyface.app.r4r.databinding.ActivityMainBinding
+import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
@@ -46,7 +52,6 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
-import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -59,21 +64,29 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
-import de.cyface.synchronization.SyncService
+import de.cyface.synchronization.OAuth2
+import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.TokenResponse
 import java.io.IOException
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the
- * [de.cyface.app.r4r.ui.TermsOfUseActivity] class.
+ * [de.cyface.app.r4r.TermsOfUseActivity] class.
+ *
+ * It calls the [de.cyface.app.r4r.auth.LoginActivity] if the user is unauthorized and uses the
+ * outcome of the OAuth 2 authorization flow to negotiate the final authorized state. This is done
+ * by performing the "authorization code exchange" if required.
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.2.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider {
@@ -97,6 +110,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * The `SharedPreferences` used to store the user's preferences.
      */
     private lateinit var preferences: SharedPreferences
+
+    /**
+     * The authorization.
+     */
+    override lateinit var auth: OAuth2
 
     /**
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
@@ -162,14 +180,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 AUTHORITY,
                 ACCOUNT_TYPE,
                 BuildConfig.cyfaceServer,
-                BuildConfig.authServer,
+                OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery),
                 CapturingEventHandler(),
                 unInterestedListener,
                 DEFAULT_SENSOR_FREQUENCY
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            startSynchronization()
+            //startSynchronization() //FIXME: we do this in displayAuthorized() instead!
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
@@ -179,6 +197,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             throw IllegalStateException(e)
         }
 
+        /****************************************************************************************/
         // Crashes with RuntimeException: capturing not initialized when this is at the top of `onCreate`
         super.onCreate(savedInstanceState)
 
@@ -213,6 +232,49 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // Inject the Incentives API URL into the preferences, as the `Incentives` from `utils`
         // cannot reach the `ui.rfr.BuildConfig`.
         setIncentivesServerUrl()
+
+        // Authorization
+        auth = OAuth2(applicationContext)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        // All good, user is authorized
+        if (auth.isAuthorized()) {
+            onAuthorized("onStart")
+            return
+        }
+
+        // the stored AuthState is incomplete, so check if we are currently receiving the result of
+        // the authorization flow from the browser.
+        val response = AuthorizationResponse.fromIntent(intent)
+        val ex = AuthorizationException.fromIntent(intent)
+        if (response != null || ex != null) {
+            auth.updateAfterAuthorization(response, ex)
+        }
+        if (response?.authorizationCode != null) {
+            // authorization code exchange is required
+            auth.updateAfterAuthorization(response, ex)
+            exchangeAuthorizationCode(response)
+        } else if (ex != null) {
+            onUnauthorized("Auth flow failed: " + ex.message)
+        } else {
+            // The user is not logged in / logged out -> LoginActivity is called
+            onUnauthorized("No auth state retained - re-auth required", false)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // Authorization
+        if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            Handler().postDelayed({ signOut(true); finish() }, 2000)
+        } else {
+            show("Sign out canceled")
+        }
     }
 
     /**
@@ -231,18 +293,23 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     override fun onDestroy() {
         super.onDestroy()
+
         // Clean up CyfaceDataCapturingService
         try {
             // As the WifiSurveyor WiFiSurveyor.startSurveillance() tells us to
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val isReportingEnabled = preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
+            val isReportingEnabled =
+                preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
             if (isReportingEnabled) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
+
+        // Authorization
+        auth.dispose()
     }
 
     /**
@@ -265,7 +332,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             return
         }
 
-        // The LoginActivity is called by Android which handles the account creation
+        // The LoginActivity is called by Android which handles the account creation (authentication)
         Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
             ACCOUNT_TYPE,
@@ -349,5 +416,80 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             editor.putString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, server)
             editor.apply()
         }
+    }
+
+    @MainThread
+    private fun onUnauthorized(explanation: String, explain: Boolean = true) {
+        runOnUiThread {
+            if (explain) {
+                show("unauthorized, logging out ... ($explanation)")
+                Handler().postDelayed({ signOut(false) }, 2000)
+            } else {
+                signOut(false)
+            }
+        }
+    }
+
+    @MainThread
+    private fun onAuthorized(message: String) {
+        runOnUiThread {
+            Log.d(TAG, "authorized ($message)")
+            startSynchronization()
+        }
+    }
+
+    @MainThread
+    private fun exchangeAuthorizationCode(authorizationResponse: AuthorizationResponse) {
+        Log.d(TAG, "Exchanging authorization code")
+        val requestSuccessful = auth.performTokenRequest(
+            authorizationResponse.createTokenExchangeRequest()
+        ) { tokenResponse: TokenResponse?, authException: AuthorizationException? ->
+            val authSuccessful = auth.handleCodeExchangeResponse(
+                tokenResponse,
+                authException,
+                ACCOUNT_TYPE,
+                applicationContext,
+                AUTHORITY
+            )
+            if (authSuccessful) {
+                onAuthorized("code exchanged, account updated")
+            } else {
+                onUnauthorized(
+                    ("Authorization Code exchange failed"
+                            + if (authException != null) authException.error else "")
+                )
+            }
+        }
+        if (!requestSuccessful) {
+            onUnauthorized("Client authentication method is unsupported")
+        }
+    }
+
+    /**
+     * When the user explicitly wants to sign out, we need to send an `endSession` request to the
+     * auth server, see `MenuProvider.logout`.
+     *
+     * Here we only want to clear the local data about the current session, when something changes.
+     */
+    @MainThread
+    private fun signOut(removeAccount: Boolean = false) {
+        auth.signOut()
+
+        // E.g. `MainActivity.onStart()` calls `signOut()` when the user is already signed out
+        // so there is no account to be removed.
+        if (removeAccount) {
+            // Also remove account from account manager
+            capturing.removeAccount(capturing.wiFiSurveyor.account.name)
+        }
+
+        val mainIntent = Intent(this, LoginActivity::class.java)
+        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(mainIntent)
+        finish()
+    }
+
+    @MainThread
+    private fun show(message: String) {
+        Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
     }
 }
