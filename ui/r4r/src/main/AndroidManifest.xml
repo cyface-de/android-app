@@ -84,7 +84,7 @@
       android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
     </activity>
 
-    <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator FIXME: we might launch LoginActivity as default Activity which switches to MainActivity -->
+    <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
     <activity
       android:name=".auth.LoginActivity"
       android:label="@string/title_activity_login"

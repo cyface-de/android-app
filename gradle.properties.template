@@ -31,6 +31,8 @@ android.nonTransitiveRClass=true
 
 android.builder.sdkDownload=true
 android.enableJetifier=false
+android.defaults.buildfeatures.buildconfig=true
+android.nonFinalResIds=false
 
 githubUser=
 githubToken=
@@ -43,28 +45,26 @@ hCaptcha.key.r4r=
 
 cyface.oauth_redirect=
 
-# api/v4 (rfr)
 cyface.api=
 cyface.incentives_api=
 cyface.oauth_discovery=
-# api/v3 (cy)
-cyface.api_v3
-cyface.auth_api_v3=
 
-cyface.demo_api=
-cyface.local_api=
-cyface.local_auth_api=
-cyface.local_incentives_api=
-cyface.emulator_api=
-
-# api/v4 (rfr)
 cyface.staging_api=
 cyface.staging_incentives_api=
 cyface.staging_oauth_discovery=
 cyface.staging_user=
 cyface.staging_password=
-# api/v3 (cy)
-cyface.staging_api_v3=
-cyface.staging_auth_api_v3=
+
+cyface.demo_api=
+cyface.demo_incentives_api=
+cyface.demo_oauth_discovery=
+
+cyface.local_api=
+cyface.local_incentives_api=
+cyface.local_oauth_discovery=
+
+cyface.emulator_api=
+cyface.emulator_incentives_api=
+cyface.emulator_oauth_discovery=
 
 # keep an empty line at the end for the CI to inject new lines easily

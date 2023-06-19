@@ -89,17 +89,21 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
-            //buildConfigField "String", "authServer", "\"${project.findProperty('cyface.local_auth_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.local_incentives_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.local_incentives_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.emulator_incentives_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
             // Staging
@@ -112,6 +116,8 @@ android {
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
         }
         release {

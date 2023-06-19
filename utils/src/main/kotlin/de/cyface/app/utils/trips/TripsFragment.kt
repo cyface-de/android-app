@@ -31,7 +31,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.View.resolveSizeAndState
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -42,7 +41,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.volley.NetworkError
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.TAG
@@ -102,7 +100,7 @@ class TripsFragment : Fragment() {
      * defined by E-Mail from Matthias Koss, 23.05.23
      */
     @Suppress("SpellCheckingInspection")
-    private val distanceGoalKm = 0.0 // FIXME
+    private val distanceGoalKm = 15.0
 
     /**
      * The API to get the voucher data from or `null` when no such things show be shown to the user.
@@ -140,16 +138,17 @@ class TripsFragment : Fragment() {
         if (savedInstanceState != null) tracker?.onRestoreInstanceState(savedInstanceState)
 
         if (activity is ServiceProvider) {
-            capturing = (activity as ServiceProvider).capturing
+            val serviceProvider = activity as ServiceProvider
+            capturing = serviceProvider.capturing
+
+            // Load incentivesUrl - only send requests in RFR app
+            val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
+            if (rfr) {
+                val incentivesApi = incentivesApi(requireContext())
+                this.incentives = Incentives(requireContext(), incentivesApi, serviceProvider.auth)
+            }
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
-        }
-
-        // Load incentivesUrl - only send requests in RFR app
-        val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
-        if (rfr) {
-            val incentivesApi = incentivesApi(requireContext())
-            this.incentives = Incentives(requireContext(), incentivesApi)
         }
     }
 

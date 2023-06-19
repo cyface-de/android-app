@@ -101,7 +101,6 @@ class LoginActivity : AppCompatActivity() {
             //Log.i(TAG, "User is already authenticated, processing to token activity")
             Log.e(TAG, "User is already authenticated")
             show("User is already authenticated")
-            //startActivity(Intent(this, MainActivity::class.java)) // FIXME: only if we stick with the flow LoginActivity -> MainActivity
             finish()
             return
         }
@@ -159,7 +158,7 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtras(data!!.extras!!)
             startActivity(intent)
-            finish() // FIXME added because of our workflow
+            finish() // added because of our workflow where MainActivity calls LoginActivity
         }
     }
 
@@ -302,7 +301,7 @@ class LoginActivity : AppCompatActivity() {
         } catch (ex: InterruptedException) {
             Log.w(TAG, "Interrupted while waiting for auth intent")
         }
-        if (mUsePendingIntents) { // TODO: We currently always use the other option below
+        if (mUsePendingIntents) { // We currently always use the other option below
             val completionIntent = Intent(this, MainActivity::class.java)
             val cancelIntent = Intent(this, LoginActivity::class.java)
             cancelIntent.putExtra(EXTRA_FAILED, true)
@@ -389,12 +388,6 @@ class LoginActivity : AppCompatActivity() {
     @MainThread
     private fun show(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        /*Snackbar.make(
-            findViewById(R.id.container),
-            message,
-            Snackbar.LENGTH_SHORT
-        )
-            .show()*/
     }
 
     @TargetApi(Build.VERSION_CODES.M)

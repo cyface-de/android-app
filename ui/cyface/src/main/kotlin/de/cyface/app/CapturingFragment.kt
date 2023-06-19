@@ -212,8 +212,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         requireActivity().addMenuProvider(
             MenuProvider(
-                capturing,
-                requireActivity(),
+                requireActivity() as MainActivity,
                 navHostFragment.navController
             ),
             viewLifecycleOwner,

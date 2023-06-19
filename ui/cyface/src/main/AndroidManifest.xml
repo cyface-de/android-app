@@ -45,6 +45,7 @@
     <!-- allowBackup=false as we did not yet define what we really want to backup-->
     <!-- usesCleartextTraffic only API 23+, ignored below. only for debugging -->
     <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
+    <!-- tools:replace="android:usesCleartextTraffic" required when testing against local collector -->
     <application
         android:name=".MeasuringClient"
         android:allowBackup="false"
@@ -52,6 +53,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
+        tools:replace="android:usesCleartextTraffic"
         android:usesCleartextTraffic="${usesCleartextTraffic}">
 
         <!-- Sentry DSN. This ids the account but is not a secret. -->
@@ -91,7 +93,7 @@
 
         <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".auth.LoginActivity"
             android:label="@string/title_activity_login"
             android:exported="false"
             android:launchMode="singleTask" /> <!-- when we switch back from Registration, see https://stackoverflow.com/a/45292292/5815054 -->

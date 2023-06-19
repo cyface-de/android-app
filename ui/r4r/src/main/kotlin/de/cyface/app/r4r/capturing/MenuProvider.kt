@@ -24,33 +24,23 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.MainThread
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
-import de.cyface.app.r4r.MainActivity.Companion.END_SESSION_REQUEST_CODE
+import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
-import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.synchronization.AuthStateManager
-import de.cyface.synchronization.Configuration
 import de.cyface.uploader.exception.SynchronisationException
-import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationService
-import net.openid.appauth.AuthorizationServiceConfiguration
-import net.openid.appauth.EndSessionRequest
 
 /**
  * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.2.0
  */
 class MenuProvider(
-    private val capturingService: CyfaceDataCapturingService,
-    private val activity: FragmentActivity,
+    private val activity: MainActivity,
     private val navController: NavController
 ) : androidx.core.view.MenuProvider {
 
@@ -58,21 +48,6 @@ class MenuProvider(
      * The `Intent` used when the user wants to send feedback.
      */
     private lateinit var emailIntent: Intent
-
-    /**
-     * The service used for authorization.
-     */
-    private lateinit var mAuthService: AuthorizationService
-
-    /**
-     * The authorization state.
-     */
-    private lateinit var mStateManager: AuthStateManager
-
-    /**
-     * The configuration of the OAuth 2 endpoint to authorize against.
-     */
-    private lateinit var mConfiguration: Configuration
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.capturing, menu)
@@ -82,26 +57,6 @@ class MenuProvider(
             activity,
             activity.getString(de.cyface.energy_settings.R.string.feedback_error_description),
             SUPPORT_EMAIL
-        )
-
-        // Authorization
-        val context = activity.applicationContext
-        mStateManager = AuthStateManager.getInstance(context)
-        //mExecutor = Executors.newSingleThreadExecutor()
-        mConfiguration = Configuration.getInstance(context)
-        val config = Configuration.getInstance(context)
-        /*if (config.hasConfigurationChanged()) {
-            // This happens when starting the app after a fresh installation
-            //throw IllegalArgumentException("config changed (MenuProvider)")
-            Toast.makeText(context, "Ignoring: config changed (SyncAdapter)", Toast.LENGTH_SHORT).show()
-            //Handler().postDelayed({ signOut() }, 2000)
-            //return
-        }*/
-        mAuthService = AuthorizationService(
-            activity.applicationContext,
-            AppAuthConfiguration.Builder()
-                .setConnectionBuilder(config.connectionBuilder)
-                .build()
         )
     }
 
@@ -144,45 +99,25 @@ class MenuProvider(
                 true
             }
 
-            R.id.logout_item -> {
+            /*R.id.logout_item -> {
                 try {
                     Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
                     // This inform the auth server that the user wants to end its session
-                    endSession()
+                    activity.auth.endSession(activity)
                     //signOut() // instead of `endSession()` to sign out softly for testing
+                    activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.account.name)
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                //(activity as MainActivity).startSynchronization() FIXME: This is already done be endSession()
+                // This is done by MainActivity.onActivityResult -> signOut()
+                //(activity as MainActivity).startSynchronization()
                 true
-            }
+            }*/
 
             else -> {
                 false
             }
-        }
-    }
-
-    @MainThread
-    private fun endSession() {
-        val currentState: AuthState = mStateManager.current
-        val config: AuthorizationServiceConfiguration =
-            currentState.authorizationServiceConfiguration!!
-        if (config.endSessionEndpoint != null) {
-            val endSessionIntent: Intent = mAuthService.getEndSessionRequestIntent(
-                EndSessionRequest.Builder(config)
-                    .setIdTokenHint(currentState.idToken)
-                    .setPostLogoutRedirectUri(mConfiguration.endSessionRedirectUri)
-                    .build()
-            )
-            // This opens a browser window to inform the auth server that the user wants to log out.
-            // The window closes after a split second and calls `MainActivity.onActivityResult`
-            // where `signOut()` is executed which also removes the account from the account manager.
-            activity.startActivityForResult(endSessionIntent, END_SESSION_REQUEST_CODE)
-        } else {
-            throw IllegalStateException("Auth server does not provide an end session endpoint")
-            //signOut()
         }
     }
 }

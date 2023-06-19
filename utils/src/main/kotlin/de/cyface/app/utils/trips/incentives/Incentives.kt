@@ -23,12 +23,9 @@ import com.android.volley.Response.ErrorListener
 import com.android.volley.Response.Listener
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import de.cyface.synchronization.AuthStateManager
-import de.cyface.synchronization.Configuration
+import de.cyface.synchronization.Auth
 import de.cyface.uploader.DefaultAuthenticator
-import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationService
 import org.json.JSONObject
 import java.net.URL
 
@@ -41,41 +38,11 @@ import java.net.URL
  * @property context The authenticator to get the auth token from
  * @property apiEndpoint An API endpoint running a Cyface Incentives API, like `https://some.url/api/v1`
  */
-class Incentives(private val context: Context, private val apiEndpoint: String) {
-
-    /**
-     * The service used for authorization.
-     */
-    private var mAuthService: AuthorizationService? = null
-
-    /**
-     * The authorization state.
-     */
-    private var mStateManager: AuthStateManager
-
-    /**
-     * The configuration of the OAuth 2 endpoint to authorize against.
-     */
-    private var mConfiguration: Configuration
-
-    init {
-        // Authorization
-        mStateManager = AuthStateManager.getInstance(context)
-        //mExecutor = Executors.newSingleThreadExecutor()
-        mConfiguration = Configuration.getInstance(context)
-        val config = Configuration.getInstance(context)
-        /*if (config.hasConfigurationChanged()) {
-            throw IllegalStateException("config changed (Incentives)")
-            //Handler().postDelayed({ signOut(false) }, 2000)
-            //return
-        }*/
-        mAuthService = AuthorizationService(
-            context,
-            AppAuthConfiguration.Builder()
-                .setConnectionBuilder(config.connectionBuilder)
-                .build()
-        )
-    }
+class Incentives(
+    private val context: Context,
+    private val apiEndpoint: String,
+    private val auth: Auth
+) {
 
     /**
      * Requests the number of available vouchers.
@@ -90,11 +57,9 @@ class Incentives(private val context: Context, private val apiEndpoint: String) 
         failureHandler: ErrorListener,
         authErrorHandler: Listener<AuthorizationException>
     ) {
-        mStateManager.current.performActionWithFreshTokens(
-            mAuthService!!
-        ) { accessToken: String?, idToken: String?, ex: AuthorizationException? ->
+        auth.performActionWithFreshTokens() { accessToken, _, ex ->
             if (ex != null) {
-                authErrorHandler.onResponse(ex)
+                authErrorHandler.onResponse(ex as AuthorizationException)
                 return@performActionWithFreshTokens
             }
 
@@ -129,11 +94,9 @@ class Incentives(private val context: Context, private val apiEndpoint: String) 
         failureHandler: ErrorListener,
         authErrorHandler: Listener<AuthorizationException>
     ) {
-        mStateManager.current.performActionWithFreshTokens(
-            mAuthService!!
-        ) { accessToken: String?, idToken: String?, ex: AuthorizationException? ->
+        auth.performActionWithFreshTokens { accessToken, _, ex ->
             if (ex != null) {
-                authErrorHandler.onResponse(ex)
+                authErrorHandler.onResponse(ex as AuthorizationException)
                 return@performActionWithFreshTokens
             }
 

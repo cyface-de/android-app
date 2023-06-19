@@ -81,6 +81,9 @@ android {
                 'appAuthRedirectScheme': 'de.cyface.app'
         ]
 
+        // oauth redirect uri
+        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect')}\""
+
         // Load hCaptcha API key
         buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key')}\""
     }
@@ -94,26 +97,32 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
             // Staging
-            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api_v3')}\""
-            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.staging_auth_api_v3')}\""
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
+            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
+            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
         }
         release {
@@ -123,8 +132,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // signingConfig is set by the CI
-            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api_v3')}\""
-            buildConfigField "String", "authServer", "\"${project.findProperty('cyface.auth_api_v3')}\""
+            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
+            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
         }
     }

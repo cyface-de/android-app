@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app
+package de.cyface.app.auth
 
 import android.annotation.TargetApi
 import android.app.PendingIntent
@@ -25,6 +25,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.View.VISIBLE
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.AnyThread
@@ -33,8 +34,10 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
-import de.cyface.app.r4r.auth.AuthStateManager
-import de.cyface.app.r4r.auth.Configuration
+import de.cyface.app.MainActivity
+import de.cyface.app.R
+import de.cyface.synchronization.AuthStateManager
+import de.cyface.synchronization.Configuration
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -70,8 +73,8 @@ class LoginActivity : AppCompatActivity() {
     private val RC_AUTH = 100
 
     private var mAuthService: AuthorizationService? = null
-    private lateinit var mAuthStateManager: de.cyface.app.r4r.auth.AuthStateManager
-    private lateinit var mConfiguration: de.cyface.app.r4r.auth.Configuration
+    private lateinit var mAuthStateManager: AuthStateManager
+    private lateinit var mConfiguration: Configuration
 
     private val mClientId = AtomicReference<String>()
     private val mAuthRequest = AtomicReference<AuthorizationRequest?>()
@@ -86,8 +89,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mExecutor = Executors.newSingleThreadExecutor()
-        mAuthStateManager = de.cyface.app.r4r.auth.AuthStateManager.getInstance(this)
-        mConfiguration = de.cyface.app.r4r.auth.Configuration.getInstance(this)
+        mAuthStateManager = AuthStateManager.getInstance(this)
+        mConfiguration = Configuration.getInstance(this)
 
         // Already authorized
         if (mAuthStateManager.current.isAuthorized
@@ -98,7 +101,6 @@ class LoginActivity : AppCompatActivity() {
             //Log.i(TAG, "User is already authenticated, processing to token activity")
             Log.e(TAG, "User is already authenticated")
             show("User is already authenticated")
-            //startActivity(Intent(this, MainActivity::class.java)) // FIXME: only if we stick with the flow LoginActivity -> MainActivity
             finish()
             return
         }
@@ -156,7 +158,7 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtras(data!!.extras!!)
             startActivity(intent)
-            finish() // FIXME added because of our workflow
+            finish() // added because of our workflow where MainActivity calls LoginActivity
         }
     }
 
@@ -299,7 +301,7 @@ class LoginActivity : AppCompatActivity() {
         } catch (ex: InterruptedException) {
             Log.w(TAG, "Interrupted while waiting for auth intent")
         }
-        if (mUsePendingIntents) { // TODO: We currently always use the other option below
+        if (mUsePendingIntents) { // We currently always use the other option below
             val completionIntent = Intent(this, MainActivity::class.java)
             val cancelIntent = Intent(this, LoginActivity::class.java)
             cancelIntent.putExtra(EXTRA_FAILED, true)
@@ -343,7 +345,7 @@ class LoginActivity : AppCompatActivity() {
 
     @MainThread
     private fun displayLoading(loadingMessage: String) {
-        findViewById<View>(R.id.loading_container).visibility = View.VISIBLE
+        findViewById<View>(R.id.loading_container).visibility = VISIBLE
         findViewById<View>(R.id.auth_container).visibility = View.GONE
         findViewById<View>(R.id.error_container).visibility = View.GONE
         (findViewById<View>(R.id.loading_description) as TextView).text =
@@ -352,11 +354,11 @@ class LoginActivity : AppCompatActivity() {
 
     @MainThread
     private fun displayError(error: String, recoverable: Boolean) {
-        findViewById<View>(R.id.error_container).visibility = View.VISIBLE
+        findViewById<View>(R.id.error_container).visibility = VISIBLE
         findViewById<View>(R.id.loading_container).visibility = View.GONE
         findViewById<View>(R.id.auth_container).visibility = View.GONE
         (findViewById<View>(R.id.error_description) as TextView).text = error
-        findViewById<View>(R.id.retry).visibility = if (recoverable) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.retry).visibility = if (recoverable) VISIBLE else View.GONE
     }
 
     // WrongThread inference is incorrect in this case
@@ -377,7 +379,7 @@ class LoginActivity : AppCompatActivity() {
 
     @MainThread
     private fun displayAuthOptions() {
-        findViewById<View>(R.id.auth_container).visibility = View.VISIBLE
+        findViewById<View>(R.id.auth_container).visibility = VISIBLE
         findViewById<View>(R.id.loading_container).visibility = View.GONE
         findViewById<View>(R.id.error_container).visibility = View.GONE
     }
@@ -386,12 +388,6 @@ class LoginActivity : AppCompatActivity() {
     @MainThread
     private fun show(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        /*Snackbar.make(
-            findViewById(R.id.container),
-            message,
-            Snackbar.LENGTH_SHORT
-        )
-            .show()*/
     }
 
     @TargetApi(Build.VERSION_CODES.M)
