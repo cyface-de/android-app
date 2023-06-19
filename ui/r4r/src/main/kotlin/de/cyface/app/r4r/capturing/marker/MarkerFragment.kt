@@ -27,6 +27,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.MapsInitializer
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import de.cyface.app.r4r.databinding.FragmentMarkerBinding
@@ -93,7 +94,7 @@ class MarkerFragment : Fragment() {
      * The `Runnable` triggered when the `Map` is loaded and ready.
      */
     private val onMapReadyRunnable = Runnable {
-        map!!.renderMarkers(markers)
+        map!!.renderMarkers(markers())
     }
 
     override fun onCreateView(
@@ -136,35 +137,56 @@ class MarkerFragment : Fragment() {
             return now.after(endDate)
         }
 
-        val markers = if (eventPassed()) emptyList() else arrayListOf(
-            // Schkeuditz
-            // FIXME: Start/Ziel: Stand am Stadtfest: 51.39554154202172, 12.223122188347885
-            MarkerOptions()
-                .position(LatLng(51.39877, 12.20104)).title("Station: Nähe Globana"), // FIXME: ändere Globana auf 51.39874, 12.20011
-            MarkerOptions()
-                .position(LatLng(51.38995, 12.22101)).title("Station: Stadtmuseum"),
-            MarkerOptions()
-                .position(LatLng(51.38848, 12.23337)).title("Station: Elsterbrücke"),
-            MarkerOptions()
-                .position(LatLng(51.40696, 12.22106)).title("Station: Fußballfeld"),
-            // Köthen
-            // FIXME: Start/Ziel Köthen: 51.751117, 11.973984 "Marktplatz Köthen"
-            MarkerOptions()
-                .position(LatLng(51.751117, 11.973984)).title("Start und Ziel: Marktplatz Köthen"),
-            MarkerOptions()
-                .position(LatLng(51.75243880654433, 11.948543178133846)).title("Station: Piratenspielplatz"),
-            MarkerOptions()
-                .position(LatLng(51.766749, 11.931790)).title("Station: Forellenhof"),
-            MarkerOptions()
-                .position(LatLng(51.766687, 11.983936)).title("Station: Kinder- und Bowlingwelt Köthen"),
-            MarkerOptions()
-                .position(LatLng(51.754960, 12.001494)).title("Station: Kaufland Köthen (Merziener Straße)"),
-            MarkerOptions()
-                .position(LatLng(51.747082, 12.005348)).title("Station: Gnetscher Straße, Nähe Stadtbäckerei Rödel"),
-            MarkerOptions()
-                .position(LatLng(51.743019, 11.971916)).title("Station: Jürgenweg (Höhe NP)"),
-            MarkerOptions()
-                .position(LatLng(51.755023, 11.976503)).title("Station: Schloss Köthen, Haus des Dürerbundes")
-        )
+        fun markers(): List<MarkerOptions> {
+            val defaultIcon = BitmapDescriptorFactory.defaultMarker(152.0F) // #299463
+            val startIcon = BitmapDescriptorFactory.defaultMarker()
+            return if (eventPassed()) emptyList() else arrayListOf(
+                // Schkeuditz
+                MarkerOptions()
+                    .position(LatLng(51.39554154202172, 12.223122188347885)).title("Start und Ziel: Stand am Stadtfest")
+                    .icon(startIcon),
+                MarkerOptions()
+                    .position(LatLng(51.39874, 12.20011)).title("Station: Nähe Globana")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.38995, 12.22101)).title("Station: Stadtmuseum")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.38848, 12.23337)).title("Station: Elsterbrücke")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.40696, 12.22106)).title("Station: Fußballfeld")
+                    .icon(defaultIcon),
+
+                // Köthen
+                MarkerOptions()
+                    .position(LatLng(51.751117, 11.973984)).title("Start und Ziel: Marktplatz Köthen")
+                    .icon(startIcon),
+                MarkerOptions()
+                    .position(LatLng(51.75243880654433, 11.948543178133846)).title("Station: Piratenspielplatz")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.766749, 11.931790)).title("Station: Forellenhof")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.766687, 11.983936)).title("Station: Kinder- und Bowlingwelt Köthen")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.754960, 12.001494)).title("Station: Kaufland Köthen (Merziener Straße)")
+                    .icon(defaultIcon),
+
+                // FIXME: ggf. nicht mehr Teil der Rally:
+                MarkerOptions()
+                    .position(LatLng(51.747082, 12.005348)).title("Station: Gnetscher Straße, Nähe Stadtbäckerei Rödel")
+                    .icon(defaultIcon),
+
+                MarkerOptions()
+                    .position(LatLng(51.743019, 11.971916)).title("Station: Jürgenweg (Höhe NP)")
+                    .icon(defaultIcon),
+                MarkerOptions()
+                    .position(LatLng(51.755023, 11.976503)).title("Station: Schloss Köthen, Haus des Dürerbundes")
+                    .icon(defaultIcon)
+            )
+        }
     }
 }

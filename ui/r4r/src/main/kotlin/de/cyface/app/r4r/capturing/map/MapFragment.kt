@@ -130,7 +130,7 @@ class MapFragment : Fragment() {
      * The `Runnable` triggered when the `Map` is loaded and ready.
      */
     private val onMapReadyRunnable = Runnable {
-        map!!.renderMarkers(MarkerFragment.markers)
+        map!!.renderMarkers(MarkerFragment.markers())
         observeTracks()
 
         // Only load track if there is an ongoing measurement
@@ -152,10 +152,10 @@ class MapFragment : Fragment() {
         val observer = Observer<ArrayList<Track>?> {
             if (it != null) {
                 //val events: List<Event> = loadCurrentMeasurementsEvents()
-                map!!.render(it, ArrayList()/* events */, false, MarkerFragment.markers)
+                map!!.render(it, ArrayList()/* events */, false, MarkerFragment.markers())
             } else {
                 map!!.clearMap()
-                map!!.renderMarkers(MarkerFragment.markers)
+                map!!.renderMarkers(MarkerFragment.markers())
             }
         }
         capturingViewModel.tracks.observe(viewLifecycleOwner, observer)
