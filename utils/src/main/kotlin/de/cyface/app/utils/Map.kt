@@ -141,7 +141,7 @@ class Map(
         view.getMapAsync(this)
         preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, true)
     }
 
     /**
@@ -438,7 +438,7 @@ class Map(
             return
         }
         requestLocationUpdates()
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
+        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, true)
     }
 
     fun onPause() {

@@ -251,7 +251,7 @@ class SettingsFragment : Fragment() {
 
         // Center map- and synchronization switch
         binding.centerMapSwitch.isChecked =
-            preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
+            preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, true)
         binding.uploadSwitch.isChecked =
             preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
 
@@ -666,7 +666,7 @@ private class CenterMapSwitchHandler(
     private val context: Context?
 ) : CompoundButton.OnCheckedChangeListener {
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        val current = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, false)
+        val current = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, true)
         if (current != isChecked) {
             preferences.edit().putBoolean(PREFERENCES_CENTER_MAP_KEY, isChecked).apply()
             if (isChecked) {
