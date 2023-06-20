@@ -179,7 +179,7 @@
         \n- Status of the device: battery charge and temperature, charging state, boot time, memory space, connection type (Wi-Fi/mobile data), storage space, available storage, preferred language, device orientation, screen resolution and density, time zone
         \n- IP address of the machine (when the connection is established)
 
-        \n\nThe information is collected anonymously, not used for personal purposes or for advertising purposes and then deleted again. The legal basis for the above-mentioned data processing is Art. 6, Paragraph 1 lit. f of the GDPR.
+        \n\nThe information is collected anonymously, not used for personal or advertising purposes and deleted after a period of 90 days. The legal basis for the aforementioned data processing is Art. 6, Para. 1 lit. f of the GDPR. For this purpose, a data processing agreement (AV contract) has been concluded with Functional Software Inc.
 
         \n\nThe sole purpose of processing is to improve the stability and usability of the app. For further information regarding data processing by Sentry, please refer to the Sentry Privacy Policy: https://sentry.io/privacy/</string>
 
@@ -187,7 +187,7 @@
     <string name="disclaimer">Disclaimer</string>
     <string name="disclaimer_content">The application (hereinafter also: \"app\") is in <b>beta state</b>. It was developed to the best of our knowledge with utmost care by trained software developers. We are testing the app regularly and extensively on our own mobile devices.
         \nHowever, we currently can\'t ensure that everything works as expected and we assume no liability whatsoever for damage that may result from the use of the app. At the same time, we can\'t promise you all time availability of our servers and services such as data upload, data processing and data visualization.
-        \n<b>By using this application you accept these conditions and the privacy conditions below.</b></string>
+        \n<b>By using this application you confirm that you have read and understood these conditions and the privacy conditions below.</b></string>
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
     <!-- Version 2.1.1 -->
@@ -218,7 +218,7 @@
         \nIf the processing is necessary to safeguard a legitimate interest of our company or a third party and if the interests, fundamental rights and fundamental freedoms of the data subject do not outweigh the first-mentioned interest, Art. 6 para. 1 lit. f GDPR serves as the legal basis for the processing.
 
         \n\n<b>2.3 Data deletion and storage duration</b>
-        \n\nThe personal data of the data subject will be deleted or blocked as soon as the purpose of storage no longer applies. In addition, the data may be stored if the European or national legislator has provided for this in EU regulations, laws or other rules to which the person responsible is subject. The data will also be blocked or deleted if a storage period prescribed by the aforementioned regulations expires, unless it is necessary to store the data further in order to conclude or fulfill a contract.
+        \n\nThe personal data of the data subject will be deleted or blocked as soon as the purpose of storage no longer applies (for example if the associated project has been finished) or if the users account gets deleted. In addition, the data may be stored if the European or national legislator has provided for this in EU regulations, laws or other rules to which the person responsible is subject. The data will also be blocked or deleted if a storage period prescribed by the aforementioned regulations expires, unless it is necessary to store the data further in order to conclude or fulfill a contract.
 
         \n\n<b>3. Provision of the application and creation of log files</b>
         \n\n<b>3.1 Description and scope of the data processing</b>
@@ -236,6 +236,7 @@
 
         \n\nThis data comes directly from the sensors of the mobile device used or is generated in the mobile application. Continuous collection means that the geodata is collected at intervals of one second or more. Acceleration, angular acceleration and magnetometer data is recorded at the maximum frequency supported by the hardware.
         \nThe acquired data is sent to a Cyface server via wireless data transmission and stored there in a database for further processing. The Cyface Server is currently located in Germany and will continue to follow German law in the future.
+        \nThe acquired data is shared with partners in the context for research and development projects. We will ensure, that there is a written agreement with those partners about shared responsibility. The legal basis for this shared responsibility is Art. 26 GDPR.
         \nThe data will also be stored partially or completely in the log files of our system. These data will not be stored together with other personal data of the user.
         \nThe legal basis for the temporary storage of data and log files is Art. 6 para. 1 lit. f GDPR.
 
@@ -256,14 +257,17 @@
 
         \n\n- An e-mail address of the user
         \n- A password of the user
-        \n- During the registration process, the user\'s consent for the processing of this data is obtained.
+
+        \n\nDuring the registration process, the user\'s consent for the processing of this data is obtained.
+
+        \n\nIf the user uses an invitation code, link or QR code, the user account will be linked to this invitation during registration. The user is informed about this during registration and has the option to register without an invitation.
 
         \n\n<b>4.1 Legal basis for the data processing</b>
         \n\nThe legal basis for the processing of data is Art. 6 para. 1 lit. a GDPR if the user has given his consent.
         \nIf the registration serves the fulfillment of a contract to which the user is a party of or if it serves the implementation of pre-contractual measures, the additional legal basis for the processing of the data is Art. 6 para. 1 lit. b GDPR.
 
         \n\n<b>4.2 Purpose of the data processing</b>
-        \n\nA registration of the user is necessary for the presentation of the data collected by the user himself as well as the deletion of this data in accordance with Art. 17.
+        \n\nA registration of the user is necessary for the presentation of the data collected by the user himself as well as the deletion of this data in accordance with Art. 17 GDPR.
         \nA registration of the user is necessary for the fulfillment of a contract with the user or for the execution of pre-contractual measures.
 
         \n\n<b>4.3 Duration of storage</b>

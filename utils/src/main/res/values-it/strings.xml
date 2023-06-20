@@ -164,7 +164,7 @@
         \n- Stato del dispositivo: carica e temperatura della batteria, livello di carica, tempo di avvio del dispositivo, memoria, tipo di connessione (Wi-Fi/dati mobili), spazio di memoria, memoria disponibile, lingua preferita, orientamento del dispositivo, risoluzione e densità dello schermo, fuso orario
         \n- Indirizzo IP dell\'apparecchio (stabilendo la connessione)
 
-        \n Le informazioni sono raccolte in forma anonima, non vengono utilizzate per scopi personali o per scopi pubblicitari e poi cancellate di nuovo. La base giuridica per il suddetto trattamento dei dati è costituita dall\'art. 6 cpv. 1 lett. f della GDPR.
+        \n\nI dati vengono raccolti in forma anonima, non vengono utilizzati per scopi personali o pubblicitari e vengono cancellati dopo un periodo di 90 giorni. La base giuridica per il suddetto trattamento dei dati è l\'art. 6, comma 1, lettera f del GDPR. A tal fine è stato stipulato un contratto di elaborazione degli ordini (contratto AV) con Functional Software Inc.
 
         \n \n L\'unico scopo dell\'elaborazione è quello di migliorare la stabilità e l\'usabilità dell\'app. Ulteriori informazioni sul trattamento dei dati da parte di Sentry si trovano nell\'Informativa sulla privacy di Sentry: https://sentry.io/privacy/</string>
 
@@ -172,7 +172,7 @@
   <string name="disclaimer">Disclaimer</string>
   <string name="disclaimer_content">L\'applicazione (di seguito anche: \"App\") è in <b>versione beta</b>. E\' stata sviluppata al meglio delle nostre conoscenze con la massima cura da parte di sviluppatori di software competenti. Stiamo testando l\'applicazione regolarmente e ampiamente sui nostri dispositivi mobili.
         \nTuttavia, al momento non possiamo garantire che tutto funzioni come previsto e non ci assumiamo alcuna responsabilità per i danni che possono derivare dall\'uso dell\'applicazione. Allo stesso tempo, non possiamo promettervi la disponibilità dei nostri server e servizi come il caricamento dei dati, l\'elaborazione e la visualizzazione dei dati.
-        \n<b>Utilizzando questa applicazione accetti queste condizioni e le condizioni sulla privacy qui sotto.</b></string>
+        \n<b>Utilizzando questa applicazione, l\'utente conferma di aver letto e compreso le presenti condizioni e le condizioni sulla privacy riportate di seguito.</b></string>
 
   <!-- Attention: The legal text should be updated first in Confluence! -->
   <!-- Version 2.1.1 -->
@@ -203,7 +203,7 @@
         \nSe il trattamento è necessario per salvaguardare un interesse legittimo della nostra azienda o di terzi e se gli interessi, i diritti e le libertà fondamentali della persona interessata non superano il primo interesse, l\'art. 6 cpv. 1 lett. d RDPC serve come base giuridica. 6 comma 1 lit. f GDPR serve come base giuridica per il trattamento.
 
         \n\n<b>2.3 Durata di cancellazione e memorizzazione dei dati</b>
-        \n\nI dati personali dell\'interessato vengono cancellati o bloccati non appena lo scopo della memorizzazione non è più valido. Inoltre, i dati possono essere memorizzati se il legislatore europeo o nazionale lo ha previsto in regolamenti, leggi o altre norme dell\'Unione europea a cui il responsabile è soggetto. I dati saranno inoltre bloccati o cancellati in caso di scadenza di un periodo di conservazione prescritto dalla normativa di cui sopra, a meno che non sia necessario conservare ulteriormente i dati per concludere o adempiere a un contratto.
+        \n\nI dati personali dell\'interessato vengono cancellati o bloccati non appena lo scopo della memorizzazione non è più valido (ad esempio, se il progetto associato è stato terminato) o se l\'account dell\'utente viene cancellato. Inoltre, i dati possono essere memorizzati se il legislatore europeo o nazionale lo ha previsto in regolamenti, leggi o altre norme dell\'Unione europea a cui il responsabile è soggetto. I dati saranno inoltre bloccati o cancellati in caso di scadenza di un periodo di conservazione prescritto dalla normativa di cui sopra, a meno che non sia necessario conservare ulteriormente i dati per concludere o adempiere a un contratto.
 
         \n\n<b>3. Fornitura dell\'applicazione e creazione di file di log</b>
         \n\n<b>3.1 Descrizione e ambito di applicazione del trattamento dei dati</b>
@@ -221,6 +221,7 @@
 
         \n\nQuesti dati provengono direttamente dai sensori del dispositivo mobile utilizzato o vengono generati nell\'applicazione mobile. Raccolta continua significa che i geodati sono raccolti ad intervalli di un secondo o più. I dati di accelerazione, accelerazione angolare e magnetometro sono registrati alla massima frequenza supportata dall\'hardware.
         \nI dati acquisiti vengono inviati a un server Cyface tramite trasmissione dati senza fili e memorizzati in un database per un\'ulteriore elaborazione. Il Cyface Server si trova attualmente in Germania e continuerà a seguire la legge tedesca anche in futuro.
+        \nI dati acquisiti vengono condivisi con i partner nell\'ambito di progetti di ricerca e sviluppo. Ci assicureremo che vi sia un accordo scritto con tali partner in merito alla responsabilità condivisa. La base giuridica per questa responsabilità condivisa è l\'Art. 26 GDPR.
         \nI dati saranno memorizzati parzialmente o completamente nei file di log del nostro sistema. Questi dati non saranno memorizzati insieme ad altri dati personali dell\'utente.
         \nLa base giuridica per la memorizzazione temporanea di dati e file di log è l\'Art. 6 comma 1 lit. f GDPR.
 
@@ -241,14 +242,17 @@
 
         \n\n- Un indirizzo e-mail dell\'utente
         \n- Una password dell\'utente
-        \n- Durante il processo di registrazione, si ottiene il consenso dell\'utente per il trattamento di questi dati.
+
+        \n\nDurante il processo di registrazione, si ottiene il consenso dell\'utente per il trattamento di questi dati.
+
+        \n\nSe l\'utente utilizza un codice di invito, un link o un codice QR, l\'account utente sarà collegato a tale invito durante la registrazione. L\'utente viene informato di ciò durante la registrazione e ha la possibilità di registrarsi senza invito.
 
             \n\n<b>4.1 Base giuridica per l\'elaborazione dei dati</b>
         \n\nLa base giuridica per il trattamento dei dati è l\'Art. 6 comma 1 lit. a GDPR se l\'utente ha dato il suo consenso.
         \nSe la registrazione serve all\'adempimento di un contratto di cui l\'utente è parte o se serve all\'attuazione di misure precontrattuali, la base giuridica aggiuntiva per il trattamento dei dati è l\'art. 6 cpv. 1 lett. a RDPC, se l\'utente ha dato il suo consenso. 6 comma 1 lit. b GDPR.
 
             \n\n<b>4.2 Finalità del trattamento dei dati</b>
-        \n\nLa registrazione dell\'utente è necessaria per la presentazione dei dati raccolti dall\'utente stesso, nonché per la cancellazione di tali dati ai sensi dell\'art. 7 della legge. 17.
+        \n\nLa registrazione dell\'utente è necessaria per la visualizzazione dei dati raccolti dall\'utente stesso e per la cancellazione di tali dati ai sensi dell\'art. 17 GDPR.
         \nLa registrazione dell\'utente è necessaria per l\'adempimento di un contratto con l\'utente o per l\'esecuzione di misure precontrattuali.
 
             \n\n<b>4.3 Durata della memorizzazione</b>
@@ -315,7 +319,7 @@
         \n\n- per esercitare la liberta\' di espressione e di informazione;
         \n- di adempiere ad un obbligo giuridico imposto dal diritto dell\'Unione o degli Stati membri cui è soggetto il responsabile del trattamento, o di eseguire un compito di interesse pubblico o nell\'esercizio dei pubblici poteri affidati al responsabile del trattamento;
         \n- per motivi di interesse pubblico nel settore della sanità pubblica ai sensi dell\'art. 9 cpv. 2 lett. h e i e Art. 9 cpv. 3 GDPR;
-        \n- a fini archivistici di pubblico interesse, a fini di ricerca scientifica o storica o a fini statistici ai sensi dell\'art. 9 cpv. 2 lett. h e i e dell\'art. 9 cpv. 3 RDPP; \n- a fini archivistici nell\'interesse pubblico, a fini di ricerca scientifica o storica o a fini statistici ai sensi dell\'art. 9 cpv. 2 lett. h). 89 cpv. 1 GDPR, nella misura in cui la legge di cui al paragrafo "Obbligo di cancellazione dei dati" rende presumibilmente impossibile o pregiudica gravemente il raggiungimento degli obiettivi di tale trattamento, oppure
+        \n- per scopi di archiviazione nel pubblico interesse, per scopi di ricerca scientifica o storica o per scopi statistici ai sensi dell\'art. 89, comma 1, lettera a). 89 par. 1 GDPR, nella misura in cui la legge citata al punto \"Obbligo di cancellazione dei dati\" renda presumibilmente impossibile o pregiudichi gravemente il raggiungimento degli obiettivi di tale trattamento, oppure
         \n- per far valere, esercitare o difendere un\'azione legale.
 
         \n\n<b>5.5 Diritto a ricevere informazioni</b>

@@ -56,7 +56,7 @@ android {
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
 
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
-        buildConfigField "int", "currentTerms", "4"
+        buildConfigField "int", "currentTerms", "5"
 
         // Ensure that the backend's "CyfaceFull" flavor is always used
         missingDimensionStrategy 'project', 'cyface'

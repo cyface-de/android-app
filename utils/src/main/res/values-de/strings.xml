@@ -163,7 +163,7 @@
         \n- Status des Geräts: Batterieladung und -temperatur, Ladezustand, Zeitpunkt des Gerätestarts, Arbeitsspeicher, Verbindungstyp (Wi-Fi/Mobil-Daten), Speicherplatz, verfügbarer Speicher, bevorzugte Sprache, Geräteausrichtung, Bildschirmauflösung und -dichte, Zeitzone
         \n- IP-Adresse des Geräts (durch den Verbindungsaufbau)
 
-        \n\nDie Informationen werden anonym erhoben, nicht für persönliche Zwecke oder zu Werbezwecken verwendet und anschließend wieder gelöscht. Rechtsgrundlage für die vorgenannte Datenverarbeitung ist Art. 6, Abs. 1 lit. f der DSGVO.
+        \n\nDie Informationen werden anonym erhoben, nicht für persönliche Zwecke oder zu Werbezwecken verwendet und nach einem Zeitraum von 90 Tagen gelöscht. Rechtsgrundlage für die vorgenannte Datenverarbeitung ist Art. 6, Abs. 1 lit. f der DSGVO. Zu diesem Zweck wurde mit der Functional Software Inc. ein Auftragsverarbeitungsvertrag (AV-Vertrag) abgeschlossen.
 
         \n\nZweck der Verarbeitung ist ausschließlich die Verbessung der Stabilität und Nutzbarkeit der App. Weitere Informationen bzgl. der Datenverarbeitung durch Sentry finden Sie in den Datenschutzrichtlinien von Sentry: https://sentry.io/privacy/</string>
 
@@ -171,7 +171,7 @@
     <string name="disclaimer">Disclaimer</string>
     <string name="disclaimer_content">Die Anwendung (im Folgenden auch \„App\") befindet sich in der <b>Betaphase</b>. Sie wurde nach bestem Wissen mit größt möglicher Sorgfalt von ausgebildeten Softwareentwicklern erstellt. Wir testen die Anwendung regelmäßig und ausführlich auf unseren eigenen mobilen Endgeräten.
         \nDerzeit ist es uns aber unmöglich die Haftung für mögliche Schäden zu übernehmen die Ihnen während der Benutzung der App entstehen. Gleichzeitig übernehmen wir keine Garantie für die ständige Verfügbarkeit der an die App geknüpften Dienste, wie Datenupload, Datenverarbeitung und Datenvisualisierung.
-        \n<b>Mit der Verwendung dieser App akzeptieren Sie die hier aufgeführten Bedingungen und unten stehende Datenschutzerklärung.</b></string>
+        \n<b>Mit der Verwendung dieser App nehmen Sie die hier aufgeführten Bedingungen und unten stehende Datenschutzerklärung zur Kenntnis.</b></string>
 
     <!-- Attention: The legal text should be updated first in Confluence! -->
     <!-- Version 2.1.1 -->
@@ -202,7 +202,7 @@
         \nIst die Verarbeitung zur Wahrung eines berechtigten Interesses unseres Unternehmens oder eines Dritten erforderlich und überwiegen die Interessen, Grundrechte und Grundfreiheiten des Betroffenen das erstgenannte Interesse nicht, so dient Art. 6 Abs. 1 lit. f DSGVO als Rechtsgrundlage für die Verarbeitung.
 
         \n\n<b>2.3 Datenlöschung und Speicherdauer</b>
-        \n\nDie personenbezogenen Daten der betroffenen Person werden gelöscht oder gesperrt, sobald der Zweck der Speicherung entfällt. Eine Speicherung kann darüber hinaus erfolgen, wenn dies durch den europäischen oder nationalen Gesetzgeber in unionsrechtlichen Verordnungen, Gesetzen oder sonstigen Vorschriften, denen der Verantwortliche unterliegt, vorgesehen wurde. Eine Sperrung oder Löschung der Daten erfolgt auch dann, wenn eine durch die genannten Normen vorgeschriebene Speicherfrist abläuft, es sei denn, dass eine Erforderlichkeit zur weiteren Speicherung der Daten für einen Vertragsabschluss oder eine Vertragserfüllung besteht.
+        \n\nDie personenbezogenen Daten der betroffenen Person werden gelöscht oder gesperrt, sobald der Zweck der Speicherung entfällt (z.B. mit Abschluss des zugehörigen Projektes) oder wenn der zugehörige Account auf Anfrage gelöscht wird. Eine Speicherung kann darüber hinaus erfolgen, wenn dies durch den europäischen oder nationalen Gesetzgeber in unionsrechtlichen Verordnungen, Gesetzen oder sonstigen Vorschriften, denen der Verantwortliche unterliegt, vorgesehen wurde. Eine Sperrung oder Löschung der Daten erfolgt auch dann, wenn eine durch die genannten Normen vorgeschriebene Speicherfrist abläuft, es sei denn, dass eine Erforderlichkeit zur weiteren Speicherung der Daten für einen Vertragsabschluss oder eine Vertragserfüllung besteht.
 
         \n\n<b>3. Bereitstellung der Anwendung und Erstellung von Logfiles</b>
         \n\n<b>3.1 Beschreibung und Umfang der Datenverarbeitung</b>
@@ -219,6 +219,7 @@
 
         \n\nDiese Daten kommen direkt von den Sensoren des verwendeten mobilen Gerätes, bzw. werden in der mobilen Anwendung erzeugt. Kontinuierliche Erfassung bedeutet, dass die Geodaten im Abstand von wenigstens einer Sekunde erfasst werden. Beschleunigungs-, Winkelbeschleunigungs- und Magnetometerdaten werden mit der maximalen von der Hardware unterstützen Frequenz erfasst.
         \nDie erfassten Daten werden mittels kabelloser Datenübertragung an einen Cyface Server gesendet und dort zur weiteren Verarbeitung in einer Datenbank abgelegt. Der Cyface Server steht derzeit in Deutschland und wird auch in Zukunft deutschem Recht folgen.
+        \nDie erfassten Daten werden im Rahmen von Forschungs- und Entwicklungsprojekten, Partnern in diesen Projekten zugänglich gemacht. Mit diesen Partner besteht ein schriftliche gegenseitig unterschriebene Vereinbarung zur Gemeinsamen Verantwortlichkeit. Grundlage dafür bildet Art. 26 DSGVO.
         \nDie Daten werden ebenfalls teilweise oder vollständig in den Logfiles unseres Systems gespeichert. Eine Speicherung dieser Daten zusammen mit anderen personenbezogenen Daten des Nutzers findet nicht statt.
         \nRechtsgrundlage für die vorübergehende Speicherung der Daten und der Logfiles ist Art. 6 Abs. 1 lit. f DSGVO.
 
@@ -239,14 +240,17 @@
 
         \n\n- Eine E-Mail Adresse des Nutzers
         \n- Ein Passwort des Nutzers
-        \n- Im Rahmen des Registrierungsprozesses wird eine Einwilligung des Nutzers zur Verarbeitung dieser Daten eingeholt.
+
+        \n\nIm Rahmen des Registrierungsprozesses wird eine Einwilligung des Nutzers zur Verarbeitung dieser Daten eingeholt.
+
+        \n\nVerwendet der Nutzer einen Einladungs-Code, -Link oder -QR-Code, wird der Nutzeraccount bei der Registrierung mit dieser Einladung verbunden. Der Nutzer wird darüber bei der Registrierung informiert und hat die Möglichkeit, sich ohne Einladung zu registrieren.
 
         \n\n<b>4.1 Rechtsgrundlage für die Datenverarbeitung</b>
         \n\nRechtsgrundlage für die Verarbeitung der Daten ist bei Vorliegen einer Einwilligung des Nutzers Art. 6 Abs. 1 lit. a DSGVO.
         \nDient die Registrierung der Erfüllung eines Vertrages, dessen Vertragspartei der Nutzer ist oder der Durchführung vorvertraglicher Maßnahmen, so ist zusätzliche Rechtsgrundlage für die Verarbeitung der Daten Art. 6 Abs. 1 lit. b DSGVO.
 
         \n\n<b>4.2 Zweck der Datenverarbeitung</b>
-        \n\nEine Registrierung des Nutzers ist für die Darstellung der durch den Nutzer selbst erfassten Daten so wie die Löschung dieser Daten gemäß Art. 17 erforderlich.
+        \n\nEine Registrierung des Nutzers ist für die Darstellung der durch den Nutzer selbst erfassten Daten so wie die Löschung dieser Daten gemäß Art. 17 DSGVO erforderlich.
         \nEine Registrierung des Nutzers ist zur Erfüllung eines Vertrages mit dem Nutzer oder zur Durchführung vorvertraglicher Maßnahmen erforderlich.
 
         \n\n<b>4.3 Dauer der Speicherung</b>
