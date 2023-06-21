@@ -40,11 +40,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.volley.VolleyError
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.utils.databinding.FragmentTripsBinding
+import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -56,6 +56,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import okio.IOException
+import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Double.min
 import java.lang.ref.WeakReference
@@ -279,7 +284,7 @@ class TripsFragment : Fragment() {
         _binding?.achievements?.visibility = VISIBLE
     }
 
-    private fun handleVolleyError(it: VolleyError) {
+    private fun handleError(it: IOException) {
         Handler(Looper.getMainLooper()).post {
             // This could also be another problem than "offline"
             _binding?.achievementsErrorMessage?.text =
@@ -339,85 +344,137 @@ class TripsFragment : Fragment() {
     private fun showVouchersLeft() {
         try {
             incentives!!.availableVouchers(
-                requireContext(),
-                { response ->
-                    // If parsing crashes the server probably returned a 302 which forwards to
-                    // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
-                    // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
-                    val json = JSONObject(response)
-                    val availableVouchers = json.getInt("vouchers")
-                    if (availableVouchers > 0) {
-                        Handler(Looper.getMainLooper()).post {
-                            // Can be null when switching tab before response returns
-                            _binding?.achievementsVouchersLeft?.text =
-                                getString(R.string.voucher_left, availableVouchers)
-                            _binding?.achievementsError?.visibility = GONE
-                            _binding?.achievements?.visibility = VISIBLE
-                        }
-                    } else {
-                        showNoVouchersLeft()
-                        //_binding?.achievementsError?.visibility = GONE
-                        //_binding?.achievements?.visibility = GONE
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        handleError(e)
                     }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        if (response.code == 200) {
+                            try {
+                                val json = JSONObject(response.body!!.string())
+                                val availableVouchers = json.getInt("vouchers")
+                                if (availableVouchers > 0) {
+                                    Handler(Looper.getMainLooper()).post {
+                                        // Can be null when switching tab before response returns
+                                        _binding?.achievementsVouchersLeft?.text =
+                                            getString(R.string.voucher_left, availableVouchers)
+                                        _binding?.achievementsError?.visibility = GONE
+                                        _binding?.achievements?.visibility = VISIBLE
+                                    }
+                                } else {
+                                    showNoVouchersLeft()
+                                    //_binding?.achievementsError?.visibility = GONE
+                                    //_binding?.achievements?.visibility = GONE
+                                }
+                            } catch (e: JSONException) {
+                                handleJsonException(e)
+                            }
+                        } else {
+                            handleUnknownResponse(response.code)
+                        }
+                    }
+
                 },
-                { handleVolleyError(it) },
-                { handleAuthorizationException(it) })
+                object : AuthExceptionListener {
+                    override fun onException(e: AuthorizationException) {
+                        handleAuthorizationException(e)
+                    }
+                })
         } catch (e: Exception) {
             handleException(e)
         }
     }
 
+    private fun handleUnknownResponse(responseCode: Int) {
+        if (isReportingEnabled) {
+            Sentry.captureMessage("Unknown response code: $responseCode")
+        }
+        throw IllegalArgumentException("Unknown response code: $responseCode")
+    }
+
+    @Suppress("SpellCheckingInspection")
+    private fun handleJsonException(e: JSONException) {
+        // If parsing crashes the server probably returned a 302 which forwards to
+        // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
+        // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
+        if (isReportingEnabled) {
+            Sentry.captureMessage("Forwarded? Forgot Auth header?")
+        }
+        throw java.lang.IllegalStateException("Forwarded? Forgot Auth header?", e)
+    }
+
     private fun showVoucher() {
         try {
             incentives!!.voucher(
-                requireContext(),
-                { response ->
-                    val code = response.getString("code")
-                    val until = response.getString("until")
-                    Handler(Looper.getMainLooper()).post {
-                        binding.achievementsError.visibility = GONE
-                        binding.achievementsUnlocked.visibility = GONE
-                        binding.achievementsProgress.visibility = GONE
-                        binding.achievementsReceived.visibility = VISIBLE
-                        binding.achievementsReceivedContent.text =
-                            getString(R.string.voucher_code_is, code)
-                        @Suppress("SpellCheckingInspection")
-                        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-                        val validUntil = format.parse(until)
-                        val untilText =
-                            SimpleDateFormat.getDateInstance(
-                                SimpleDateFormat.LONG,
-                                Locale.getDefault()
-                            ).format(validUntil!!.time)
-                        binding.achievementValidUntil.text =
-                            getString(R.string.valid_until, untilText)
-                        binding.achievementsReceivedButton.setOnClickListener {
-                            val clipboard =
-                                getSystemService(requireContext(), ClipboardManager::class.java)
-                            val clip = ClipData.newPlainText(getString(R.string.voucher_code), code)
-                            clipboard!!.setPrimaryClip(clip)
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        handleError(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        // Capture all responses, also non-successful response codes
+                        if (response.code == 428) {
+                            // Use from wrong municipality tried to request a voucher [RFR-605]
+                            throw IllegalStateException("Voucher not allowed for this user")
+                        } else if (response.code == 204) {
+                            // if this is in face 204: The last voucher just got assigned
+                            // else the server forgot to send a JSON content
+                            showNoVouchersLeft()
+                            // This should hardly ever happen, thus, reporting to Sentry
+                            if (isReportingEnabled) {
+                                Sentry.captureMessage("Last voucher just got assigned?")
+                            }
+                        } else if (response.code == 200) {
+                            try {
+                                val json = JSONObject(response.body!!.string())
+                                val code = json.getString("code")
+                                val until = json.getString("until")
+                                Handler(Looper.getMainLooper()).post {
+                                    binding.achievementsError.visibility = GONE
+                                    binding.achievementsUnlocked.visibility = GONE
+                                    binding.achievementsProgress.visibility = GONE
+                                    binding.achievementsReceived.visibility = VISIBLE
+                                    binding.achievementsReceivedContent.text =
+                                        getString(R.string.voucher_code_is, code)
+                                    @Suppress("SpellCheckingInspection")
+                                    val format =
+                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+                                    val validUntil = format.parse(until)
+                                    val untilText =
+                                        SimpleDateFormat.getDateInstance(
+                                            SimpleDateFormat.LONG,
+                                            Locale.getDefault()
+                                        ).format(validUntil!!.time)
+                                    binding.achievementValidUntil.text =
+                                        getString(R.string.valid_until, untilText)
+                                    binding.achievementsReceivedButton.setOnClickListener {
+                                        val clipboard =
+                                            getSystemService(
+                                                requireContext(),
+                                                ClipboardManager::class.java
+                                            )
+                                        val clip =
+                                            ClipData.newPlainText(
+                                                getString(R.string.voucher_code),
+                                                code
+                                            )
+                                        clipboard!!.setPrimaryClip(clip)
+                                    }
+                                }
+                            } catch (e: JSONException) {
+                                handleJsonException(e)
+                            }
+                        } else {
+                            handleUnknownResponse(response.code)
                         }
                     }
                 },
-                {
-                    val code = it.networkResponse?.statusCode
-                    val responseIsEmpty = it.cause?.message == "End of input at character 0 of "
-                    if (code != null && code == 428) {
-                        // Use from wrong municipality tried to request a voucher [RFR-605]
-                        throw IllegalStateException(it)
-                    } else if(responseIsEmpty /* code probably 204 without content */) {
-                        // if this is in face 204: The last voucher just got assigned
-                        // else the server forgot to send a JSON content
-                        showNoVouchersLeft()
-                        // This should hardly ever happen, thus, reporting to Sentry
-                        if (isReportingEnabled) {
-                            Sentry.captureMessage("Last voucher just got assigned?")
-                        }
-                    } else {
-                        handleVolleyError(it)
+                object : AuthExceptionListener {
+                    override fun onException(e: AuthorizationException) {
+                        handleAuthorizationException(e)
                     }
-                },
-                { handleAuthorizationException(it) })
+                })
         } catch (e: Exception) {
             handleException(e)
         }

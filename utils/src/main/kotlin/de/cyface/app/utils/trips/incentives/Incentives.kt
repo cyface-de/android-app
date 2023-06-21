@@ -19,15 +19,12 @@
 package de.cyface.app.utils.trips.incentives
 
 import android.content.Context
-import com.android.volley.Response.ErrorListener
-import com.android.volley.Response.Listener
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import de.cyface.synchronization.Auth
 import de.cyface.uploader.DefaultAuthenticator
 import net.openid.appauth.AuthorizationException
-import org.json.JSONObject
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.net.URL
 
 /**
@@ -44,84 +41,58 @@ class Incentives(
     private val apiEndpoint: String,
     private val auth: Auth
 ) {
+    private val client: OkHttpClient = OkHttpClient()
 
     /**
      * Requests the number of available vouchers.
      *
-     * @param context the context required to load the account manager and to create cache dirs
      * @param handler the handler which receives the response in case of success
-     * @param failureHandler the handler which receives the errors
+     * @param authErrorHandler the handler which receives the auth errors
      */
     fun availableVouchers(
-        context: Context,
-        handler: Listener<String>,
-        failureHandler: ErrorListener,
-        authErrorHandler: Listener<AuthorizationException>
+        handler: Callback,
+        authErrorHandler: AuthExceptionListener
     ) {
         auth.performActionWithFreshTokens { accessToken, _, ex ->
             if (ex != null) {
-                authErrorHandler.onResponse(ex as AuthorizationException)
+                authErrorHandler.onException(ex as AuthorizationException)
                 return@performActionWithFreshTokens
             }
 
-            // Try to send the request and handle expected errors
-            val queue = Volley.newRequestQueue(context)
+            // Try to send the request
             val url = voucherCountEndpoint().toString()
-            val request = object : StringRequest(
-                Method.GET,
-                url,
-                handler,
-                failureHandler
-            ) {
-                override fun getHeaders(): MutableMap<String, String> {
-                    return headers(accessToken!!)
-                }
-            }
-            queue.add(request)
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer $accessToken")
+                .build()
+            client.newCall(request).enqueue(handler)
         }
     }
 
     /**
      * Requests a voucher for the currently logged in user.
      *
-     * @param context the context required to load the account manager and to create cache dirs
      * @param handler the handler which receives the response in case of success
-     * @param failureHandler the handler which receives the errors
+     * @param authErrorHandler the handler which receives the auth errors
      */
     fun voucher(
-        context: Context,
-        handler: Listener<JSONObject>,
-        failureHandler: ErrorListener,
-        authErrorHandler: Listener<AuthorizationException>
+        handler: Callback,
+        authErrorHandler: AuthExceptionListener
     ) {
         auth.performActionWithFreshTokens { accessToken, _, ex ->
             if (ex != null) {
-                authErrorHandler.onResponse(ex as AuthorizationException)
+                authErrorHandler.onException(ex as AuthorizationException)
                 return@performActionWithFreshTokens
             }
 
-            // Try to send the request and handle expected errors
-            val queue = Volley.newRequestQueue(context)
+            // Try to send the request
             val url = voucherEndpoint().toString()
-            val request = object : JsonObjectRequest(
-                Method.GET,
-                url,
-                null,
-                handler,
-                failureHandler
-            ) {
-                override fun getHeaders(): MutableMap<String, String> {
-                    return headers(accessToken!!)
-                }
-            }
-            queue.add(request)
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer $accessToken")
+                .build()
+            client.newCall(request).enqueue(handler)
         }
-    }
-
-    private fun headers(jwtAuthToken: String): MutableMap<String, String> {
-        val headers: MutableMap<String, String> = HashMap()
-        headers["Authorization"] = "Bearer $jwtAuthToken"
-        return headers
     }
 
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
