@@ -187,7 +187,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-            //startSynchronization() //FIXME: we do this in displayAuthorized() instead!
+            //startSynchronization() // We do this in displayAuthorized() instead!
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             /*cameraService = CameraService(
                 fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),

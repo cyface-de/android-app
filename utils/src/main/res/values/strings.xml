@@ -15,6 +15,16 @@
     <string name="logo_content_description" translatable="false">Logo</string>
     <string name="log_in">Log in</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="initializing">Initializing</string>
+    <string name="retrieving_discovery_document">Contacting authentication server</string>
+    <string name="making_authorization_request">Authentication</string>
+    <string name="dynamically_registering_client">Register client</string>
+    <string name="failed_to_register_client">Failed to register client: %s</string>
+    <string name="failed_to_retrieve_discovery">Authentication server unreachable: %s</string>
+    <string name="user_is_already_authenticated">Already authenticated</string>
+    <string name="authorization_canceled">Login aborted</string>
+    <string name="logging_in">Logging in …</string>
+    <string name="retry">Try again</string>
 
     <!-- BottomNavigationView -->
     <string name="trips">Trips</string>
