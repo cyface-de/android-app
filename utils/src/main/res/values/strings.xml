@@ -13,32 +13,13 @@
 
     <!-- Login -->
     <string name="logo_content_description" translatable="false">Logo</string>
-    <string name="login_name">Login</string>
-    <string name="password">Password</string>
     <string name="log_in">Log in</string>
-    <string name="no_credentials">No credentials?</string>
-    <string name="register_now">Register now</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="error_message_field_required">This field is required</string>
-    <string name="error_message_invalid_email">This email address is invalid</string>
-    <string name="error_message_password_too_short">This password is too short</string>
-    <string name="error_message_login_too_short">This username is too short</string>
-
-    <!-- Registration -->
-    <string name="email">Email address</string>
-    <string name="password_confirmation">Password confirmation</string>
-    <string name="sign_up">Sign Up</string>
-    <string name="error_message_passwords_do_not_match">The passwords don\'t match</string>
-    <string name="error_message_email_taken">There is already an account with this email address</string>
-    <string name="registration_failed">Registration failed</string>
-    <string name="captcha_failed">Captcha failed. Please try again</string>
-    <string name="registration_successful">Account created. Click on the link in the activation email before you can log in</string>
 
     <!-- BottomNavigationView -->
     <string name="trips">Trips</string>
     <string name="capturing">Capturing</string>
     <string name="statistics">Statistics</string>
-    <string name="already_registered">Already registered?</string>
 
     <!-- Capturing -->
     <string name="map">Map</string>
@@ -123,6 +104,10 @@
     <string name="voucher_left">%d x 15 minutes nextbike vouchers left</string>
     <string name="voucher_details">1x 15 free minutes on the next rental</string>
     <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
+    <string name="error_message_no_connection">No connection to the server</string>
+    <string name="error_message_authentication_failed">Authentication failed</string>
+    <string name="error_message_server_unavailable">Server unavailable</string>
+    <string name="error_message_request_failed">Server request failed</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>
