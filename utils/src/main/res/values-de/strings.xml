@@ -105,6 +105,7 @@
     <string name="error_message_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="error_message_server_unavailable">Server nicht erreichbar</string>
     <string name="error_message_request_failed">Serveranfrage fehlgeschlagen</string>
+    <string name="error_message_no_voucher_left">Leider sind keine Gutscheine mehr übrig</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>

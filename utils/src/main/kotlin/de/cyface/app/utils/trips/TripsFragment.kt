@@ -56,6 +56,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
+import org.json.JSONObject
 import java.lang.Double.min
 import java.lang.ref.WeakReference
 import java.net.ConnectException
@@ -340,7 +341,11 @@ class TripsFragment : Fragment() {
             incentives!!.availableVouchers(
                 requireContext(),
                 { response ->
-                    val availableVouchers = response.getInt("vouchers")
+                    // If parsing crashes the server probably returned a 302 which forwards to
+                    // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
+                    // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
+                    val json = JSONObject(response)
+                    val availableVouchers = json.getInt("vouchers")
                     if (availableVouchers > 0) {
                         Handler(Looper.getMainLooper()).post {
                             // Can be null when switching tab before response returns
@@ -350,8 +355,9 @@ class TripsFragment : Fragment() {
                             _binding?.achievements?.visibility = VISIBLE
                         }
                     } else {
-                        _binding?.achievementsError?.visibility = GONE
-                        _binding?.achievements?.visibility = GONE
+                        showNoVouchersLeft()
+                        //_binding?.achievementsError?.visibility = GONE
+                        //_binding?.achievements?.visibility = GONE
                     }
                 },
                 { handleVolleyError(it) },
@@ -393,11 +399,40 @@ class TripsFragment : Fragment() {
                         }
                     }
                 },
-                // FIXME: Handle 204 - no content (when the last voucher just got assigned)
-                { handleVolleyError(it) },
+                {
+                    val code = it.networkResponse?.statusCode
+                    val responseIsEmpty = it.cause?.message == "End of input at character 0 of "
+                    if (code != null && code == 428) {
+                        // Use from wrong municipality tried to request a voucher [RFR-605]
+                        throw IllegalStateException(it)
+                    } else if(responseIsEmpty /* code probably 204 without content */) {
+                        // if this is in face 204: The last voucher just got assigned
+                        // else the server forgot to send a JSON content
+                        showNoVouchersLeft()
+                        // This should hardly ever happen, thus, reporting to Sentry
+                        if (isReportingEnabled) {
+                            Sentry.captureMessage("Last voucher just got assigned?")
+                        }
+                    } else {
+                        handleVolleyError(it)
+                    }
+                },
                 { handleAuthorizationException(it) })
         } catch (e: Exception) {
             handleException(e)
+        }
+    }
+
+    private fun showNoVouchersLeft() {
+        Handler(Looper.getMainLooper()).post {
+            // This could also be another problem than "offline"
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_no_voucher_left)
+            _binding?.achievementsProgress?.visibility = GONE
+            _binding?.achievementsUnlocked?.visibility = GONE
+            _binding?.achievementsReceived?.visibility = GONE
+            _binding?.achievementsError?.visibility = VISIBLE
+            _binding?.achievements?.visibility = VISIBLE
         }
     }
 

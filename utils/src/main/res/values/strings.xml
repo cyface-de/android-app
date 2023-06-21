@@ -108,6 +108,7 @@
     <string name="error_message_authentication_failed">Authentication failed</string>
     <string name="error_message_server_unavailable">Server unavailable</string>
     <string name="error_message_request_failed">Server request failed</string>
+    <string name="error_message_no_voucher_left">Unfortunately, no vouchers are left</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>

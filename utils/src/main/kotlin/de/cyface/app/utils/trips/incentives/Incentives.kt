@@ -22,6 +22,7 @@ import android.content.Context
 import com.android.volley.Response.ErrorListener
 import com.android.volley.Response.Listener
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import de.cyface.synchronization.Auth
 import de.cyface.uploader.DefaultAuthenticator
@@ -53,11 +54,11 @@ class Incentives(
      */
     fun availableVouchers(
         context: Context,
-        handler: Listener<JSONObject>,
+        handler: Listener<String>,
         failureHandler: ErrorListener,
         authErrorHandler: Listener<AuthorizationException>
     ) {
-        auth.performActionWithFreshTokens() { accessToken, _, ex ->
+        auth.performActionWithFreshTokens { accessToken, _, ex ->
             if (ex != null) {
                 authErrorHandler.onResponse(ex as AuthorizationException)
                 return@performActionWithFreshTokens
@@ -66,10 +67,9 @@ class Incentives(
             // Try to send the request and handle expected errors
             val queue = Volley.newRequestQueue(context)
             val url = voucherCountEndpoint().toString()
-            val request = object : JsonObjectRequest(
+            val request = object : StringRequest(
                 Method.GET,
                 url,
-                null,
                 handler,
                 failureHandler
             ) {
