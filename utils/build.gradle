@@ -125,8 +125,8 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // Charts
     implementation "com.github.PhilJay:MPAndroidChart:$rootProject.ext.chartVersion"
-    // Http Requests
-    implementation "com.android.volley:volley:$rootProject.ext.volleyVersion"
+    // Http Requests (can't use Volley lib as it does not return status code in failure-/handler)
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
 
     // OAuth 2.0 with OpenID Connect
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion"

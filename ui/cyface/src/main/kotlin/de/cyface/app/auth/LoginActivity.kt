@@ -123,7 +123,7 @@ class LoginActivity : AppCompatActivity() {
         if (intent.getBooleanExtra(EXTRA_FAILED, false)) {
             show("Authorization canceled")
         }
-        displayLoading("Initializing")
+        displayLoading(getString(de.cyface.app.utils.R.string.initializing))
         mExecutor.submit { initializeAppAuth() }
     }
 
@@ -164,7 +164,7 @@ class LoginActivity : AppCompatActivity() {
 
     @MainThread
     fun startAuth() {
-        displayLoading("Making authorization request")
+        displayLoading(getString(de.cyface.app.utils.R.string.making_authorization_request))
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
@@ -203,7 +203,7 @@ class LoginActivity : AppCompatActivity() {
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
-        runOnUiThread { displayLoading("Retrieving discovery document") }
+        runOnUiThread { displayLoading(getString(de.cyface.app.utils.R.string.retrieving_discovery_document)) }
         Log.i(TAG, "Retrieving OpenID discovery doc")
         AuthorizationServiceConfiguration.fetchFromUrl(
             mConfiguration.discoveryUri!!,
@@ -224,7 +224,13 @@ class LoginActivity : AppCompatActivity() {
     ) {
         if (config == null) {
             Log.i(TAG, "Failed to retrieve discovery document", ex)
-            displayError("Failed to retrieve discovery document: " + ex!!.message, true)
+            val message = if (ex!!.message == "Network error") "Offline?" else ex.message
+            displayError(
+                getString(
+                    de.cyface.app.utils.R.string.failed_to_retrieve_discovery,
+                    message
+                ), true
+            )
             return
         }
         Log.i(TAG, "Discovery document retrieved")
@@ -256,7 +262,7 @@ class LoginActivity : AppCompatActivity() {
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
-        runOnUiThread { displayLoading("Dynamically registering client") }
+        runOnUiThread { displayLoading(getString(de.cyface.app.utils.R.string.dynamically_registering_client)) }
         Log.i(TAG, "Dynamically registering client")
         val registrationRequest = RegistrationRequest.Builder(
             mAuthStateManager.current.authorizationServiceConfiguration!!,
@@ -282,7 +288,12 @@ class LoginActivity : AppCompatActivity() {
         mAuthStateManager.updateAfterRegistration(response, ex)
         if (response == null) {
             Log.i(TAG, "Failed to dynamically register client", ex)
-            displayErrorLater("Failed to register client: " + ex!!.message, true)
+            displayErrorLater(
+                getString(
+                    de.cyface.app.utils.R.string.failed_to_register_client,
+                    ex!!.message
+                ), true
+            )
             return
         }
         Log.i(TAG, "Dynamically registered client: " + response.clientId)

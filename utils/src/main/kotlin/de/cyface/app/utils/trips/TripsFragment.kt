@@ -26,7 +26,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.preference.PreferenceManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -43,17 +42,26 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants.TAG
+import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.app.utils.databinding.FragmentTripsBinding
+import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.model.Measurement
 import de.cyface.utils.Validate
+import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.openid.appauth.AuthorizationException
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import okio.IOException
+import org.json.JSONException
+import org.json.JSONObject
 import java.lang.Double.min
 import java.lang.ref.WeakReference
 import java.net.ConnectException
@@ -114,6 +122,11 @@ class TripsFragment : Fragment() {
         TripsViewModelFactory(capturing.persistenceLayer.measurementRepository!!)
     }
 
+    /**
+     * `True` if the user opted-in to error reporting.
+     */
+    private var isReportingEnabled = false
+
     // This launcher must be launched to request permissions
     private var exportPermissionLauncher: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(
@@ -159,6 +172,7 @@ class TripsFragment : Fragment() {
     ): View {
         _binding = FragmentTripsBinding.inflate(inflater, container, false)
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
 
         // Bind the UI element to the adapter
         val tripsList = binding.tripsList
@@ -185,69 +199,19 @@ class TripsFragment : Fragment() {
         )
         tripsList.addItemDecoration(divider)
 
-        // Check voucher availability
-        if (incentives != null) {
-            GlobalScope.launch {
-                withContext(Dispatchers.IO) {
-                    try {
-                        incentives!!.availableVouchers(
-                            requireContext(),
-                            { response ->
-                                val availableVouchers = response.getInt("vouchers")
-                                if (availableVouchers > 0) {
-                                    Handler(Looper.getMainLooper()).post {
-                                        // Can be null when switching tab before response returns
-                                        _binding?.achievementsVouchersLeft?.text =
-                                            getString(R.string.voucher_left, availableVouchers)
-                                        _binding?.achievements?.visibility = VISIBLE
-                                    }
-                                }
-                            },
-                            {
-                                Handler(Looper.getMainLooper()).post {
-                                    Toast.makeText(
-                                        context,
-                                        "Gutscheinprüfung fehlgeschlagen: ${it.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                                // FIXME: Report to Sentry, to add error handling later
-                            },
-                            {
-                                // FIXME: handle refresh token error, e.g. when server is not reachable
-                                var reason = "Authentifizierung fehlgeschlagen: ${it.message}"
-                                if (it.cause is UnknownHostException || it.cause is ConnectException) {
-                                    reason = "Server nicht erreichbar." // e.g. device is offline
-                                } else {
-                                    // FIXME: Report to Sentry, to add error handling later
-                                }
-                                Toast.makeText(
-                                    context,
-                                    reason,
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            })
-                    } catch (e: Exception) {
-                        Handler(Looper.getMainLooper()).post {
-                            Toast.makeText(
-                                context,
-                                "Gutscheinprüfung nicht möglich",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                        Log.e(TAG, "availableVouchers crashed", e)
-                        // FIXME: Report to Sentry, to add error handling later
-                    }
-                }
-            }
-        }
-
         // Update adapters with the updates from the ViewModel
         tripsViewModel.measurements.observe(viewLifecycleOwner) { measurements ->
             measurements?.let { adapter.submitList(it) }
 
             // Show achievements progress
             if (incentives != null) {
+                // Check voucher availability
+                GlobalScope.launch {
+                    withContext(Dispatchers.IO) {
+                        showVouchersLeft()
+                    }
+                }
+
                 val totalDistanceKm = totalDistanceKm(measurements)
                 val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
 
@@ -255,6 +219,7 @@ class TripsFragment : Fragment() {
                     showProgress(progress, distanceGoalKm, totalDistanceKm)
                 } else {
                     // Show request voucher button
+                    binding.achievementsError.visibility = GONE
                     binding.achievementsProgress.visibility = GONE
                     binding.achievementsReceived.visibility = GONE
                     binding.achievementsUnlocked.visibility = VISIBLE
@@ -283,11 +248,65 @@ class TripsFragment : Fragment() {
         return binding.root
     }
 
+    private fun handleException(e: Exception) {
+        Handler(Looper.getMainLooper()).post {
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_request_failed)
+            _binding?.achievementsProgress?.visibility = GONE
+            _binding?.achievementsUnlocked?.visibility = GONE
+            _binding?.achievementsReceived?.visibility = GONE
+            _binding?.achievementsError?.visibility = VISIBLE
+            _binding?.achievements?.visibility = VISIBLE
+        }
+        // This should not happen, thus, reporting to Sentry
+        if (isReportingEnabled) {
+            Sentry.captureException(e)
+        }
+    }
+
+    private fun handleAuthorizationException(it: AuthorizationException) {
+        if (it.cause is UnknownHostException || it.cause is ConnectException) {
+            // e.g. device is offline
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_server_unavailable)
+        } else {
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_authentication_failed)
+            // This should not happen, thus, reporting to Sentry
+            if (isReportingEnabled) {
+                Sentry.captureException(it)
+            }
+        }
+        _binding?.achievementsProgress?.visibility = GONE
+        _binding?.achievementsUnlocked?.visibility = GONE
+        _binding?.achievementsReceived?.visibility = GONE
+        _binding?.achievementsError?.visibility = VISIBLE
+        _binding?.achievements?.visibility = VISIBLE
+    }
+
+    private fun handleError(it: IOException) {
+        Handler(Looper.getMainLooper()).post {
+            // This could also be another problem than "offline"
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_no_connection)
+            _binding?.achievementsProgress?.visibility = GONE
+            _binding?.achievementsUnlocked?.visibility = GONE
+            _binding?.achievementsReceived?.visibility = GONE
+            _binding?.achievementsError?.visibility = VISIBLE
+            _binding?.achievements?.visibility = VISIBLE
+        }
+        // This should not happen, thus, reporting to Sentry
+        if (isReportingEnabled) {
+            Sentry.captureException(it)
+        }
+    }
+
     private fun showProgress(
         progress: Double,
         @Suppress("SameParameterValue") distanceGoalKm: Double,
         totalDistanceKm: Double
     ) {
+        binding.achievementsError.visibility = GONE
         binding.achievementsUnlocked.visibility = GONE
         binding.achievementsReceived.visibility = GONE
         binding.achievementsProgress.visibility = VISIBLE
@@ -322,70 +341,155 @@ class TripsFragment : Fragment() {
         return apiEndpoint!!
     }
 
+    private fun showVouchersLeft() {
+        try {
+            incentives!!.availableVouchers(
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        handleError(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        if (response.code == 200) {
+                            try {
+                                val json = JSONObject(response.body!!.string())
+                                val availableVouchers = json.getInt("vouchers")
+                                if (availableVouchers > 0) {
+                                    Handler(Looper.getMainLooper()).post {
+                                        // Can be null when switching tab before response returns
+                                        _binding?.achievementsVouchersLeft?.text =
+                                            getString(R.string.voucher_left, availableVouchers)
+                                        _binding?.achievementsError?.visibility = GONE
+                                        _binding?.achievements?.visibility = VISIBLE
+                                    }
+                                } else {
+                                    showNoVouchersLeft()
+                                    //_binding?.achievementsError?.visibility = GONE
+                                    //_binding?.achievements?.visibility = GONE
+                                }
+                            } catch (e: JSONException) {
+                                handleJsonException(e)
+                            }
+                        } else {
+                            handleUnknownResponse(response.code)
+                        }
+                    }
+
+                },
+                object : AuthExceptionListener {
+                    override fun onException(e: AuthorizationException) {
+                        handleAuthorizationException(e)
+                    }
+                })
+        } catch (e: Exception) {
+            handleException(e)
+        }
+    }
+
+    private fun handleUnknownResponse(responseCode: Int) {
+        if (isReportingEnabled) {
+            Sentry.captureMessage("Unknown response code: $responseCode")
+        }
+        throw IllegalArgumentException("Unknown response code: $responseCode")
+    }
+
+    @Suppress("SpellCheckingInspection")
+    private fun handleJsonException(e: JSONException) {
+        // If parsing crashes the server probably returned a 302 which forwards to
+        // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
+        // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
+        if (isReportingEnabled) {
+            Sentry.captureMessage("Forwarded? Forgot Auth header?")
+        }
+        throw java.lang.IllegalStateException("Forwarded? Forgot Auth header?", e)
+    }
+
     private fun showVoucher() {
         try {
             incentives!!.voucher(
-                requireContext(),
-                { response ->
-                    val code = response.getString("code")
-                    val until = response.getString("until")
-                    Handler(Looper.getMainLooper()).post {
-                        binding.achievementsUnlocked.visibility = GONE
-                        binding.achievementsProgress.visibility = GONE
-                        binding.achievementsReceived.visibility = VISIBLE
-                        binding.achievementsReceivedContent.text =
-                            getString(R.string.voucher_code_is, code)
-                        @Suppress("SpellCheckingInspection")
-                        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-                        val validUntil = format.parse(until)
-                        val untilText =
-                            SimpleDateFormat.getDateInstance(
-                                SimpleDateFormat.LONG,
-                                Locale.getDefault()
-                            ).format(validUntil!!.time)
-                        binding.achievementValidUntil.text =
-                            getString(R.string.valid_until, untilText)
-                        binding.achievementsReceivedButton.setOnClickListener {
-                            val clipboard =
-                                getSystemService(requireContext(), ClipboardManager::class.java)
-                            val clip = ClipData.newPlainText(getString(R.string.voucher_code), code)
-                            clipboard!!.setPrimaryClip(clip)
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        handleError(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        // Capture all responses, also non-successful response codes
+                        if (response.code == 428) {
+                            // Use from wrong municipality tried to request a voucher [RFR-605]
+                            throw IllegalStateException("Voucher not allowed for this user")
+                        } else if (response.code == 204) {
+                            // if this is in face 204: The last voucher just got assigned
+                            // else the server forgot to send a JSON content
+                            showNoVouchersLeft()
+                            // This should hardly ever happen, thus, reporting to Sentry
+                            if (isReportingEnabled) {
+                                Sentry.captureMessage("Last voucher just got assigned?")
+                            }
+                        } else if (response.code == 200) {
+                            try {
+                                val json = JSONObject(response.body!!.string())
+                                val code = json.getString("code")
+                                val until = json.getString("until")
+                                Handler(Looper.getMainLooper()).post {
+                                    binding.achievementsError.visibility = GONE
+                                    binding.achievementsUnlocked.visibility = GONE
+                                    binding.achievementsProgress.visibility = GONE
+                                    binding.achievementsReceived.visibility = VISIBLE
+                                    binding.achievementsReceivedContent.text =
+                                        getString(R.string.voucher_code_is, code)
+                                    @Suppress("SpellCheckingInspection")
+                                    val format =
+                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+                                    val validUntil = format.parse(until)
+                                    val untilText =
+                                        SimpleDateFormat.getDateInstance(
+                                            SimpleDateFormat.LONG,
+                                            Locale.getDefault()
+                                        ).format(validUntil!!.time)
+                                    binding.achievementValidUntil.text =
+                                        getString(R.string.valid_until, untilText)
+                                    binding.achievementsReceivedButton.setOnClickListener {
+                                        val clipboard =
+                                            getSystemService(
+                                                requireContext(),
+                                                ClipboardManager::class.java
+                                            )
+                                        val clip =
+                                            ClipData.newPlainText(
+                                                getString(R.string.voucher_code),
+                                                code
+                                            )
+                                        clipboard!!.setPrimaryClip(clip)
+                                    }
+                                }
+                            } catch (e: JSONException) {
+                                handleJsonException(e)
+                            }
+                        } else {
+                            handleUnknownResponse(response.code)
                         }
                     }
                 },
-                {
-                    // FIXME: Handle 204 - no content (when the last voucher just got assigned)
-                    Toast.makeText(
-                        context,
-                        "Gutscheinanfrage fehlgeschlagen: ${it.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    // FIXME: Report to Sentry, to add error handling later
-                },
-                {
-                    // FIXME: handle refresh token error, e.g. when server is not reachable
-                    var reason = "Authentifizierung fehlgeschlagen: ${it.message}"
-                    if (it.cause is UnknownHostException || it.cause is ConnectException) {
-                        reason = "Server nicht erreichbar." // e.g. device is offline
-                    } else {
-                        // FIXME: Report to Sentry, to add error handling later
+                object : AuthExceptionListener {
+                    override fun onException(e: AuthorizationException) {
+                        handleAuthorizationException(e)
                     }
-                    Toast.makeText(
-                        context,
-                        reason,
-                        Toast.LENGTH_LONG
-                    ).show()
                 })
         } catch (e: Exception) {
-            Handler(Looper.getMainLooper()).post {
-                Toast.makeText(
-                    context,
-                    "Gutscheinanfrage nicht möglich",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            Log.e(TAG, "availableVouchers crashed", e)
-            // FIXME: Report to Sentry, to add error handling later
+            handleException(e)
+        }
+    }
+
+    private fun showNoVouchersLeft() {
+        Handler(Looper.getMainLooper()).post {
+            // This could also be another problem than "offline"
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_no_voucher_left)
+            _binding?.achievementsProgress?.visibility = GONE
+            _binding?.achievementsUnlocked?.visibility = GONE
+            _binding?.achievementsReceived?.visibility = GONE
+            _binding?.achievementsError?.visibility = VISIBLE
+            _binding?.achievements?.visibility = VISIBLE
         }
     }
 

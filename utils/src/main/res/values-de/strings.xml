@@ -12,27 +12,18 @@
     <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet.</string>
 
     <!-- Login -->
-    <string name="login_name">Login</string>
-    <string name="password">Passwort</string>
     <string name="log_in">Anmelden</string>
-    <string name="no_credentials">Keine Zugangsdaten?</string>
-    <string name="register_now">Registrieren</string>
     <string name="title_activity_login">Einloggen</string>
-    <string name="error_message_field_required">Bitte ausfüllen</string>
-    <string name="error_message_invalid_email">Dies ist keine E-Mail Adresse</string>
-    <string name="error_message_password_too_short">Das Passwort ist zu kurz</string>
-    <string name="error_message_login_too_short">Der Nutzername ist zu kurz</string>
-
-    <!-- Registration -->
-    <string name="email">E-Mail Adresse</string>
-    <string name="password_confirmation">Passwort bestätigen</string>
-    <string name="sign_up">Registrieren</string>
-    <string name="already_registered">Bereits registriert?</string>
-    <string name="error_message_passwords_do_not_match">Die Passwörter stimmen nicht überein</string>
-    <string name="error_message_email_taken">Es existiert bereits ein Account mit dieser E-Mail Adresse</string>
-    <string name="registration_failed">Registrierung fehlgeschlagen</string>
-    <string name="captcha_failed">Captcha fehlgeschlagen. Bitte erneut probieren</string>
-    <string name="registration_successful">Nutzerkonto angelegt. Klicken Sie auf den Bestätigungslink in der Aktivierungsemail bevor Sie sich einloggen zu können</string>
+    <string name="initializing">Initialisierung</string>
+    <string name="retrieving_discovery_document">Kontaktiere Authentifizierungsserver</string>
+    <string name="making_authorization_request">Authentifizierung</string>
+    <string name="dynamically_registering_client">Registriere Client</string>
+    <string name="failed_to_register_client">Client Registrierung fehlgeschlagen: %s</string>
+    <string name="failed_to_retrieve_discovery">Authentifiziungsserver nicht erreichbar: %s</string>
+    <string name="user_is_already_authenticated">Bereits eingeloggt</string>
+    <string name="authorization_canceled">Anmeldung abgebrochen</string>
+    <string name="logging_in">Sie werden eingeloggt …</string>
+    <string name="retry">Erneut versuchen</string>
 
     <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
     <string name="trips">Fahrten</string>
@@ -120,6 +111,11 @@
     <string name="voucher_left">%d x 15 Minuten nextbike Gutscheine übrig</string>
     <string name="voucher_details">1x 15 Freiminuten auf die nächste Ausleihe</string>
     <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
+    <string name="error_message_no_connection">Keine Verbindung zum Server</string>
+    <string name="error_message_authentication_failed">Authentifizierung fehlgeschlagen</string>
+    <string name="error_message_server_unavailable">Server nicht erreichbar</string>
+    <string name="error_message_request_failed">Serveranfrage fehlgeschlagen</string>
+    <string name="error_message_no_voucher_left">Leider sind keine Gutscheine mehr übrig</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>

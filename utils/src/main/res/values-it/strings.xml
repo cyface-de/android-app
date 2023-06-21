@@ -12,27 +12,18 @@
   <string name="toast_last_tracking_crashed">Il tracciamento del tuo ultimo tracking si è interrotto inaspettatamente.</string>
 
   <!-- Login -->
-  <string name="login_name">Login</string>
-  <string name="password">Password</string>
   <string name="log_in">Accedi</string>
-  <string name="no_credentials">Nessuna credenziale?</string>
-  <string name="register_now">Registrati ora</string>
   <string name="title_activity_login">Accedi</string>
-  <string name="error_message_field_required">This Quest ocampo è richiesto</string>
-  <string name="error_message_invalid_email">Questa email non è valida</string>
-  <string name="error_message_password_too_short">Questa password è troppo corta</string>
-  <string name="error_message_login_too_short">Questo nome utente è troppo corto</string>
-
-  <!-- Registration -->
-  <string name="email">Email address</string>
-  <string name="password_confirmation">Password confirmation</string>
-  <string name="sign_up">Sign Up</string>
-  <string name="already_registered">Already registered?</string>
-  <string name="error_message_passwords_do_not_match">The passwords don\'t match</string>
-  <string name="error_message_email_taken">There is already an account with this email address</string>
-  <string name="registration_failed">Registration failed</string>
-  <string name="captcha_failed">Captcha failed. Please try again</string>
-  <string name="registration_successful">Account created. Click on the link in the activation email before you can log in</string>
+  <string name="initializing">Initializing</string>
+  <string name="retrieving_discovery_document">Contacting authentication server</string>
+  <string name="making_authorization_request">Authentication</string>
+  <string name="dynamically_registering_client">Register client</string>
+  <string name="failed_to_register_client">Failed to register client: %s</string>
+  <string name="failed_to_retrieve_discovery">Authentication server unreachable: %s</string>
+  <string name="user_is_already_authenticated">Already authenticated</string>
+  <string name="authorization_canceled">Login aborted</string>
+  <string name="logging_in">Logging in …</string>
+  <string name="retry">Try again</string>
 
   <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
   <string name="trips">Trips</string>
@@ -120,6 +111,11 @@
   <string name="voucher_left">%d x 15 minutes nextbike vouchers left</string>
   <string name="voucher_details">1x 15 free minutes on the next rental</string>
   <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
+  <string name="error_message_no_connection">No connection to the server</string>
+  <string name="error_message_authentication_failed">Authentication failed</string>
+  <string name="error_message_server_unavailable">Server unavailable</string>
+  <string name="error_message_request_failed">Server request failed</string>
+  <string name="error_message_no_voucher_left">Unfortunately, no vouchers are left</string>
 
   <!-- Trip Details -->
   <string name="trip_details">Trip details</string>

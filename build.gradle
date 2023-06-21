@@ -78,7 +78,7 @@ ext {
     roomVersion = "2.5.1"
     lifecycleVersion = "2.6.1"
     navigationVersion = "2.5.3"
-    volleyVersion = "1.2.1"
+    okHttpVersion = "4.11.0"
 
     // Kotlin components
     coroutinesVersion = "1.6.4"
