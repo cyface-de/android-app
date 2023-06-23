@@ -62,16 +62,19 @@ import java.lang.ref.WeakReference
  * The Map class handles everything around the GoogleMap view.
  *
  * @author Armin Schnabel
- * @version 4.0.0
+ * @version 4.1.0
  * @since 1.0.0
  * @property view The `MapView` element of the `GoogleMap`.
  * @property onMapReadyRunnable The `Runnable` triggered when the `GoogleMap` is loaded and ready.
+ * @property ignoreAutoZoom `true` if the map should ignore the user preferences and never activate
+ * auto-zoom. `false` if auto-zoom should be enabled depending on the user preferences.
  */
 class Map(
     private val view: MapView,
     savedInstanceState: Bundle?,
     onMapReadyRunnable: Runnable,
-    permissionLauncher: ActivityResultLauncher<Array<String>>
+    permissionLauncher: ActivityResultLauncher<Array<String>>,
+    private val ignoreAutoZoom: Boolean = false
 ) : OnMapReadyCallback, LocationListener {
     /**
      * The visualization library in use.
@@ -150,11 +153,12 @@ class Map(
     private fun requestLocationUpdates() {
         val activity = view.context as Activity
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000).build()
+        val locationRequest =
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000).build()
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
-                if (locationResult.locations.size > 0 && isAutoCenterMapEnabled) {
+                if (locationResult.locations.size > 0 && isAutoCenterMapEnabled && !ignoreAutoZoom) {
                     moveToLocation(
                         true,
                         locationResult.locations[locationResult.locations.size - 1]
@@ -447,7 +451,7 @@ class Map(
 
     override fun onLocationChanged(location: Location) {
         // This is used by `ui/cyface`, the `ui/r4r` uses `onLocationResult`
-        if (isAutoCenterMapEnabled) {
+        if (isAutoCenterMapEnabled && !ignoreAutoZoom) {
             moveToLocation(true, location)
         }
     }
@@ -476,32 +480,32 @@ class Map(
      * @param isMarkerToBeFocused `True` if the newly added `Marker` is to be focused after creation
      * /
     fun addMarker(
-        eventId: Long, latLng: LatLng, modality: Modality,
-        isMarkerToBeFocused: Boolean
+    eventId: Long, latLng: LatLng, modality: Modality,
+    isMarkerToBeFocused: Boolean
     ) {
-        val modalityKey = applicationContext.getString(R.string.modality_type)
-        val modalityValue = getTranslation(WeakReference(applicationContext), modality)
-        val markerTitle = "$modalityKey : $modalityValue"
-        val markerOptions =
-            MarkerOptions().position(LatLng(latLng.latitude, latLng.longitude)).title(markerTitle)
-        val marker = googleMap!!.addMarker(markerOptions)
-        eventMarker[eventId] = marker
-        if (isMarkerToBeFocused) {
-            focusMarker(marker!!)
-        }
+    val modalityKey = applicationContext.getString(R.string.modality_type)
+    val modalityValue = getTranslation(WeakReference(applicationContext), modality)
+    val markerTitle = "$modalityKey : $modalityValue"
+    val markerOptions =
+    MarkerOptions().position(LatLng(latLng.latitude, latLng.longitude)).title(markerTitle)
+    val marker = googleMap!!.addMarker(markerOptions)
+    eventMarker[eventId] = marker
+    if (isMarkerToBeFocused) {
+    focusMarker(marker!!)
+    }
     }
 
     /**
      * Moves the camera of the map to the {@param marker} position and shows the Marker title.
      *
      * @param marker The `Marker` which is to be focused.
-     */
+    */
     fun focusMarker(marker: Marker) {
-        marker.showInfoWindow()
-        val markerLatLng = marker.position
-        val googleMap = googleMap
-        val cameraUpdate = CameraUpdateFactory.newLatLng(markerLatLng)
-        googleMap!!.moveCamera(cameraUpdate)
+    marker.showInfoWindow()
+    val markerLatLng = marker.position
+    val googleMap = googleMap
+    val cameraUpdate = CameraUpdateFactory.newLatLng(markerLatLng)
+    googleMap!!.moveCamera(cameraUpdate)
     }*/
 
     /**
