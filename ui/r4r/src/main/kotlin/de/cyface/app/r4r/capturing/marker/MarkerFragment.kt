@@ -38,7 +38,7 @@ import java.util.Calendar
  * The [Fragment] which shows a map with markers to the user.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.1
  */
 class MarkerFragment : Fragment() {
@@ -109,7 +109,7 @@ class MarkerFragment : Fragment() {
         _binding = FragmentMarkerBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
+        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher, true)
 
         return root
     }
