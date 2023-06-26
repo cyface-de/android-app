@@ -19,6 +19,7 @@
 package de.cyface.app.r4r.capturing.speed
 
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.r4r.databinding.FragmentSpeedBinding
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
+import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -66,9 +68,13 @@ class SpeedFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val isReportingEnabled =
+            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
-            persistence.eventRepository!!
+            persistence.eventRepository!!,
+            isReportingEnabled
         )
     }
 
