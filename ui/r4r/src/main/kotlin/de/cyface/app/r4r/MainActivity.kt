@@ -197,8 +197,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             throw IllegalStateException(e)
         }
 
+        // Authorization
+        auth = OAuth2(applicationContext)
+
         /****************************************************************************************/
-        // Crashes with RuntimeException: capturing not initialized when this is at the top of `onCreate`
+        // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
+        // `capturing=` or `auth=` [RFR-618].
         super.onCreate(savedInstanceState)
 
         // To access the `Activity`s' `capturingService` from `Fragment.onCreate` the
@@ -232,9 +236,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // Inject the Incentives API URL into the preferences, as the `Incentives` from `utils`
         // cannot reach the `ui.rfr.BuildConfig`.
         setIncentivesServerUrl()
-
-        // Authorization
-        auth = OAuth2(applicationContext)
     }
 
     override fun onStart() {
