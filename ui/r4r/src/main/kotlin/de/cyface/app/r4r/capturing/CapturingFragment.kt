@@ -24,6 +24,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -52,6 +53,7 @@ import de.cyface.app.r4r.capturing.marker.MarkerFragment
 import de.cyface.app.r4r.capturing.speed.SpeedFragment
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.CalibrationDialogListener
+import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -140,9 +142,13 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val viewModel: CapturingViewModel by activityViewModels {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val isReportingEnabled =
+            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
-            persistence.eventRepository!!
+            persistence.eventRepository!!,
+            isReportingEnabled
         )
     }
 

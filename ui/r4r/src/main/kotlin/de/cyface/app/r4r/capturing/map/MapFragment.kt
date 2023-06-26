@@ -39,6 +39,7 @@ import de.cyface.app.r4r.databinding.FragmentMapBinding
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -88,9 +89,13 @@ class MapFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val isReportingEnabled =
+            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
-            persistence.eventRepository!!
+            persistence.eventRepository!!,
+            isReportingEnabled
         )
     }
 

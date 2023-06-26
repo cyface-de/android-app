@@ -142,9 +142,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      */
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val isReportingEnabled =
+            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         val persistence = capturing.persistenceLayer
         CapturingViewModelFactory(
-            persistence.measurementRepository!!, persistence.eventRepository!!
+            persistence.measurementRepository!!, persistence.eventRepository!!, isReportingEnabled
         )
     }
 

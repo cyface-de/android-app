@@ -32,7 +32,7 @@ import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.repository.EventRepository
 import de.cyface.persistence.repository.MeasurementRepository
-import de.cyface.utils.Validate
+import io.sentry.Sentry
 
 /**
  * This is the [ViewModel] for the [CapturingFragment].
@@ -54,7 +54,8 @@ import de.cyface.utils.Validate
  */
 class CapturingViewModel(
     private val repository: MeasurementRepository,
-    eventRepository: EventRepository
+    eventRepository: EventRepository,
+    private val isReportingEnabled: Boolean
 ) : ViewModel() {
 
     /**
@@ -151,7 +152,14 @@ class CapturingViewModel(
      * @param location Adds a location to the latest sub-track of the [Track]s of the current [Measurement].
      */
     fun addToTrack(location: ParcelableGeoLocation) {
-        Validate.notNull(_tracks.value, "onNewGeoLocation - cached track is null")
+        if (_tracks.value == null) {
+            Log.i(TAG, "addToTrack: ignoring location, tracking is inactive")
+            // Collect metrics about this in Sentry, to see if this happens a lot
+            if (isReportingEnabled) {
+                Sentry.captureMessage("addToTrack: ignoring location, tracking is inactive")
+            }
+            return
+        }
         if (!location.isValid) {
             Log.d(TAG, "addToTrack: ignoring invalid point")
             return
@@ -204,13 +212,14 @@ class CapturingViewModel(
  */
 class CapturingViewModelFactory(
     private val repository: MeasurementRepository,
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val isReportingEnabled: Boolean
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CapturingViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CapturingViewModel(repository, eventRepository) as T
+            return CapturingViewModel(repository, eventRepository, isReportingEnabled) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
