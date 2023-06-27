@@ -129,6 +129,11 @@ class MarkerFragment : Fragment() {
         _binding = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        map?.onDestroy()
+    }
+
     companion object {
         fun eventPassed(): Boolean {
             val now = Calendar.getInstance()

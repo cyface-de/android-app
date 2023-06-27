@@ -73,7 +73,7 @@ class Map(
     private val view: MapView,
     savedInstanceState: Bundle?,
     onMapReadyRunnable: Runnable,
-    permissionLauncher: ActivityResultLauncher<Array<String>>,
+    private var permissionLauncher: ActivityResultLauncher<Array<String>>?,
     private val ignoreAutoZoom: Boolean = false
 ) : OnMapReadyCallback, LocationListener {
     /**
@@ -131,7 +131,8 @@ class Map(
         view.onCreate(savedInstanceState)
         val activity = view.context as Activity
         applicationContext = activity.applicationContext
-        permissionLauncher.launch(
+        // Ensure launcher is not called after parent fragment was destroyed [RFR-630]
+        permissionLauncher?.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -447,6 +448,11 @@ class Map(
 
     fun onPause() {
         stopLocationUpdates()
+    }
+
+    fun onDestroy() {
+        // Ensure launcher is not called after parent fragment was destroyed [RFR-630]
+        permissionLauncher = null
     }
 
     override fun onLocationChanged(location: Location) {
