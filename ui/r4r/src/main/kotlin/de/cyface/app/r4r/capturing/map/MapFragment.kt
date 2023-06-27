@@ -135,6 +135,11 @@ class MapFragment : Fragment() {
      * The `Runnable` triggered when the `Map` is loaded and ready.
      */
     private val onMapReadyRunnable = Runnable {
+        // Ignore this async runnable when the fragment is detached from the activity [RFR-629]
+        if (this.isDetached) {
+            return@Runnable
+        }
+
         map!!.renderMarkers(MarkerFragment.markers())
         observeTracks()
 
