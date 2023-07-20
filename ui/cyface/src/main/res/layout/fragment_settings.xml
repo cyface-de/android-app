@@ -64,7 +64,33 @@
         app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- the two items below were before in the sidebar -->
+    <!-- camera feature -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/camera_mode_wrapper"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/synchronization_wrapper">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/camera_mode"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+      <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/camera_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- the following item was in the old sidebar -->
 
     <!--item
         android:id="@+id/speed_sensor"
@@ -72,17 +98,8 @@
         app:actionLayout="@layout/drawer_list_switch"
         app:showAsAction="ifRoom"/-->
 
-    <!--item
-      android:id="@+id/pictures"
-      android:title="@string/drawer_setting_pictures"
-      android:visible="false"
-      android:checkable="false"
-      app:actionLayout="@layout/drawer_list_switch"
-      app:showAsAction="ifRoom" /-->
-
-    <!--
-    < Show current camera status and mode >
-    <LinearLayout
+    <!-- Show current camera status and mode -->
+    <!--LinearLayout  // TODO: disabled as this only changes when re-opening the fragment atm
       android:id="@+id/camera_status_wrapper"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -106,20 +123,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="4pt" />
-    </LinearLayout>
+    </LinearLayout-->
 
-    < - - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - >
+    <!-- - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
     <View
       android:id="@+id/divider1"
       android:layout_width="match_parent"
       android:layout_height="1dp"
       app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/camera_status_wrapper"
+      app:layout_constraintTop_toBottomOf="@id/camera_mode_wrapper"
       android:layout_marginTop="8pt"
       android:layout_marginBottom="8pt"
       android:background="@color/grey_700" />
 
-    < Supported Camera2 features >
+    <!-- Supported Camera2 features -->
     <TextView
       android:id="@+id/supported_camera2_features"
       android:layout_width="wrap_content"
@@ -129,7 +146,7 @@
       android:paddingBottom="4pt"
       android:text="@string/supported_features_title" />
 
-    < Camera2 support level >
+    <!-- Camera2 support level -->
     <LinearLayout
       android:id="@+id/hardware_support_wrapper"
       android:layout_width="match_parent"
@@ -159,7 +176,7 @@
         android:layout_height="wrap_content" />
     </LinearLayout>
 
-    < Manual sensor support >
+    <!-- Manual sensor support -->
     <LinearLayout
       android:id="@+id/manual_sensor_support_wrapper"
       android:layout_width="match_parent"
@@ -189,7 +206,7 @@
         android:layout_height="wrap_content" />
     </LinearLayout>
 
-    < Calibration level of focus distance >
+    <!-- Calibration level of focus distance -->
     <LinearLayout
       android:id="@+id/focus_distance_wrapper"
       android:layout_width="match_parent"
@@ -219,7 +236,7 @@
         android:layout_height="wrap_content" />
     </LinearLayout>
 
-    < Hyper-focal distance >
+    <!-- Hyper-focal distance -->
     <LinearLayout
       android:id="@+id/hyper_focal_distance_wrapper"
       android:layout_width="match_parent"
@@ -249,7 +266,7 @@
         android:layout_height="wrap_content" />
     </LinearLayout>
 
-    < Closest focus distance >
+    <!-- Closest focus distance -->
     <LinearLayout
       android:id="@+id/closest_focus_distance_wrapper"
       android:layout_width="match_parent"
@@ -279,7 +296,7 @@
         android:layout_height="wrap_content" />
     </LinearLayout>
 
-    < - - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - >
+    <!-- - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
     <View
       android:id="@+id/divider2"
       android:layout_width="match_parent"
@@ -290,7 +307,7 @@
       android:layout_marginBottom="8pt"
       android:background="@color/grey_700" />
 
-    < JPEG settings >
+    <!-- JPEG settings -->
     <TextView
       android:id="@+id/jpeg_settings"
       android:layout_width="wrap_content"
@@ -300,7 +317,7 @@
       android:layout_marginBottom="4pt"
       android:text="@string/JPEG_settings" />
 
-    < distance-based capturing mode >
+    <!-- distance-based capturing mode -->
     <TextView
       android:id="@+id/distance_based_capturing_mode"
       android:layout_width="wrap_content"
@@ -359,7 +376,7 @@
         android:visibility="invisible" />
     </LinearLayout>
 
-    < Static Focus Distance >
+    <!-- Static Focus Distance -->
     <TextView
       android:id="@+id/static_focus_distance"
       android:layout_width="wrap_content"
@@ -391,7 +408,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-      < for min/max distance see LENS_INFO_FOCUS_DISTANCE_CALIBRATION >
+      <!-- for min/max distance see LENS_INFO_FOCUS_DISTANCE_CALIBRATION -->
       <com.google.android.material.slider.Slider
         android:id="@+id/static_focus_distance_slider"
         android:layout_width="0dp"
@@ -419,7 +436,7 @@
         android:visibility="invisible" />
     </LinearLayout>
 
-    < Static Exposure Time >
+    <!-- Static Exposure Time -->
     <TextView
       android:id="@+id/static_exposure_time_header"
       android:layout_width="wrap_content"
@@ -451,8 +468,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-      < The slider is not useful for a set of predefined values like 1E9/54444, 1/8000, 1/125 >
-      < ! - -com.google.android.material.slider.Slider
+      <!-- The slider is not useful for a set of predefined values like 1E9/54444, 1/8000, 1/125 -->
+      <!-- -com.google.android.material.slider.Slider
           android:id="@+id/static_exposure_time_slider"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
@@ -460,7 +477,7 @@
           android:stepSize="1250000"
           android:valueFrom="0"
           android:valueTo="10000000"
-          android:visibility="invisible" / - - >
+          android:visibility="invisible" / -->
 
       <TextView
         android:id="@+id/static_exposure_time"
@@ -479,7 +496,7 @@
         android:visibility="invisible" />
     </LinearLayout>
 
-    < Exposure value for Static Exposure Time >
+    <!-- Exposure value for Static Exposure Time -->
     <TextView
       android:id="@+id/static_exposure_value_title"
       android:layout_width="wrap_content"
@@ -534,7 +551,7 @@
         android:visibility="invisible" />
     </LinearLayout>
 
-    < - - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - >
+    <!-- - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
     <View
       android:id="@+id/divider3"
       android:layout_width="match_parent"
@@ -545,7 +562,7 @@
       android:layout_marginBottom="8pt"
       android:background="@color/grey_700" />
 
-    < Sensor frequency >
+    <!-- Sensor frequency -->
     <TextView
       android:id="@+id/sensor_frequency_title"
       android:layout_width="wrap_content"
@@ -590,7 +607,7 @@
         android:paddingEnd="4pt"
         android:paddingRight="4pt"
         android:text="@string/settings_sensor_frequency_unit" />
-    </LinearLayout> -->
+    </LinearLayout>
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

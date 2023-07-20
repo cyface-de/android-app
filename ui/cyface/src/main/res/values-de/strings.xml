@@ -18,9 +18,9 @@
   <string name="toast_measurement_paused">Fahrt pausiert</string>
   <string name="toast_measurement_resumed">Fahrt fortgesetzt</string>
 
-  <!-- Navigation -->
+  <!-- Settings -->
   <string name="drawer_setting_speed_sensor">Externer Sensor</string>
-  <string name="drawer_setting_pictures">Kameramodus</string>
+  <string name="camera_mode">Kameramodus</string>
   <string name="no_camera_available_toast">Es wurde keine Kamera gefunden die benutzt werden kann</string>
   <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente</string>
   <string name="drawer_setting_camera_focus_distance">Kamera Fokus Distanz</string>

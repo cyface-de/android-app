@@ -33,14 +33,21 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.selection.MutableSelection
 import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants
+import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.DefaultPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import de.cyface.persistence.exception.NoSuchMeasurementException
+import de.cyface.persistence.model.Measurement
+import de.cyface.utils.Constants
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.utils.Utils
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.File
 import java.lang.ref.WeakReference
+import java.util.Arrays
 
 /**
  * The [androidx.core.view.MenuProvider] for the [TripsFragment] which defines which options are
@@ -72,6 +79,7 @@ class MenuProvider(
                 syncNow()
                 true
             }
+
             R.id.export -> {
                 // Permission requirements: https://developer.android.com/training/data-storage
                 val requiresWritePermission =
@@ -102,14 +110,17 @@ class MenuProvider(
 
                 true
             }
+
             R.id.select_all -> {
                 adapter.selectAll()
                 true
             }
+
             R.id.delete -> {
                 deleteSelectedMeasurements()
                 true
             }
+
             else -> {
                 false
             }
@@ -208,15 +219,77 @@ class MenuProvider(
                 context.get()!!,
                 DefaultPersistenceBehaviour()
             )
+
+            // Load unfinished measurement
+            val unFinishedMeasurement: Measurement? = try {
+                persistence.loadCurrentlyCapturedMeasurement()
+            } catch (e: NoSuchMeasurementException) {
+                null
+            }
+
             val mutableSelection = MutableSelection<Long>()
             adapter.tracker!!.copySelection(mutableSelection)
             mutableSelection.forEach { position ->
                 run {
+                    // Ignoring the ongoing measurement
                     val measurementId = adapter.getItem(position.toInt()).id
-                    persistence.delete(measurementId)
+                    if (unFinishedMeasurement == null || measurementId != unFinishedMeasurement.id) {
+                        // Delete files linked to measurement (e.g. image data)
+                        val attachmentsFolder = findMeasurementAttachmentsFolder(measurementId)
+                        if (attachmentsFolder != null) {
+                            deleteRecursively(context.get()!!, attachmentsFolder)
+                        }
+                        persistence.delete(measurementId)
+                    }
                     adapter.tracker!!.deselect(position)
                 }
             }
         }
+
+        Toast.makeText(
+            context.get(),
+            R.string.toast_measurement_deletion_success,
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    /**
+     * Delete all pictures captured by the Cyface SDK in Pro mode.
+     *
+     * @param context The current Android context used to access the file system.
+     * @param fileOrFolder The picture storage directory.
+     */
+    private fun deleteRecursively(context: Context, fileOrFolder: File) {
+        Log.d(TAG, "deleteRecursively: " + fileOrFolder.path)
+        if (fileOrFolder.isDirectory) {
+            val files = fileOrFolder.listFiles()
+            Validate.notNull(files)
+            for (child in files) {
+                deleteRecursively(context, child)
+            }
+        }
+        val deleteSuccessful = fileOrFolder.delete()
+        if (!deleteSuccessful) {
+            Log.w(TAG, "Delete was not successful: " + fileOrFolder.absolutePath)
+            return
+        }
+        Utils.informMediaScanner(context, fileOrFolder)
+    }
+
+    /**
+     * Searches for the folder containing pictures captured during the provided measurement, if any.
+     *
+     * @param measurementId The id of the measurement to search pictures for.
+     * @return Either the path to the request folder or `null` if there are no pictures.
+     */
+    private fun findMeasurementAttachmentsFolder(measurementId: Long): File? {
+        // If the app was reinstalled the pictures of the old installation were automatically deleted
+        val results = File(Constants.externalCyfaceFolderPath(context.get()!!))
+            .listFiles { pathname: File -> pathname.name.endsWith("_$measurementId") }
+        if (results != null && results.isNotEmpty()) {
+            Arrays.sort(results)
+            return results[results.size - 1]
+        }
+        return null
     }
 }
