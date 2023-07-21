@@ -211,7 +211,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             cameraService = CameraService(
                 this.applicationContext,
                 CameraEventHandler(),
-                unInterestedCameraListener // here was the capturing button but it registers itself, too
+                unInterestedCameraListener, // here was the capturing button but it registers itself, too
+                CccTriggerHandler(capturing.persistenceLayer.restoreOrCreateDeviceId())
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
