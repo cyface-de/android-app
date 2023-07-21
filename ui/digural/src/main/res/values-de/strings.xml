@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!-- Dialogs -->
+  <string name="dialog_modality_title">Fortbewegungsart auswählen</string>
+  <!-- synchronize the order of the items with Modality enum type and tab selection -->
+  <string-array name="dialog_modality">
+    <item>Auto</item>
+    <item>Fahrrad</item>
+    <item>Zu Fuß</item>
+    <item>Bus</item>
+    <item>Zug</item>
+  </string-array>
+
+  <!-- Capturing -->
+  <string name="measurement_id">Messungs-Id</string>
+  <string name="capturing_active">Datenerfassung aktiv</string>
+  <string name="toast_measurement_paused">Fahrt pausiert</string>
+  <string name="toast_measurement_resumed">Fahrt fortgesetzt</string>
+
+  <!-- Settings -->
+  <string name="drawer_setting_speed_sensor">Externer Sensor</string>
+  <string name="camera_mode">Kameramodus</string>
+  <string name="no_camera_available_toast">Es wurde keine Kamera gefunden die benutzt werden kann</string>
+  <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente</string>
+  <string name="drawer_setting_camera_focus_distance">Kamera Fokus Distanz</string>
+  <string name="settings_sensor_frequency">Sensorfrequenz</string>
+
+  <!-- Camera -->
+  <string name="camera_status">Kamera Status</string>
+  <string name="camera_status_connected">Kamera: bereit</string>
+  <string name="camera_status_paused">Kamera: pausiert</string>
+  <string name="camera_capturing_active">Kamera Datenerfassung aktiv</string>
+  <string name="experimental_feature_warning">Achtung: Experimentelle Einstellung</string>
+  <string name="JPEG_settings">JPEG Einzelbild-Modus</string>
+  <string name="supported_features_title">Unterstützte Funktionen (Hauptkamera)</string>
+  <string name="camera_feature_camera2_support_level"> \'camera2\' Support Level: </string>
+  <string name="camera_feature_manual_sensor">Manuelle Steuerung: </string>
+  <string name="camera_feature_focus_distance_calibration">Fokus Distanz: </string>
+  <string name="camera_feature_focus_distance_minimum">Kürzeste Fokus Distanz: </string>
+  <string name="camera_feature_hyper_focal_distance">Hyperfokale Distanz: </string>
+  <string name="static_camera_focus_distance">Statische Kamera Fokus Distanz</string>
+  <string name="static_camera_exposure_time">Statische Kamera Belichtungszeit (\"S-/Tv-Modus\")</string>
+  <string name="static_camera_exposure_value">Belichtungswert (für S-/Tv-Modus)</string>
+  <string name="distance_based_capturing">Weg-basiertes Auslösen</string>
+  <string name="camera_images">Bilder: </string>
+  <string name="notification_title_picture_capturing_decreased">Reduzierte Bilderfassungsrate</string>
+  <string name="notification_text_picture_capturing_decreased">Es wurde weniger Bildmaterial erfasst als erwartet.</string>
+</resources>

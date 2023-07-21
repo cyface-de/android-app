@@ -28,9 +28,11 @@ import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.os.Parcel
 import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
@@ -58,6 +60,7 @@ import de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY
 import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.camera_service.CameraListener
 import de.cyface.camera_service.CameraService
+import de.cyface.camera_service.TriggerHandler
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -212,7 +215,17 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                CccTriggerHandler(capturing.persistenceLayer.restoreOrCreateDeviceId())
+                object : TriggerHandler{
+                    override fun describeContents(): Int {
+                        return 0
+                    }
+                    override fun writeToParcel(dest: Parcel, flags: Int) {
+                        // nothing to do
+                    }
+                    override fun trigger(measurementId: Long, location: Location?) {
+                        // nothing to do
+                    }
+                }
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)

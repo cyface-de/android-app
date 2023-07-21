@@ -68,7 +68,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class LoginActivity : AppCompatActivity() {
 
-    private val TAG = "de.cyface.app.r4r.login"
+    private val TAG = "de.cyface.app.login"
     private val EXTRA_FAILED = "failed"
     private val RC_AUTH = 100
 

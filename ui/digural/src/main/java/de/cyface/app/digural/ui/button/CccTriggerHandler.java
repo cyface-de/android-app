@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app;
+package de.cyface.app.digural.ui.button;
 
 import static de.cyface.camera_service.Constants.TAG;
 

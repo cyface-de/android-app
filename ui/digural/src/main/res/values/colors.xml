@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- https://m2.material.io/design/color/the-color-system.html#tools-for-picking-colors -->
+    <color name="green_700">#3f8730</color>
+    <color name="green_900">#316a25</color>
+
+    <color name="red_200">#fc99b7</color>
+    <color name="red_700">#cf3666</color>
+    <!-- not used -->
+</resources>

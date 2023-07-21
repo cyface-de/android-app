@@ -70,6 +70,7 @@ jobs:
           echo "cyface.staging_password=guestPassword" >> gradle.properties
           echo "cyface.oauth_redirect=de.cyface.app:/oauth2redirect" >> gradle.properties
           echo "cyface.oauth_redirect.r4r=de.cyface.app.r4r:/oauth2redirect" >> gradle.properties
+          echo "cyface.oauth_redirect.digural=de.cyface.app.digural:/oauth2redirect" >> gradle.properties
 
       # Not executing build here on MacOS stack (10x costs, if private repository)
       # Not using "gradle build" as we don't want to run the tests of all dependencies (e.g. backend)

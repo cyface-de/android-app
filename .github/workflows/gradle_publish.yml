@@ -56,6 +56,7 @@ jobs:
           # Inject OAuth redirect URIs
           echo "cyface.oauth_redirect=de.cyface.app:/oauth2redirect" >> gradle.properties
           echo "cyface.oauth_redirect.r4r=de.cyface.app.r4r:/oauth2redirect" >>gradle.properties
+          echo "cyface.oauth_redirect.digural=de.cyface.app.digural:/oauth2redirect" >> gradle.properties
           # Inject Google Maps API key
           echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> gradle.properties
           echo "google.maps_api_key.r4r=${{ secrets.GOOGLE_MAPS_KEY_R4R }}" >> gradle.properties
