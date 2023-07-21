@@ -23,13 +23,13 @@
 
     <fragment
       android:id="@+id/navigation_imprint"
-      android:name="de.cyface.app.ImprintFragment"
+      android:name="de.cyface.app.capturing.ImprintFragment"
       android:label="@string/drawer_title_imprint"
       tools:layout="@layout/fragment_imprint" />
 
     <fragment
       android:id="@+id/navigation_settings"
-      android:name="de.cyface.app.SettingsFragment"
+      android:name="de.cyface.app.capturing.SettingsFragment"
       android:label="@string/settings"
       tools:layout="@layout/fragment_settings" />
   </navigation>
