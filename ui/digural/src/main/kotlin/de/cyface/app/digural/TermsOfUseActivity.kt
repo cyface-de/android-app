@@ -20,17 +20,12 @@ package de.cyface.app.digural
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
-import de.cyface.app.digural.BuildConfig
-import de.cyface.app.digural.R
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.utils.SharedConstants.ACCEPTED_TERMS_KEY
+import de.cyface.utils.AppPreferences
 
 /**
  * The TermsOfUserActivity is the first [Activity] started on app launch.
@@ -62,7 +57,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     /**
      * To check whether the user accepted the terms and opted-in to error reporting.
      */
-    private var preferences: SharedPreferences? = null
+    private lateinit var preferences: AppPreferences
 
     /**
      * Allows the user to opt-in to error reporting.
@@ -75,9 +70,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     private var acceptTermsCheckbox: CheckBox? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        preferences = PreferenceManager.getDefaultSharedPreferences(
-            applicationContext
-        )
+        preferences = AppPreferences(applicationContext)
         callMainActivityIntent = Intent(this, MainActivity::class.java)
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent)
@@ -91,8 +84,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
      * @return `True` if the latest privacy policy was accepted by the user.
      */
     private fun currentTermsHadBeenAccepted(): Boolean {
-        val acceptedTermsVersion = preferences!!.getInt(ACCEPTED_TERMS_KEY, 0)
-        return acceptedTermsVersion == BuildConfig.currentTerms
+        return preferences.getAcceptedTerms() == BuildConfig.currentTerms
     }
 
     /**
@@ -123,10 +115,8 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        val editor = preferences!!.edit()
-        editor.putInt(ACCEPTED_TERMS_KEY, BuildConfig.currentTerms)
-        editor.putBoolean(ACCEPTED_REPORTING_KEY, isReportingEnabled)
-        editor.apply()
+        preferences.saveAcceptedTerms(BuildConfig.currentTerms)
+        preferences.saveReportingAccepted(isReportingEnabled)
         this.startActivity(callMainActivityIntent)
         finish()
     }

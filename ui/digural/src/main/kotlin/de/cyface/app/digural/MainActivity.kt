@@ -26,12 +26,10 @@ import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
-import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.MainThread
@@ -44,8 +42,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import de.cyface.app.digural.BuildConfig
-import de.cyface.app.digural.R
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
@@ -55,11 +51,8 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_SENSOR_FREQUENCY_KEY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.camera_service.CameraListener
+import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -75,6 +68,7 @@ import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
@@ -122,7 +116,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private var preferences: SharedPreferences? = null
+    private lateinit var preferences: AppPreferences
+
+    /**
+     * The `SharedPreferences` used to store the camera settings.
+     */
+    private lateinit var cameraPreferences: CameraPreferences
 
     /**
      * The authorization.
@@ -162,15 +161,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        preferences = AppPreferences(this)
+        cameraPreferences = CameraPreferences(this)
 
         // Location permissions are requested by MainFragment which needs to react to results
 
         // If camera service is requested, check needed permissions
-        val cameraEnabled = preferences!!.getBoolean(
-            de.cyface.camera_service.Constants.PREFERENCES_CAMERA_CAPTURING_ENABLED_KEY,
-            false
-        )
+        val cameraEnabled = cameraPreferences.getCameraEnabled()
         val permissionsMissing = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.CAMERA
@@ -181,7 +178,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
          * || ContextCompat.checkSelfPermission(this,
          * Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
          */
-        if (/*cameraEnabled &&*/ permissionsMissing) {
+        if (cameraEnabled && permissionsMissing) {
             ActivityCompat.requestPermissions(
                 this, arrayOf(
                     Manifest.permission.CAMERA /*
@@ -194,8 +191,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Start DataCapturingService and CameraService
-        val sensorFrequency =
-            preferences!!.getInt(PREFERENCES_SENSOR_FREQUENCY_KEY, DEFAULT_SENSOR_FREQUENCY)
         try {
             capturing = CyfaceDataCapturingService(
                 this.applicationContext,
@@ -205,7 +200,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery),
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
-                sensorFrequency
+                preferences.getSensorFrequency()
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
@@ -321,8 +316,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
+            if (preferences.getReportingAccepted()) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -372,8 +366,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = preferences!!
-                        .getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+                    val syncEnabledPreference = preferences.getUpload()
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"

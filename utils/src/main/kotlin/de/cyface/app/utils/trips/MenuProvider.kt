@@ -20,7 +20,6 @@ package de.cyface.app.utils.trips
 
 import android.Manifest
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -41,6 +40,7 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Measurement
 import de.cyface.utils.Constants
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.Utils
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
@@ -59,7 +59,7 @@ import java.util.Arrays
  */
 class MenuProvider(
     private val capturingService: CyfaceDataCapturingService,
-    private val preferences: SharedPreferences,
+    private val preferences: AppPreferences,
     private val adapter: TripListAdapter,
     private val exportPermissionLauncher: ActivityResultLauncher<Array<String>>,
     private val context: WeakReference<Context>
@@ -177,8 +177,7 @@ class MenuProvider(
 
         // Check is sync is disabled via frontend
         val syncEnabled = capturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled =
-            preferences.getBoolean(SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY, true)
+        val syncPreferenceEnabled = preferences.getUpload()
         Validate.isTrue(
             syncEnabled == syncPreferenceEnabled,
             "sync " + (if (syncEnabled) "enabled" else "disabled")

@@ -24,7 +24,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -46,14 +45,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
-import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.r4r.databinding.FragmentCapturingBinding
 import de.cyface.app.r4r.capturing.map.MapFragment
 import de.cyface.app.r4r.capturing.marker.MarkerFragment
 import de.cyface.app.r4r.capturing.speed.SpeedFragment
+import de.cyface.app.r4r.databinding.FragmentCapturingBinding
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.CalibrationDialogListener
-import de.cyface.app.utils.SharedConstants
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -80,6 +78,7 @@ import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
@@ -142,13 +141,10 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val viewModel: CapturingViewModel by activityViewModels {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val isReportingEnabled =
-            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
             persistence.eventRepository!!,
-            isReportingEnabled
+            AppPreferences(requireContext()).getReportingAccepted()
         )
     }
 
@@ -191,7 +187,8 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         // Update UI elements with the updates from the ViewModel
         viewModel.measurementId.observe(viewLifecycleOwner) {
-            val tripTitle = if (it == null) null else getString(de.cyface.app.utils.R.string.trip_id, it)
+            val tripTitle =
+                if (it == null) null else getString(de.cyface.app.utils.R.string.trip_id, it)
             binding.tripTitle.text = tripTitle ?: ""
         }
         viewModel.measurement.observe(viewLifecycleOwner) {
@@ -212,23 +209,33 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
             val distanceKm = it?.distance?.div(1000.0)
             binding.distanceView.text =
-                if (distanceKm == null) "" else getString(de.cyface.app.utils.R.string.distanceKm, distanceKm)
+                if (distanceKm == null) "" else getString(
+                    de.cyface.app.utils.R.string.distanceKm,
+                    distanceKm
+                )
 
             // 95 g / km see https://de.statista.com/infografik/25742/durchschnittliche-co2-emission-von-pkw-in-deutschland-im-jahr-2020/
             val co2Kg = distanceKm?.times(95)?.div(1000)
-            binding.co2View.text = if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)
+            binding.co2View.text =
+                if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)
 
             val millis = if (it == null) null else persistence.loadDuration(it.id)
             val seconds = millis?.div(1000)
             val minutes = seconds?.div(60)
             val hours = minutes?.div(60)
             val hoursText =
-                if (hours == null || hours == 0L) "" else getString(de.cyface.app.utils.R.string.hours, hours) + " "
+                if (hours == null || hours == 0L) "" else getString(
+                    de.cyface.app.utils.R.string.hours,
+                    hours
+                ) + " "
             val minutesText = if (minutes == null || minutes == 0L) "" else getString(
                 de.cyface.app.utils.R.string.minutes,
                 minutes % 60
             ) + " "
-            val secondsText = if (seconds == null) "" else getString(de.cyface.app.utils.R.string.seconds, seconds % 60)
+            val secondsText = if (seconds == null) "" else getString(
+                de.cyface.app.utils.R.string.seconds,
+                seconds % 60
+            )
             val durationText = hoursText + minutesText + secondsText
             binding.durationView.text = durationText
         }
@@ -511,18 +518,21 @@ class CapturingFragment : Fragment(), DataCapturingListener {
                 pauseButton.isEnabled = true
                 stopButton.isEnabled = true
             }
+
             MeasurementStatus.PAUSED -> {
                 startResumeButton.setImageResource(R.drawable.ic_baseline_fast_forward_24)
                 startResumeButton.isEnabled = true
                 pauseButton.isEnabled = false
                 stopButton.isEnabled = true
             }
+
             MeasurementStatus.FINISHED -> {
                 startResumeButton.setImageResource(R.drawable.ic_baseline_play_arrow_24)
                 startResumeButton.isEnabled = true
                 pauseButton.isEnabled = false
                 stopButton.isEnabled = false
             }
+
             else -> throw IllegalArgumentException("Invalid button state: $status")
         }
     }

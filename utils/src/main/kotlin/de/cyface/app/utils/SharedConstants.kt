@@ -23,7 +23,7 @@ package de.cyface.app.utils
  * which would only be needed to access those constants.
  *
  * @author Armin Schnabel
- * @version 1.1.0
+ * @version 1.2.0
  * @since 3.2.0
  */
 object SharedConstants {
@@ -43,54 +43,6 @@ object SharedConstants {
      * as the SDK.DatabaseHelper.DATABASE_NAME constant. We don't want to make DatabaseHelper
      */
     const val DATABASE_NAME = "measures"
-
-    /**
-     * Default value in Hz when there is no user preference stored yet.
-     */
-    const val DEFAULT_SENSOR_FREQUENCY = 100
-
-    /*
-     * Preferences keys
-     *
-     * *Don't change the values, as this resets the user's preferences!*
-     */
-
-    /**
-     * The prefix used in the shared preferences, historically.
-     *
-     * *Don't change this, as this resets the user's preferences!*
-     */
-    private const val KEY_PACKAGE = "de.cyface.app"
-
-    /**
-     * Identifies the accepted terms version in the preferences.
-     */
-    const val ACCEPTED_TERMS_KEY = "$KEY_PACKAGE.accepted_terms"
-
-    /**
-     * Identifies if the user opted-in to error reporting in the preferences.
-     */
-    const val ACCEPTED_REPORTING_KEY = "$KEY_PACKAGE.accepted_reporting"
-
-    const val PREFERENCES_MODALITY_KEY = "$KEY_PACKAGE.modality"
-
-    const val PREFERENCES_CENTER_MAP_KEY = "$KEY_PACKAGE.zoom_to_location"
-    const val PREFERENCES_SYNCHRONIZATION_KEY = "$KEY_PACKAGE.synchronization_enabled"
-
-    /**
-     * The key for the `SharedPreferences`. This entry contains the preferred sensor frequency.
-     */
-    const val PREFERENCES_SENSOR_FREQUENCY_KEY = "$KEY_PACKAGE.sensor_frequency"
-
-    /**
-     * The default setting for `centerMap` after a fresh installation.
-     */
-    const val DEFAULT_CENTER_MAP_VALUE = true
-
-    /**
-     * The default setting for `upload` after a fresh installation.
-     */
-    const val DEFAULT_UPLOAD_VALUE = true
 
     /*
      * Notification channel ids

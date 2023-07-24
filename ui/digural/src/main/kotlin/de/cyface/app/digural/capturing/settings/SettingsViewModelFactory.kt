@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.capturing.settings
+package de.cyface.app.digural.capturing.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.app.utils.capturing.settings.AppPreferences
+import de.cyface.camera_service.CameraPreferences
+import de.cyface.utils.AppPreferences
 
 /**
  * Factory which creates the [ViewModel] with the required dependencies.
@@ -30,13 +31,18 @@ import de.cyface.app.utils.capturing.settings.AppPreferences
  * @author Armin Schnabel
  * @version 1.0.0
  * @since 3.4.0
+ * @param appPreferences Persistence storage of the app preferences.
+ * @param cameraPreferences Persistence storage of the camera preferences.
  */
-class SettingsViewModelFactory(private val appPreferences: AppPreferences) :
+class SettingsViewModelFactory(
+    private val appPreferences: AppPreferences,
+    private val cameraPreferences: CameraPreferences
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appPreferences) as T
+            return SettingsViewModel(appPreferences, cameraPreferences) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

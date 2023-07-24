@@ -25,10 +25,8 @@ import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
-import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -43,16 +41,13 @@ import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
+import de.cyface.app.utils.capturing.settings.CustomPreferences
 import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants
-import de.cyface.app.utils.SharedConstants.DEFAULT_SENSOR_FREQUENCY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
-import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -68,6 +63,8 @@ import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
+import de.cyface.utils.AppPreferences
+import de.cyface.utils.AppPreferences.Companion.DEFAULT_SENSOR_FREQUENCY
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
@@ -109,7 +106,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private lateinit var preferences: SharedPreferences
+    private lateinit var preferences: CustomPreferences
 
     /**
      * The authorization.
@@ -142,17 +139,15 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      */
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val isReportingEnabled =
-            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
-        val persistence = capturing.persistenceLayer
         CapturingViewModelFactory(
-            persistence.measurementRepository!!, persistence.eventRepository!!, isReportingEnabled
+            capturing.persistenceLayer.measurementRepository!!,
+            capturing.persistenceLayer.eventRepository!!,
+            AppPreferences(this).getReportingAccepted()
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        preferences = CustomPreferences(this)
 
         // The location permissions are requested in MapFragment which needs to react to results
 
@@ -304,9 +299,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val isReportingEnabled =
-                preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
+            if (preferences.getReportingAccepted()) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -356,8 +349,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference =
-                        preferences.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+                    val syncEnabledPreference = preferences.getUpload()
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
@@ -407,18 +399,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * effect.
      */
     private fun setIncentivesServerUrl() {
-        val storedServer = preferences.getString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, null)
+        val storedServer = preferences.getIncentivesUrl()
         val server = BuildConfig.incentivesServer
         @Suppress("KotlinConstantConditions")
         Validate.isTrue(server != "null")
         if (storedServer == null || storedServer != server) {
-            Log.d(
-                TAG,
-                "Updating Cyface Incentives API URL from " + storedServer + "to" + server
-            )
-            val editor = preferences.edit()
-            editor.putString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, server)
-            editor.apply()
+            Log.d(TAG, "Updating Incentives API URL from " + storedServer + "to" + server)
+            preferences.saveIncentivesUrl(server)
         }
     }
 

@@ -20,8 +20,6 @@ package de.cyface.app.digural.button
 
 import android.accounts.AccountManager
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
@@ -30,9 +28,9 @@ import com.github.lzyzsd.circleprogress.DonutProgress
 import de.cyface.app.digural.MainActivity.Companion.accountWithTokenExists
 import de.cyface.app.digural.utils.Constants.TAG
 import de.cyface.app.utils.R
-import de.cyface.app.utils.SharedConstants.PREFERENCES_SYNCHRONIZATION_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
 
 /**
@@ -56,7 +54,7 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
      */
     private var button: ImageButton? = null
     private var progressView: DonutProgress? = null
-    private var preferences: SharedPreferences? = null
+    private lateinit var preferences: AppPreferences
 
     /**
      * [CyfaceDataCapturingService] to check [WiFiSurveyor.isConnected]
@@ -73,7 +71,7 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
         context = button!!.context
         this.button = button
         this.progressView = progress
-        preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        preferences = AppPreferences(context!!)
         onResume() // TODO[MOV-621] the parent's onResume, thus, this class's onResume should automatically be called
         button.setOnClickListener(this)
     }
@@ -144,7 +142,7 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
 
         // Check is sync is disabled via frontend
         val syncEnabled = dataCapturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled = preferences!!.getBoolean(PREFERENCES_SYNCHRONIZATION_KEY, true)
+        val syncPreferenceEnabled = preferences.getUpload()
         Validate.isTrue(
             syncEnabled == syncPreferenceEnabled,
             "sync " + (if (syncEnabled) "enabled" else "disabled")

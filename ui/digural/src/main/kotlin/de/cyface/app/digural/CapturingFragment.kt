@@ -19,9 +19,7 @@
 package de.cyface.app.digural
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +32,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import de.cyface.app.digural.R
 import de.cyface.app.digural.button.SynchronizationButton
 import de.cyface.app.digural.capturing.MenuProvider
 import de.cyface.app.digural.databinding.FragmentCapturingBinding
@@ -42,8 +39,6 @@ import de.cyface.app.digural.dialog.ModalityDialog
 import de.cyface.app.digural.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY
 import de.cyface.camera_service.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
@@ -52,6 +47,7 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 
@@ -94,7 +90,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
     /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private var preferences: SharedPreferences? = null
+    private lateinit var preferences: AppPreferences
 
     /**
      * The `DataCapturingService` which represents the API of the Cyface Android SDK.
@@ -151,8 +147,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             currentMeasurementsEvents = dataCapturingButton!!.loadCurrentMeasurementsEvents()
             map!!.render(currentMeasurementsTracks, currentMeasurementsEvents, false, ArrayList())
         } catch (e: NoSuchMeasurementException) {
-            val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
+            if (preferences.getReportingAccepted()) {
                 Sentry.captureException(e)
             }
             Log.w(
@@ -186,7 +181,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         _binding = FragmentCapturingBinding.inflate(inflater, container, false)
         dataCapturingButton =
             DataCapturingButton(this)
-        preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        preferences = AppPreferences(requireContext())
         // Register synchronization listener
         capturing.addConnectionStatusListener(this)
         syncButton = SynchronizationButton(capturing)
@@ -226,8 +221,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
     private fun showModalitySelectionDialogIfNeeded() {
         registerModalityTabSelectionListener()
-        val selectedModality = preferences!!.getString(PREFERENCES_MODALITY_KEY, null)
-        if (selectedModality != null) {
+        if (preferences.getModality() != null) {
             selectModalityTab()
             return
         }
@@ -244,7 +238,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         val newModality = arrayOfNulls<Modality>(1)
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                val oldModalityId = preferences!!.getString(PREFERENCES_MODALITY_KEY, null)
+                val oldModalityId = preferences.getModality()
                 val oldModality =
                     if (oldModalityId == null) null else Modality.valueOf(oldModalityId)
                 when (tab.position) {
@@ -255,9 +249,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
                     4 -> newModality[0] = Modality.TRAIN
                     else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
                 }
-                preferences!!.edit()
-                    .putString(PREFERENCES_MODALITY_KEY, newModality[0]!!.databaseIdentifier)
-                    .apply()
+                preferences.saveModality(newModality[0]!!.databaseIdentifier)
                 if (oldModality != null && oldModality == newModality[0]) {
                     Log.d(
                         TAG,
@@ -307,7 +299,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
      */
     private fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
-        val modality = preferences!!.getString(PREFERENCES_MODALITY_KEY, null)
+        val modality = preferences.getModality()
         Validate.notNull(modality, "Modality should already be set but isn't.")
 
         // Select the Modality tab

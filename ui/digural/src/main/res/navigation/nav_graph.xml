@@ -29,7 +29,7 @@
 
     <fragment
       android:id="@+id/navigation_settings"
-      android:name="de.cyface.app.digural.capturing.SettingsFragment"
+      android:name="de.cyface.app.digural.capturing.settings.SettingsFragment"
       android:label="@string/settings"
       tools:layout="@layout/fragment_settings" />
   </navigation>

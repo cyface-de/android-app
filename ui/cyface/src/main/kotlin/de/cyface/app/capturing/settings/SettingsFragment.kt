@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.capturing.settings.AppPreferences
 import de.cyface.datacapturing.CyfaceDataCapturingService
 
 /**

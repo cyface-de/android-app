@@ -21,12 +21,10 @@ package de.cyface.app.utils
 import android.Manifest
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -47,13 +45,12 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
-import de.cyface.app.utils.SharedConstants.PREFERENCES_CENTER_MAP_KEY
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import java.lang.ref.WeakReference
@@ -102,14 +99,9 @@ class Map(
     private var currentLocation: LatLng? = null
 
     /**
-     * `True` if the "auto-center map" feature is currently enabled.
-     */
-    var isAutoCenterMapEnabled: Boolean
-
-    /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private val preferences: SharedPreferences
+    private var preferences: AppPreferences
 
     /**
      * The `Runnable` triggered when the `GoogleMap` is loaded and ready.
@@ -121,11 +113,6 @@ class Map(
      * Event.
      */
     private val eventMarker = HashMap<Long, Marker?>()
-
-    /**
-     * `True` if the user opted-in to error reporting.
-     */
-    private val isReportingEnabled: Boolean
 
     init {
         view.onCreate(savedInstanceState)
@@ -143,9 +130,7 @@ class Map(
             currentLocation = LatLng(51.027852, 13.720864)
         }
         view.getMapAsync(this)
-        preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, true)
+        preferences = AppPreferences(applicationContext)
     }
 
     /**
@@ -159,7 +144,7 @@ class Map(
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
-                if (locationResult.locations.size > 0 && isAutoCenterMapEnabled && !ignoreAutoZoom) {
+                if (locationResult.locations.size > 0 && preferences.getCenterMap() && !ignoreAutoZoom) {
                     moveToLocation(
                         true,
                         locationResult.locations[locationResult.locations.size - 1]
@@ -393,7 +378,7 @@ class Map(
         } catch (e: SecurityException) {
             if (permissionWereJustGranted) {
                 Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
-                if (isReportingEnabled) {
+                if (preferences.getReportingAccepted()) {
                     Sentry.captureException(e)
                 }
             }
@@ -423,7 +408,7 @@ class Map(
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera")
-                if (!highFrequentRequest && isReportingEnabled) {
+                if (!highFrequentRequest && preferences.getReportingAccepted()) {
                     Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
                 }
                 return
@@ -431,7 +416,7 @@ class Map(
             googleMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?")
-            if (!highFrequentRequest && isReportingEnabled) {
+            if (!highFrequentRequest && preferences.getReportingAccepted()) {
                 Sentry.captureException(e)
             }
         }
@@ -443,7 +428,6 @@ class Map(
             return
         }
         requestLocationUpdates()
-        isAutoCenterMapEnabled = preferences.getBoolean(PREFERENCES_CENTER_MAP_KEY, true)
     }
 
     fun onPause() {
@@ -457,7 +441,7 @@ class Map(
 
     override fun onLocationChanged(location: Location) {
         // This is used by `ui/cyface`, the `ui/r4r` uses `onLocationResult`
-        if (isAutoCenterMapEnabled && !ignoreAutoZoom) {
+        if (preferences.getCenterMap() && !ignoreAutoZoom) {
             moveToLocation(true, location)
         }
     }
