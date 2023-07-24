@@ -23,7 +23,7 @@ package de.cyface.app.utils
  * which would only be needed to access those constants.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 3.2.0
  */
 object SharedConstants {
@@ -81,6 +81,16 @@ object SharedConstants {
      * The key for the `SharedPreferences`. This entry contains the preferred sensor frequency.
      */
     const val PREFERENCES_SENSOR_FREQUENCY_KEY = "$KEY_PACKAGE.sensor_frequency"
+
+    /**
+     * The default setting for `centerMap` after a fresh installation.
+     */
+    const val DEFAULT_CENTER_MAP_VALUE = true
+
+    /**
+     * The default setting for `upload` after a fresh installation.
+     */
+    const val DEFAULT_UPLOAD_VALUE = true
 
     /*
      * Notification channel ids
