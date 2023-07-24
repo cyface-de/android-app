@@ -28,9 +28,9 @@ import com.github.lzyzsd.circleprogress.DonutProgress
 import de.cyface.app.MainActivity.Companion.accountWithTokenExists
 import de.cyface.app.utils.Constants.TAG
 import de.cyface.app.utils.R
-import de.cyface.app.utils.capturing.settings.AppPreferences
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.WiFiSurveyor
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
 
 /**

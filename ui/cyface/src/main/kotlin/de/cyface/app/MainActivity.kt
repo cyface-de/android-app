@@ -52,7 +52,6 @@ import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.capturing.settings.AppPreferences
 import de.cyface.camera_service.CameraListener
 import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.CameraService
@@ -71,6 +70,7 @@ import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry

@@ -20,7 +20,7 @@ package de.cyface.app.capturing.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.app.utils.capturing.settings.AppPreferences
+import de.cyface.utils.AppPreferences
 
 /**
  * Factory which creates the [ViewModel] with the required dependencies.

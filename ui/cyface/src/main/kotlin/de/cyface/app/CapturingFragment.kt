@@ -39,8 +39,6 @@ import de.cyface.app.dialog.ModalityDialog
 import de.cyface.app.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.capturing.settings.AppPreferences
-import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
@@ -49,6 +47,7 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
+import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 
@@ -92,11 +91,6 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
      * The `SharedPreferences` used to store the app preferences.
      */
     private lateinit var preferences: AppPreferences
-
-    /**
-     * The `SharedPreferences` used to store the camera preferences.
-     */
-    private lateinit var cameraPreferences: CameraPreferences
 
     /**
      * The `DataCapturingService` which represents the API of the Cyface Android SDK.

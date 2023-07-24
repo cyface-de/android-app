@@ -21,7 +21,7 @@ package de.cyface.app.r4r.capturing.settings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import de.cyface.app.utils.capturing.settings.AppPreferences
+import de.cyface.utils.AppPreferences
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
