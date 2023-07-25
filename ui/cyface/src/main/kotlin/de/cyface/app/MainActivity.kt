@@ -211,18 +211,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             cameraService = CameraService(
                 this.applicationContext,
                 CameraEventHandler(),
-                unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                object {
-                    override fun describeContents(): Int {
-                        return 0
-                    }
-                    override fun writeToParcel(dest: Parcel, flags: Int) {
-                        // nothing to do
-                    }
-                    override fun trigger(measurementId: Long, location: Location?) {
-                        // nothing to do
-                    }
-                }
+                unInterestedCameraListener // here was the capturing button but it registers itself, too
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
