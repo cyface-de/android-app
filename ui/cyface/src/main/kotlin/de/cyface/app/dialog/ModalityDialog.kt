@@ -23,13 +23,13 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.fragment.app.DialogFragment
 import de.cyface.app.CapturingFragment
 import de.cyface.app.R
-import de.cyface.app.utils.SharedConstants.PREFERENCES_MODALITY_KEY
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.BundlesExtrasCodes
+import de.cyface.utils.AppPreferences
+import de.cyface.utils.AppPreferences.Companion.PREFERENCES_MODALITY_KEY
 import de.cyface.utils.Validate
 
 /**
@@ -56,8 +56,7 @@ class ModalityDialog : DialogFragment() {
         ) { _: DialogInterface?, which: Int ->
             val fragmentActivity = activity
             Validate.notNull(fragmentActivity)
-            val editor = PreferenceManager
-                .getDefaultSharedPreferences(fragmentActivity!!.applicationContext).edit()
+            val preferences = AppPreferences(fragmentActivity!!.applicationContext)
             val modality: Modality = when (which) {
                 0 -> Modality.valueOf(Modality.CAR.name)
                 1 -> Modality.valueOf(Modality.BICYCLE.name)
@@ -66,7 +65,7 @@ class ModalityDialog : DialogFragment() {
                 4 -> Modality.valueOf(Modality.TRAIN.name)
                 else -> throw IllegalArgumentException("Unknown modality selected: $which")
             }
-            editor.putString(PREFERENCES_MODALITY_KEY, modality.databaseIdentifier).apply()
+            preferences.saveModality(modality.databaseIdentifier)
             val requestCode = targetRequestCode
             val resultCode: Int
             val intent = Intent()

@@ -21,11 +21,9 @@ package de.cyface.app.utils.trips
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -42,14 +40,12 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
+import de.cyface.app.utils.capturing.settings.CustomPreferences
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.app.utils.trips.incentives.Incentives
-import de.cyface.app.utils.trips.incentives.Incentives.Companion.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.model.Measurement
-import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -97,7 +93,7 @@ class TripsFragment : Fragment() {
     /**
      * The data holder for the user's preferences.
      */
-    private lateinit var preferences: SharedPreferences
+    private lateinit var preferences: CustomPreferences
 
     /**
      * Tracker for selected items in the list.
@@ -122,11 +118,6 @@ class TripsFragment : Fragment() {
         TripsViewModelFactory(capturing.persistenceLayer.measurementRepository!!)
     }
 
-    /**
-     * `True` if the user opted-in to error reporting.
-     */
-    private var isReportingEnabled = false
-
     // This launcher must be launched to request permissions
     private var exportPermissionLauncher: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(
@@ -149,6 +140,7 @@ class TripsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) tracker?.onRestoreInstanceState(savedInstanceState)
+        this.preferences = CustomPreferences(requireContext())
 
         if (activity is ServiceProvider) {
             val serviceProvider = activity as ServiceProvider
@@ -157,7 +149,7 @@ class TripsFragment : Fragment() {
             // Load incentivesUrl - only send requests in RFR app
             val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
             if (rfr) {
-                val incentivesApi = incentivesApi(requireContext())
+                val incentivesApi = preferences.getIncentivesUrl()!!
                 this.incentives = Incentives(requireContext(), incentivesApi, serviceProvider.auth)
             }
         } else {
@@ -171,8 +163,6 @@ class TripsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTripsBinding.inflate(inflater, container, false)
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        isReportingEnabled = preferences.getBoolean(ACCEPTED_REPORTING_KEY, false)
 
         // Bind the UI element to the adapter
         val tripsList = binding.tripsList
@@ -259,7 +249,7 @@ class TripsFragment : Fragment() {
             _binding?.achievements?.visibility = VISIBLE
         }
         // This should not happen, thus, reporting to Sentry
-        if (isReportingEnabled) {
+        if (preferences.getReportingAccepted()) {
             Sentry.captureException(e)
         }
     }
@@ -273,7 +263,7 @@ class TripsFragment : Fragment() {
             _binding?.achievementsErrorMessage?.text =
                 getString(R.string.error_message_authentication_failed)
             // This should not happen, thus, reporting to Sentry
-            if (isReportingEnabled) {
+            if (preferences.getReportingAccepted()) {
                 Sentry.captureException(it)
             }
         }
@@ -296,7 +286,7 @@ class TripsFragment : Fragment() {
             _binding?.achievements?.visibility = VISIBLE
         }
         // This should not happen, thus, reporting to Sentry
-        if (isReportingEnabled) {
+        if (preferences.getReportingAccepted()) {
             Sentry.captureException(it)
         }
     }
@@ -323,22 +313,6 @@ class TripsFragment : Fragment() {
             totalDistanceKm += distanceKm
         }
         return totalDistanceKm
-    }
-
-    /**
-     * Reads the Incentives API URL from the preferences.
-     *
-     * @param context The `Context` required to read the preferences
-     * @return The URL as string
-     */
-    private fun incentivesApi(context: Context): String {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val apiEndpoint = preferences.getString(INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, null)
-        Validate.notNull(
-            apiEndpoint,
-            "TripsFragment: Incentives url not available. Please set the applications server url preference."
-        )
-        return apiEndpoint!!
     }
 
     private fun showVouchersLeft() {
@@ -387,7 +361,7 @@ class TripsFragment : Fragment() {
     }
 
     private fun handleUnknownResponse(responseCode: Int) {
-        if (isReportingEnabled) {
+        if (preferences.getReportingAccepted()) {
             Sentry.captureMessage("Unknown response code: $responseCode")
         }
         throw IllegalArgumentException("Unknown response code: $responseCode")
@@ -398,7 +372,7 @@ class TripsFragment : Fragment() {
         // If parsing crashes the server probably returned a 302 which forwards to
         // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
         // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
-        if (isReportingEnabled) {
+        if (preferences.getReportingAccepted()) {
             Sentry.captureMessage("Forwarded? Forgot Auth header?")
         }
         throw java.lang.IllegalStateException("Forwarded? Forgot Auth header?", e)
@@ -422,7 +396,7 @@ class TripsFragment : Fragment() {
                             // else the server forgot to send a JSON content
                             showNoVouchersLeft()
                             // This should hardly ever happen, thus, reporting to Sentry
-                            if (isReportingEnabled) {
+                            if (preferences.getReportingAccepted()) {
                                 Sentry.captureMessage("Last voucher just got assigned?")
                             }
                         } else if (response.code == 200) {

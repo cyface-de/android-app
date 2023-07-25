@@ -20,15 +20,13 @@ package de.cyface.app
 
 import android.app.Application
 import android.content.IntentFilter
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.auth.LoginActivity
-import de.cyface.app.utils.SharedConstants.ACCEPTED_REPORTING_KEY
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
+import de.cyface.utils.AppPreferences
 import io.sentry.Sentry
 
 /**
@@ -45,7 +43,7 @@ class MeasuringClient : Application() {
     /**
      * Stores the user's preferences.
      */
-    private var preferences: SharedPreferences? = null
+    private lateinit var preferences: AppPreferences
 
     /**
      * Reports error events to the user via UI and to Sentry, if opted-in.
@@ -66,15 +64,14 @@ class MeasuringClient : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            val isReportingEnabled = preferences!!.getBoolean(ACCEPTED_REPORTING_KEY, false)
-            if (isReportingEnabled) {
+            if (preferences.getReportingAccepted()) {
                 Sentry.captureMessage(errorCode.name + ": " + errorMessage)
             }
         }
 
     override fun onCreate() {
         super.onCreate()
-        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        preferences = AppPreferences(this)
 
         // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java

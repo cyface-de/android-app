@@ -19,9 +19,9 @@
   <string name="toast_measurement_paused">Trip paused</string>
   <string name="toast_measurement_resumed">Trip resumed</string>
 
-  <!-- Navigation -->
+  <!-- Settings -->
   <string name="drawer_setting_speed_sensor">External sensor</string>
-  <string name="drawer_setting_pictures">Camera mode</string>
+  <string name="camera_mode">Camera mode</string>
   <string name="no_camera_available_toast">Sorry, no camera found to be used.</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>

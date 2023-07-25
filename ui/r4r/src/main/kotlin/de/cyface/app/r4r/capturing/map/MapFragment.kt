@@ -18,9 +18,7 @@
  */
 package de.cyface.app.r4r.capturing.map
 
-import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -39,12 +37,12 @@ import de.cyface.app.r4r.databinding.FragmentMapBinding
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.SharedConstants
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
+import de.cyface.utils.AppPreferences
 
 /**
  * The [Fragment] which shows a map to the user.
@@ -83,19 +81,16 @@ class MapFragment : Fragment() {
     /**
      * The data holder for users preferences.
      */
-    private var preferences: SharedPreferences? = null
+    private lateinit var preferences: AppPreferences
 
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val isReportingEnabled =
-            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
             persistence.eventRepository!!,
-            isReportingEnabled
+            AppPreferences(requireContext()).getReportingAccepted()
         )
     }
 
@@ -187,7 +182,6 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        @Suppress("SpellCheckingInspection")
         // Using the new map renderer, which must be called before MapView is initialized:
         // https://developers.google.com/maps/documentation/android-sdk/renderer
         MapsInitializer.initialize(requireContext(), MapsInitializer.Renderer.LATEST) {}
@@ -195,7 +189,7 @@ class MapFragment : Fragment() {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        preferences = AppPreferences(requireContext())
         map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
 
         return root

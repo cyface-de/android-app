@@ -19,21 +19,20 @@
 package de.cyface.app.r4r.capturing.speed
 
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import de.cyface.app.r4r.R
-import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.r4r.databinding.FragmentSpeedBinding
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
-import de.cyface.app.utils.SharedConstants
+import de.cyface.app.r4r.databinding.FragmentSpeedBinding
+import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import de.cyface.utils.AppPreferences
 
 /**
  * The [Fragment] which shows the live speed of the currently captured measurement.
@@ -68,13 +67,10 @@ class SpeedFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val isReportingEnabled =
-            preferences.getBoolean(SharedConstants.ACCEPTED_REPORTING_KEY, false)
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
             persistence.eventRepository!!,
-            isReportingEnabled
+            AppPreferences(requireContext()).getReportingAccepted()
         )
     }
 
@@ -99,7 +95,10 @@ class SpeedFragment : Fragment() {
 
         capturingViewModel.location.observe(viewLifecycleOwner) {
             val speedKmPh = it?.speed?.times(3.6)
-            val speedText = if (speedKmPh == null) null else getString(de.cyface.app.utils.R.string.speedKph, speedKmPh)
+            val speedText = if (speedKmPh == null) null else getString(
+                de.cyface.app.utils.R.string.speedKph,
+                speedKmPh
+            )
             binding.liveSpeedView.text = speedText ?: getString(R.string.capturing_inactive)
         }
         return root

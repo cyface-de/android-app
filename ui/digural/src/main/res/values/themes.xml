@@ -1,0 +1,31 @@
+<resources>
+  <!-- Base application theme. -->
+  <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+
+    <!-- Material Design -->
+    <!--   app branding color for the app bar, e.g used for the tool bar -->
+    <item name="colorPrimary">@color/green_700</item>
+    <!--   darker variant of the branding color, e.g. used for the status bar & contextual app bars -->
+    <item name="colorPrimaryVariant">@color/green_900</item>
+    <item name="colorOnPrimary">@color/white</item>
+
+    <!-- Secondary brand color. -->
+    <item name="colorSecondary">@color/green_700</item>
+    <item name="colorSecondaryVariant">@color/green_900</item>
+    <item name="colorOnSecondary">@color/white</item>
+
+    <!-- Status bar color. -->
+    <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+    <!-- Toolbar icon color. -->
+    <item name="iconTint">@color/white</item>
+    <!-- Customize your theme here. -->
+    <!-- menu items in dropdown, e.g. the trips fragment top right menu -->
+    <item name="android:itemTextAppearance">@style/menuItem</item>
+  </style>
+
+  <style name="menuItem" parent="Widget.AppCompat.TextView.SpinnerItem">
+    <item name="android:textColor">@color/text</item>
+  </style>
+</resources>

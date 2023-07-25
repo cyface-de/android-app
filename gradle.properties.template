@@ -45,6 +45,7 @@ hCaptcha.key.r4r=
 
 cyface.oauth_redirect=
 cyface.oauth_redirect.r4r=
+cyface.oauth_redirect.digural=
 
 cyface.api=
 cyface.incentives_api=

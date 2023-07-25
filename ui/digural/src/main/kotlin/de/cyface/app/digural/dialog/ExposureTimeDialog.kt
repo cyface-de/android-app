@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Cyface GmbH
+ * Copyright 2017-2023 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.dialog
+package de.cyface.app.digural.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import androidx.fragment.app.DialogFragment
-import de.cyface.app.R
-import de.cyface.app.capturing.SettingsFragment
+import de.cyface.app.digural.R
+import de.cyface.app.digural.capturing.settings.SettingsFragment
+import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.Constants
 import de.cyface.utils.Validate
 import kotlin.math.round
@@ -47,8 +47,6 @@ class ExposureTimeDialog : DialogFragment() {
         ) { _: DialogInterface?, which: Int ->
             val fragmentActivity = activity
             Validate.notNull(fragmentActivity)
-            val editor = PreferenceManager
-                .getDefaultSharedPreferences(fragmentActivity!!.applicationContext).edit()
             // Pixel 3a reference device: EV100 10, f/1.8, 1/125s (2ms) => iso 40 (55 used, minimum)
             val exposureTimeNanos: Long = when (which) {
                 0 -> round(1000000000.0 / 125).toLong()
@@ -62,8 +60,8 @@ class ExposureTimeDialog : DialogFragment() {
                 else -> throw IllegalArgumentException("Unknown exposure time selected: $which")
             }
             Log.d(Constants.TAG, "Update preference to exposure time -> $exposureTimeNanos ns")
-            editor.putLong(Constants.PREFERENCES_CAMERA_STATIC_EXPOSURE_TIME_KEY, exposureTimeNanos)
-                .apply()
+            val preferences = CameraPreferences(fragmentActivity!!.applicationContext)
+            preferences.saveStaticExposureTime(exposureTimeNanos)
             val requestCode = targetRequestCode
             val resultCode: Int
             val intent = Intent()

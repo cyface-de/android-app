@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+      android:id="@+id/trips_graph"
+      android:icon="@drawable/ic_baseline_format_list_bulleted_24"
+      android:title="@string/trips" />
+
+    <item
+      android:id="@+id/capturing"
+      android:icon="@drawable/ic_baseline_location_searching_24"
+      android:title="@string/capturing" />
+
+    <!-- To change `app:IconTint="@color/red_700"` enable `vectorDrawables.useSupportLibrary`
+    and use a selector, see: https://stackoverflow.com/a/68915308/5815054 -->
+
+    <item
+      android:id="@+id/statistics_graph"
+      android:icon="@drawable/ic_baseline_show_chart_24"
+      android:title="@string/statistics" />
+
+</menu>
