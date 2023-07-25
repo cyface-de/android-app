@@ -55,7 +55,6 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraListener
 import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.CameraService
-import de.cyface.camera_service.TriggerHandler
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -213,7 +212,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                object : TriggerHandler{
+                object {
                     override fun describeContents(): Int {
                         return 0
                     }

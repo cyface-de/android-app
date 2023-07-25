@@ -46,7 +46,6 @@ import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
-import de.cyface.app.digural.ui.button.CccTriggerHandler
 import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
@@ -210,7 +209,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                CccTriggerHandler(capturing.persistenceLayer.restoreOrCreateDeviceId())
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
