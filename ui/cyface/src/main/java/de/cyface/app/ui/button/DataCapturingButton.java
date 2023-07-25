@@ -710,6 +710,7 @@ public class DataCapturingButton
         final var staticExposureTimeSelected = cameraPreferences.getStaticExposure();
         final var staticExposureTime = cameraPreferences.getStaticExposureTime();
         final var exposureValueIso100 = cameraPreferences.getStaticExposureValue();
+        final var backgroundEventsListener = new DiGuRaLCameraSystemTriggerer();
 
         cameraService.start(
                 measurementId,
