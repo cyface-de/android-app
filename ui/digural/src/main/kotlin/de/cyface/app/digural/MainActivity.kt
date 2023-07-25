@@ -50,9 +50,9 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraListener
+import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.CameraPreferences
-import de.cyface.camera_service.CameraService
+import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -146,7 +146,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onCapturingStopped() {}
     }
 
-    private val unInterestedCameraListener: CameraListener = object : CameraListener {
+    private val unInterestedCameraListener: CameraListener = object :
+        CameraListener {
         override fun onNewPictureAcquired(picturesCaptured: Int) {}
         override fun onNewVideoStarted() {}
         override fun onVideoStopped() {}

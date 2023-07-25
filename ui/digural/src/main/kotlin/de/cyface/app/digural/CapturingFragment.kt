@@ -39,7 +39,7 @@ import de.cyface.app.digural.dialog.ModalityDialog
 import de.cyface.app.digural.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraService
+import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer

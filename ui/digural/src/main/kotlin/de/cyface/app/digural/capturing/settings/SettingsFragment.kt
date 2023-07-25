@@ -37,7 +37,7 @@ import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraModeDialog
+import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.Constants
 import de.cyface.camera_service.Utils

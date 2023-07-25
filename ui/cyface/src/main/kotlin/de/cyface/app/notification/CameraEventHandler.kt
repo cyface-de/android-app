@@ -39,7 +39,7 @@ import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID
 import de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID
-import de.cyface.camera_service.BackgroundService
+import de.cyface.camera_service.background.BackgroundService
 import de.cyface.camera_service.EventHandlingStrategy
 import de.cyface.utils.Validate
 
