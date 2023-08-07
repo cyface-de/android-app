@@ -61,6 +61,7 @@ import de.cyface.app.digural.CapturingFragment;
 import de.cyface.app.digural.R;
 import de.cyface.app.digural.button.AbstractButton;
 import de.cyface.app.digural.button.ButtonListener;
+import de.cyface.app.digural.notification.CameraEventHandler;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
 import de.cyface.camera_service.background.camera.CameraListener;
@@ -688,15 +689,24 @@ public class DataCapturingButton
         final var staticExposureTime = cameraPreferences.getStaticExposureTime();
         final var exposureValueIso100 = cameraPreferences.getStaticExposureValue();
 
-        cameraService.start(measurementId, videoModeSelected, rawModeSelected, staticFocusSelected,
-                staticFocusDistance, staticExposureTimeSelected, staticExposureTime, exposureValueIso100,
-                distanceBasedTriggeringSelected, triggeringDistance,
+        cameraService.start(
+                measurementId,
+                videoModeSelected,
+                rawModeSelected,
+                staticFocusSelected,
+                staticFocusDistance,
+                staticExposureTimeSelected,
+                staticExposureTime,
+                exposureValueIso100,
+                distanceBasedTriggeringSelected,
+                triggeringDistance,
                 new StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     @Override
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
                     }
-                });
+                }
+                );
     }
 
     /**

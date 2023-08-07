@@ -19,9 +19,13 @@
 package de.cyface.app.digural.button
 
 import android.location.Location
+import android.os.Parcelable
 import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.camera_service.background.CapturingProcessListener
 import de.cyface.utils.Validate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -33,7 +37,8 @@ import kotlinx.parcelize.Parcelize
  * and an endpoint to send requests to.
  */
 @Parcelize
-class DiGuRaLCameraSystemTriggerer(val deviceId: String, val endpoint: String) : CapturingProcessListener {
+class DiGuRaLCameraSystemTriggerer(val deviceId: String, val endpoint: String) : CapturingProcessListener,
+    Parcelable {
     init {
         Validate.notEmpty(deviceId)
         Validate.notEmpty(endpoint)
@@ -46,12 +51,21 @@ class DiGuRaLCameraSystemTriggerer(val deviceId: String, val endpoint: String) :
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         val payload = de.cyface.app.digural.capturing.Location(
-            deviceId!!,
+            deviceId,
             measurementId,
             location!!.latitude,
             location.longitude,
             location.time
         )
-        diguralService.trigger(payload)
+
+        runBlocking {
+            launch() {
+                diguralService.trigger(payload)
+            }
+        }
+    }
+
+    override fun shallStop() {
+        TODO("Not yet implemented")
     }
 }

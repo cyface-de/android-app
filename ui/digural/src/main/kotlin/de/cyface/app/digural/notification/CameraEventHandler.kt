@@ -27,21 +27,17 @@ import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
-import android.os.Parcel
-import android.os.Parcelable.Creator
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.R
-import de.cyface.app.digural.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants.CAMERA_ACCESS_LOST_NOTIFICATION_ID
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID
-import de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID
 import de.cyface.camera_service.background.BackgroundService
-import de.cyface.camera_service.EventHandlingStrategy
+import de.cyface.camera_service.foreground.EventHandlingStrategy
 import de.cyface.utils.Validate
+import kotlinx.parcelize.Parcelize
 
 /**
  * A [EventHandlingStrategy] to respond to specified events triggered by the
@@ -51,104 +47,8 @@ import de.cyface.utils.Validate
  * @version 1.2.2
  * @since 1.0.0
  */
+@Parcelize
 class CameraEventHandler : EventHandlingStrategy {
-    constructor() {
-        // Nothing to do here.
-    }
-
-    /**
-     * Constructor as required by `Parcelable` implementation.
-     *
-     * @param in A `Parcel` that is a serialized version of a [CameraEventHandler].
-     */
-    @Suppress("UNUSED_PARAMETER")
-    private constructor(`in`: Parcel) {
-        // Nothing to do here.
-    }
-
-    override fun handleSpaceWarning(backgroundService: BackgroundService) {
-        showSpaceWarningNotification(backgroundService.applicationContext)
-        backgroundService.stopSelf()
-        backgroundService.sendStoppedItselfMessage()
-        Log.i(TAG, "handleSpaceWarning() - CS capturing stopped.")
-    }
-
-    override fun handleCameraAccessLostWarning(backgroundService: BackgroundService) {
-        showCameraAccessLostNotification(backgroundService.applicationContext)
-        backgroundService.stopSelf()
-        backgroundService.sendStoppedItselfMessage()
-        Log.i(TAG, "handleCameraAccessLostWarning() triggered - CS capturing stopped.")
-    }
-
-    override fun handleCameraErrorWarning(
-        backgroundService: BackgroundService,
-        reason: String
-    ) {
-        showCameraErrorNotification(backgroundService.applicationContext, reason)
-
-        // The CameraStateHandle throws a hard exception for play store statistics but
-        // we try to stop this service here gracefully anyway
-        backgroundService.stopSelf()
-        backgroundService.sendStoppedItselfMessage()
-        Log.i(TAG, "handleCameraErrorWarning() triggered - CS capturing stopped.")
-    }
-
-    override fun handlePictureCapturingDecrease(backgroundService: BackgroundService) {
-        Log.i(TAG, "handlePictureCapturingDecrease() triggered. Showing notification.")
-        showPictureCapturingDecreasedNotification(backgroundService.applicationContext)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {}
-
-    /**
-     * A [Notification] shown when the [BackgroundService] triggered the low space event.
-     *
-     * @param context The context if the service used to show the [Notification]. It stays even
-     * when the service is stopped as long as a unique id is used.
-     */
-    private fun showSpaceWarningNotification(context: Context) {
-        val onClickIntent = Intent(context, MainActivity::class.java)
-        val onClickPendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        } else {
-            // Ignore warning: immutable flag only available in API >= 23, see above
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
-        val notificationManager = context
-            .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        Validate.notNull(notificationManager)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createNotificationChannelIfNotExists(
-                context, NOTIFICATION_CHANNEL_ID_WARNING,
-                context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
-                context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
-                NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true
-            )
-        }
-        // TODO: see if we not create two of those warnings (DCS and CS)
-        val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
-            context,
-            NOTIFICATION_CHANNEL_ID_WARNING
-        ).setContentIntent(onClickPendingIntent)
-            .setSmallIcon(R.drawable.ic_logo_only_c)
-            .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
-            .setContentText(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space))
-            .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2)
-            .setAutoCancel(true)
-            .setVibrate(longArrayOf(500, 1500))
-            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-        notificationManager.notify(SPACE_WARNING_NOTIFICATION_ID, notificationBuilder.build())
-    }
 
     /**
      * A [Notification] shown when the [BackgroundService] triggered the 'camera error' event.
@@ -156,7 +56,7 @@ class CameraEventHandler : EventHandlingStrategy {
      * @param context The context if the service used to show the [Notification]. It stays even
      * when the service is stopped as long as a unique id is used.
      */
-    private fun showCameraErrorNotification(context: Context, reason: String) {
+    override fun showCameraErrorNotification(context: Context, reason: String) {
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
@@ -203,7 +103,7 @@ class CameraEventHandler : EventHandlingStrategy {
      * @param context The context if the service used to show the [Notification]. It stays even
      * when the service is stopped as long as a unique id is used.
      */
-    private fun showCameraAccessLostNotification(context: Context) {
+    override fun showCameraAccessLostNotification(context: Context) {
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
@@ -253,7 +153,7 @@ class CameraEventHandler : EventHandlingStrategy {
      * @param context The context if the service used to show the [Notification]. It stays even
      * when the service is stopped as long as a unique id is used.
      */
-    private fun showPictureCapturingDecreasedNotification(context: Context) {
+    override fun showPictureCapturingDecreasedNotification(context: Context) {
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
@@ -345,20 +245,6 @@ class CameraEventHandler : EventHandlingStrategy {
     }
 
     companion object {
-        /**
-         * The `Parcelable` creator as required by the Android Parcelable specification.
-         */
-        @Suppress("unused")
-        @JvmField
-        val CREATOR: Creator<CameraEventHandler?> = object : Creator<CameraEventHandler?> {
-            override fun createFromParcel(`in`: Parcel): CameraEventHandler {
-                return CameraEventHandler(`in`)
-            }
-
-            override fun newArray(size: Int): Array<CameraEventHandler?> {
-                return arrayOfNulls(size)
-            }
-        }
 
         /**
          * Since Android 8 it is necessary to create a new notification channel for a foreground service notification. To

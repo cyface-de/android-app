@@ -240,6 +240,10 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     // Retrofit with Scalar Converter
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android'
+
 
     // Dependencies for instrumentation tests
     // Resolve conflicts between main and test APK (which is used in the integration-test module):
