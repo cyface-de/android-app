@@ -19,17 +19,17 @@
 package de.cyface.app.digural.button
 
 import android.location.Location
-<<<<<<< Updated upstream
 import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.camera_service.background.CapturingProcessListener
-=======
 import android.util.Log
 import de.cyface.app.digural.capturing.DiguralApi
 import de.cyface.app.digural.capturing.DiguralApi.baseUrl
 import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
->>>>>>> Stashed changes
 import de.cyface.utils.Validate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import retrofit2.awaitResponse
 import java.net.HttpURLConnection
@@ -64,7 +64,7 @@ class DiGuRaLCameraSystemTriggerer(val deviceId: String, val address: URL) :
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "######## On About to Capture $location")
         val payload = de.cyface.app.digural.capturing.Location(
-            deviceId!!,
+            deviceId,
             measurementId,
             50.0,
             13.0,
