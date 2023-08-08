@@ -22,8 +22,8 @@ import android.location.Location
 import android.os.Parcelable
 import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.camera_service.background.CapturingProcessListener
+import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
@@ -33,15 +33,12 @@ import kotlinx.parcelize.Parcelize
  *
  * @author Klemens Muthmann
  * @since 4.2.0
- * @constructor Create a new triggerer from the world wide unique device identifier of this device
- * and an endpoint to send requests to.
+ * @constructor Create a new triggerer from the world wide unique device identifier of this device.
  */
 @Parcelize
-class DiGuRaLCameraSystemTriggerer(val deviceId: String, val endpoint: String) : CapturingProcessListener,
-    Parcelable {
+class DiGuRaLCameraSystemTriggerer(val deviceId: String) : ParcelableCapturingProcessListener {
     init {
         Validate.notEmpty(deviceId)
-        Validate.notEmpty(endpoint)
     }
 
     override fun onCameraAccessLost() {}
@@ -50,10 +47,14 @@ class DiGuRaLCameraSystemTriggerer(val deviceId: String, val endpoint: String) :
     override fun onRecordingStopped() {}
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
+        if(location == null) {
+            return
+        }
+
         val payload = de.cyface.app.digural.capturing.Location(
             deviceId,
             measurementId,
-            location!!.latitude,
+            location.latitude,
             location.longitude,
             location.time
         )

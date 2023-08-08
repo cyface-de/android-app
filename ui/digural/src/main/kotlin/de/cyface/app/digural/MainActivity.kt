@@ -43,6 +43,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
+import de.cyface.app.digural.button.DiGuRaLCameraSystemTriggerer
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
@@ -202,6 +203,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 preferences.getSensorFrequency()
             )
+            var deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             // startSynchronization() // This is done in onAuthorized() instead
@@ -210,6 +212,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
+                DiGuRaLCameraSystemTriggerer(deviceIdentifier)
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
