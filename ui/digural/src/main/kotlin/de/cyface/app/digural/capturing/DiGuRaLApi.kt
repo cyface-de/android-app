@@ -11,9 +11,27 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import java.net.URL
 
-//private const val BASE_URL = "http://192.168.178.112:33553/PanAiCam/"
+private const val BASE_URL = "http://192.168.178.112:33553/PanAiCam/"
 
-val retrofit = Retrofit.Builder().baseUrl("http://192.168.113.154:5000/").build()
+val logging: HttpLoggingInterceptor
+    get() {
+        val logging = HttpLoggingInterceptor()
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        return HttpLoggingInterceptor()
+    }
+
+val httpClient: OkHttpClient.Builder
+    get() {
+        val ret = OkHttpClient.Builder()
+        httpClient.addInterceptor(logging)
+        return ret
+    }
+
+private val retrofit = Retrofit.Builder()
+    .addConverterFactory(GsonConverterFactory.create())
+    .baseUrl(BASE_URL)
+    .client(httpClient.build())
+    .build()
 
 interface DiguralApiService {
     //@POST("Trigger")
