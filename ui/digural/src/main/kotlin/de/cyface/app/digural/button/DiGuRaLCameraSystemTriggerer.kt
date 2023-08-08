@@ -22,12 +22,8 @@ import android.location.Location
 import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.camera_service.background.CapturingProcessListener
 import android.util.Log
-import de.cyface.app.digural.capturing.DiguralApi
-import de.cyface.app.digural.capturing.DiguralApi.baseUrl
-import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
@@ -42,8 +38,7 @@ import kotlin.concurrent.thread
  *
  * @author Klemens Muthmann
  * @since 4.2.0
- * @constructor Create a new triggerer from the world wide unique device identifier of this device
- * and an endpoint to send requests to.
+ * @constructor Create a new triggerer from the world wide unique device identifier of this device.
  */
 @Parcelize
 class DiGuRaLCameraSystemTriggerer(val deviceId: String, val address: URL) :
