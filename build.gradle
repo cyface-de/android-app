@@ -86,7 +86,6 @@ ext {
     // Other dependencies
     materialDialogsVersion = "3.3.0"
     chartVersion = "v3.1.0"
-    hCaptchaVersion = "3.8.1"
     // Can't be a SDK dependency as `appAuthRedirectScheme` needs to be defined at build-time
     appAuthVersion = "0.11.1" // Can't move to uploader lib because of dependency issues
 
@@ -133,7 +132,7 @@ allprojects {
                 password = project.findProperty("githubToken")
             }
         }
-        maven { url 'https://jitpack.io' } // For MPAndroidChart and HCaptcha
+        maven { url 'https://jitpack.io' } // For MPAndroidChart
         maven {
             url = uri("https://maven.pkg.github.com/cyface-de/uploader")
             // Needed even for public projects: https://github.community/t5/GitHub-API-Development-and/Download-from-Github-Package-Registry-without-authentication/m-p/35255
