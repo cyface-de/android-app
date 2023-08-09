@@ -57,8 +57,6 @@ jobs:
           echo "githubToken=${{ secrets.GH_READ_TOKEN }}" >> gradle.properties
           echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> gradle.properties
           echo "google.maps_api_key.r4r=${{ secrets.GOOGLE_MAPS_KEY_R4R }}" >> gradle.properties
-          echo "hCaptcha.key=${{ secrets.H_CAPTCHA_KEY }}" >> gradle.properties
-          echo "hCaptcha.key.r4r=${{ secrets.H_CAPTCHA_KEY_R4R }}" >> gradle.properties
 
       - name: Inject dummy credentials for UI tests to skip login
         run: |

@@ -84,9 +84,6 @@ android {
 
         // oauth redirect uri
         buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect')}\""
-
-        // Load hCaptcha API key
-        buildConfigField "String", "hCaptchaKey", "\"${project.findProperty('hCaptcha.key')}\""
     }
 
     buildTypes {
@@ -220,9 +217,6 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
-
-    // HCaptcha
-    implementation "com.github.hcaptcha:hcaptcha-android-sdk:$rootProject.ext.hCaptchaVersion"
 
     // OAuth 2.0 with OpenID Connect
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
