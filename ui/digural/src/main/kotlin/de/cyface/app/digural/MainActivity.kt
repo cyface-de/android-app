@@ -44,6 +44,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.button.DiGuRaLCameraSystemTriggerer
+import de.cyface.app.digural.capturing.settings.DiGuRaLPreferences
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
@@ -164,6 +165,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     override fun onCreate(savedInstanceState: Bundle?) {
         preferences = AppPreferences(this)
         cameraPreferences = CameraPreferences(this)
+        val diguralPreferences = DiGuRaLPreferences(this)
 
         // Location permissions are requested by MainFragment which needs to react to results
 
@@ -212,7 +214,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                DiGuRaLCameraSystemTriggerer(deviceIdentifier)
+                DiGuRaLCameraSystemTriggerer(
+                    deviceIdentifier,
+                    diguralPreferences.getDiGuRaLApiAddress()
+                )
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)

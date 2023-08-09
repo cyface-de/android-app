@@ -23,6 +23,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import de.cyface.camera_service.CameraPreferences
 import de.cyface.utils.AppPreferences
+import java.net.URL
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
@@ -39,6 +40,7 @@ import de.cyface.utils.AppPreferences
  *   https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
  *
  * @author Armin Schnabel
+ * @author Klemens Muthmann
  * @version 1.0.0
  * @since 3.4.0
  * @param appPreferences Persistence storage of the app preferences.
@@ -46,7 +48,8 @@ import de.cyface.utils.AppPreferences
  */
 class SettingsViewModel(
     private val appPreferences: AppPreferences,
-    private val cameraPreferences: CameraPreferences
+    private val cameraPreferences: CameraPreferences,
+    private val diGuRaLPreferences: DiGuRaLPreferences
 ) : ViewModel() {
 
     private val _centerMap = MutableLiveData<Boolean>()
@@ -64,6 +67,9 @@ class SettingsViewModel(
     private val _staticExposure = MutableLiveData<Boolean>()
     private val _staticExposureTime = MutableLiveData<Long>()
     private val _staticExposureValue = MutableLiveData<Int>()
+
+    /** digural settings **/
+    private val _diguralServerAddress = MutableLiveData<URL>()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -85,6 +91,8 @@ class SettingsViewModel(
         _staticExposure.value = cameraPreferences.getStaticExposure()
         _staticExposureTime.value = cameraPreferences.getStaticExposureTime()
         _staticExposureValue.value = cameraPreferences.getStaticExposureValue()
+        /** digural settings **/
+        _diguralServerAddress.value = diGuRaLPreferences.getDiGuRaLApiAddress()
     }
 
     val centerMap: LiveData<Boolean> = _centerMap
@@ -102,6 +110,8 @@ class SettingsViewModel(
     val staticExposure: LiveData<Boolean> = _staticExposure
     val staticExposureTime: LiveData<Long> = _staticExposureTime
     val staticExposureValue: LiveData<Int> = _staticExposureValue
+    /** digural settings **/
+    val diguralServerAddress: LiveData<URL> = _diguralServerAddress
 
     fun setCenterMap(centerMap: Boolean) {
         appPreferences.saveCenterMap(centerMap)
@@ -167,6 +177,11 @@ class SettingsViewModel(
     fun setStaticExposureValue(staticExposureValue: Int) {
         cameraPreferences.saveStaticExposureValue(staticExposureValue)
         _staticExposureValue.postValue(staticExposureValue)
+    }
+
+    fun setDiGuRaLServerAddressValue(address: URL) {
+        diGuRaLPreferences.saveDiGuRaLApiAddress(address)
+        _diguralServerAddress.postValue(address)
     }
 }
 

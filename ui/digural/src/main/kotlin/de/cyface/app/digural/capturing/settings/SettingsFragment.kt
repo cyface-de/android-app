@@ -112,9 +112,10 @@ class SettingsFragment : Fragment() {
         // Initialize ViewModel
         val appPreferences = AppPreferences(requireContext().applicationContext)
         val cameraPreferences = CameraPreferences(requireContext().applicationContext)
+        val diGuRaLPreferences = DiGuRaLPreferences(requireContext().applicationContext)
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(appPreferences, cameraPreferences)
+            SettingsViewModelFactory(appPreferences, cameraPreferences, diGuRaLPreferences)
         )[SettingsViewModel::class.java]
 
         // Initialize CapturingService
@@ -159,6 +160,7 @@ class SettingsFragment : Fragment() {
                 this
             )
         )
+        binding.diguralServerAddress.addTextChangedListener(DiGuRaLServerAddress(viewModel))
 
         // Observe view model and update UI
         viewModel.centerMap.observe(viewLifecycleOwner) { centerMapValue ->

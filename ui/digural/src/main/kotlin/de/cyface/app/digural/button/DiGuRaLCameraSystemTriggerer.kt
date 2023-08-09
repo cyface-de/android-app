@@ -19,14 +19,15 @@
 package de.cyface.app.digural.button
 
 import android.location.Location
-import android.os.Parcelable
-import de.cyface.app.digural.capturing.DiguralApi.diguralService
-import de.cyface.camera_service.background.CapturingProcessListener
+import android.util.Log
+import de.cyface.app.digural.capturing.DiguralApi
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import java.net.URL
 
 /**
  * Calls the API that triggers external cameras to trigger in sync with this smartphones camera.
@@ -36,9 +37,11 @@ import kotlinx.parcelize.Parcelize
  * @constructor Create a new triggerer from the world wide unique device identifier of this device.
  */
 @Parcelize
-class DiGuRaLCameraSystemTriggerer(val deviceId: String) : ParcelableCapturingProcessListener {
+class DiGuRaLCameraSystemTriggerer(val deviceId: String, val address: URL) : ParcelableCapturingProcessListener {
+    private val TAG = "de.cyface.app.digural"
     init {
         Validate.notEmpty(deviceId)
+        DiguralApi.baseUrl = address
     }
 
     override fun onCameraAccessLost() {}
@@ -59,11 +62,12 @@ class DiGuRaLCameraSystemTriggerer(val deviceId: String) : ParcelableCapturingPr
             location.time
         )
 
-        runBlocking {
-            launch() {
-                diguralService.trigger(payload)
+            runBlocking {
+                withContext(Dispatchers.IO) {
+                    Log.d(TAG, "###########Sending Payload $payload")
+                    DiguralApi.diguralService.trigger(payload)
+                }
             }
-        }
     }
 
     override fun shallStop() {
