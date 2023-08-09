@@ -18,4 +18,4 @@ local.properties
 /release-upload-key.jks
 
 # Only version gradle.properties.template
-/gradle.properties
+/gradle.properties*
