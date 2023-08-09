@@ -115,7 +115,7 @@ android {
             buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
-            manifestPlaceholders = [usesCleartextTraffic:"true"]
+            manifestPlaceholders = [usesCleartextTraffic:"true"] // external Digural camera API uses http
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
@@ -133,7 +133,7 @@ android {
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
             buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
-            manifestPlaceholders = [usesCleartextTraffic:"true"]
+            manifestPlaceholders = [usesCleartextTraffic:"true"] // external Digural camera API uses http
         }
     }
 
@@ -231,10 +231,10 @@ dependencies {
     implementation project(':camera_service')
     implementation project(':utils')
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.ext.retrofitVersion"
     // Retrofit with Scalar Converter
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.11.0"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.ext.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okHttpVersion"
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android'

@@ -47,8 +47,6 @@ class DiguralUrlChangeHandler(
         if (newValue != null && newValue.toString() != previousValue?.toExternalForm()) {
             try {
                 viewModel.setDiguralServerUrl(URL(newValue.toString()))
-                Toast.makeText(context, R.string.url_changed_toast, Toast.LENGTH_LONG)
-                    .show()
             } catch (e: MalformedURLException) {
                 Toast.makeText(context, R.string.url_malformed_toast, Toast.LENGTH_LONG)
                     .show()

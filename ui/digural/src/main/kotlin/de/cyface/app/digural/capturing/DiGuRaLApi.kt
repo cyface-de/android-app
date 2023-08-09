@@ -8,8 +8,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import java.net.URL
 
-//private const val BASE_URL = "http://192.168.178.112:33553/PanAiCam/"
-
 interface DiguralApiService {
     @POST("Trigger")
     suspend fun trigger(@Body location: Location)

@@ -88,6 +88,8 @@ ext {
     chartVersion = "v3.1.0"
     // Can't be a SDK dependency as `appAuthRedirectScheme` needs to be defined at build-time
     appAuthVersion = "0.11.1" // Can't move to uploader lib because of dependency issues
+    retrofitVersion = "2.9.0" // Used by digural UI
+
 
     // Testing
     junitVersion = "1.1.5"

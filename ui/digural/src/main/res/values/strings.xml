@@ -29,7 +29,6 @@
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
   <string name="settings_digural_server_address">Digural server address</string>
   <string name="url_malformed_toast">Invalid address format. The change was ignored.</string>
-  <string name="url_changed_toast">Address saved.</string>
 
   <!-- Camera -->
   <string name="camera_status">Camera Status</string>
