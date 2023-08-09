@@ -39,11 +39,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
-<<<<<<< HEAD
 import de.cyface.app.digural.button.ExternalCameraController
-=======
-import de.cyface.app.digural.button.DiGuRaLCameraSystemTriggerer
->>>>>>> 3211195 (Add trigger call to DiGuRaL API)
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
@@ -164,6 +160,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     override fun onCreate(savedInstanceState: Bundle?) {
         preferences = AppPreferences(this)
         cameraPreferences = CameraPreferences(this)
+        val diguralPreferences = DiGuRaLPreferences(this)
 
         // Start DataCapturingService and CameraService
         try {
