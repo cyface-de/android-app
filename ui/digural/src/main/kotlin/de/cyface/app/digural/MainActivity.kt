@@ -43,8 +43,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
-import de.cyface.app.digural.button.DiGuRaLCameraSystemTriggerer
-import de.cyface.app.digural.capturing.settings.CustomPreferences
+import de.cyface.app.digural.button.ExternalCameraController
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
@@ -52,8 +51,8 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -165,7 +164,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     override fun onCreate(savedInstanceState: Bundle?) {
         preferences = AppPreferences(this)
         cameraPreferences = CameraPreferences(this)
-        val customPreferences = CustomPreferences(this)
 
         // Location permissions are requested by MainFragment which needs to react to results
 
@@ -205,7 +203,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 preferences.getSensorFrequency()
             )
-            var deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
+            val deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             // startSynchronization() // This is done in onAuthorized() instead
@@ -214,10 +212,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                DiGuRaLCameraSystemTriggerer(
-                    deviceIdentifier,
-                    customPreferences.getDiguralUrl() // FIXME
-                )
+                ExternalCameraController(deviceIdentifier)
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)

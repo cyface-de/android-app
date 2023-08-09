@@ -18,30 +18,37 @@
  */
 package de.cyface.app.digural.button
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
+import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.app.digural.capturing.DiguralApi
+import de.cyface.app.digural.capturing.settings.CustomPreferences
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.net.URL
 
 /**
  * Calls the API that triggers external cameras to trigger in sync with this smartphones camera.
  *
  * @author Klemens Muthmann
  * @since 4.2.0
- * @constructor Create a new triggerer from the world wide unique device identifier of this device.
+ * @constructor Create a new controller from the world wide unique device identifier of this device.
  */
 @Parcelize
-class DiGuRaLCameraSystemTriggerer(val deviceId: String, val address: URL) : ParcelableCapturingProcessListener {
-    private val TAG = "de.cyface.app.digural"
+class ExternalCameraController(private val deviceId: String) : ParcelableCapturingProcessListener {
     init {
         Validate.notEmpty(deviceId)
+    }
+
+    override fun setContext(context: Context) {
+        val address = CustomPreferences(context).getDiguralUrl()
         DiguralApi.baseUrl = address
+        Log.d(TAG, "###########Setting digural address to: $address")
     }
 
     override fun onCameraAccessLost() {}
@@ -62,12 +69,12 @@ class DiGuRaLCameraSystemTriggerer(val deviceId: String, val address: URL) : Par
             location.time
         )
 
-            runBlocking {
-                withContext(Dispatchers.IO) {
-                    Log.d(TAG, "###########Sending Payload $payload")
-                    DiguralApi.diguralService.trigger(payload)
-                }
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                Log.d(TAG, "###########Sending Payload $payload to ${DiguralApi.baseUrl}")
+                DiguralApi.diguralService.trigger(payload)
             }
+        }
     }
 
     override fun shallStop() {

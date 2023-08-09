@@ -61,14 +61,13 @@ import de.cyface.app.digural.CapturingFragment;
 import de.cyface.app.digural.R;
 import de.cyface.app.digural.button.AbstractButton;
 import de.cyface.app.digural.button.ButtonListener;
-import de.cyface.app.digural.notification.CameraEventHandler;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.background.camera.CameraListener;
 import de.cyface.camera_service.CameraPreferences;
-import de.cyface.camera_service.foreground.CameraService;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
+import de.cyface.camera_service.background.camera.CameraListener;
+import de.cyface.camera_service.foreground.CameraService;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
@@ -705,8 +704,7 @@ public class DataCapturingButton
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
                     }
-                }
-                );
+                });
     }
 
     /**
