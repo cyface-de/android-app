@@ -45,11 +45,12 @@ import java.net.URL
  * @since 3.4.0
  * @param appPreferences Persistence storage of the app preferences.
  * @param cameraPreferences Persistence storage of the camera preferences.
+ * @param customPreferences Persistence storage of the ui custom preferences.
  */
 class SettingsViewModel(
     private val appPreferences: AppPreferences,
     private val cameraPreferences: CameraPreferences,
-    private val diGuRaLPreferences: DiGuRaLPreferences
+    private val customPreferences: CustomPreferences
 ) : ViewModel() {
 
     private val _centerMap = MutableLiveData<Boolean>()
@@ -68,8 +69,8 @@ class SettingsViewModel(
     private val _staticExposureTime = MutableLiveData<Long>()
     private val _staticExposureValue = MutableLiveData<Int>()
 
-    /** digural settings **/
-    private val _diguralServerAddress = MutableLiveData<URL>()
+    /** custom settings **/
+    private val _diguralServerUrl = MutableLiveData<URL>()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -91,8 +92,8 @@ class SettingsViewModel(
         _staticExposure.value = cameraPreferences.getStaticExposure()
         _staticExposureTime.value = cameraPreferences.getStaticExposureTime()
         _staticExposureValue.value = cameraPreferences.getStaticExposureValue()
-        /** digural settings **/
-        _diguralServerAddress.value = diGuRaLPreferences.getDiGuRaLApiAddress()
+        /** custom settings **/
+        _diguralServerUrl.value = customPreferences.getDiguralUrl()
     }
 
     val centerMap: LiveData<Boolean> = _centerMap
@@ -110,8 +111,9 @@ class SettingsViewModel(
     val staticExposure: LiveData<Boolean> = _staticExposure
     val staticExposureTime: LiveData<Long> = _staticExposureTime
     val staticExposureValue: LiveData<Int> = _staticExposureValue
-    /** digural settings **/
-    val diguralServerAddress: LiveData<URL> = _diguralServerAddress
+
+    /** custom settings **/
+    val diguralServerUrl: LiveData<URL> = _diguralServerUrl
 
     fun setCenterMap(centerMap: Boolean) {
         appPreferences.saveCenterMap(centerMap)
@@ -179,9 +181,9 @@ class SettingsViewModel(
         _staticExposureValue.postValue(staticExposureValue)
     }
 
-    fun setDiGuRaLServerAddressValue(address: URL) {
-        diGuRaLPreferences.saveDiGuRaLApiAddress(address)
-        _diguralServerAddress.postValue(address)
+    fun setDiguralServerUrl(address: URL) {
+        customPreferences.saveDiguralUrl(address)
+        _diguralServerUrl.postValue(address)
     }
 }
 

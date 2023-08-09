@@ -37,13 +37,13 @@ import de.cyface.utils.AppPreferences
 class SettingsViewModelFactory(
     private val appPreferences: AppPreferences,
     private val cameraPreferences: CameraPreferences,
-    private val diGuRaLPreferences: DiGuRaLPreferences
+    private val customPreferences: CustomPreferences
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appPreferences, cameraPreferences, diGuRaLPreferences) as T
+            return SettingsViewModel(appPreferences, cameraPreferences, customPreferences) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -25,6 +25,9 @@
   <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente</string>
   <string name="drawer_setting_camera_focus_distance">Kamera Fokus Distanz</string>
   <string name="settings_sensor_frequency">Sensorfrequenz</string>
+  <string name="settings_digural_server_address">Digural Server Adresse</string>
+  <string name="url_malformed_toast">Fehlerhaftes Adress-Format. Änderung wurde verworfen.</string>
+  <string name="url_changed_toast">Adresse gespeichert.</string>
 
   <!-- Camera -->
   <string name="camera_status">Kamera Status</string>
