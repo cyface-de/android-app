@@ -29,7 +29,6 @@ import de.cyface.utils.Validate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -45,7 +44,13 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
         Validate.notEmpty(deviceId)
     }
 
-    override fun setContext(context: Context) {
+    override fun contextBasedInitialization(context: Context) {
+        // FIXME: Known issue: After starting the capturing once, further preference changes
+        // are not affecting the preferences received here, even when this is always executed after
+        // starting a new BackgroundService. The SharedPreferences don't support multi-process env.
+        // We cannot inject the address preference in `CameraService` as this is a ui-specific
+        // preferences which the camera_service has no knowledge of.
+        // A possible solution would be to store this in Room/Sql, as this supports multi-process.
         val address = CustomPreferences(context).getDiguralUrl()
         DiguralApi.baseUrl = address
         Log.d(TAG, "###########Setting digural address to: $address")

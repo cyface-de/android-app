@@ -58,7 +58,7 @@ ext {
     cyfaceAndroidBackendVersion = "7.8.1" // Also update submodule commit ref
     cyfaceUtilsVersion = "3.5.0"
     cyfaceEnergySettingsVersion = "3.3.4" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.1.12" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.2.0" // Also update submodule commit ref
     // Maybe keep this in sync with the serialization library version used in `uploader` lib
     cyfaceSerializationVersion = "2.3.7" // Keep im sync with version in submodule `backend`
     cyfaceUploaderVersion = "1.0.0"

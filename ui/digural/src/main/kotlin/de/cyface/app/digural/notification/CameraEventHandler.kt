@@ -35,12 +35,12 @@ import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID
 import de.cyface.camera_service.background.BackgroundService
-import de.cyface.camera_service.foreground.EventHandlingStrategy
+import de.cyface.camera_service.foreground.NotificationStrategy
 import de.cyface.utils.Validate
 import kotlinx.parcelize.Parcelize
 
 /**
- * A [EventHandlingStrategy] to respond to specified events triggered by the
+ * A [NotificationStrategy] to respond to specified events triggered by the
  * [BackgroundService].
  *
  * @author Armin Schnabel
@@ -48,7 +48,8 @@ import kotlinx.parcelize.Parcelize
  * @since 1.0.0
  */
 @Parcelize
-class CameraEventHandler : EventHandlingStrategy {
+class CameraEventHandler :
+    NotificationStrategy {
 
     /**
      * A [Notification] shown when the [BackgroundService] triggered the 'camera error' event.
