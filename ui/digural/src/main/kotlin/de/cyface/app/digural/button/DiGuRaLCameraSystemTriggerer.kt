@@ -24,8 +24,9 @@ import de.cyface.camera_service.background.CapturingProcessListener
 import android.util.Log
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import retrofit2.awaitResponse
 import java.net.HttpURLConnection
