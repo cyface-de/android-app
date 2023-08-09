@@ -61,11 +61,12 @@ import de.cyface.app.CapturingFragment;
 import de.cyface.app.R;
 import de.cyface.app.button.AbstractButton;
 import de.cyface.app.button.ButtonListener;
+import de.cyface.app.notification.CameraEventHandler;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.CameraListener;
+import de.cyface.camera_service.background.camera.CameraListener;
 import de.cyface.camera_service.CameraPreferences;
-import de.cyface.camera_service.CameraService;
+import de.cyface.camera_service.foreground.CameraService;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
@@ -93,6 +94,10 @@ import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
 
+// TODO: This class has overstretched its intended scope by several orders of magnitude by now.
+// The initial idea was to have this contain all the UI code for the button triggering data
+// capturing and providing a ViewModel as soon as too much business logic is in here. This is the
+// case now. All this stuff should be moved to a or multiple business logic classes soon.
 /**
  * The button listener for the button to start and stop the data capturing service.
  *
@@ -699,15 +704,24 @@ public class DataCapturingButton
         final var staticExposureTime = cameraPreferences.getStaticExposureTime();
         final var exposureValueIso100 = cameraPreferences.getStaticExposureValue();
 
-        cameraService.start(measurementId, videoModeSelected, rawModeSelected, staticFocusSelected,
-                staticFocusDistance, staticExposureTimeSelected, staticExposureTime, exposureValueIso100,
-                distanceBasedTriggeringSelected, triggeringDistance,
+        cameraService.start(
+                measurementId,
+                videoModeSelected,
+                rawModeSelected,
+                staticFocusSelected,
+                staticFocusDistance,
+                staticExposureTimeSelected,
+                staticExposureTime,
+                exposureValueIso100,
+                distanceBasedTriggeringSelected,
+                triggeringDistance,
                 new StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     @Override
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
                     }
-                });
+                }
+                );
     }
 
     /**

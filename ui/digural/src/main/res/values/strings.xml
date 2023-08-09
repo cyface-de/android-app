@@ -27,6 +27,8 @@
   <string name="drawer_setting_camera_focus_distance">Camera focus distance</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
+  <string name="settings_digural_server_address">Digural server address</string>
+  <string name="url_malformed_toast">Invalid address format. The change was ignored.</string>
 
   <!-- Camera -->
   <string name="camera_status">Camera Status</string>

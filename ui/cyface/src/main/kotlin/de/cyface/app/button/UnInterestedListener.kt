@@ -16,18 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural
+package de.cyface.app.button
 
-import de.cyface.camera_service.foreground.CameraService
+import android.content.Context
+import android.location.Location
+import de.cyface.camera_service.background.ParcelableCapturingProcessListener
+import kotlinx.parcelize.Parcelize
 
-/**
- * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from
- * the `Fragments`.
- *
- * @author Armin Schnabel
- * @version 1.0.0
- * @since 7.5.0
- */
-interface CameraServiceProvider {
-    val cameraService: CameraService
+@Parcelize
+class UnInterestedListener : ParcelableCapturingProcessListener {
+
+    override fun contextBasedInitialization(context: Context) {}
+    override fun onCameraAccessLost() {}
+    override fun onPictureCaptured() {}
+    override fun onRecordingStarted() {}
+    override fun onRecordingStopped() {}
+    override fun onCameraError(reason: String) {}
+    override fun onAboutToCapture(measurementId: Long, location: Location?) {}
+    override fun shallStop() {}
 }

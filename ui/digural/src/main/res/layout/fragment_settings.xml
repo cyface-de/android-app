@@ -527,6 +527,33 @@
       </LinearLayout>
     </LinearLayout>
 
+    <!-- Digural Url -->
+    <TextView
+      android:id="@+id/diguralServerAddressTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/camera_settings_wrapper"
+      android:text="@string/settings_digural_server_address" />
+
+    <com.google.android.material.textfield.TextInputLayout
+      android:id="@+id/diguralServerAddressWrapper"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:endIconMode="custom"
+      app:endIconDrawable="@drawable/baseline_save_24"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/diguralServerAddressTitle">
+
+      <!-- cannot use a simple EditText to store a URL as onChange is triggered after each
+      character change which would throw a Malformed exception-->
+      <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/diguralServerAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="http://localhost:33553" />
+    </com.google.android.material.textfield.TextInputLayout>
+
 
     <!-- - - - - - - - - - - - - - - Divider - - - - - - - - - - - - - - - -->
     <View
@@ -534,7 +561,7 @@
       android:layout_width="match_parent"
       android:layout_height="1dp"
       app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/camera_settings_wrapper"
+      app:layout_constraintTop_toBottomOf="@id/diguralServerAddressWrapper"
       android:layout_marginTop="8pt"
       android:layout_marginBottom="8pt"
       android:background="@color/grey_700" />
@@ -584,6 +611,7 @@
         android:paddingEnd="4pt"
         android:paddingRight="4pt"
         android:text="@string/settings_sensor_frequency_unit" />
+
     </LinearLayout>
 
   </androidx.constraintlayout.widget.ConstraintLayout>

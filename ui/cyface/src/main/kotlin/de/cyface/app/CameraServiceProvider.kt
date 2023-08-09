@@ -18,7 +18,7 @@
  */
 package de.cyface.app
 
-import de.cyface.camera_service.CameraService
+import de.cyface.camera_service.foreground.CameraService
 
 /**
  * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from

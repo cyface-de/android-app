@@ -63,11 +63,11 @@ import de.cyface.app.digural.button.AbstractButton;
 import de.cyface.app.digural.button.ButtonListener;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.CameraListener;
 import de.cyface.camera_service.CameraPreferences;
-import de.cyface.camera_service.CameraService;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
+import de.cyface.camera_service.background.camera.CameraListener;
+import de.cyface.camera_service.foreground.CameraService;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
@@ -688,9 +688,17 @@ public class DataCapturingButton
         final var staticExposureTime = cameraPreferences.getStaticExposureTime();
         final var exposureValueIso100 = cameraPreferences.getStaticExposureValue();
 
-        cameraService.start(measurementId, videoModeSelected, rawModeSelected, staticFocusSelected,
-                staticFocusDistance, staticExposureTimeSelected, staticExposureTime, exposureValueIso100,
-                distanceBasedTriggeringSelected, triggeringDistance,
+        cameraService.start(
+                measurementId,
+                videoModeSelected,
+                rawModeSelected,
+                staticFocusSelected,
+                staticFocusDistance,
+                staticExposureTimeSelected,
+                staticExposureTime,
+                exposureValueIso100,
+                distanceBasedTriggeringSelected,
+                triggeringDistance,
                 new StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     @Override
                     public void startUpFinished(final long measurementIdentifier) {

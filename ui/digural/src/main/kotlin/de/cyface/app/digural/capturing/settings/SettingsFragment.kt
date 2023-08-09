@@ -37,10 +37,10 @@ import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraModeDialog
 import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.Constants
 import de.cyface.camera_service.Utils
+import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
@@ -112,9 +112,10 @@ class SettingsFragment : Fragment() {
         // Initialize ViewModel
         val appPreferences = AppPreferences(requireContext().applicationContext)
         val cameraPreferences = CameraPreferences(requireContext().applicationContext)
+        val customPreferences = CustomPreferences(requireContext().applicationContext)
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(appPreferences, cameraPreferences)
+            SettingsViewModelFactory(appPreferences, cameraPreferences, customPreferences)
         )[SettingsViewModel::class.java]
 
         // Initialize CapturingService
@@ -159,6 +160,13 @@ class SettingsFragment : Fragment() {
                 this
             )
         )
+        binding.diguralServerAddressWrapper.setEndIconOnClickListener(
+            DiguralUrlChangeHandler(
+                viewModel,
+                this,
+                binding.diguralServerAddress
+            )
+        )
 
         // Observe view model and update UI
         viewModel.centerMap.observe(viewLifecycleOwner) { centerMapValue ->
@@ -175,6 +183,12 @@ class SettingsFragment : Fragment() {
             run {
                 Log.d(TAG, "updateView -> sensor frequency slider $sensorFrequencyValue")
                 binding.sensorFrequency.text = sensorFrequencyValue.toString()
+            }
+        }
+        viewModel.diguralServerUrl.observe(viewLifecycleOwner) { serverAddress ->
+            run {
+                Log.d(TAG, "updateView -> digural server address: $serverAddress")
+                binding.diguralServerAddress.setText(serverAddress.toExternalForm())
             }
         }
         viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabledValue ->
