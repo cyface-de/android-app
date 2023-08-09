@@ -43,6 +43,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.auth.LoginActivity
+import de.cyface.app.button.UnInterestedListener
 import de.cyface.app.databinding.ActivityMainBinding
 import de.cyface.app.notification.CameraEventHandler
 import de.cyface.app.notification.DataCapturingEventHandler
@@ -50,8 +51,8 @@ import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -210,7 +211,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             cameraService = CameraService(
                 this.applicationContext,
                 CameraEventHandler(),
-                unInterestedCameraListener // here was the capturing button but it registers itself, too
+                unInterestedCameraListener, // here was the capturing button but it registers itself, too
+                UnInterestedListener()
             )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
