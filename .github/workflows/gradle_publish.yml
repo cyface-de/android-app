@@ -77,6 +77,16 @@ jobs:
       - name: Build App
         run: ./gradlew bundleRelease
 
+      - name: Sign Digural App
+        id: sign_app_digural
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: ui/digural/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.SIGNING_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }} # optional
+
       - name: Sign R4R App
         id: sign_app_r4r
         uses: r0adkll/sign-android-release@v1
@@ -99,6 +109,11 @@ jobs:
 
       # We currently upload the app manually to Play Store, but we could automate this using a
       # Google Service Account and the Github Action `r0adkll/upload-google-play`.
+      - name: Make Digural app available
+        uses: actions/upload-artifact@v3
+        with:
+          name: Signed App Bundle
+          path: ${{ steps.sign_app_digural.outputs.signedReleaseFile }}
       - name: Make R4R app available
         uses: actions/upload-artifact@v3
         with:
