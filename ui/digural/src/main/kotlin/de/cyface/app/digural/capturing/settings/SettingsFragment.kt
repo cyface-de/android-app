@@ -726,6 +726,7 @@ class SettingsFragment : Fragment() {
 final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
 && preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
 connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
+*/
 
 // connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
 
