@@ -44,6 +44,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.button.ExternalCameraController
+import de.cyface.app.digural.capturing.settings.CustomPreferences
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
@@ -164,7 +165,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     override fun onCreate(savedInstanceState: Bundle?) {
         preferences = AppPreferences(this)
         cameraPreferences = CameraPreferences(this)
-        val diguralPreferences = DiGuRaLPreferences(this)
 
         // Location permissions are requested by MainFragment which needs to react to results
 

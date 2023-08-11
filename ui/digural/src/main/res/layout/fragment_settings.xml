@@ -614,15 +614,5 @@
 
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/diguralServerAddress"
-        android:layout_width="378dp"
-        android:layout_height="52dp"
-        android:ems="10"
-        android:inputType="text"
-        android:text="http://localhost:33553"
-        app:layout_constraintTop_toBottomOf="@+id/sensor_frequency_wrapper"
-        tools:layout_editor_absoluteX="0dp" />
-
   </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
