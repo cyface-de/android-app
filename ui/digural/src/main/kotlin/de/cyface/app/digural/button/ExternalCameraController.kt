@@ -57,7 +57,7 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
         // A possible solution would be to store this in Room/Sql, as this supports multi-process.
         val address = CustomPreferences(context).getDiguralUrl()
         DiguralApi.baseUrl = address
-        Log.d(TAG, "###########Setting digural address to: $address")
+        Log.d(TAG, "Setting digural address to: $address")
     }
 
     override fun onCameraAccessLost() {}
@@ -67,6 +67,13 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "On About to Capture $location")
+
+        val targetUrl = DiguralApi
+            .baseUrl
+            .toURI()
+            .resolve("PanAiCam/Trigger")
+            .toURL()
+
         if (location == null) {
             return
         }
@@ -91,10 +98,9 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
         /* Begin Classic Variant */
         thread {
             Log.d(TAG, "Sending Payload ${payload.toJson()}")
-            with(URL("http://192.168.113.154:5000/PanAiCam/Trigger").openConnection() as HttpURLConnection) {
+            with(targetUrl.openConnection() as HttpURLConnection) {
                 try {
                     requestMethod = "POST"
-                    setRequestProperty("Accept", "*/*")
                     setRequestProperty("Content-Type", "application/json")
                     doOutput = true
 
