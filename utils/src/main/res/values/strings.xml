@@ -177,4 +177,7 @@
         \n\nThe information is collected anonymously, not used for personal or advertising purposes and deleted after a period of 90 days. The legal basis for the aforementioned data processing is Art. 6, Para. 1 lit. f of the GDPR. For this purpose, a data processing agreement (AV contract) has been concluded with Functional Software Inc.
 
         \n\nThe sole purpose of processing is to improve the stability and usability of the app. For further information regarding data processing by Sentry, please refer to the Sentry Privacy Policy: https://sentry.io/privacy/</string>
+
+    <string name="privacy">Privacy Policy</string>
+    <string name="privacy_content">Click here to open the privacy policy.</string>
 </resources>

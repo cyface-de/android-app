@@ -161,4 +161,7 @@
         \n\nDie Informationen werden anonym erhoben, nicht für persönliche Zwecke oder zu Werbezwecken verwendet und nach einem Zeitraum von 90 Tagen gelöscht. Rechtsgrundlage für die vorgenannte Datenverarbeitung ist Art. 6, Abs. 1 lit. f der DSGVO. Zu diesem Zweck wurde mit der Functional Software Inc. ein Auftragsverarbeitungsvertrag (AV-Vertrag) abgeschlossen.
 
         \n\nZweck der Verarbeitung ist ausschließlich die Verbessung der Stabilität und Nutzbarkeit der App. Weitere Informationen bzgl. der Datenverarbeitung durch Sentry finden Sie in den Datenschutzrichtlinien von Sentry: https://sentry.io/privacy/</string>
+
+    <string name="privacy">Datenschutzerklärung</string>
+    <string name="privacy_content">Hier klicken um zur Datenschutzerklärung zu gelangen.</string>
 </resources>

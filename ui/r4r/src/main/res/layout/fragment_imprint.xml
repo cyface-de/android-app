@@ -30,5 +30,25 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="15sp" />
 
+        <TextView
+          android:id="@+id/privacyPolicyTitle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:paddingTop="5sp"
+          android:text="@string/privacy"
+          android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+          android:id="@+id/privacyPolicy"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:padding="5sp"
+          android:text="@string/privacy_content"
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textColor="@color/green_700"
+          android:clickable="true"
+          android:focusable="true"
+          android:textSize="15sp" />
+
     </LinearLayout>
 </ScrollView>
