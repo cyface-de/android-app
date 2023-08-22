@@ -30,12 +30,12 @@ import de.cyface.utils.AppPreferences
 /**
  * The TermsOfUserActivity is the first [Activity] started on app launch.
  *
- * It's responsible for informing the user about the terms of use (and data privacy conditions).
+ * It's responsible for allow the user to opt-in for Sentry.
  *
  * When the current terms are accepted or have been before, the [MainActivity] is launched.
  *
  * @author Armin Schnabel
- * @version 1.1.1
+ * @version 1.2.0
  * @since 1.0.0
  */
 class TermsOfUseActivity : Activity(), View.OnClickListener {
@@ -63,11 +63,6 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
      * Allows the user to opt-in to error reporting.
      */
     private var acceptReportsCheckbox: CheckBox? = null
-
-    /**
-     * To ask the user to accept the terms.
-     */
-    private var acceptTermsCheckbox: CheckBox? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferences = AppPreferences(applicationContext)
@@ -93,12 +88,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     private fun registerOnClickListeners() {
         acceptTermsButton = findViewById(R.id.accept_terms_button)
         acceptTermsButton!!.setOnClickListener(this)
-        acceptTermsCheckbox = findViewById(R.id.accept_terms_checkbox)
         acceptReportsCheckbox = findViewById(R.id.accept_reports_checkbox)
-        acceptTermsCheckbox!!
-            .setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-                acceptTermsButton!!.isEnabled = isChecked
-            }
         acceptReportsCheckbox!!
             .setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
                 isReportingEnabled = isChecked
@@ -110,7 +100,6 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
      */
     private fun unregisterOnClickListeners() {
         acceptTermsButton!!.setOnClickListener(null)
-        acceptTermsCheckbox!!.setOnCheckedChangeListener(null)
         acceptReportsCheckbox!!.setOnCheckedChangeListener(null)
     }
 

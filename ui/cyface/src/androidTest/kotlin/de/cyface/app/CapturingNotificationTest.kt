@@ -44,7 +44,7 @@ import org.junit.runner.RunWith
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.2.1
+ * @version 1.2.2
  * @since 3.0.0
  */
 @RunWith(AndroidJUnit4::class)
@@ -177,17 +177,8 @@ class CapturingNotificationTest {
     }
 
     private fun acceptTermsIfNeeded(device: UiDevice?) {
-        val acceptTermsCheckboxSelector = By.res(CYFACE_APP_PACKAGE, "accept_terms_checkbox")
-        device!!.wait(
-            Until.hasObject(acceptTermsCheckboxSelector),
-            DEFAULT_TIMEOUT.toLong()
-        ) // to fix CI
-        if (device.hasObject(acceptTermsCheckboxSelector)
-            && device.hasObject(By.res(CYFACE_APP_PACKAGE, "accept_terms_button"))
+        if (device!!.hasObject(By.res(CYFACE_APP_PACKAGE, "accept_terms_button"))
         ) {
-            val acceptTermsCheckbox = device.findObject(acceptTermsCheckboxSelector)
-            MatcherAssert.assertThat(acceptTermsCheckbox.isCheckable, Matchers.`is`(true))
-            acceptTermsCheckbox.click()
             val acceptTermsButtonSelector = By.res(CYFACE_APP_PACKAGE, "accept_terms_button")
             val acceptTermsButton = device.findObject(acceptTermsButtonSelector)
             MatcherAssert.assertThat(acceptTermsButton.isClickable, Matchers.`is`(true))

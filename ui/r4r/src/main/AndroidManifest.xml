@@ -69,6 +69,7 @@
 
     <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
     <!-- `exported="true"` or else the app cannot be launched after installation! -->
+    <!-- As the user can opt-in for Sentry, we can't remove the terms page (DSE in Keycloak) -->
     <activity android:name=".TermsOfUseActivity"
       android:exported="true">
       <intent-filter>
