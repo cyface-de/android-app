@@ -10,6 +10,17 @@
     <string name="notification_channel_description_warning">Warning messages, e.g. when the storage is full and the measuring had to be canceled. This notification should not be disabled.</string>
     <string name="toast_last_tracking_crashed">Your last tracking stopped unexpectedly.</string>
 
+    <!-- Permissions -->
+    <string name="missing_permissions">Missing Permissions</string>
+    <string name="missing_permissions_info">The app is missing %s permissions.</string>
+    <string name="missing_location_permissions_toast">The app is missing location permission.</string>
+    <string name="change_permissions">Change permissions</string>
+    <string name="close_app">Close app</string>
+    <string name="camera">camera</string>
+    <string name="notification">notification</string>
+    <string name="location">location</string>
+    <string name="and">and</string>
+
     <!-- Login -->
     <string name="logo_content_description" translatable="false">Logo</string>
     <string name="log_in">Log in</string>

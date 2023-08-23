@@ -10,6 +10,17 @@
     <string name="notification_channel_description_warning">Warnungen, z.B. wenn der Speicher voll ist und die Messung abgebrochen werden musste. Diese Benachrichtigung sollte nicht deaktiviert werden.</string>
     <string name="toast_last_tracking_crashed">Die letzte Aufzeichnung wurde nicht ordnungsgemäß beendet.</string>
 
+    <!-- Permissions -->
+    <string name="missing_permissions">Fehlende Berechtigungen</string>
+    <string name="missing_permissions_info">Der App fehlen %s Berechtigungen.</string>
+    <string name="missing_location_permissions_toast">Der App fehlen Standort Berechtigungen.</string>
+    <string name="change_permissions">Berechtigungen ändern</string>
+    <string name="close_app">App beenden</string>
+    <string name="camera">Kamera</string>
+    <string name="notification">Benachrichtigungs-</string>
+    <string name="location">Standort</string>
+    <string name="and">und</string>
+
     <!-- Login -->
     <string name="log_in">Anmelden</string>
     <string name="title_activity_login">Einloggen</string>
