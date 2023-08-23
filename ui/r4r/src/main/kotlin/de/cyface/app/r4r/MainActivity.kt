@@ -18,31 +18,21 @@
  */
 package de.cyface.app.r4r
 
-import android.Manifest
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -51,13 +41,13 @@ import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
-import de.cyface.app.utils.capturing.settings.CustomPreferences
 import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.capturing.settings.CustomPreferences
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -116,17 +106,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     /**
      * The `SharedPreferences` used to store the user's preferences.
      */
-    private lateinit var preferences: CustomPreferences
-
-    /**
-     * The launcher to call after a permission request returns.
-     */
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-
-    /**
-     * The dialog which inform the user about missing permissions.
-     */
-    private var permissionDialog: AlertDialog? = null
+    private lateinit var appPreferences: CustomPreferences
 
     /**
      * The authorization.
@@ -167,18 +147,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        preferences = CustomPreferences(this)
+        appPreferences = CustomPreferences(this)
         //cameraPreferences = CameraPreferences(this)
-
-        // Location permissions are requested by CapturingFragment/Map to react to results.
-        permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                // Show Dialog only after the user had a change to accept permissions
-                //val cameraMissing = cameraPermissionMissing(this, cameraPreferences)
-                val notificationMissing = notificationPermissionMissing(this)
-                val locationMissing = !granted(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                showMissingPermissions(/*cameraMissing,*/ notificationMissing, locationMissing)
-            }
 
         // Start DataCapturingService and CameraService
         try {
@@ -296,11 +266,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         showGnssWarningDialog(this)
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
-        // Ensure app is only used with required permissions (e.g. location dismissed too ofter)
-        permissionDialog?.dismiss() // reset previous to show current permission state
-        if (missingPermission(this/*, cameraPreferences*/)) {
-            requestMissingPermissions(/*cameraPreferences*/)
-        }
         super.onResume()
     }
 
@@ -313,7 +278,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            if (preferences.getReportingAccepted()) {
+            if (appPreferences.getReportingAccepted()) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -323,110 +288,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         auth.dispose()
     }
 
-    private fun showMissingPermissions(
-        //cameraMissing: @JvmSuppressWildcards Boolean,
-        notificationMissing: @JvmSuppressWildcards Boolean,
-        locationMissing: @JvmSuppressWildcards Boolean
-    ) {
-        if (/*cameraMissing ||*/ notificationMissing || locationMissing) {
-            val cameraString = this.getString(de.cyface.app.utils.R.string.camera)
-            val notificationString =
-                this.getString(de.cyface.app.utils.R.string.notification)
-            val locationString = this.getString(de.cyface.app.utils.R.string.location)
-            val missing = mutableListOf<String>()
-            //if (cameraMissing) missing.add(cameraString)
-            if (notificationMissing) missing.add(notificationString)
-            if (locationMissing) missing.add(locationString)
-
-            permissionDialog = AlertDialog.Builder(this)
-                .setTitle(this.getString(de.cyface.app.utils.R.string.missing_permissions))
-                .setMessage(
-                    this.getString(
-                        de.cyface.app.utils.R.string.missing_permissions_info,
-                        missing.toCustomString()
-                    )
-                )
-                .setPositiveButton(de.cyface.app.utils.R.string.change_permissions) { dialog, _ ->
-                    dialog.dismiss()
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", packageName, null)
-                    intent.data = uri
-                    startActivity(intent)
-                }
-                .setNegativeButton(de.cyface.app.utils.R.string.close_app) { _, _ ->
-                    finish()
-                }
-                .setCancelable(false)
-                .show()
-        }
-    }
-
-    /**
-     * @return a string in the format: "item1, item2 and item3"
-     */
-    private fun List<String>.toCustomString(): String {
-        val and = applicationContext.getString(de.cyface.app.utils.R.string.and)
-        return when (size) {
-            1 -> this[0]
-            2 -> "${this[0]} $and ${this[1]}"
-            else -> "${this.dropLast(1).joinToString(", ")} $and ${this.last()}"
-        }
-    }
-
-    /**
-     * Checks and requests missing permissions.
-     *
-     * @ param cameraPreferences The camera preferences to check if camera is enabled.
-     */
-    private fun requestMissingPermissions(/*cameraPreferences: CameraPreferences*/) {
-        // Without notification permissions the capturing notification is not shown on Android >= 13
-        // But capturing still works.
-        val permissionsMissing = missingPermission(this/*, cameraPreferences*/)
-        if (permissionsMissing) {
-            val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-            /*val cameraEnabled = cameraPreferences.getCameraEnabled()
-            if (cameraEnabled) {
-                permissions.add(Manifest.permission.CAMERA)
-            }*/
-            permissionLauncher.launch(permissions.toTypedArray())
-        }
-    }
-
-    /**
-     * Checks if permissions are missing.
-     *
-     * @param context The context to check for.
-     * @ param cameraPreferences The camera preferences to check if camera is enable.
-     * @return `true` if permissions are missing.
-     */
-    private fun missingPermission(context: Context/*, cameraPreferences: CameraPreferences*/): Boolean {
-        //val cameraMissing = cameraPermissionMissing(context, cameraPreferences)
-        val notificationMissing = notificationPermissionMissing(context)
-        val locationMissing = !granted(context, Manifest.permission.ACCESS_FINE_LOCATION)
-        return /*cameraMissing ||*/ notificationMissing || locationMissing
-    }
-
-    private fun notificationPermissionMissing(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            !granted(context, Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            false
-        }
-    }
-
-    /**
-     * Determine whether you have been granted a particular permission.
-     *
-     * @param permission The permission to check.
-     * @return `true` if the permission was already granted.
-     */
-    private fun granted(context: Context, permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-    }
-
     /**
      * Starts the synchronization.
      *
@@ -434,7 +295,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * no account the synchronization is started when the async account creation future returns to ensure
      * the account is available at that point.
      */
-    fun startSynchronization() {
+    private fun startSynchronization() {
         val accountManager = AccountManager.get(this.applicationContext)
         val validAccountExists = accountWithTokenExists(accountManager)
         if (validAccountExists) {
@@ -467,7 +328,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = preferences.getUpload()
+                    val syncEnabledPreference = appPreferences.getUpload()
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
@@ -517,13 +378,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * effect.
      */
     private fun setIncentivesServerUrl() {
-        val storedServer = preferences.getIncentivesUrl()
+        val storedServer = appPreferences.getIncentivesUrl()
         val server = BuildConfig.incentivesServer
         @Suppress("KotlinConstantConditions")
         Validate.isTrue(server != "null")
         if (storedServer == null || storedServer != server) {
             Log.d(TAG, "Updating Incentives API URL from " + storedServer + "to" + server)
-            preferences.saveIncentivesUrl(server)
+            appPreferences.saveIncentivesUrl(server)
         }
     }
 

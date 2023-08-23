@@ -131,16 +131,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     private lateinit var cameraPreferences: CameraPreferences
 
     /**
-     * The launcher to call after a permission request returns.
-     */
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-
-    /**
-     * The dialog which inform the user about missing permissions.
-     */
-    private var permissionDialog: AlertDialog? = null
-
-    /**
      * The authorization.
      */
     override lateinit var auth: OAuth2
@@ -181,16 +171,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     override fun onCreate(savedInstanceState: Bundle?) {
         appPreferences = AppPreferences(this)
         cameraPreferences = CameraPreferences(this)
-
-        // Location permissions are requested by CapturingFragment/Map to react to results.
-        permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                // Show Dialog only after the user had a change to accept permissions
-                val cameraMissing = cameraPermissionMissing(this, cameraPreferences)
-                val notificationMissing = notificationPermissionMissing(this)
-                val locationMissing = !granted(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                showMissingPermissions(cameraMissing, notificationMissing, locationMissing)
-            }
 
         // Start DataCapturingService and CameraService
         val sensorFrequency = appPreferences.getSensorFrequency()
@@ -307,11 +287,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         showGnssWarningDialog(this)
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
-        // Ensure app is only used with required permissions (e.g. location dismissed too ofter)
-        permissionDialog?.dismiss() // reset previous to show current permission state
-        if (missingPermission(this, cameraPreferences)) {
-            requestMissingPermissions(cameraPreferences)
-        }
         super.onResume()
     }
 
@@ -332,118 +307,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
 
         // Authorization
         auth.dispose()
-    }
-
-    private fun showMissingPermissions(
-        cameraMissing: @JvmSuppressWildcards Boolean,
-        notificationMissing: @JvmSuppressWildcards Boolean,
-        locationMissing: @JvmSuppressWildcards Boolean
-    ) {
-        if (cameraMissing || notificationMissing || locationMissing) {
-            val cameraString = this.getString(de.cyface.app.utils.R.string.camera)
-            val notificationString =
-                this.getString(de.cyface.app.utils.R.string.notification)
-            val locationString = this.getString(de.cyface.app.utils.R.string.location)
-            val missing = mutableListOf<String>()
-            if (cameraMissing) missing.add(cameraString)
-            if (notificationMissing) missing.add(notificationString)
-            if (locationMissing) missing.add(locationString)
-
-            permissionDialog = AlertDialog.Builder(this)
-                .setTitle(this.getString(de.cyface.app.utils.R.string.missing_permissions))
-                .setMessage(
-                    this.getString(
-                        de.cyface.app.utils.R.string.missing_permissions_info,
-                        missing.toCustomString()
-                    )
-                )
-                .setPositiveButton(de.cyface.app.utils.R.string.change_permissions) { dialog, _ ->
-                    dialog.dismiss()
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", packageName, null)
-                    intent.data = uri
-                    startActivity(intent)
-                }
-                .setNegativeButton(de.cyface.app.utils.R.string.close_app) { _, _ ->
-                    finish()
-                }
-                .setCancelable(false)
-                .show()
-        }
-    }
-
-    /**
-     * @return a string in the format: "item1, item2 and item3"
-     */
-    private fun List<String>.toCustomString(): String {
-        val and = applicationContext.getString(de.cyface.app.utils.R.string.and)
-        return when (size) {
-            1 -> this[0]
-            2 -> "${this[0]} $and ${this[1]}"
-            else -> "${this.dropLast(1).joinToString(", ")} $and ${this.last()}"
-        }
-    }
-
-    /**
-     * Checks and requests missing permissions.
-     *
-     * @param cameraPreferences The camera preferences to check if camera is enabled.
-     */
-    private fun requestMissingPermissions(cameraPreferences: CameraPreferences) {
-        // Without notification permissions the capturing notification is not shown on Android >= 13
-        // But capturing still works.
-        val permissionsMissing = missingPermission(this, cameraPreferences)
-        if (permissionsMissing) {
-            val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-            val cameraEnabled = cameraPreferences.getCameraEnabled()
-            if (cameraEnabled) {
-                permissions.add(Manifest.permission.CAMERA)
-            }
-            permissionLauncher.launch(permissions.toTypedArray())
-        }
-    }
-
-    /**
-     * Checks if permissions are missing.
-     *
-     * @param context The context to check for.
-     * @param cameraPreferences The camera preferences to check if camera is enable.
-     * @return `true` if permissions are missing.
-     */
-    private fun missingPermission(context: Context, cameraPreferences: CameraPreferences): Boolean {
-        val cameraMissing = cameraPermissionMissing(context, cameraPreferences)
-        val notificationMissing = notificationPermissionMissing(context)
-        val locationMissing = !granted(context, Manifest.permission.ACCESS_FINE_LOCATION)
-        return cameraMissing || notificationMissing || locationMissing
-    }
-
-    private fun notificationPermissionMissing(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            !granted(context, Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            false
-        }
-    }
-
-    private fun cameraPermissionMissing(
-        context: Context,
-        cameraPreferences: CameraPreferences
-    ): Boolean {
-        val cameraEnabled = cameraPreferences.getCameraEnabled()
-        return if (cameraEnabled) !granted(context, Manifest.permission.CAMERA) else false
-    }
-
-    /**
-     * Determine whether you have been granted a particular permission.
-     *
-     * @param permission The permission to check.
-     * @return `true` if the permission was already granted.
-     */
-    private fun granted(context: Context, permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(context, permission) == PERMISSION_GRANTED
     }
 
     /**
