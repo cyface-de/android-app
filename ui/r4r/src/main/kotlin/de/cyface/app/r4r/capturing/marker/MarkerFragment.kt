@@ -77,7 +77,7 @@ class MarkerFragment : Fragment() {
                 } else {
                     Toast.makeText(
                         context,
-                        "Location permission repeatedly denied",
+                        requireContext().getString(de.cyface.app.utils.R.string.missing_location_permissions_toast),
                         Toast.LENGTH_LONG
                     ).show()
                     // Close Cyface if permission has not been granted.

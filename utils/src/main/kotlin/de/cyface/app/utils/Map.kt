@@ -160,11 +160,12 @@ class Map(
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            throw java.lang.IllegalStateException("Missing permissions")
-        }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-        if (googleMap != null) {
-            googleMap!!.isMyLocationEnabled = true
+            Log.d(TAG, "requestLocationUpdates: Skip requestLocationUpdates (missing permissions)")
+        } else {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+            if (googleMap != null) {
+                googleMap!!.isMyLocationEnabled = true
+            }
         }
     }
 
