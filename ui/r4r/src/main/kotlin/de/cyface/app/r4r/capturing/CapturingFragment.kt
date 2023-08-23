@@ -681,6 +681,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         } catch (e: DataCapturingException) {
             throw IllegalStateException(e)
         } catch (e: MissingPermissionException) {
+            Toast.makeText(
+                requireContext(),
+                getString(de.cyface.app.utils.R.string.missing_location_permissions_toast),
+                Toast.LENGTH_LONG
+            ).show()
             throw IllegalStateException(e)
         }
     }

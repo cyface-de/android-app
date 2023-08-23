@@ -592,7 +592,14 @@ public class DataCapturingButton
                             }
                         }
                     });
-        } catch (final DataCapturingException | MissingPermissionException e) {
+        } catch (final DataCapturingException e) {
+            throw new IllegalStateException(e);
+        } catch (final MissingPermissionException e)  {
+            Toast.makeText(
+                    context,
+                    context.getString(de.cyface.app.utils.R.string.missing_location_permissions_toast),
+                    Toast.LENGTH_LONG
+            ).show();
             throw new IllegalStateException(e);
         }
     }
