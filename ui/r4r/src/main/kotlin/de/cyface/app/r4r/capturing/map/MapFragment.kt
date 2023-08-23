@@ -217,6 +217,7 @@ class MapFragment : Fragment() {
             // Dismiss dialog when user gave permissions while app was paused
             if (!missingPermission(requireContext()/*, cameraPreferences*/)) {
                 permissionDialog?.dismiss() // reset previous to show current permission state
+                isPermissionRequested = false
             }
         }
     }
