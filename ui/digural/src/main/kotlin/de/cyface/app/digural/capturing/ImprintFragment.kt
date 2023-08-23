@@ -18,6 +18,8 @@
  */
 package de.cyface.app.digural.capturing
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,7 +31,7 @@ import de.cyface.app.digural.databinding.FragmentImprintBinding
  * The [Fragment] which shows the imprint information to the user.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 3.2.0
  */
 class ImprintFragment : Fragment() {
@@ -50,6 +52,14 @@ class ImprintFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentImprintBinding.inflate(inflater, container, false)
+
+        // Link in privacy policy
+        binding.privacyPolicy.setOnClickListener {
+            // Sync link version with link used in `Play Store > App Content` during release
+            val uri = Uri.parse("https://www.cyface.de/datenschutzbestimmung-der-app-5-1-0/")
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        }
         return binding.root
     }
 
