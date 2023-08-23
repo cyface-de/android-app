@@ -118,13 +118,6 @@ class Map(
         view.onCreate(savedInstanceState)
         val activity = view.context as Activity
         applicationContext = activity.applicationContext
-        // Ensure launcher is not called after parent fragment was destroyed [RFR-630]
-        permissionLauncher?.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
         this.onMapReadyRunnable = onMapReadyRunnable
         if (currentLocation == null) {
             currentLocation = LatLng(51.027852, 13.720864)
