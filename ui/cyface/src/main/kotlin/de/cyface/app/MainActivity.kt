@@ -185,9 +185,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         // Location permissions are requested by CapturingFragment/Map to react to results.
         permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                // Handled by onResume: showMissingPermissions()
+                // Show Dialog only after the user had a change to accept permissions
+                val cameraMissing = cameraPermissionMissing(this, cameraPreferences)
+                val notificationMissing = notificationPermissionMissing(this)
+                val locationMissing = !granted(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                showMissingPermissions(cameraMissing, notificationMissing, locationMissing)
             }
-        requestMissingPermissions(cameraPreferences)
 
         // Start DataCapturingService and CameraService
         val sensorFrequency = appPreferences.getSensorFrequency()
@@ -304,13 +307,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         showGnssWarningDialog(this)
         showEnergySaferWarningDialog(this)
         showRestrictedBackgroundProcessingWarningDialog(this)
-        // Show dialog if permissions are missing (e.g. dismissed too ofter)
+        // Ensure app is only used with required permissions (e.g. location dismissed too ofter)
         permissionDialog?.dismiss() // reset previous to show current permission state
-        val cameraMissing = cameraPermissionMissing(this, cameraPreferences)
-        val notificationMissing = notificationPermissionMissing(this)
-        val locationMissing = !granted(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        if (cameraMissing || notificationMissing || locationMissing) {
-            showMissingPermissions(cameraMissing, notificationMissing, locationMissing)
+        if (missingPermission(this, cameraPreferences)) {
+            requestMissingPermissions(cameraPreferences)
         }
         super.onResume()
     }
@@ -394,21 +394,15 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         // But capturing still works.
         val permissionsMissing = missingPermission(this, cameraPreferences)
         if (permissionsMissing) {
+            val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                val cameraEnabled = cameraPreferences.getCameraEnabled()
-                val permissions = if (cameraEnabled) arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) else arrayOf(
-                    Manifest.permission.POST_NOTIFICATIONS,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                permissionLauncher.launch(permissions)
-            } else {
-                val permissions = arrayOf(Manifest.permission.CAMERA)
-                permissionLauncher.launch(permissions)
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
+            val cameraEnabled = cameraPreferences.getCameraEnabled()
+            if (cameraEnabled) {
+                permissions.add(Manifest.permission.CAMERA)
+            }
+            permissionLauncher.launch(permissions.toTypedArray())
         }
     }
 
@@ -420,10 +414,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
      * @return `true` if permissions are missing.
      */
     private fun missingPermission(context: Context, cameraPreferences: CameraPreferences): Boolean {
-        val cameraPermissionMissing = cameraPermissionMissing(context, cameraPreferences)
-        val notificationPermissionMissing = notificationPermissionMissing(context)
-        val locationPermissionMissing = !granted(context, Manifest.permission.ACCESS_FINE_LOCATION)
-        return cameraPermissionMissing || notificationPermissionMissing || locationPermissionMissing
+        val cameraMissing = cameraPermissionMissing(context, cameraPreferences)
+        val notificationMissing = notificationPermissionMissing(context)
+        val locationMissing = !granted(context, Manifest.permission.ACCESS_FINE_LOCATION)
+        return cameraMissing || notificationMissing || locationMissing
     }
 
     private fun notificationPermissionMissing(context: Context): Boolean {
