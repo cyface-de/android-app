@@ -30,6 +30,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.Charset
+import kotlin.concurrent.thread
 
 /**
  * Calls the API that triggers external cameras to trigger in sync with this smartphones camera.
@@ -53,7 +57,7 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
         // A possible solution would be to store this in Room/Sql, as this supports multi-process.
         val address = CustomPreferences(context).getDiguralUrl()
         DiguralApi.baseUrl = address
-        Log.d(TAG, "###########Setting digural address to: $address")
+        Log.d(TAG, "Setting digural address to: $address")
     }
 
     override fun onCameraAccessLost() {}
@@ -62,7 +66,15 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
     override fun onRecordingStopped() {}
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
-        if(location == null) {
+        Log.d(TAG, "On About to Capture $location")
+
+        val targetUrl = DiguralApi
+            .baseUrl
+            .toURI()
+            .resolve("PanAiCam/Trigger")
+            .toURL()
+
+        if (location == null) {
             return
         }
 
@@ -74,12 +86,39 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
             location.time
         )
 
-        runBlocking {
+        /* Begin Retrofit Variant */
+        /*runBlocking {
             withContext(Dispatchers.IO) {
                 Log.d(TAG, "###########Sending Payload $payload to ${DiguralApi.baseUrl}")
                 DiguralApi.diguralService.trigger(payload)
             }
+        }*/
+        /* End Retrofit Variant */
+
+        /* Begin Classic Variant */
+        thread {
+            Log.d(TAG, "Sending Payload ${payload.toJson()}")
+            with(targetUrl.openConnection() as HttpURLConnection) {
+                try {
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type", "application/json")
+                    doOutput = true
+
+                    outputStream.use { os ->
+                        val input: ByteArray =
+                            payload.toJson().toByteArray(Charset.defaultCharset())
+                        os.write(input, 0, input.size)
+                    }
+                    outputStream.flush()
+                    outputStream.close()
+
+                    Log.d(TAG, "$responseCode")
+                } finally {
+                    disconnect()
+                }
+            }
         }
+        /* End Classic Variant */
     }
 
     override fun shallStop() {
