@@ -24,6 +24,7 @@
  * @version 1.11.0
  * @since 1.0.0
  */
+
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
