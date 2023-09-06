@@ -24,6 +24,7 @@ import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.auth.LoginActivity
 import de.cyface.energy_settings.TrackingSettings
+import de.cyface.synchronization.CustomSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
@@ -72,9 +73,14 @@ class MeasuringClient : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        preferences = AppPreferences(this)
-        TrackingSettings.initialize(this) // ensures DataStore is only initialized once
+        preferences = AppPreferences(this) // FIXME: see below
 
+        // Ensure DataStore is only initialized once
+        TrackingSettings.initialize(this)
+
+        // Register single-instance DataStore (for both, ui and :sync process)
+        val synchronizationSettings = CustomSettings(this)
+        CyfaceAuthenticator.settings = synchronizationSettings
         // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
 

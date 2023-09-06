@@ -60,6 +60,7 @@ import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
@@ -190,7 +191,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Authorization
-        auth = OAuth2(applicationContext)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings) // FIXME: does this work?!
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
