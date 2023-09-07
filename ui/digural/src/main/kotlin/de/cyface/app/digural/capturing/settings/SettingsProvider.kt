@@ -16,20 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural
-
-import de.cyface.camera_service.settings.CameraSettings
-import de.cyface.camera_service.foreground.CameraService
+package de.cyface.app.digural.capturing.settings
 
 /**
- * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from
- * the `Fragments`.
+ * Interface which defines dependencies specific to this ui.
  *
  * @author Armin Schnabel
- * @version 1.1.0
- * @since 7.5.0
+ * @version 1.0.0
+ * @since 7.9.0
  */
-interface CameraServiceProvider {
-    val cameraService: CameraService
-    val cameraSettings: CameraSettings
+interface SettingsProvider {
+    val customSettings: CustomSettings
 }

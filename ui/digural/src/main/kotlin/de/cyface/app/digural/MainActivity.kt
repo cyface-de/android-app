@@ -40,7 +40,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.button.ExternalCameraController
-import de.cyface.app.digural.capturing.settings.CustomPreferences
+import de.cyface.app.digural.capturing.settings.SettingsProvider
+import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
@@ -48,7 +49,7 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -61,6 +62,7 @@ import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
@@ -88,7 +90,7 @@ import java.lang.ref.WeakReference
  * @version 4.1.0
  * @since 1.0.0
  */
-class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider, SettingsProvider {
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -111,14 +113,19 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     private lateinit var navigation: NavController
 
     /**
-     * The `SharedPreferences` used to store the user's preferences.
+     * The settings used by all UIs.
      */
     private lateinit var preferences: AppPreferences
 
     /**
-     * The `SharedPreferences` used to store the camera settings.
+     * The settings specific to this ui.
      */
-    private lateinit var cameraPreferences: CameraPreferences
+    override lateinit var customSettings: CustomSettings
+
+    /**
+     * The settings used to store the user preferences for the camera.
+     */
+    override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -160,7 +167,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preferences = AppPreferences(this)
-        cameraPreferences = CameraPreferences(this)
+        cameraSettings = CameraSettings(this)
+        customSettings = CustomSettings(this)
 
         // Start DataCapturingService and CameraService
         try {
@@ -190,7 +198,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Authorization
-        auth = OAuth2(applicationContext)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above

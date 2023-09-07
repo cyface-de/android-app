@@ -20,13 +20,14 @@
  * Gradle's build file for the app utils.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 3.2.0
  */
 apply plugin: 'com.android.library'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
+apply plugin: 'com.google.protobuf' // For Proto DataStore
 
 buildscript {
     repositories {
@@ -115,6 +116,11 @@ dependencies {
     // Exception tracking
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
+    // Proto DataStore with MultiProcess support to store settings
+    implementation "androidx.datastore:datastore:${datastoreVersion}"
+    implementation "androidx.datastore:datastore-core-android:${datastoreVersion}"
+    implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
+
     // To change the material design
     //implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
@@ -152,4 +158,24 @@ dependencies {
     // - If Junit symbols are not resolvable in IntelliJ, make sure Build Variant is set to debug
     // - Loading another dependency (e.g. module) only it's production dependencies (compile) are loaded but not other dependencies (e.g. testCompile)
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
+}
+
+// Required for Proto DataStore
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobuf files in this project. See
+    // https://github.com/google/protobuf-gradle-plugin#customizing-protobuf-compilation
+    // for more information.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
 }

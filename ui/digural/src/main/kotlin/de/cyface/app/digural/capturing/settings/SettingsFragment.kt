@@ -34,11 +34,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
+import de.cyface.app.digural.dialog.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraPreferences
-import de.cyface.camera_service.Constants
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -77,6 +78,8 @@ class SettingsFragment : Fragment() {
      */
     private lateinit var viewModel: SettingsViewModel
 
+    lateinit var cameraSettings: CameraSettings
+
     /**
      * Can be launched to request permissions.
      */
@@ -110,12 +113,22 @@ class SettingsFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Initialize ViewModel
-        val appPreferences = AppPreferences(requireContext().applicationContext)
-        val cameraPreferences = CameraPreferences(requireContext().applicationContext)
-        val customPreferences = CustomPreferences(requireContext().applicationContext)
+        val appPreferences = AppPreferences(requireContext().applicationContext) // FIXME
+        cameraSettings =
+            if (activity is CameraServiceProvider) {
+                (activity as CameraServiceProvider).cameraSettings
+            } else {
+                throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
+            }
+        val customSettings: CustomSettings =
+            if (activity is SettingsProvider) {
+                (activity as SettingsProvider).customSettings
+            } else {
+                throw RuntimeException("Context doesn't support the Fragment, implement `CustomProvider`")
+            }
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(appPreferences, cameraPreferences, customPreferences)
+            SettingsViewModelFactory(appPreferences, cameraSettings, customSettings)
         )[SettingsViewModel::class.java]
 
         // Initialize CapturingService
@@ -279,7 +292,7 @@ class SettingsFragment : Fragment() {
     fun onCameraEnabled(fragment: SettingsFragment) {
 
         // Ask for camera mode
-        val cameraModeDialog = CameraModeDialog()
+        val cameraModeDialog = CameraModeDialog(cameraSettings)
         cameraModeDialog.setTargetFragment(
             fragment,
             de.cyface.energy_settings.Constants.DIALOG_ENERGY_SAFER_WARNING_CODE
@@ -660,10 +673,7 @@ class SettingsFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE) {
-            val exposureTimeNanos = data!!.getLongExtra(
-                Constants.PREFERENCES_CAMERA_STATIC_EXPOSURE_TIME_KEY,
-                -1L
-            )
+            val exposureTimeNanos = data!!.getLongExtra(CAMERA_STATIC_EXPOSURE_TIME_KEY, -1L)
             Validate.isTrue(exposureTimeNanos != -1L)
             val fraction = Utils.getExposureTimeFraction(exposureTimeNanos)
             Log.d(

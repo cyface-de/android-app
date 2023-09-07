@@ -27,9 +27,11 @@ import android.util.Log
 import androidx.fragment.app.DialogFragment
 import de.cyface.app.digural.R
 import de.cyface.app.digural.capturing.settings.SettingsFragment
-import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.Constants
 import de.cyface.utils.Validate
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.round
 
 /**
@@ -39,7 +41,7 @@ import kotlin.math.round
  * @version 1.0.0
  * @since 2.9.0
  */
-class ExposureTimeDialog : DialogFragment() {
+class ExposureTimeDialog(private val cameraSettings: CameraSettings) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(R.string.static_camera_exposure_time).setItems(
@@ -60,15 +62,15 @@ class ExposureTimeDialog : DialogFragment() {
                 else -> throw IllegalArgumentException("Unknown exposure time selected: $which")
             }
             Log.d(Constants.TAG, "Update preference to exposure time -> $exposureTimeNanos ns")
-            val preferences = CameraPreferences(fragmentActivity!!.applicationContext)
-            preferences.saveStaticExposureTime(exposureTimeNanos)
+            GlobalScope.launch { cameraSettings.setStaticExposureTime(exposureTimeNanos) }
             val requestCode = targetRequestCode
             val resultCode: Int
             val intent = Intent()
             if (requestCode == SettingsFragment.DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE) {
+
                 resultCode = DIALOG_EXPOSURE_TIME_SELECTION_RESULT_CODE
                 intent.putExtra(
-                    Constants.PREFERENCES_CAMERA_STATIC_EXPOSURE_TIME_KEY,
+                    CAMERA_STATIC_EXPOSURE_TIME_KEY,
                     exposureTimeNanos
                 )
             } else {
@@ -83,6 +85,7 @@ class ExposureTimeDialog : DialogFragment() {
 
     companion object {
         private const val DIALOG_EXPOSURE_TIME_SELECTION_RESULT_CODE = 202002171
+        const val CAMERA_STATIC_EXPOSURE_TIME_KEY = "de.cyface.camera_service.static_exposure_time"
         private val itemsDescriptions = arrayOf<CharSequence>(
             "1/125 s", "1/250 s", "1/500 s",
             "1/1.000 s", "1/2.000 s", "1/4.000 s", "1/8.000 s", "1/18.367 s"

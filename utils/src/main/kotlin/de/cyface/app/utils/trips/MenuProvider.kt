@@ -31,7 +31,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.selection.MutableSelection
 import de.cyface.app.utils.R
-import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.DefaultPersistenceBehaviour
@@ -41,10 +40,13 @@ import de.cyface.persistence.model.Measurement
 import de.cyface.utils.Constants
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.utils.AppPreferences
+import de.cyface.utils.AppSettings
 import de.cyface.utils.Utils
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Arrays
@@ -54,12 +56,12 @@ import java.util.Arrays
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.2.0
  */
 class MenuProvider(
     private val capturingService: CyfaceDataCapturingService,
-    private val preferences: AppPreferences,
+    private val settings: AppSettings,
     private val adapter: TripListAdapter,
     private val exportPermissionLauncher: ActivityResultLauncher<Array<String>>,
     private val context: WeakReference<Context>
@@ -177,7 +179,7 @@ class MenuProvider(
 
         // Check is sync is disabled via frontend
         val syncEnabled = capturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled = preferences.getUpload()
+        val syncPreferenceEnabled = runBlocking { settings.uploadEnabledFlow.first() } // FIXME
         Validate.isTrue(
             syncEnabled == syncPreferenceEnabled,
             "sync " + (if (syncEnabled) "enabled" else "disabled")

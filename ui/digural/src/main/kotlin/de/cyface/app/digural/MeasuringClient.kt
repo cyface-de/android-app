@@ -23,6 +23,8 @@ import android.content.IntentFilter
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
+import de.cyface.energy_settings.TrackingSettings
+import de.cyface.synchronization.settings.CustomSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
@@ -71,7 +73,11 @@ class MeasuringClient : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        preferences = AppPreferences(this)
+
+        // Initialize DataStore once for all settings
+        preferences = AppPreferences(this) // settings used by all UIs FIXME
+        TrackingSettings.initialize(this) // energy_settings
+        CyfaceAuthenticator.settings = CustomSettings(this) // synchronization
 
         // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java

@@ -32,6 +32,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatSeekBar
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -47,7 +48,7 @@ import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.capturing.settings.CustomPreferences
+import de.cyface.app.utils.capturing.settings.CustomSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.exception.SetupException
@@ -59,15 +60,20 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.AppPreferences
 import de.cyface.utils.AppPreferences.Companion.DEFAULT_SENSOR_FREQUENCY
+import de.cyface.utils.AppSettings
 import de.cyface.utils.DiskConsumption
+import de.cyface.utils.Settings
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
@@ -104,9 +110,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private lateinit var navigation: NavController
 
     /**
-     * The `SharedPreferences` used to store the user's preferences.
+     * The settings used to store values used by all UIs.
      */
-    private lateinit var appPreferences: CustomPreferences
+    private lateinit var appSettings: AppSettings
+
+    /**
+     * The settings used to store values specific to android-app/utils.
+     */
+    private lateinit var customSettings: CustomSettings
 
     /**
      * The authorization.
@@ -147,7 +158,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        appPreferences = CustomPreferences(this)
+        appSettings = AppSettings(this)
         //cameraPreferences = CameraPreferences(this)
 
         // Start DataCapturingService and CameraService
@@ -175,7 +186,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
 
         // Authorization
-        auth = OAuth2(applicationContext)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -278,7 +289,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            if (appPreferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            if (reportErrors) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -328,7 +340,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = appPreferences.getUpload()
+                    val syncEnabledPreference = runBlocking { appSettings.uploadEnabledFlow.first() } // FIXME
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
@@ -378,13 +390,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * effect.
      */
     private fun setIncentivesServerUrl() {
-        val storedServer = appPreferences.getIncentivesUrl()
+        val storedServer = runBlocking { customSettings.incentivesUrlFlow.first() } // FIXME
         val server = BuildConfig.incentivesServer
         @Suppress("KotlinConstantConditions")
         Validate.isTrue(server != "null")
-        if (storedServer == null || storedServer != server) {
+        if (storedServer != server) {
             Log.d(TAG, "Updating Incentives API URL from " + storedServer + "to" + server)
-            appPreferences.saveIncentivesUrl(server)
+            runBlocking { customSettings.setIncentivesUrl(server) } // FIXME
         }
     }
 

@@ -47,7 +47,7 @@ import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -112,14 +112,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     private lateinit var navigation: NavController
 
     /**
-     * The `SharedPreferences` used to store the app preferences.
+     * The settings used by all UIs.
      */
     private lateinit var appPreferences: AppPreferences
 
     /**
-     * The `SharedPreferences` used to store the camera preferences.
+     * The settings used to store the user preferences for the camera.
      */
-    private lateinit var cameraPreferences: CameraPreferences
+    override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         appPreferences = AppPreferences(this)
-        cameraPreferences = CameraPreferences(this)
+        cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
         val sensorFrequency = appPreferences.getSensorFrequency()

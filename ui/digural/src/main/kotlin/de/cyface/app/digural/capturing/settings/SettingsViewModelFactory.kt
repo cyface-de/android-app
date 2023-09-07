@@ -20,7 +20,7 @@ package de.cyface.app.digural.capturing.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.AppPreferences
 
 /**
@@ -32,18 +32,18 @@ import de.cyface.utils.AppPreferences
  * @version 1.0.0
  * @since 3.4.0
  * @param appPreferences Persistence storage of the app preferences.
- * @param cameraPreferences Persistence storage of the camera preferences.
+ * @param cameraSettings Persistence storage of the camera preferences.
  */
 class SettingsViewModelFactory(
     private val appPreferences: AppPreferences,
-    private val cameraPreferences: CameraPreferences,
-    private val customPreferences: CustomPreferences
+    private val cameraSettings: CameraSettings,
+    private val customSettings: CustomSettings
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appPreferences, cameraPreferences, customPreferences) as T
+            return SettingsViewModel(appPreferences, cameraSettings, customSettings) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

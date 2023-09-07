@@ -44,7 +44,7 @@ buildscript {
 }
 
 plugins {
-    // To generate Proto DataStores for settings in ui/... and utils/
+    // To generate Proto DataStores for settings in ui/digural and utils/
     id 'com.google.protobuf' version '0.8.19' apply false // Maybe keep in sync with other usages
 }
 

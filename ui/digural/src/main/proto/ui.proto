@@ -16,30 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.utils.capturing.settings
+syntax = "proto3";
 
-import android.content.Context
-import androidx.core.content.edit
-import de.cyface.app.utils.trips.incentives.Incentives
-import de.cyface.utils.AppPreferences
+option java_package = "de.cyface.app.digural";
+option java_multiple_files = true;
 
 /**
- * Preferences persisted with SharedPreferences.
+ * The data types for the values stored in the `CustomSettings`.
  *
- * @author Armin Schnabel
- * @version 1.0.0
- * @since 7.8.1
+ * See https://protobuf.dev/programming-guides/proto3/
+ *
+ * Attention: The classes are generated from the file at compile time. Don't forget to rebuild.
+ *
+ * @author: Armin Schnabel
+ * @since: 3.7.0
+ * @version: 1.0.0
  */
-class CustomPreferences(context: Context) : AppPreferences(context) {
+message Settings {
+  // Version of this datastore. It helps to support default values and to migrate data. When the
+  // datastore is newly created, it's 0, after default values are set it's 1, then migration happens.
+  uint32 version = 1;
 
-    fun saveIncentivesUrl(incentivesUrl: String) {
-        preferences.edit {
-            putString(Incentives.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, incentivesUrl)
-            apply()
-        }
-    }
-
-    fun getIncentivesUrl(): String? {
-        return preferences.getString(Incentives.INCENTIVES_ENDPOINT_URL_SETTINGS_KEY, null)
-    }
+  // The URL of the server to inform about camera triggers, e.g. 'https://example.com/api/v1'.
+  string digural_url = 2;
 }

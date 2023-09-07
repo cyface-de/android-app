@@ -18,7 +18,7 @@ class StaticExposureTimeClickHandler(
     override fun onClick(v: View) {
         Log.d(TAG, "StaticExposureTimeClickHandler triggered, showing ExposureTimeDialog")
         Validate.notNull(fragmentManager)
-        val dialog = ExposureTimeDialog()
+        val dialog = ExposureTimeDialog(settingsFragment.cameraSettings)
         dialog.setTargetFragment(
             settingsFragment,
             DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE

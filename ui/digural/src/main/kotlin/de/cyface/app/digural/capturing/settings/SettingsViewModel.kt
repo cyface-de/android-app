@@ -21,8 +21,12 @@ package de.cyface.app.digural.capturing.settings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import de.cyface.camera_service.CameraPreferences
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.AppPreferences
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.net.URL
 
 /**
@@ -44,13 +48,13 @@ import java.net.URL
  * @version 1.0.0
  * @since 3.4.0
  * @param appPreferences Persistence storage of the app preferences.
- * @param cameraPreferences Persistence storage of the camera preferences.
- * @param customPreferences Persistence storage of the ui custom preferences.
+ * @param cameraSettings Persistence storage of the camera preferences.
+ * @param customSettings Persistence storage of the ui custom preferences.
  */
 class SettingsViewModel(
     private val appPreferences: AppPreferences,
-    private val cameraPreferences: CameraPreferences,
-    private val customPreferences: CustomPreferences
+    private val cameraSettings: CameraSettings,
+    private val customSettings: CustomSettings
 ) : ViewModel() {
 
     private val _centerMap = MutableLiveData<Boolean>()
@@ -81,19 +85,21 @@ class SettingsViewModel(
         _centerMap.value = appPreferences.getCenterMap()
         _upload.value = appPreferences.getUpload()
         _sensorFrequency.value = appPreferences.getSensorFrequency()
-        /** camera settings  **/
-        _cameraEnabled.value = cameraPreferences.getCameraEnabled()
-        _videoMode.value = cameraPreferences.getVideoMode()
-        _rawMode.value = cameraPreferences.getRawMode()
-        _distanceBasedTriggering.value = cameraPreferences.getDistanceBasedTriggering()
-        _triggeringDistance.value = cameraPreferences.getTriggeringDistance()
-        _staticFocus.value = cameraPreferences.getStaticFocus()
-        _staticFocusDistance.value = cameraPreferences.getStaticFocusDistance()
-        _staticExposure.value = cameraPreferences.getStaticExposure()
-        _staticExposureTime.value = cameraPreferences.getStaticExposureTime()
-        _staticExposureValue.value = cameraPreferences.getStaticExposureValue()
-        /** custom settings **/
-        _diguralServerUrl.value = customPreferences.getDiguralUrl()
+        runBlocking { // FIXME
+            /** camera settings  **/
+            _cameraEnabled.value = cameraSettings.cameraEnabledFlow.first()
+            _videoMode.value = cameraSettings.videoModeFlow.first()
+            _rawMode.value = cameraSettings.rawModeFlow.first()
+            _distanceBasedTriggering.value = cameraSettings.distanceBasedTriggeringFlow.first()
+            _triggeringDistance.value = cameraSettings.triggeringDistanceFlow.first()
+            _staticFocus.value = cameraSettings.staticFocusFlow.first()
+            _staticFocusDistance.value = cameraSettings.staticFocusDistanceFlow.first()
+            _staticExposure.value = cameraSettings.staticExposureFlow.first()
+            _staticExposureTime.value = cameraSettings.staticExposureTimeFlow.first()
+            _staticExposureValue.value = cameraSettings.staticExposureValueFlow.first()
+            /** custom settings **/
+            _diguralServerUrl.value = customSettings.diguralUrlFlow.first()
+        }
     }
 
     val centerMap: LiveData<Boolean> = _centerMap
@@ -132,58 +138,58 @@ class SettingsViewModel(
 
     /** camera settings  **/
     fun setCameraEnabled(cameraEnabled: Boolean) {
-        cameraPreferences.saveCameraEnabled(cameraEnabled)
+        GlobalScope.launch { cameraSettings.setCameraEnabled(cameraEnabled) } // FIXME
         _cameraEnabled.postValue(cameraEnabled)
     }
 
     fun setVideoMode(videoMode: Boolean) {
-        cameraPreferences.saveVideoMode(videoMode)
+        GlobalScope.launch { cameraSettings.setVideoMode(videoMode) } // FIXME
         _videoMode.postValue(videoMode)
     }
 
     fun setRawMode(rawMode: Boolean) {
-        cameraPreferences.saveRawMode(rawMode)
+        GlobalScope.launch { cameraSettings.setRawMode(rawMode) } // FIXME
         _rawMode.postValue(rawMode)
     }
 
     fun setDistanceBasedTriggering(distanceBasedTriggering: Boolean) {
-        cameraPreferences.saveDistanceBasedTriggering(distanceBasedTriggering)
+        GlobalScope.launch { cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering) } // FIXME
         _distanceBasedTriggering.postValue(distanceBasedTriggering)
     }
 
     fun setTriggeringDistance(triggeringDistance: Float) {
-        cameraPreferences.saveTriggeringDistance(triggeringDistance)
+        GlobalScope.launch { cameraSettings.setTriggeringDistance(triggeringDistance) } // FIXME
         _triggeringDistance.postValue(triggeringDistance)
     }
 
     fun setStaticFocus(staticFocus: Boolean) {
-        cameraPreferences.saveStaticFocus(staticFocus)
+        GlobalScope.launch { cameraSettings.setStaticFocus(staticFocus) } // FIXME
         _staticFocus.postValue(staticFocus)
     }
 
     fun setStaticFocusDistance(staticFocusDistance: Float) {
-        cameraPreferences.saveStaticFocusDistance(staticFocusDistance)
+        GlobalScope.launch { cameraSettings.setStaticFocusDistance(staticFocusDistance) } // FIXME
         _staticFocusDistance.postValue(staticFocusDistance)
     }
 
     fun setStaticExposure(staticExposure: Boolean) {
-        cameraPreferences.saveStaticExposure(staticExposure)
+        GlobalScope.launch { cameraSettings.setStaticExposure(staticExposure) } // FIXME
         _staticExposure.postValue(staticExposure)
     }
 
     fun setStaticExposureTime(staticExposureTime: Long) {
-        cameraPreferences.saveStaticExposureTime(staticExposureTime)
+        GlobalScope.launch { cameraSettings.setStaticExposureTime(staticExposureTime) } // FIXME
         _staticExposureTime.postValue(staticExposureTime)
     }
 
     fun setStaticExposureValue(staticExposureValue: Int) {
-        cameraPreferences.saveStaticExposureValue(staticExposureValue)
+        GlobalScope.launch { cameraSettings.setStaticExposureValue(staticExposureValue) } // FIXME
         _staticExposureValue.postValue(staticExposureValue)
     }
 
     fun setDiguralServerUrl(address: URL) {
-        customPreferences.saveDiguralUrl(address)
-        _diguralServerUrl.postValue(address)
+        GlobalScope.launch { customSettings.setDiguralUrl(address) } // FIXME
+        _diguralServerUrl.postValue(address) // FIXME: race condition with line above?
     }
 }
 
