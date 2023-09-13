@@ -27,7 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 
 /**
  * The [Fragment] which shows the settings to the user.
@@ -54,6 +54,11 @@ class SettingsFragment : Fragment() {
     private lateinit var capturing: CyfaceDataCapturingService
 
     /**
+     * The settings used by both, UIs and libraries.
+     */
+    private lateinit var appSettings: AppSettings
+
+    /**
      * The [SettingsViewModel] for this fragment.
      */
     private lateinit var viewModel: SettingsViewModel
@@ -61,19 +66,19 @@ class SettingsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize ViewModel
-        val appPreferences = AppPreferences(requireContext().applicationContext)
-        viewModel = ViewModelProvider(
-            this,
-            SettingsViewModelFactory(appPreferences)
-        )[SettingsViewModel::class.java]
-
         // Initialize CapturingService
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
+            appSettings = (activity as ServiceProvider).appSettings
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
+
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(
+            this,
+            SettingsViewModelFactory(appSettings)
+        )[SettingsViewModel::class.java]
     }
 
     override fun onCreateView(

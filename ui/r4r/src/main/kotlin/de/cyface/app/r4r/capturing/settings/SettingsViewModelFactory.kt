@@ -20,7 +20,7 @@ package de.cyface.app.r4r.capturing.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 
 /**
  * Factory which creates the [ViewModel] with the required dependencies.
@@ -31,12 +31,12 @@ import de.cyface.utils.AppPreferences
  * @version 1.0.0
  * @since 3.4.0
  */
-class SettingsViewModelFactory(private val appPreferences: AppPreferences) :
+class SettingsViewModelFactory(private val appSettings: AppSettings) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appPreferences) as T
+            return SettingsViewModel(appSettings) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

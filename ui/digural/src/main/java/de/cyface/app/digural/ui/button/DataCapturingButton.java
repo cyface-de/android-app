@@ -88,7 +88,7 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.persistence.strategy.DefaultLocationCleaning;
-import de.cyface.utils.AppPreferences;
+import de.cyface.utils.settings.AppSettings;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -120,7 +120,10 @@ public class DataCapturingButton
      * The {@link CameraService} required to control and check the visual capturing process.
      */
     private CameraService cameraService = null;
-    private AppPreferences preferences;
+    /**
+     * The settings used by both, UIs and libraries.
+     */
+    private AppSettings appSettings;
     private CameraSettings cameraSettings;
     private final static long CALIBRATION_DIALOG_TIMEOUT = 1500L;
     private Collection<CalibrationDialogListener> calibrationDialogListener;
@@ -159,10 +162,10 @@ public class DataCapturingButton
     private ProgressDialog calibrationProgressDialog;
 
     public DataCapturingButton(@NonNull final CapturingFragment capturingFragment,
-                               @NonNull final AppPreferences appPreferences, @NonNull final CameraSettings cameraSettings) {
+                               @NonNull final AppSettings appSettings, @NonNull final CameraSettings cameraSettings) {
         this.listener = new HashSet<>();
         this.capturingFragment = capturingFragment;
-        this.preferences = appPreferences;
+        this.appSettings = appSettings;
         this.cameraSettings = cameraSettings;
     }
 
@@ -548,7 +551,7 @@ public class DataCapturingButton
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            final var modality = Modality.valueOf(preferences.getModality());
+            final var modality = Modality.valueOf(appSettings.getModalityBlocking());
             Validate.notNull(modality);
 
             currentMeasurementsTracks = new ArrayList<>();
@@ -828,7 +831,7 @@ public class DataCapturingButton
             Log.w(TAG, "Skipping DCS.disconnect() as DCS is null");
             // This should not happen, thus, reporting to Sentry
 
-            if (preferences.getReportingAccepted()) {
+            if (appSettings.getReportErrorsBlocking()) {
                 Sentry.captureMessage("DCButton.onDestroyView: dataCapturingService is null");
             }
         } else {
@@ -879,7 +882,7 @@ public class DataCapturingButton
             // GeoLocations may also arrive shortly after a measurement was stopped. Thus, this may not crash.
             // This happened on the Emulator with emulated live locations.
             Log.w(TAG, "onNewGeoLocationAcquired: No currently captured measurement found, doing nothing.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[0] && preferences.getReportingAccepted()) {
+            if (!onNewGeoLocationAcquiredExceptionTriggered[0] && appSettings.getReportErrorsBlocking()) {
                 onNewGeoLocationAcquiredExceptionTriggered[0] = true;
                 Sentry.captureException(e);
             }
@@ -905,7 +908,7 @@ public class DataCapturingButton
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
                     + "Thus, map.renderMeasurement() is ignored. This should only happen id "
                     + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && preferences.getReportingAccepted()) {
+            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && appSettings.getReportErrorsBlocking()) {
                 onNewGeoLocationAcquiredExceptionTriggered[2] = true;
                 Sentry.captureException(e);
             }

@@ -32,7 +32,9 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * The [Fragment] which shows the live speed of the currently captured measurement.
@@ -59,6 +61,11 @@ class SpeedFragment : Fragment() {
     private lateinit var capturing: CyfaceDataCapturingService
 
     /**
+     * The settings used by both, UIs and libraries.
+     */
+    private lateinit var appSettings: AppSettings
+
+    /**
      * An implementation of the persistence layer which caches some data during capturing.
      */
     private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
@@ -67,10 +74,11 @@ class SpeedFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
             persistence.eventRepository!!,
-            AppPreferences(requireContext()).getReportingAccepted()
+            reportErrors
         )
     }
 
@@ -79,6 +87,7 @@ class SpeedFragment : Fragment() {
 
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
+            appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")

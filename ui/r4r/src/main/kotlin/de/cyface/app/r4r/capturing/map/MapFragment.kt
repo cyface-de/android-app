@@ -50,7 +50,9 @@ import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * The [Fragment] which shows a map to the user.
@@ -87,9 +89,9 @@ class MapFragment : Fragment() {
     private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
 
     /**
-     * The data holder for users preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var preferences: AppPreferences
+    private lateinit var appSettings: AppSettings
 
     /**
      * The launcher to call after a permission request returns.
@@ -110,10 +112,11 @@ class MapFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
             persistence.eventRepository!!,
-            AppPreferences(requireContext()).getReportingAccepted()
+            reportErrors
         )
     }
 
@@ -162,6 +165,7 @@ class MapFragment : Fragment() {
 
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
+            appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
@@ -200,7 +204,6 @@ class MapFragment : Fragment() {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        preferences = AppPreferences(requireContext())
         map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
 
         return root

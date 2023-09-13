@@ -41,23 +41,31 @@ object PreferencesMigrationFactory {
 
     /**
      * @param context The context to search and access the old SharedPreferences from.
+     * @param incentivesUrl The URL of the Incentives API, e.g. "https://example.com/api/v1".
      * @return The migration code which imports preferences from the SharedPreferences if found.
      */
-    fun create(context: Context): SharedPreferencesMigration<Settings> {
+    fun create(context: Context, incentivesUrl: String): SharedPreferencesMigration<Settings> {
         return SharedPreferencesMigration(
             context,
             PREFERENCES_NAME,
-            migrate = ::migratePreferences
+            migrate = { preferences, settings ->
+                migratePreferences(preferences, settings, incentivesUrl)
+            }
         )
     }
 
     private fun migratePreferences(
         preferences: SharedPreferencesView,
-        settings: Settings
+        settings: Settings,
+        incentivesUrl: String
     ): Settings {
         return settings.toBuilder()
-            .setVersion(1) // Ensure the migrated values below are used instead of default values.
-            .setIncentivesUrl(preferences.getString(INCENTIVES_URL_KEY, null)) // FIXME: test
+            // Setting version to 1 as it would else default to Protobuf default of 0 which would
+            // trigger the StoreMigration from 0 -> 1 which ignores previous settings.
+            // This way the last supported version of SharedPreferences is hard-coded here and
+            // then the migration steps in StoreMigration starting at version 1 continues from here.
+            .setVersion(1)
+            .setIncentivesUrl(preferences.getString(INCENTIVES_URL_KEY, incentivesUrl))
             .build()
     }
 }

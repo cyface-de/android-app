@@ -25,7 +25,11 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * The TermsOfUserActivity is the first [Activity] started on app launch.
@@ -55,9 +59,9 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     private var isReportingEnabled = false
 
     /**
-     * To check whether the user accepted the terms and opted-in to error reporting.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var preferences: AppPreferences
+    private lateinit var appSettings: AppSettings
 
     /**
      * Allows the user to opt-in to error reporting.
@@ -65,7 +69,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     private var acceptReportsCheckbox: CheckBox? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        preferences = AppPreferences(applicationContext)
+        appSettings = MeasuringClient.appSettings
         callMainActivityIntent = Intent(this, MainActivity::class.java)
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent)
@@ -79,7 +83,8 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
      * @return `True` if the latest privacy policy was accepted by the user.
      */
     private fun currentTermsHadBeenAccepted(): Boolean {
-        return preferences.getAcceptedTerms() == BuildConfig.currentTerms
+        val acceptedTerms = runBlocking { appSettings.acceptedTermsFlow.first() }
+        return acceptedTerms == BuildConfig.currentTerms
     }
 
     /**
@@ -104,8 +109,10 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        preferences.saveAcceptedTerms(BuildConfig.currentTerms)
-        preferences.saveReportingAccepted(isReportingEnabled)
+        GlobalScope.launch {
+            appSettings.setAcceptedTerms(BuildConfig.currentTerms)
+            appSettings.setReportErrors(isReportingEnabled)
+        }
         this.startActivity(callMainActivityIntent)
         finish()
     }

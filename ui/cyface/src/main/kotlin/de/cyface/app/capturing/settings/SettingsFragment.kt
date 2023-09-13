@@ -24,10 +24,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import de.cyface.app.MainActivity
+import de.cyface.app.MeasuringClient
 import de.cyface.app.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.utils.AppPreferences
 
 /**
  * The [Fragment] which shows the settings to the user.
@@ -62,10 +63,9 @@ class SettingsFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Initialize ViewModel
-        val appPreferences = AppPreferences(requireContext().applicationContext)
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(appPreferences)
+            SettingsViewModelFactory(MeasuringClient.appSettings)
         )[SettingsViewModel::class.java]
 
         // Initialize CapturingService

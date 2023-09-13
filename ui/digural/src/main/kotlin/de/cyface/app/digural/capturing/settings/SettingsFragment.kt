@@ -35,6 +35,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.digural.CameraServiceProvider
+import de.cyface.app.digural.MainActivity
+import de.cyface.app.digural.MeasuringClient
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.app.digural.dialog.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
@@ -43,7 +45,6 @@ import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
 import java.util.TreeMap
 import kotlin.math.floor
@@ -113,7 +114,6 @@ class SettingsFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // Initialize ViewModel
-        val appPreferences = AppPreferences(requireContext().applicationContext) // FIXME
         cameraSettings =
             if (activity is CameraServiceProvider) {
                 (activity as CameraServiceProvider).cameraSettings
@@ -128,7 +128,7 @@ class SettingsFragment : Fragment() {
             }
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(appPreferences, cameraSettings, customSettings)
+            SettingsViewModelFactory(MeasuringClient.appSettings, cameraSettings, customSettings)
         )[SettingsViewModel::class.java]
 
         // Initialize CapturingService

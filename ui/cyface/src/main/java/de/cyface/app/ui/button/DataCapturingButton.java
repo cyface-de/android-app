@@ -88,7 +88,7 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.persistence.strategy.DefaultLocationCleaning;
-import de.cyface.utils.AppPreferences;
+import de.cyface.utils.settings.AppSettings;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
 import io.sentry.Sentry;
@@ -125,9 +125,9 @@ public class DataCapturingButton
      */
     private CameraService cameraService = null;
     /**
-     * The `SharedPreferences` used to store the app preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private AppPreferences preferences;
+    private AppSettings appSettings;
     /**
      * The `SharedPreferences` used to store the camera preferences.
      */
@@ -173,10 +173,10 @@ public class DataCapturingButton
     private ProgressDialog calibrationProgressDialog;
 
     public DataCapturingButton(@NonNull final CapturingFragment capturingFragment,
-            @NonNull final AppPreferences appPreferences, @NonNull final CameraSettings cameraSettings) {
+            @NonNull final AppSettings appSettings, @NonNull final CameraSettings cameraSettings) {
         this.listener = new HashSet<>();
         this.capturingFragment = capturingFragment;
-        this.preferences = appPreferences;
+        this.appSettings = appSettings;
         this.cameraSettings = cameraSettings;
     }
 
@@ -193,7 +193,7 @@ public class DataCapturingButton
         this.cameraInfoTextView = button.getRootView().findViewById(R.id.camera_capturing_info);
 
         // To get the vehicle
-        isReportingEnabled = preferences.getReportingAccepted();
+        isReportingEnabled = appSettings.getReportErrorsBlocking();
 
         // To load the measurement distance
         this.persistenceLayer = new DefaultPersistenceLayer<>(context, new DefaultPersistenceBehaviour());
@@ -565,7 +565,7 @@ public class DataCapturingButton
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            final var modality = Modality.valueOf(preferences.getModality());
+            final var modality = Modality.valueOf(appSettings.getModalityBlocking());
             Validate.notNull(modality);
 
             currentMeasurementsTracks = new ArrayList<>();

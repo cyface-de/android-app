@@ -78,11 +78,13 @@ import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 /**
@@ -113,6 +115,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
     private lateinit var capturing: CyfaceDataCapturingService
 
     /**
+     * The settings used by both, UIs and libraries.
+     */
+    private lateinit var appSettings: AppSettings
+
+    /**
      * An implementation of the persistence layer which caches some data during capturing.
      */
     private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
@@ -141,10 +148,11 @@ class CapturingFragment : Fragment(), DataCapturingListener {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val viewModel: CapturingViewModel by activityViewModels {
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
             persistence.eventRepository!!,
-            AppPreferences(requireContext()).getReportingAccepted()
+            reportErrors
         )
     }
 
@@ -168,6 +176,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
 
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
+            appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")

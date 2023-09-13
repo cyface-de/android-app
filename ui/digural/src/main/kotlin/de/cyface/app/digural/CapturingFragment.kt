@@ -55,10 +55,12 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -98,9 +100,9 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         private set
 
     /**
-     * The `SharedPreferences` used to store the user's preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var appPreferences: AppPreferences
+    private lateinit var appSettings: AppSettings
 
     /**
      * The `SharedPreferences` used to store the camera preferences.
@@ -148,7 +150,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             currentMeasurementsEvents = dataCapturingButton!!.loadCurrentMeasurementsEvents()
             map!!.render(currentMeasurementsTracks, currentMeasurementsEvents, false, ArrayList())
         } catch (e: NoSuchMeasurementException) {
-            if (appPreferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+            if (reportErrors) {
                 Sentry.captureException(e)
             }
             Log.w(
@@ -160,7 +163,6 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appPreferences = AppPreferences(requireContext()) // FIXME
         cameraSettings =
             if (activity is CameraServiceProvider) {
                 (activity as CameraServiceProvider).cameraSettings
@@ -170,6 +172,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
+            appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
             cameraService = (activity as CameraServiceProvider).cameraService
         } else {
@@ -208,7 +211,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
     ): View {
         _binding = FragmentCapturingBinding.inflate(inflater, container, false)
         dataCapturingButton =
-            DataCapturingButton(this, appPreferences, cameraSettings)
+            DataCapturingButton(this, appSettings, cameraSettings)
         // Register synchronization listener
         capturing.addConnectionStatusListener(this)
         syncButton = SynchronizationButton(capturing)
@@ -248,13 +251,14 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
     private fun showModalitySelectionDialogIfNeeded() {
         registerModalityTabSelectionListener()
-        if (appPreferences.getModality() != null) {
+        val modality = runBlocking { Modality.valueOf(appSettings.modalityFlow.first()) }
+        if (modality != Modality.UNKNOWN) {
             selectModalityTab()
             return
         }
         val fragmentManager = fragmentManager
         Validate.notNull(fragmentManager)
-        val dialog = ModalityDialog()
+        val dialog = ModalityDialog(appSettings)
         dialog.setTargetFragment(this, DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE)
         dialog.isCancelable = false
         dialog.show(fragmentManager!!, "MODALITY_DIALOG")
@@ -265,9 +269,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         val newModality = arrayOfNulls<Modality>(1)
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                val oldModalityId = appPreferences.getModality()
-                val oldModality =
-                    if (oldModalityId == null) null else Modality.valueOf(oldModalityId)
+                val oldModalityId = runBlocking { appSettings.modalityFlow.first() }
+                val oldModality = Modality.valueOf(oldModalityId)
                 when (tab.position) {
                     0 -> newModality[0] = Modality.CAR
                     1 -> newModality[0] = Modality.BICYCLE
@@ -276,8 +279,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
                     4 -> newModality[0] = Modality.TRAIN
                     else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
                 }
-                appPreferences.saveModality(newModality[0]!!.databaseIdentifier)
-                if (oldModality != null && oldModality == newModality[0]) {
+                GlobalScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
+                if (oldModality == newModality[0]) {
                     Log.d(
                         TAG,
                         "changeModalityType(): old (" + oldModality + " and new Modality (" + newModality[0]
@@ -326,7 +329,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
      */
     private fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
-        val modality = appPreferences.getModality()
+        val modality = runBlocking { appSettings.modalityFlow.first() }
         Validate.notNull(modality, "Modality should already be set but isn't.")
 
         // Select the Modality tab

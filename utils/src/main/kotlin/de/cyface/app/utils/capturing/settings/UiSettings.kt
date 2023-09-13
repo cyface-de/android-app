@@ -22,6 +22,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.MultiProcessDataStoreFactory
 import de.cyface.app.utils.Settings
+import de.cyface.persistence.SetupException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
@@ -34,7 +35,7 @@ import java.net.URL
  * @version 2.0.0
  * @since 3.4.0
  */
-class CustomSettings(context: Context) {
+class UiSettings(context: Context, incentivesUrl: String) {
 
     /**
      * This avoids leaking the context when this object outlives the Activity of Fragment.
@@ -62,8 +63,17 @@ class CustomSettings(context: Context) {
         // TODO [RFR-788]: Add a test which ensures preferences migration works and not default values are used
         // TODO [RFR-788]: Add a test where the version is already 1 and SharedPreferences file is found
         // TODO [RFR-788]: Add a test where the version is 1 and ensure no migration is executed / defaults are set
-        migrations = listOf(PreferencesMigrationFactory.create(appContext))
+        migrations = listOf(
+            PreferencesMigrationFactory.create(appContext, incentivesUrl),
+            StoreMigration(incentivesUrl)
+        )
     )
+
+    init {
+        if (!incentivesUrl.startsWith("https://") && !incentivesUrl.startsWith("http://")) {
+            throw SetupException("Invalid URL protocol")
+        }
+    }
 
     /**
      * Saves the URL of the server to get incentives from.

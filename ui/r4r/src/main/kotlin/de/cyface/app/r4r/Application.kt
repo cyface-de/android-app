@@ -28,8 +28,11 @@ import de.cyface.synchronization.settings.CustomSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
-import de.cyface.utils.AppPreferences
+import de.cyface.synchronization.OAuth2
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * The implementation of Android's `Application` class for this project.
@@ -38,14 +41,17 @@ import io.sentry.Sentry
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.5.2
+ * @version 1.6.0
  * @since 1.0.0
  */
 class Application : Application() {
+
     /**
-     * The `SharedPreferences` used to store the app preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var preferences: AppPreferences
+    private val lazyAppSettings by lazy { // android-utils
+        AppSettings(this)
+    }
 
     /**
      * Reports error events to the user via UI and to Sentry, if opted-in.
@@ -66,7 +72,8 @@ class Application : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            if (preferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { lazyAppSettings.reportErrorsFlow.first() }
+            if (reportErrors) {
                 Sentry.captureMessage(errorCode.name + ": " + errorMessage)
             }
         }
@@ -75,9 +82,13 @@ class Application : Application() {
         super.onCreate()
 
         // Initialize DataStore once for all settings
-        preferences = AppPreferences(this) // settings used by all UIs FIXME
+        appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        CyfaceAuthenticator.settings = CustomSettings(this) // synchronization
+        CyfaceAuthenticator.settings = CustomSettings( // synchronization
+            this,
+            BuildConfig.cyfaceServer,
+            OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+        )
 
         // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
@@ -105,6 +116,11 @@ class Application : Application() {
          */
         @JvmStatic
         var errorHandler: ErrorHandler? = null
+            private set
+        /**
+         * The settings used by both, UIs and libraries.
+         */
+        lateinit var appSettings: AppSettings
             private set
     }
 }

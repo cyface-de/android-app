@@ -39,8 +39,7 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Measurement
 import de.cyface.utils.Constants
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.utils.AppPreferences
-import de.cyface.utils.AppSettings
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Utils
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope

@@ -25,13 +25,17 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import com.github.lzyzsd.circleprogress.DonutProgress
+import de.cyface.app.MainActivity
 import de.cyface.app.MainActivity.Companion.accountWithTokenExists
+import de.cyface.app.MeasuringClient
 import de.cyface.app.utils.Constants.TAG
 import de.cyface.app.utils.R
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * A button listener for the button to trigger data sync and show its progress
@@ -54,7 +58,10 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
      */
     private var button: ImageButton? = null
     private var progressView: DonutProgress? = null
-    private lateinit var preferences: AppPreferences
+    /**
+     * The settings used by both, UIs and libraries.
+     */
+    private lateinit var appSettings: AppSettings
 
     /**
      * [CyfaceDataCapturingService] to check [WiFiSurveyor.isConnected]
@@ -71,7 +78,7 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
         context = button!!.context
         this.button = button
         this.progressView = progress
-        preferences = AppPreferences(context!!)
+        appSettings = MeasuringClient.appSettings
         onResume() // TODO[MOV-621] the parent's onResume, thus, this class's onResume should automatically be called
         button.setOnClickListener(this)
     }
@@ -142,10 +149,10 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
 
         // Check is sync is disabled via frontend
         val syncEnabled = dataCapturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled = preferences.getUpload()
+        val uploadEnabledPreferred = runBlocking { appSettings.uploadEnabledFlow.first() }
         Validate.isTrue(
-            syncEnabled == syncPreferenceEnabled,
-            "sync enabled=$syncEnabled but syncPreference enabled=$syncPreferenceEnabled"
+            syncEnabled == uploadEnabledPreferred,
+            "sync enabled=$syncEnabled but syncPreference enabled=$uploadEnabledPreferred"
         )
         if (!syncEnabled) {
             Toast.makeText(

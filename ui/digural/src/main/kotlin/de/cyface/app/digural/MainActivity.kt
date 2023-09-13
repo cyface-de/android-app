@@ -49,12 +49,13 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
-import de.cyface.datacapturing.exception.SetupException
+import de.cyface.persistence.SetupException
 import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
@@ -67,10 +68,12 @@ import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
@@ -113,9 +116,15 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     private lateinit var navigation: NavController
 
     /**
-     * The settings used by all UIs.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var preferences: AppPreferences
+    override val appSettings: AppSettings
+        get() = MeasuringClient.appSettings
+
+    /**
+     * The settings used by multiple UIs.
+     */
+    override lateinit var uiSettings: UiSettings
 
     /**
      * The settings specific to this ui.
@@ -166,21 +175,20 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        preferences = AppPreferences(this)
+        uiSettings = UiSettings(this, BuildConfig.incentivesServer)
         cameraSettings = CameraSettings(this)
         customSettings = CustomSettings(this)
 
         // Start DataCapturingService and CameraService
+        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() } // FIXME
         try {
             capturing = CyfaceDataCapturingService(
                 this.applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                BuildConfig.cyfaceServer,
-                OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery),
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
-                preferences.getSensorFrequency()
+                sensorFrequency
             )
             val deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
@@ -297,7 +305,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            if (preferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            if (reportErrors) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -347,14 +356,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = preferences.getUpload()
+                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() } // FIXME
                     Log.d(
                         WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $syncEnabledPreference"
+                        "Setting syncEnabled for new account to preference: $uploadEnabled"
                     )
                     capturing.wiFiSurveyor.makeAccountSyncable(
                         account,
-                        syncEnabledPreference
+                        uploadEnabled
                     )
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()

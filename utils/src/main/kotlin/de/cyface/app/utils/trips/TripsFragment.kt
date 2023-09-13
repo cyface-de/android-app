@@ -40,13 +40,13 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.capturing.settings.CustomSettings
+import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.persistence.model.Measurement
-import de.cyface.utils.AppSettings
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -94,14 +94,14 @@ class TripsFragment : Fragment() {
     private lateinit var capturing: CyfaceDataCapturingService
 
     /**
-     * The settings used to store values used by all UIs.
+     * The settings used by both, UIs and libraries.
      */
     private lateinit var appSettings: AppSettings
 
     /**
      * The settings used to store values specific to android-app/utils.
      */
-    private lateinit var customSettings: CustomSettings
+    private lateinit var uiSettings: UiSettings
 
     /**
      * Tracker for selected items in the list.
@@ -148,17 +148,18 @@ class TripsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) tracker?.onRestoreInstanceState(savedInstanceState)
-        this.customSettings = CustomSettings(requireContext())
 
         if (activity is ServiceProvider) {
             val serviceProvider = activity as ServiceProvider
             capturing = serviceProvider.capturing
+            uiSettings = serviceProvider.uiSettings
+            appSettings = serviceProvider.appSettings
 
             // Load incentivesUrl - only send requests in RFR app
             val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
             if (rfr) {
                 val incentivesApi =
-                    runBlocking { customSettings.incentivesUrlFlow.first() } // FIXME
+                    runBlocking { uiSettings.incentivesUrlFlow.first() } // FIXME
                 this.incentives = Incentives(requireContext(), incentivesApi, serviceProvider.auth)
             }
         } else {
