@@ -24,7 +24,7 @@ import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.synchronization.settings.CustomSettings
+import de.cyface.synchronization.settings.SynchronizationSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
@@ -86,7 +86,7 @@ class MeasuringClient : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        CyfaceAuthenticator.settings = CustomSettings( // synchronization
+        CyfaceAuthenticator.settings = SynchronizationSettings( // synchronization
             this,
             BuildConfig.cyfaceServer,
             OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
