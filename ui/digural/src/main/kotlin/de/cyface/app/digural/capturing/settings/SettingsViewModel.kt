@@ -21,9 +21,10 @@ package de.cyface.app.digural.capturing.settings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -45,15 +46,15 @@ import java.net.URL
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.4.0
- * @param appSettings The settings used by both, UIs and libraries.
- * @param cameraSettings The settings used by the camera library.
- * @param customSettings The UI-specific settings.
+ * @property appSettings The settings used by both, UIs and libraries.
+ * @property cameraSettings The settings used by the camera library.
+ * @property customSettings The UI-specific settings.
  */
 class SettingsViewModel(
     private val appSettings: AppSettings,
-    private val cameraSettings: CameraSettings,
+    internal val cameraSettings: CameraSettings,
     private val customSettings: CustomSettings
 ) : ViewModel() {
 
@@ -83,6 +84,7 @@ class SettingsViewModel(
 
     init {
         runBlocking {
+            /** app settings **/
             _centerMap.value = appSettings.centerMapFlow.first()
             _upload.value = appSettings.uploadEnabledFlow.first()
             _sensorFrequency.value = appSettings.sensorFrequencyFlow.first()
@@ -102,94 +104,84 @@ class SettingsViewModel(
         }
     }
 
-    val centerMap: LiveData<Boolean> = _centerMap
-    val upload: LiveData<Boolean> = _upload
-    val sensorFrequency: LiveData<Int> = _sensorFrequency
+    /** app settings **/
+    val centerMap: LiveData<Boolean> = appSettings.centerMapFlow.asLiveData()
+    val uploadEnabled: LiveData<Boolean> = appSettings.uploadEnabledFlow.asLiveData()
+    val sensorFrequency: LiveData<Int> = appSettings.sensorFrequencyFlow.asLiveData()
 
     /** camera settings  **/
-    val cameraEnabled: LiveData<Boolean> = _cameraEnabled
-    val videoMode: LiveData<Boolean> = _videoMode
-    val rawMode: LiveData<Boolean> = _rawMode
-    val distanceBasedTriggering: LiveData<Boolean> = _distanceBasedTriggering
-    val triggeringDistance: LiveData<Float> = _triggeringDistance
-    val staticFocus: LiveData<Boolean> = _staticFocus
-    val staticFocusDistance: LiveData<Float> = _staticFocusDistance
-    val staticExposure: LiveData<Boolean> = _staticExposure
-    val staticExposureTime: LiveData<Long> = _staticExposureTime
-    val staticExposureValue: LiveData<Int> = _staticExposureValue
+    val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
+    val videoMode: LiveData<Boolean> = cameraSettings.videoModeFlow.asLiveData()
+    val rawMode: LiveData<Boolean> = cameraSettings.rawModeFlow.asLiveData()
+    val distanceBasedTriggering: LiveData<Boolean> =
+        cameraSettings.distanceBasedTriggeringFlow.asLiveData()
+    val triggeringDistance: LiveData<Float> = cameraSettings.triggeringDistanceFlow.asLiveData()
+    val staticFocus: LiveData<Boolean> = cameraSettings.staticFocusFlow.asLiveData()
+    val staticFocusDistance: LiveData<Float> = cameraSettings.staticFocusDistanceFlow.asLiveData()
+    val staticExposure: LiveData<Boolean> = cameraSettings.staticExposureFlow.asLiveData()
+    val staticExposureTime: LiveData<Long> = cameraSettings.staticExposureTimeFlow.asLiveData()
+    val staticExposureValue: LiveData<Int> = cameraSettings.staticExposureValueFlow.asLiveData()
 
     /** custom settings **/
-    val diguralServerUrl: LiveData<URL> = _diguralServerUrl
+    val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
 
+    /** app settings **/
     fun setCenterMap(centerMap: Boolean) {
-        GlobalScope.launch { appSettings.setCenterMap(centerMap) }
-        _centerMap.postValue(centerMap)
+        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
     }
 
     fun setUpload(upload: Boolean) {
-        GlobalScope.launch { appSettings.setUploadEnabled(upload) }
-        _upload.postValue(upload)
+        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
     }
 
     fun setSensorFrequency(sensorFrequency: Int) {
-        GlobalScope.launch { appSettings.setSensorFrequency(sensorFrequency) }
-        _sensorFrequency.postValue(sensorFrequency)
+        viewModelScope.launch { appSettings.setSensorFrequency(sensorFrequency) }
     }
 
     /** camera settings  **/
     fun setCameraEnabled(cameraEnabled: Boolean) {
-        GlobalScope.launch { cameraSettings.setCameraEnabled(cameraEnabled) }
-        _cameraEnabled.postValue(cameraEnabled)
+        viewModelScope.launch { cameraSettings.setCameraEnabled(cameraEnabled) }
     }
 
     fun setVideoMode(videoMode: Boolean) {
-        GlobalScope.launch { cameraSettings.setVideoMode(videoMode) }
-        _videoMode.postValue(videoMode)
+        viewModelScope.launch { cameraSettings.setVideoMode(videoMode) }
     }
 
     fun setRawMode(rawMode: Boolean) {
-        GlobalScope.launch { cameraSettings.setRawMode(rawMode) }
-        _rawMode.postValue(rawMode)
+        viewModelScope.launch { cameraSettings.setRawMode(rawMode) }
     }
 
     fun setDistanceBasedTriggering(distanceBasedTriggering: Boolean) {
-        GlobalScope.launch { cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering) }
-        _distanceBasedTriggering.postValue(distanceBasedTriggering)
+        viewModelScope.launch { cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering) }
     }
 
     fun setTriggeringDistance(triggeringDistance: Float) {
-        GlobalScope.launch { cameraSettings.setTriggeringDistance(triggeringDistance) }
-        _triggeringDistance.postValue(triggeringDistance)
+        viewModelScope.launch { cameraSettings.setTriggeringDistance(triggeringDistance) }
     }
 
     fun setStaticFocus(staticFocus: Boolean) {
-        GlobalScope.launch { cameraSettings.setStaticFocus(staticFocus) }
-        _staticFocus.postValue(staticFocus)
+        viewModelScope.launch { cameraSettings.setStaticFocus(staticFocus) }
     }
 
     fun setStaticFocusDistance(staticFocusDistance: Float) {
-        GlobalScope.launch { cameraSettings.setStaticFocusDistance(staticFocusDistance) }
-        _staticFocusDistance.postValue(staticFocusDistance)
+        viewModelScope.launch { cameraSettings.setStaticFocusDistance(staticFocusDistance) }
     }
 
     fun setStaticExposure(staticExposure: Boolean) {
-        GlobalScope.launch { cameraSettings.setStaticExposure(staticExposure) }
-        _staticExposure.postValue(staticExposure)
+        viewModelScope.launch { cameraSettings.setStaticExposure(staticExposure) }
     }
 
     fun setStaticExposureTime(staticExposureTime: Long) {
-        GlobalScope.launch { cameraSettings.setStaticExposureTime(staticExposureTime) }
-        _staticExposureTime.postValue(staticExposureTime)
+        viewModelScope.launch { cameraSettings.setStaticExposureTime(staticExposureTime) }
     }
 
     fun setStaticExposureValue(staticExposureValue: Int) {
-        GlobalScope.launch { cameraSettings.setStaticExposureValue(staticExposureValue) }
-        _staticExposureValue.postValue(staticExposureValue)
+        viewModelScope.launch { cameraSettings.setStaticExposureValue(staticExposureValue) }
     }
 
+    /** custom settings **/
     fun setDiguralServerUrl(address: URL) {
-        GlobalScope.launch { customSettings.setDiguralUrl(address) }
-        _diguralServerUrl.postValue(address) // FIXME: race condition with line above?
+        viewModelScope.launch { customSettings.setDiguralUrl(address) }
     }
 }
 

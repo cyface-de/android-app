@@ -63,11 +63,11 @@ import de.cyface.app.button.AbstractButton;
 import de.cyface.app.button.ButtonListener;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.settings.CameraSettings;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
 import de.cyface.camera_service.background.camera.CameraListener;
 import de.cyface.camera_service.foreground.CameraService;
+import de.cyface.camera_service.settings.CameraSettings;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
@@ -88,9 +88,9 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.persistence.strategy.DefaultLocationCleaning;
-import de.cyface.utils.settings.AppSettings;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
+import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry;
 
 // TODO: This class has overstretched its intended scope by several orders of magnitude by now.
@@ -127,11 +127,11 @@ public class DataCapturingButton
     /**
      * The settings used by both, UIs and libraries.
      */
-    private AppSettings appSettings;
+    private final AppSettings appSettings;
     /**
-     * The `SharedPreferences` used to store the camera preferences.
+     * The settings used by the camera service.
      */
-    private CameraSettings cameraSettings;
+    private final CameraSettings cameraSettings;
     private final static long CALIBRATION_DIALOG_TIMEOUT = 1500L;
     private Collection<CalibrationDialogListener> calibrationDialogListener;
     /**
@@ -954,7 +954,7 @@ public class DataCapturingButton
     @Override
     public void onNewPictureAcquired(final int picturesCaptured) {
         Log.d(Constants.TAG, "onNewPictureAcquired");
-        final String text = context.getString(R.string.camera_images) + " " + picturesCaptured;
+        final var text = context.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured;
         cameraInfoTextView.setText(text);
         Log.d(TAG, "cameraInfoTextView: " + cameraInfoTextView.getText());
     }

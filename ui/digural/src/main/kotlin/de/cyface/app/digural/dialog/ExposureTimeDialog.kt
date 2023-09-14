@@ -25,10 +25,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.DialogFragment
-import de.cyface.app.digural.R
 import de.cyface.app.digural.capturing.settings.SettingsFragment
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.Constants
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.Validate
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,7 +43,7 @@ import kotlin.math.round
 class ExposureTimeDialog(private val cameraSettings: CameraSettings) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
-        builder.setTitle(R.string.static_camera_exposure_time).setItems(
+        builder.setTitle(de.cyface.camera_service.R.string.static_camera_exposure_time).setItems(
             itemsDescriptions
         ) { _: DialogInterface?, which: Int ->
             val fragmentActivity = activity

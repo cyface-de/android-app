@@ -31,6 +31,10 @@ import java.net.URL
 /**
  * Settings used by multiple uis.
  *
+ * We currently don't use a repository to abstract the interface of the data types from the data
+ * source. The reason for this is the class is very simple and we don't plan multiple data sources.
+ * If this changes, consider using the standard Android Architecture, see `MeasurementRepository`.
+ *
  * @author Armin Schnabel
  * @version 2.0.0
  * @since 3.4.0
@@ -59,10 +63,6 @@ class UiSettings(context: Context, incentivesUrl: String) {
         produceFile = {
             File("${appContext.cacheDir.path}/app_utils.pb")
         },
-        // TODO [RFR-788]: Add a test to ensure version is not set to 1 if no SharedPreferences file exist
-        // TODO [RFR-788]: Add a test which ensures preferences migration works and not default values are used
-        // TODO [RFR-788]: Add a test where the version is already 1 and SharedPreferences file is found
-        // TODO [RFR-788]: Add a test where the version is 1 and ensure no migration is executed / defaults are set
         migrations = listOf(
             PreferencesMigrationFactory.create(appContext, incentivesUrl),
             StoreMigration(incentivesUrl)

@@ -37,19 +37,20 @@ class UploadSwitchHandler(
     private val capturingService: CyfaceDataCapturingService
 ) : CompoundButton.OnCheckedChangeListener {
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        if (viewModel.upload.value != isChecked) {
-            // Also update WifiSurveyor's synchronizationEnabled
-            capturingService.wiFiSurveyor.isSyncEnabled = isChecked
-            viewModel.setUpload(isChecked)
+        if (viewModel.upload.value == isChecked) {
+            return
+        }
 
-            // Show warning to user (storage gets filled)
-            if (!isChecked) {
-                Toast.makeText(
-                    context,
-                    R.string.sync_disabled_toast,
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        // Also update WifiSurveyor's synchronizationEnabled
+        capturingService.wiFiSurveyor.isSyncEnabled = isChecked
+        viewModel.setUpload(isChecked)
+
+        if (!isChecked) {
+            Toast.makeText(
+                context,
+                R.string.sync_disabled_toast,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 }

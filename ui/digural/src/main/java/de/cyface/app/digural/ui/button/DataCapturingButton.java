@@ -63,11 +63,11 @@ import de.cyface.app.digural.button.AbstractButton;
 import de.cyface.app.digural.button.ButtonListener;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.settings.CameraSettings;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
 import de.cyface.camera_service.background.camera.CameraListener;
 import de.cyface.camera_service.foreground.CameraService;
+import de.cyface.camera_service.settings.CameraSettings;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
@@ -88,11 +88,15 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.persistence.strategy.DefaultLocationCleaning;
-import de.cyface.utils.settings.AppSettings;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
+import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry;
 
+// TODO: This class has overstretched its intended scope by several orders of magnitude by now.
+// The initial idea was to have this contain all the UI code for the button triggering data
+// capturing and providing a ViewModel as soon as too much business logic is in here. This is the
+// case now. All this stuff should be moved to a or multiple business logic classes soon.
 /**
  * The button listener for the button to start and stop the data capturing service.
  *
@@ -123,8 +127,11 @@ public class DataCapturingButton
     /**
      * The settings used by both, UIs and libraries.
      */
-    private AppSettings appSettings;
-    private CameraSettings cameraSettings;
+    private final AppSettings appSettings;
+    /**
+     * The settings used by the camera service.
+     */
+    private final CameraSettings cameraSettings;
     private final static long CALIBRATION_DIALOG_TIMEOUT = 1500L;
     private Collection<CalibrationDialogListener> calibrationDialogListener;
     /**
@@ -162,7 +169,7 @@ public class DataCapturingButton
     private ProgressDialog calibrationProgressDialog;
 
     public DataCapturingButton(@NonNull final CapturingFragment capturingFragment,
-                               @NonNull final AppSettings appSettings, @NonNull final CameraSettings cameraSettings) {
+            @NonNull final AppSettings appSettings, @NonNull final CameraSettings cameraSettings) {
         this.listener = new HashSet<>();
         this.capturingFragment = capturingFragment;
         this.appSettings = appSettings;
@@ -580,12 +587,11 @@ public class DataCapturingButton
                     });
         } catch (final DataCapturingException e) {
             throw new IllegalStateException(e);
-        } catch (final MissingPermissionException e)  {
+        } catch (final MissingPermissionException e) {
             Toast.makeText(
                     context,
                     context.getString(de.cyface.app.utils.R.string.missing_location_permissions_toast),
-                    Toast.LENGTH_LONG
-            ).show();
+                    Toast.LENGTH_LONG).show();
             throw new IllegalStateException(e);
         }
     }
@@ -713,8 +719,7 @@ public class DataCapturingButton
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
                     }
-                }
-                );
+                });
     }
 
     /**
@@ -940,7 +945,7 @@ public class DataCapturingButton
     @Override
     public void onNewPictureAcquired(final int picturesCaptured) {
         Log.d(Constants.TAG, "onNewPictureAcquired");
-        final String text = context.getString(R.string.camera_images) + " " + picturesCaptured;
+        final var text = context.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured;
         cameraInfoTextView.setText(text);
         Log.d(TAG, "cameraInfoTextView: " + cameraInfoTextView.getText());
     }

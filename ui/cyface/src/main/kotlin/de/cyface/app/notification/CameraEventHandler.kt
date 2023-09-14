@@ -61,18 +61,19 @@ class CameraEventHandler :
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
-        val onClickPendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        } else {
-            // Ignore warning: immutable flag only available in API >= 23, see above
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
+        val onClickPendingIntent: PendingIntent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                // Ignore warning: immutable flag only available in API >= 23, see above
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
@@ -108,18 +109,19 @@ class CameraEventHandler :
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
-        val onClickPendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        } else {
-            // Ignore warning: immutable flag only available in API >= 23, see above
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
+        val onClickPendingIntent: PendingIntent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                // Ignore warning: immutable flag only available in API >= 23, see above
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
@@ -158,18 +160,19 @@ class CameraEventHandler :
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
-        val onClickPendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        } else {
-            // Ignore warning: immutable flag only available in API >= 23, see above
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
+        val onClickPendingIntent: PendingIntent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                // Ignore warning: immutable flag only available in API >= 23, see above
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
@@ -186,9 +189,9 @@ class CameraEventHandler :
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
             .setSmallIcon(R.drawable.ic_logo_only_c)
-            .setContentTitle(context.getString(R.string.notification_title_picture_capturing_decreased))
+            .setContentTitle(context.getString(de.cyface.camera_service.R.string.notification_title_picture_capturing_decreased))
             .setContentText(
-                context.getString(R.string.notification_text_picture_capturing_decreased)
+                context.getString(de.cyface.camera_service.R.string.notification_text_picture_capturing_decreased)
             )
             .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2)
             .setAutoCancel(true)
@@ -209,18 +212,19 @@ class CameraEventHandler :
 
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
-        val onClickPendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        } else {
-            // Ignore warning: immutable flag only available in API >= 23, see above
-            PendingIntent.getActivity(
-                context, 0, onClickIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
+        val onClickPendingIntent: PendingIntent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                // Ignore warning: immutable flag only available in API >= 23, see above
+                PendingIntent.getActivity(
+                    context, 0, onClickIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(
                 context, channelId, "Cyface",
@@ -229,7 +233,7 @@ class CameraEventHandler :
             )
         }
         val builder = NotificationCompat.Builder(context, channelId)
-            .setContentTitle(context.getText(R.string.camera_capturing_active))
+            .setContentTitle(context.getText(de.cyface.camera_service.R.string.camera_capturing_active))
             .setContentIntent(onClickPendingIntent).setWhen(System.currentTimeMillis())
             .setOngoing(true)
             .setAutoCancel(false)

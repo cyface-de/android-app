@@ -28,6 +28,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -35,13 +38,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.digural.CameraServiceProvider
-import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.MeasuringClient
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.app.digural.dialog.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -77,9 +78,7 @@ class SettingsFragment : Fragment() {
     /**
      * The [SettingsViewModel] for this fragment.
      */
-    private lateinit var viewModel: SettingsViewModel
-
-    lateinit var cameraSettings: CameraSettings
+    internal lateinit var viewModel: SettingsViewModel
 
     /**
      * Can be launched to request permissions.
@@ -88,19 +87,11 @@ class SettingsFragment : Fragment() {
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { result ->
-            /*val granted = grantResults[0] == PackageManager.PERMISSION_GRANTED
-            val unexpectedPermissionNumber = grantResults.size < 2
-            val missingPermissions =
-                !(granted && (unexpectedPermissionNumber || (grantResults[1] == PackageManager.PERMISSION_GRANTED)))*/
-
             if (result.isNotEmpty()) {
                 val allGranted = result.values.none { !it }
-                if (allGranted /*!missingPermissions*/) {
-                    // Ask used which camera mode to use, video or default (shutter image)
-                    onCameraEnabled(this)
+                if (allGranted) {
+                    showCameraModeDialog(this)
                 } else {
-                    // Deactivate camera service and inform user about this
-                    disabledCamera()
                     Toast.makeText(
                         context,
                         requireContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
@@ -113,8 +104,13 @@ class SettingsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize ViewModel
-        cameraSettings =
+        // Get dependencies
+        if (activity is ServiceProvider) {
+            capturing = (activity as ServiceProvider).capturing
+        } else {
+            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+        }
+        val cameraSettings =
             if (activity is CameraServiceProvider) {
                 (activity as CameraServiceProvider).cameraSettings
             } else {
@@ -126,17 +122,12 @@ class SettingsFragment : Fragment() {
             } else {
                 throw RuntimeException("Context doesn't support the Fragment, implement `CustomProvider`")
             }
+
+        // Initialize ViewModel
         viewModel = ViewModelProvider(
             this,
             SettingsViewModelFactory(MeasuringClient.appSettings, cameraSettings, customSettings)
         )[SettingsViewModel::class.java]
-
-        // Initialize CapturingService
-        if (activity is ServiceProvider) {
-            capturing = (activity as ServiceProvider).capturing
-        } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
-        }
     }
 
     override fun onCreateView(
@@ -146,7 +137,8 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        // Register onClick listeners
+        // Observe UI changes
+        /** app settings **/
         binding.centerMapSwitch.setOnCheckedChangeListener(
             CenterMapSwitchHandler(
                 viewModel,
@@ -162,222 +154,41 @@ class SettingsFragment : Fragment() {
         )
         binding.sensorFrequencySlider.addOnChangeListener(
             SensorFrequencySlideHandler(
-                viewModel,
-                binding.sensorFrequency
+                viewModel
             )
         )
         /** camera settings **/
-        binding.cameraSwitch.setOnCheckedChangeListener(
+        binding.cameraEnabledSwitch.setOnCheckedChangeListener(
             CameraSwitchHandler(
                 viewModel,
                 this
             )
         )
-        binding.diguralServerAddressWrapper.setEndIconOnClickListener(
-            DiguralUrlChangeHandler(
-                viewModel,
-                this,
-                binding.diguralServerAddress
-            )
-        )
-
-        // Observe view model and update UI
-        viewModel.centerMap.observe(viewLifecycleOwner) { centerMapValue ->
-            run {
-                binding.centerMapSwitch.isChecked = centerMapValue!!
-            }
-        }
-        viewModel.upload.observe(viewLifecycleOwner) { uploadValue ->
-            run {
-                binding.uploadSwitch.isChecked = uploadValue!!
-            }
-        }
-        viewModel.sensorFrequency.observe(viewLifecycleOwner) { sensorFrequencyValue ->
-            run {
-                Log.d(TAG, "updateView -> sensor frequency slider $sensorFrequencyValue")
-                binding.sensorFrequency.text = sensorFrequencyValue.toString()
-            }
-        }
-        viewModel.diguralServerUrl.observe(viewLifecycleOwner) { serverAddress ->
-            run {
-                Log.d(TAG, "updateView -> digural server address: $serverAddress")
-                binding.diguralServerAddress.setText(serverAddress.toExternalForm())
-            }
-        }
-        viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabledValue ->
-            run {
-                binding.cameraSwitch.isChecked = cameraEnabledValue!!
-                if (cameraEnabledValue) {
-                    updateCameraSettingsView(true) // FIXME: Refactor
-
-                    updateDistanceBasedTriggeringViewToPreference() // FIXME: Refactor
-
-                    // FIXME: Refactor
-                    // Only check manual sensor settings if it's supported or else the app crashes
-                    if (viewModel.manualSensorSupported) {
-                        updateManualSensorViewToPreferences()
-                    } else {
-                        binding.staticFocusDistanceSlider.visibility = View.INVISIBLE
-                        // staticExposureTimeSlider.setVisibility(View.INVISIBLE);
-                        binding.staticExposureValueSlider.visibility = View.INVISIBLE
-                    }
-                } else {
-                    updateCameraSettingsView(false)
-                }
-            }
-        }
-
-        // FIXME: Observe cameraMode (enum text) and update the camera mode text view
-        // Update camera enabled and mode status view if incorrect
-        /*
-        val videoModePreferred = preferences.getBoolean(
-            Constants.PREFERENCES_CAMERA_VIDEO_MODE_ENABLED_KEY,
-            false
-        )
-        val rawModePreferred = preferences.getBoolean(
-            Constants.PREFERENCES_CAMERA_RAW_MODE_ENABLED_KEY,
-            false
-        )
-        val cameraModeText =
-            if (videoModePreferred) "Video" else if (rawModePreferred) "DNG" else "JPEG"
-        val cameraStatusText =
-            if (!cameraModeEnabledPreferred) "disabled" else "enabled, $cameraModeText mode"
-        if (binding.cameraStatus.text !== cameraStatusText) {
-            Log.d(TAG, "updateView -> camera mode view $cameraStatusText")
-            binding.cameraStatus.text = cameraStatusText
-        }*/
-
-        return binding.root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    /*override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String?>, grantResults: IntArray
-    ) {
-        when (requestCode) {
-            // Location permission request moved to `MapFragment` as it has to react to results
-
-            PERMISSION_REQUEST_CAMERA_AND_STORAGE_PERMISSION -> {
-                val granted = grantResults[0] == PackageManager.PERMISSION_GRANTED
-                val unexpectedPermissionNumber = grantResults.size < 2
-                val missingPermissions =
-                    !(granted && (unexpectedPermissionNumber || (grantResults[1] == PackageManager.PERMISSION_GRANTED)))
-
-                if (missingPermissions) {
-                    // Deactivate camera service and inform user about this
-                    deactivateCameraService()
-                    Toast.makeText(
-                        context,
-                        requireContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    // Ask used which camera mode to use, video or default (shutter image)
-                    showCameraModeDialog(this)
-                }
-
-            } else -> {
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            }
-        }
-    }*/
-
-    /**
-     * Displays a dialog for the user to select a camera mode (video- or picture mode).
-     */
-    fun onCameraEnabled(fragment: SettingsFragment) {
-
-        // Ask for camera mode
-        val cameraModeDialog = CameraModeDialog(cameraSettings)
-        cameraModeDialog.setTargetFragment(
-            fragment,
-            de.cyface.energy_settings.Constants.DIALOG_ENERGY_SAFER_WARNING_CODE
-        )
-        cameraModeDialog.isCancelable = false
-        cameraModeDialog.show(requireFragmentManager(), "CAMERA_MODE_DIALOG")
-
-        updateCameraSettingsView(true)
-    }
-
-    private fun disabledCamera() {
-        //binding.cameraSwitch.isChecked = false    // Should be done via observe
-        viewModel.setCameraEnabled(false)
-        onCameraDisabled()
-    }
-
-    private fun onCameraDisabled() {
-    }
-
-    private fun updateCameraSettingsView(cameraEnabled: Boolean) {
-        if (!cameraEnabled) {
-            binding.cameraSettingsWrapper.visibility = View.GONE
-            return
-        }
-        binding.cameraSettingsWrapper.visibility = View.VISIBLE
-
-        // Set manual sensor support
-        val characteristics = loadCameraCharacteristics()
-        viewModel.manualSensorSupported = Utils.isFeatureSupported(
-            characteristics,
-            CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
-        )
-
-        // Static Focus Distance
-        binding.staticFocusSwitcher.setOnCheckedChangeListener(
-            StaticFocusSwitchHandler(
-                requireContext(),
-                viewModel,
-                binding.staticFocusSwitcher,
-                binding.staticFocusDistanceSlider,
-                binding.staticFocus,
-                binding.staticFocusUnit
-            )
-        )
-        binding.staticFocusDistanceSlider.addOnChangeListener(
-            StaticFocusDistanceSlideHandler(viewModel, binding.staticFocus)
-        )
-        val minFocusDistance =
-            characteristics!!.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE)
-        // is null when camera permissions are missing, is 0.0 when "lens is fixed-focus" (e.g. emulators)
-        // It's ok when this is not set in those cases as the fragment informs about missing manual focus mode
-        if (minFocusDistance != null && minFocusDistance.toDouble() != 0.0) {
-            // Flooring to the next smaller 0.25 step as max focus distance to fix exception:
-            // stepSize(0.25) must be a factor of range [0.25;9.523809] on Pixel 6
-            binding.staticFocusDistanceSlider.valueTo = floor(minFocusDistance * 4) / 4
-        }
-
-        // Distance based triggering
         binding.distanceBasedSwitcher.setOnCheckedChangeListener(
             DistanceBasedSwitchHandler(
                 requireContext(),
-                viewModel,
-                binding.distanceBasedSlider,
-                binding.distanceBased,
-                binding.distanceBasedUnit
+                viewModel
             )
         )
         binding.distanceBasedSlider.addOnChangeListener(
-            TriggerDistanceSlideHandler(viewModel, binding.distanceBased)
+            TriggerDistanceSlideHandler(viewModel)
         )
-        // triggerDistanceSlider.setValueTo(minFocusDistance);
         binding.distanceBasedUnit.text = TRIGGER_DISTANCE_UNIT
-
-        // Static Exposure Time
+        binding.staticFocusSwitcher.setOnCheckedChangeListener(
+            StaticFocusSwitchHandler(
+                requireContext(),
+                viewModel
+            )
+        )
+        binding.staticFocusDistanceSlider.addOnChangeListener(
+            StaticFocusDistanceSlideHandler(viewModel)
+        )
+        // In case we have a device which does not support focus distance 0.25:
+        // triggerDistanceSlider.setValueTo(minFocusDistance);
         binding.staticExposureTimeSwitcher.setOnCheckedChangeListener(
             StaticExposureSwitchHandler(
                 viewModel,
-                requireContext(),
-                binding.staticExposureTimeSwitcher,
-                binding.staticExposureTime,
-                binding.staticExposureTimeUnit,
-                binding.staticExposureValueTitle,
-                binding.staticExposureValueSlider,
-                binding.staticExposureValue,
-                binding.staticExposureValueDescription
+                requireContext()
             )
         )
         binding.staticExposureTime.setOnClickListener(
@@ -387,21 +198,10 @@ class SettingsFragment : Fragment() {
             )
         )
         binding.staticExposureTimeUnit.text = EXPOSURE_TIME_UNIT
-
         // Static Exposure Value (Dialog)
-        binding.staticExposureValueSlider.addOnChangeListener(
-            StaticExposureValueSlideHandler(
-                viewModel,
-                binding.staticExposureValue,
-                binding.staticExposureValueDescription
-            )
-        )
-        binding.staticExposureValueSlider.valueFrom =
-            EXPOSURE_VALUES.firstKey()!!.toFloat()
-        binding.staticExposureValueSlider.valueTo =
-            EXPOSURE_VALUES.lastKey()!!.toFloat()
-
-        // The slider is not useful for a set of predefined values like 1E9/54444, 1/8000, 1/125
+        binding.staticExposureValueSlider.valueFrom = EXPOSURE_VALUES.firstKey()!!.toFloat()
+        binding.staticExposureValueSlider.valueTo = EXPOSURE_VALUES.lastKey()!!.toFloat()
+        // The exposure value slider is not useful for a set of predefined values like 1E9/54444, 1/8000, 1/125
         /*val exposureTimeRangeNanos =
             characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
         if (exposureTimeRangeNanos != null) { // when camera permissions are missing
@@ -414,64 +214,192 @@ class SettingsFragment : Fragment() {
             Log.d(TAG,"exposureTimeRange: $exposureTimeRangeNanos ns -> set slide range: $fromValue - $toValue")
         }
         */
-
-        // Show supported camera features (camera permissions required)
-        displaySupportLevelsAndUnits(
-            characteristics,
-            viewModel.manualSensorSupported,
-            minFocusDistance!!
-        )
-    }
-
-    private fun updateDistanceBasedTriggeringViewToPreference() {
-        // Update slider view if incorrect
-        val preferredTriggerDistance = viewModel.triggeringDistance.value
-        val roundedDistance = (preferredTriggerDistance!! * 100).roundToInt() / 100f
-        if (binding.distanceBasedSlider.value != roundedDistance) {
-            Log.d(TAG, "updateView -> triggering distance slider $roundedDistance")
-            binding.distanceBasedSlider.value = roundedDistance
-        }
-        if (binding.distanceBased.text.isEmpty()
-            || binding.distanceBased.text.toString().toFloat() != roundedDistance
-        ) {
-            Log.d(TAG, "updateView -> triggering distance text $roundedDistance")
-            binding.distanceBased.text = roundedDistance.toString()
-        }
-
-        // Update switcher view if incorrect
-        val distanceBasedTriggeringPreferred = viewModel.distanceBasedTriggering.value
-        if (binding.distanceBasedSwitcher.isChecked != distanceBasedTriggeringPreferred) {
-            Log.d(TAG, "distance based triggering -> $distanceBasedTriggeringPreferred")
-            binding.distanceBasedSwitcher.isChecked = distanceBasedTriggeringPreferred!!
-        }
-
-        // Update visibility slider + distance field
-        val expectedTriggerDistanceVisibility =
-            if (distanceBasedTriggeringPreferred) View.VISIBLE else View.INVISIBLE
-        Log.d(
-            TAG,
-            "view status -> distance triggering fields are " + binding.distanceBasedSlider.visibility
-                    + "expected is: "
-                    + if (expectedTriggerDistanceVisibility == View.VISIBLE) "visible" else "invisible"
-        )
-        if (binding.distanceBasedSlider.visibility != expectedTriggerDistanceVisibility || binding.distanceBased.visibility != expectedTriggerDistanceVisibility || binding.distanceBasedUnit.visibility != expectedTriggerDistanceVisibility) {
-            Log.d(
-                TAG, "updateView -> distance triggering fields to "
-                        + if (expectedTriggerDistanceVisibility == View.VISIBLE) "visible" else "invisible"
+        binding.staticExposureValueSlider.addOnChangeListener(
+            StaticExposureValueSlideHandler(
+                viewModel
             )
-            binding.distanceBasedSlider.visibility = expectedTriggerDistanceVisibility
-            binding.distanceBased.visibility = expectedTriggerDistanceVisibility
-            binding.distanceBasedUnit.visibility = expectedTriggerDistanceVisibility
+        )
+        /** custom settings **/
+        binding.diguralServerAddressWrapper.setEndIconOnClickListener(
+            DiguralUrlChangeHandler(
+                viewModel,
+                this,
+                binding.diguralServerAddress
+            )
+        )
+
+        // Observe view model, update UI
+        /** app settings **/
+        viewModel.centerMap.observe(viewLifecycleOwner) { centerMapValue ->
+            run {
+                binding.centerMapSwitch.isChecked = centerMapValue!!
+            }
+        }
+        viewModel.uploadEnabled.observe(viewLifecycleOwner) { uploadValue ->
+            run {
+                binding.uploadSwitch.isChecked = uploadValue!!
+            }
+        }
+        viewModel.sensorFrequency.observe(viewLifecycleOwner) { sensorFrequencyValue ->
+            run {
+                binding.sensorFrequencySlider.value = sensorFrequencyValue.toFloat()
+                binding.sensorFrequency.text = sensorFrequencyValue.toString()
+            }
+        }
+        /** camera settings **/
+        viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabled ->
+            run {
+                binding.cameraEnabledSwitch.isChecked = cameraEnabled
+                binding.cameraSettingsWrapper.visibility = if (cameraEnabled) VISIBLE else GONE
+
+                // Manual Sensor support and features
+                if (cameraEnabled) {
+                    val characteristics = loadCameraCharacteristics()
+                    val manualSensorSupported = Utils.isFeatureSupported(
+                        characteristics,
+                        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
+                    )
+                    // TODO: could also be a LiveData field
+                    viewModel.manualSensorSupported = manualSensorSupported
+                    setManualSensorSupport(characteristics, manualSensorSupported)
+                    if (!manualSensorSupported) {
+                        //binding.staticFocusDistanceSlider.visibility = INVISIBLE
+                        binding.staticFocusWrapper.visibility = INVISIBLE
+                        // binding.staticExposureTimeSlider.setVisibility(View.INVISIBLE);
+                        // binding.staticExposureValueSlider.visibility = INVISIBLE
+                        binding.staticExposureTimeWrapper.visibility = INVISIBLE
+                        binding.staticExposureValueWrapper.visibility = INVISIBLE
+                    }
+                }
+            }
+        }
+        viewModel.videoMode.observe(viewLifecycleOwner) { videoMode ->
+            if (videoMode) {
+                binding.cameraMode.text = getText(de.cyface.camera_service.R.string.video)
+            } else if (viewModel.rawMode.value == false) {
+                binding.cameraMode.text =
+                    getText(de.cyface.camera_service.R.string.compressed_images)
+            }
+        }
+        viewModel.rawMode.observe(viewLifecycleOwner) { rawMode ->
+            if (rawMode) {
+                binding.cameraMode.text =
+                    getText(de.cyface.camera_service.R.string.uncompressed_images)
+            } else if (viewModel.videoMode.value == false) {
+                binding.cameraMode.text =
+                    getText(de.cyface.camera_service.R.string.compressed_images)
+            }
+        }
+        viewModel.distanceBasedTriggering.observe(viewLifecycleOwner) { distanceBased ->
+            run {
+                binding.distanceBasedSwitcher.isChecked = distanceBased
+                binding.distanceBasedWrapper.visibility = if (distanceBased) VISIBLE else INVISIBLE
+            }
+        }
+        viewModel.triggeringDistance.observe(viewLifecycleOwner) { triggeringDistance ->
+            run {
+                val roundedDistance = (triggeringDistance * 100).roundToInt() / 100f
+                Log.d(TAG, "updateView -> triggering distance to $roundedDistance")
+                binding.distanceBasedSlider.value = roundedDistance
+
+                val text = StringBuilder(roundedDistance.toString())
+                while (text.length < 4) {
+                    text.append("0")
+                }
+                binding.distanceBased.text = text
+            }
+        }
+        viewModel.staticFocus.observe(viewLifecycleOwner) { staticFocus ->
+            run {
+                Log.d(TAG, "updateView -> static focus to $staticFocus")
+                binding.staticFocusSwitcher.isChecked = staticFocus
+                binding.staticFocusWrapper.visibility = if (staticFocus) VISIBLE else INVISIBLE
+            }
+        }
+        viewModel.staticFocusDistance.observe(viewLifecycleOwner) { distance ->
+            run {
+                val roundedDistance = (distance * 100).roundToInt() / 100f
+                Log.d(TAG, "updateView -> focus distance to $roundedDistance")
+                binding.staticFocusDistanceSlider.value = roundedDistance
+
+                val text = StringBuilder(roundedDistance.toString())
+                while (text.length < 4) {
+                    text.append("0")
+                }
+                binding.staticFocus.text = text
+            }
+        }
+        viewModel.staticExposure.observe(viewLifecycleOwner) { staticExposure ->
+            run {
+                Log.d(TAG, "updateView -> static exposure to $staticExposure")
+                binding.staticExposureTimeSwitcher.isChecked = staticExposure
+                val visibility = if (staticExposure) VISIBLE else INVISIBLE
+                binding.staticExposureTimeWrapper.visibility = visibility
+                binding.staticExposureValueWrapper.visibility = visibility
+            }
+        }
+        viewModel.staticExposureTime.observe(viewLifecycleOwner) { exposureTime ->
+            run {
+                Log.d(TAG, "updateView -> exposure time to $exposureTime")
+                binding.staticExposureTime.text = Utils.getExposureTimeFraction(exposureTime)
+            }
+        }
+        viewModel.staticExposureValue.observe(viewLifecycleOwner) { exposureValue ->
+            run {
+                Log.d(TAG, "updateView -> exposure value to $exposureValue")
+                binding.staticExposureValueSlider.value = exposureValue.toFloat()
+                binding.staticExposureValue.text = exposureValue.toString()
+                binding.staticExposureValueDescription.text = EXPOSURE_VALUES[exposureValue]
+            }
+        }
+        /** custom settings **/
+        viewModel.diguralServerUrl.observe(viewLifecycleOwner) { serverAddress ->
+            run {
+                binding.diguralServerAddress.setText(serverAddress.toExternalForm())
+            }
+        }
+
+        return binding.root
+    }
+
+    private fun setManualSensorSupport(
+        characteristics: CameraCharacteristics,
+        manualSensorSupported: Boolean
+    ) {
+        // Show supported camera features (camera permissions required)
+        val minFocusDistance =
+            characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE)
+        displaySupportLevelsAndUnits(characteristics, manualSensorSupported, minFocusDistance!!)
+        // is null when camera permissions are missing, is 0.0 when "lens is fixed-focus" (e.g. emulators)
+        // It's ok when this is not set in those cases as the fragment informs about missing manual focus mode
+        if (minFocusDistance.toDouble() != 0.0) {
+            // Flooring to the next smaller 0.25 step as max focus distance to fix exception:
+            // stepSize(0.25) must be a factor of range [0.25;9.523809] on Pixel 6
+            binding.staticFocusDistanceSlider.valueTo = floor(minFocusDistance * 4) / 4
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    /**
+     * Displays a dialog for the user to select a camera mode (video- or picture mode).
+     */
+    fun showCameraModeDialog(fragment: SettingsFragment) {
+        val cameraModeDialog = CameraModeDialog(viewModel.cameraSettings)
+        cameraModeDialog.setTargetFragment(fragment, 0)
+        cameraModeDialog.isCancelable = false
+        cameraModeDialog.show(requireFragmentManager(), "CAMERA_MODE_DIALOG")
+    }
 
     /**
      * Returns the features supported by the camera hardware.
      *
      * @return The hardware feature support
      */
-    private fun loadCameraCharacteristics(): CameraCharacteristics? {
+    private fun loadCameraCharacteristics(): CameraCharacteristics {
         val cameraManager =
             requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
         return try {
@@ -480,109 +408,6 @@ class SettingsFragment : Fragment() {
             cameraManager.getCameraCharacteristics(cameraId)
         } catch (e: CameraAccessException) {
             throw IllegalStateException(e)
-        }
-    }
-
-    private fun updateManualSensorViewToPreferences() {
-        // Update focus distance slider view if incorrect
-        val preferredFocusDistance = viewModel.staticFocusDistance.value!!
-        val roundedDistance = (preferredFocusDistance * 100).roundToInt() / 100f
-        if (binding.staticFocusDistanceSlider.value != roundedDistance) {
-            Log.d(TAG, "updateView -> focus distance slider $roundedDistance")
-            binding.staticFocusDistanceSlider.value = roundedDistance
-        }
-        if (binding.staticFocus.text.isEmpty()
-            || binding.staticFocus.text.toString().toFloat() != roundedDistance
-        ) {
-            Log.d(TAG, "updateView -> focus distance text $roundedDistance")
-            binding.staticFocus.text = roundedDistance.toString()
-        }
-
-        // Update exposure time slider view if incorrect
-        val preferredExposureTimeNanos = viewModel.staticExposureTime.value!!
-        /*
-         * if (staticExposureTimeSlider.getValue() != preferredExposureTimeNanos) {
-         * Log.d(TAG, "updateView -> exposure time slider " + preferredExposureTimeNanos);
-         * staticExposureTimeSlider.setValue(preferredExposureTimeNanos);
-         * }
-        */if (binding.staticExposureTime.text.isEmpty()
-            || binding.staticExposureTime.text.toString() != Utils.getExposureTimeFraction(
-                preferredExposureTimeNanos
-            )
-        ) {
-            Log.d(TAG, "updateView -> exposure time text $preferredExposureTimeNanos")
-            binding.staticExposureTime.text = Utils.getExposureTimeFraction(
-                preferredExposureTimeNanos
-            )
-        }
-
-        // Update exposure value slider view if incorrect
-        val preferredExposureValue = viewModel.staticExposureValue.value!!
-        if (binding.staticExposureValueSlider.value != preferredExposureValue.toFloat()) {
-            Log.d(TAG, "updateView -> exposure value slider $preferredExposureValue")
-            binding.staticExposureValueSlider.value = preferredExposureValue.toFloat()
-        }
-        if (binding.staticExposureValue.text.isEmpty() || binding.staticExposureValue.text.toString()
-                .toInt() != preferredExposureValue
-        ) {
-            Log.d(TAG, "updateView -> exposure value text $preferredExposureValue")
-            binding.staticExposureValue.text = preferredExposureValue.toString()
-        }
-        // Update exposure value description view if incorrect
-        val expectedExposureValueDescription = EXPOSURE_VALUES[preferredExposureValue]
-        if (binding.staticExposureValueDescription.text != expectedExposureValueDescription) {
-            Log.d(TAG, "exposure value description -> $expectedExposureValueDescription")
-            binding.staticExposureValueDescription.text = expectedExposureValueDescription
-        }
-
-        // Update focus distance switcher view if incorrect
-        val focusDistancePreferred = viewModel.staticFocus.value!!
-        if (binding.staticFocusSwitcher.isChecked != focusDistancePreferred) {
-            Log.d(TAG, "updateView focus distance switcher -> $focusDistancePreferred")
-            binding.staticFocusSwitcher.isChecked = focusDistancePreferred
-        }
-
-        // Update exposure time switcher view if incorrect
-        val exposureTimePreferred = viewModel.staticExposure.value!!
-        if (binding.staticExposureTimeSwitcher.isChecked != exposureTimePreferred) {
-            Log.d(TAG, "updateView exposure time switcher -> $exposureTimePreferred")
-            binding.staticExposureTimeSwitcher.isChecked = exposureTimePreferred
-        }
-
-        // Update visibility of focus distance slider + distance field
-        val expectedFocusDistanceVisibility =
-            if (focusDistancePreferred) View.VISIBLE else View.INVISIBLE
-        if (binding.staticFocusDistanceSlider.visibility != expectedFocusDistanceVisibility ||
-            binding.staticFocus.visibility != expectedFocusDistanceVisibility ||
-            binding.staticFocusUnit.visibility != expectedFocusDistanceVisibility
-        ) {
-            Log.d(
-                TAG, "updateView -> focus distance fields to "
-                        + if (expectedFocusDistanceVisibility == View.VISIBLE) "visible" else "invisible"
-            )
-            binding.staticFocusDistanceSlider.visibility = expectedFocusDistanceVisibility
-            binding.staticFocus.visibility = expectedFocusDistanceVisibility
-            binding.staticFocusUnit.visibility = expectedFocusDistanceVisibility
-        }
-
-        // Update visibility of exposure time and value slider + time and value fields
-        val expectedExposureTimeVisibility =
-            if (exposureTimePreferred) View.VISIBLE else View.INVISIBLE
-        if ( /*
-     * binding.staticExposureTimeSlider.getVisibility() != expectedExposureTimeVisibility
-     * ||
-    */binding.staticExposureTime.visibility != expectedExposureTimeVisibility || binding.staticExposureTimeUnit.visibility != expectedExposureTimeVisibility || binding.staticExposureValueTitle.visibility != expectedExposureTimeVisibility || binding.staticExposureValueSlider.visibility != expectedExposureTimeVisibility || binding.staticExposureValue.visibility != expectedExposureTimeVisibility || binding.staticExposureValueDescription.visibility != expectedExposureTimeVisibility) {
-            Log.d(
-                TAG, "updateView -> exposure time fields to "
-                        + if (expectedExposureTimeVisibility == View.VISIBLE) "visible" else "invisible"
-            )
-            // binding.staticExposureTimeSlider.setVisibility(expectedExposureTimeVisibility);
-            binding.staticExposureTime.visibility = expectedExposureTimeVisibility
-            binding.staticExposureTimeUnit.visibility = expectedExposureTimeVisibility
-            binding.staticExposureValueTitle.visibility = expectedExposureTimeVisibility
-            binding.staticExposureValueSlider.visibility = expectedExposureTimeVisibility
-            binding.staticExposureValue.visibility = expectedExposureTimeVisibility
-            binding.staticExposureValueDescription.visibility = expectedExposureTimeVisibility
         }
     }
 
@@ -673,13 +498,10 @@ class SettingsFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE) {
-            val exposureTimeNanos = data!!.getLongExtra(CAMERA_STATIC_EXPOSURE_TIME_KEY, -1L)
-            Validate.isTrue(exposureTimeNanos != -1L)
-            val fraction = Utils.getExposureTimeFraction(exposureTimeNanos)
-            Log.d(
-                TAG,
-                "Update view to exposure time -> $exposureTimeNanos ns - fraction: $fraction s"
-            )
+            val nanos = data!!.getLongExtra(CAMERA_STATIC_EXPOSURE_TIME_KEY, -1L)
+            Validate.isTrue(nanos != -1L)
+            val fraction = Utils.getExposureTimeFraction(nanos)
+            Log.d(TAG, "Update view -> exposure time to $nanos ns - fraction: $fraction s")
             binding.staticExposureTime.text = fraction
         }
     }
@@ -727,61 +549,3 @@ class SettingsFragment : Fragment() {
         }
     }
 }
-
-
-// final SwitchCompat connectToExternalSpeedSensorToggle = (SwitchCompat)view.getMenu()
-// .findItem(R.id.drawer_setting_speed_sensor).getActionView();
-
-/*
-final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
-&& preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
-connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
-*/
-
-// connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
-
-
-/*
- * A listener which is called when the external bluetooth sensor toggle in the {@link NavDrawer} is clicked.
- * /
- * private class ConnectToExternalSpeedSensorToggleListener implements CompoundButton.OnCheckedChangeListener {
- *
- * @Override
- * public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
- * final CompoundButton compoundButton = (CompoundButton)view;
- * final Context applicationContext = view.getContext().getApplicationContext();
- * if (compoundButton.isChecked()) {
- * final BluetoothLeSetup bluetoothLeSetup = new BluetoothLeSetup(new BluetoothLeSetupListener() {
- *
- * @Override
- * public void onDeviceSelected(final BluetoothDevice device, final double wheelCircumference) {
- * final SharedPreferences.Editor editor = preferences.edit();
- * editor.putString(BLUETOOTHLE_DEVICE_MAC_KEY, device.getAddress());
- * editor.putFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE,
- * Double.valueOf(wheelCircumference).floatValue());
- * editor.apply();
- * }
- *
- * @Override
- * public void onSetupProcessFailed(final Reason reason) {
- * compoundButton.setChecked(false);
- * if (reason.equals(Reason.NOT_SUPPORTED)) {
- * Toast.makeText(applicationContext, R.string.ble_not_supported, Toast.LENGTH_SHORT)
- * .show();
- * } else {
- * Log.e(TAG, "Setup process of bluetooth failed: " + reason);
- * Toast.makeText(applicationContext, R.string.bluetooth_setup_failed, Toast.LENGTH_SHORT)
- * .show();
- * }
- * }
- * });
- * bluetoothLeSetup.setup(mainActivity);
- * } else {
- * final SharedPreferences.Editor editor = preferences.edit();
- * editor.remove(BLUETOOTHLE_DEVICE_MAC_KEY);
- * editor.remove(BLUETOOTHLE_WHEEL_CIRCUMFERENCE);
- * editor.apply();
- * }
- * }
- * }
- */

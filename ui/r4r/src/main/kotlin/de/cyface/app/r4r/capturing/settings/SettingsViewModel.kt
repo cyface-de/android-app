@@ -21,8 +21,8 @@ package de.cyface.app.r4r.capturing.settings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import de.cyface.utils.settings.AppSettings
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -44,6 +44,7 @@ import kotlinx.coroutines.runBlocking
  * @author Armin Schnabel
  * @version 1.0.0
  * @since 3.4.0
+ * @property appSettings The settings used by both, UIs and libraries.
  */
 class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
 
@@ -61,12 +62,12 @@ class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
     val upload: LiveData<Boolean> = _upload
 
     fun setCenterMap(centerMap: Boolean) {
-        GlobalScope.launch { appSettings.setCenterMap(centerMap) }
+        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
         _centerMap.postValue(centerMap)
     }
 
     fun setUpload(upload: Boolean) {
-        GlobalScope.launch { appSettings.setUploadEnabled(upload) }
+        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
         _upload.postValue(upload)
     }
 }

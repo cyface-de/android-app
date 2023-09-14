@@ -1,10 +1,8 @@
 package de.cyface.app.digural.capturing.settings
 
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.FragmentManager
 import de.cyface.app.digural.capturing.settings.SettingsFragment.Companion.DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE
-import de.cyface.app.digural.capturing.settings.SettingsFragment.Companion.TAG
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.utils.Validate
 
@@ -16,9 +14,8 @@ class StaticExposureTimeClickHandler(
     private val settingsFragment: SettingsFragment
 ) : View.OnClickListener {
     override fun onClick(v: View) {
-        Log.d(TAG, "StaticExposureTimeClickHandler triggered, showing ExposureTimeDialog")
         Validate.notNull(fragmentManager)
-        val dialog = ExposureTimeDialog(settingsFragment.cameraSettings)
+        val dialog = ExposureTimeDialog(settingsFragment.viewModel.cameraSettings)
         dialog.setTargetFragment(
             settingsFragment,
             DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE

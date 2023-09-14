@@ -24,7 +24,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.app.MainActivity
 import de.cyface.app.MeasuringClient
 import de.cyface.app.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
@@ -62,18 +61,18 @@ class SettingsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize ViewModel
-        viewModel = ViewModelProvider(
-            this,
-            SettingsViewModelFactory(MeasuringClient.appSettings)
-        )[SettingsViewModel::class.java]
-
-        // Initialize CapturingService
+        // Get dependencies
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
+
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(
+            this,
+            SettingsViewModelFactory(MeasuringClient.appSettings)
+        )[SettingsViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -83,7 +82,8 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        // Register onClick listeners
+        // Observe UI changes
+        /** app settings **/
         binding.centerMapSwitch.setOnCheckedChangeListener(
             CenterMapSwitchHandler(
                 viewModel,
@@ -119,18 +119,13 @@ class SettingsFragment : Fragment() {
     }
 }
 
-
 // final SwitchCompat connectToExternalSpeedSensorToggle = (SwitchCompat)view.getMenu()
 // .findItem(R.id.drawer_setting_speed_sensor).getActionView();
-
 /*
 final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
 && preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
 connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
-
 // connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
-
-
 /*
  * A listener which is called when the external bluetooth sensor toggle in the {@link NavDrawer} is clicked.
  * /
