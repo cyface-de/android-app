@@ -28,7 +28,7 @@ import de.cyface.utils.settings.AppSettings
  * Survives configuration changes and returns the right instance after Activity recreation.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.4.0
  */
 class SettingsViewModelFactory(private val appSettings: AppSettings) :

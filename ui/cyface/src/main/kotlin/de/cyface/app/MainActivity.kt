@@ -90,7 +90,7 @@ import java.lang.ref.WeakReference
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
-        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() } // FIXME
+        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
                 this.applicationContext,
@@ -199,7 +199,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Authorization
-        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings) // FIXME: does this work?!
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -298,7 +298,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
             if (reportErrors) {
                 Sentry.captureException(e)
             }
@@ -350,7 +350,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
 
                     // Set synchronizationEnabled to the current user preferences
                     val syncEnabledPreference =
-                        runBlocking { appSettings.uploadEnabledFlow.first() } // FIXME
+                        runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"

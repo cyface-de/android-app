@@ -27,7 +27,7 @@ import de.cyface.app.utils.R
  * Handles when the user toggles the center map switch.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class CenterMapSwitchHandler(

@@ -102,7 +102,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.8.3
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class DataCapturingButton

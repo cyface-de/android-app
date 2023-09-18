@@ -39,7 +39,7 @@ import kotlinx.coroutines.runBlocking
  * When the current terms are accepted or have been before, the [MainActivity] is launched.
  *
  * @author Armin Schnabel
- * @version 1.2.0
+ * @version 1.2.1
  * @since 1.0.0
  */
 class TermsOfUseActivity : Activity(), View.OnClickListener {

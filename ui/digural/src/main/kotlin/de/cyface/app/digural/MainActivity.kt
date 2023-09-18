@@ -91,7 +91,7 @@ import java.lang.ref.WeakReference
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 4.1.0
+ * @version 5.0.0
  * @since 1.0.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider, SettingsProvider {
@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         customSettings = CustomSettings(this)
 
         // Start DataCapturingService and CameraService
-        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() } // FIXME
+        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
                 this.applicationContext,
@@ -306,7 +306,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
             if (reportErrors) {
                 Sentry.captureException(e)
             }
@@ -357,7 +357,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() } // FIXME
+                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $uploadEnabled"

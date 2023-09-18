@@ -64,7 +64,7 @@ import java.util.concurrent.atomic.AtomicReference
  * Use a real device to test the auth workflow for now.
  *
  * @author Armin Schnabel
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.0
  */
 class LoginActivity : AppCompatActivity() {

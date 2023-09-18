@@ -65,7 +65,7 @@ import kotlinx.coroutines.runBlocking
  * A `Fragment` for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.5.0
+ * @version 1.5.1
  * @since 1.0.0
  */
 class CapturingFragment : Fragment(), ConnectionStatusListener {
