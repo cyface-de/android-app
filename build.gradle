@@ -60,10 +60,10 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceAndroidBackendVersion = "7.8.2" // Also update submodule commit ref
-    cyfaceUtilsVersion = "3.5.1"
-    cyfaceEnergySettingsVersion = "3.3.5" // Also update submodule commit ref
-    cyfaceCameraServiceVersion = "4.2.2" // Also update submodule commit ref
+    cyfaceAndroidBackendVersion = "7.9.0" // Also update submodule commit ref
+    cyfaceUtilsVersion = "4.0.2"
+    cyfaceEnergySettingsVersion = "4.0.1" // Also update submodule commit ref
+    cyfaceCameraServiceVersion = "4.3.0" // Also update submodule commit ref
     // Maybe keep this in sync with the serialization library version used in `uploader` lib
     cyfaceSerializationVersion = "3.0.0" // Keep im sync with version in submodule `backend`
     cyfaceUploaderVersion = "1.0.0"
@@ -71,7 +71,7 @@ ext {
     // Android SDK versions
     minSdkVersion = 21 // device support
     targetSdkVersion = 33 // behavioral changes, follow migration guide & test the app against this
-    compileSdkVersion = 33 // allows newest APIs to be used and to see deprecations, use latest
+    compileSdkVersion = 34 // allows newest APIs to be used and to see deprecations, use latest
     buildToolsVersion = '34.0.0' // optional, if defined, use latest (SDK Manager > SDK Tools)
 
     // Android dependencies
@@ -84,6 +84,7 @@ ext {
     lifecycleVersion = "2.6.1"
     navigationVersion = "2.5.3"
     okHttpVersion = "4.11.0"
+    // 1.1.0-alpha05: ':persistence:mergeExtDexDebugAndroidTest' fails (transitive dependency)
     datastoreVersion = "1.1.0-alpha04" // only 1.1.0 supports multi-process datastore
 
     // Kotlin components

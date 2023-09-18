@@ -37,6 +37,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.MeasuringClient
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
@@ -388,7 +389,7 @@ class SettingsFragment : Fragment() {
      * Displays a dialog for the user to select a camera mode (video- or picture mode).
      */
     fun showCameraModeDialog(fragment: SettingsFragment) {
-        val cameraModeDialog = CameraModeDialog(viewModel.cameraSettings)
+        val cameraModeDialog = CameraModeDialog(viewModel.cameraSettings, lifecycleScope)
         cameraModeDialog.setTargetFragment(fragment, 0)
         cameraModeDialog.isCancelable = false
         cameraModeDialog.show(requireFragmentManager(), "CAMERA_MODE_DIALOG")

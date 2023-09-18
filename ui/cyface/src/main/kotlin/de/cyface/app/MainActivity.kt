@@ -33,6 +33,7 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -231,7 +232,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
-        showProblematicManufacturerDialog(this, false, Constants.SUPPORT_EMAIL)
+        showProblematicManufacturerDialog(this, false, Constants.SUPPORT_EMAIL, lifecycleScope)
     }
 
     override fun onStart() {

@@ -22,16 +22,13 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import de.cyface.app.R
 import de.cyface.app.CapturingFragmentDirections
 import de.cyface.app.MainActivity
+import de.cyface.app.R
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
-import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.uploader.exception.SynchronisationException
 
 /**
  * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
@@ -71,13 +68,15 @@ class MenuProvider(
                     !TrackingSettings.showProblematicManufacturerDialog(
                         activity,
                         true,
-                        SUPPORT_EMAIL
+                        SUPPORT_EMAIL,
+                        activity.lifecycleScope
                     )
                 ) {
                     TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)
                 }
                 true
             }
+
             R.id.feedback_item -> {
                 activity.startActivity(
                     Intent.createChooser(
@@ -87,11 +86,13 @@ class MenuProvider(
                 )
                 true
             }
+
             R.id.imprint_item -> {
                 val action = CapturingFragmentDirections.actionCapturingToImprint()
                 navController.navigate(action)
                 true
             }
+
             R.id.settings_item -> {
                 val action = CapturingFragmentDirections.actionCapturingToSettings()
                 navController.navigate(action)

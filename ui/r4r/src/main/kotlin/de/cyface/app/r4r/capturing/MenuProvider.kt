@@ -24,6 +24,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.MainThread
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
@@ -69,7 +70,8 @@ class MenuProvider(
                     !TrackingSettings.showProblematicManufacturerDialog(
                         activity,
                         true,
-                        SUPPORT_EMAIL
+                        SUPPORT_EMAIL,
+                        activity.lifecycleScope
                     )
                 ) {
                     TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)
