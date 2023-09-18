@@ -25,8 +25,9 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import de.cyface.utils.settings.AppSettings
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -39,10 +40,10 @@ import kotlinx.coroutines.runBlocking
  * When the current terms are accepted or have been before, the [MainActivity] is launched.
  *
  * @author Armin Schnabel
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-class TermsOfUseActivity : Activity(), View.OnClickListener {
+class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * Intent for switching to the main activity after this activity has been finished.
      */
@@ -109,7 +110,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        GlobalScope.launch {
+        lifecycleScope.launch {
             appSettings.setAcceptedTerms(BuildConfig.currentTerms)
             appSettings.setReportErrors(isReportingEnabled)
         }

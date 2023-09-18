@@ -36,6 +36,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -46,8 +47,8 @@ import de.cyface.app.digural.dialog.ModalityDialog
 import de.cyface.app.digural.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.foreground.CameraService
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -55,10 +56,9 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
-import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -279,7 +279,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
                     4 -> newModality[0] = Modality.TRAIN
                     else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
                 }
-                GlobalScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
+                lifecycleScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
                 if (oldModality == newModality[0]) {
                     Log.d(
                         TAG,
@@ -498,7 +498,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
-            val cameraEnabled = runBlocking { cameraSettings.cameraEnabledFlow.first() } // FIXME
+            val cameraEnabled = runBlocking { cameraSettings.cameraEnabledFlow.first() }
             if (cameraEnabled) {
                 permissions.add(Manifest.permission.CAMERA)
             }
@@ -533,7 +533,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         context: Context,
         cameraSettings: CameraSettings
     ): Boolean {
-        val cameraEnabled = runBlocking { cameraSettings.cameraEnabledFlow.first() } // FIXME
+        val cameraEnabled = runBlocking { cameraSettings.cameraEnabledFlow.first() }
         return if (cameraEnabled) !granted(context, Manifest.permission.CAMERA) else false
     }
 

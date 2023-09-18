@@ -142,7 +142,7 @@ class Map(
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
-                val centerMap = runBlocking { appSettings.centerMapFlow.first() } // FIXME
+                val centerMap = runBlocking { appSettings.centerMapFlow.first() }
                 if (locationResult.locations.size > 0 && centerMap && !ignoreAutoZoom) {
                     moveToLocation(
                         true,
@@ -378,7 +378,7 @@ class Map(
         } catch (e: SecurityException) {
             if (permissionWereJustGranted) {
                 Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
-                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
                 if (reportErrors) {
                     Sentry.captureException(e)
                 }
@@ -409,7 +409,7 @@ class Map(
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera")
-                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
                 if (!highFrequentRequest && reportErrors) {
                     Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
                 }
@@ -418,7 +418,7 @@ class Map(
             googleMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?")
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
             if (!highFrequentRequest && reportErrors) {
                 Sentry.captureException(e)
             }
@@ -444,7 +444,7 @@ class Map(
 
     override fun onLocationChanged(location: Location) {
         // This is used by `ui/cyface`, the `ui/r4r` uses `onLocationResult`
-        val centerMap = runBlocking { appSettings.centerMapFlow.first() } // FIXME
+        val centerMap = runBlocking { appSettings.centerMapFlow.first() }
         if (centerMap && !ignoreAutoZoom) {
             moveToLocation(true, location)
         }

@@ -74,7 +74,7 @@ class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
 
                 DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE -> {
                     resultCode = DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE
-                    intent.putExtra(DIALOG_MODALITY_KEY, modality.databaseIdentifier) // FIXME: check if this extra is read again
+                    intent.putExtra(DIALOG_MODALITY_KEY, modality.databaseIdentifier)
                     Validate.notNull(measurementId)
                     intent.putExtra(BundlesExtrasCodes.MEASUREMENT_ID, measurementId)
                 }

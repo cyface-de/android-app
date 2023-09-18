@@ -284,7 +284,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
             if (reportErrors) {
                 Sentry.captureException(e)
             }
@@ -335,7 +335,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = runBlocking { appSettings.uploadEnabledFlow.first() } // FIXME
+                    val syncEnabledPreference = runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"

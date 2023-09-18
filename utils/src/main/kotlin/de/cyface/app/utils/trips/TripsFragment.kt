@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.cyface.app.utils.R
@@ -49,7 +50,6 @@ import de.cyface.persistence.model.Measurement
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -134,7 +134,7 @@ class TripsFragment : Fragment() {
             if (result.isNotEmpty()) {
                 val allGranted = result.values.none { !it }
                 if (allGranted) {
-                    GlobalScope.launch { Exporter(requireContext()).export() }
+                    lifecycleScope.launch { Exporter(requireContext()).export() }
                 } else {
                     Toast.makeText(
                         context,
@@ -159,7 +159,7 @@ class TripsFragment : Fragment() {
             val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
             if (rfr) {
                 val incentivesApi =
-                    runBlocking { uiSettings.incentivesUrlFlow.first() } // FIXME
+                    runBlocking { uiSettings.incentivesUrlFlow.first() }
                 this.incentives = Incentives(requireContext(), incentivesApi, serviceProvider.auth)
             }
         } else {
@@ -206,7 +206,7 @@ class TripsFragment : Fragment() {
             // Show achievements progress
             if (incentives != null) {
                 // Check voucher availability
-                GlobalScope.launch {
+                lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
                         showVouchersLeft()
                     }
@@ -224,7 +224,7 @@ class TripsFragment : Fragment() {
                     binding.achievementsReceived.visibility = GONE
                     binding.achievementsUnlocked.visibility = VISIBLE
                     binding.achievementsUnlockedButton.setOnClickListener {
-                        GlobalScope.launch {
+                        lifecycleScope.launch {
                             withContext(Dispatchers.IO) {
                                 showVoucher()
                             }
@@ -241,7 +241,8 @@ class TripsFragment : Fragment() {
                 appSettings,
                 adapter,
                 exportPermissionLauncher,
-                WeakReference<Context>(requireContext().applicationContext)
+                WeakReference<Context>(requireContext().applicationContext),
+                lifecycleScope
             ), viewLifecycleOwner, Lifecycle.State.RESUMED
         )
 
@@ -259,7 +260,7 @@ class TripsFragment : Fragment() {
             _binding?.achievements?.visibility = VISIBLE
         }
         // This should not happen, thus, reporting to Sentry
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         if (reportErrors) {
             Sentry.captureException(e)
         }
@@ -274,7 +275,7 @@ class TripsFragment : Fragment() {
             _binding?.achievementsErrorMessage?.text =
                 getString(R.string.error_message_authentication_failed)
             // This should not happen, thus, reporting to Sentry
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
             if (reportErrors) {
                 Sentry.captureException(it)
             }
@@ -298,7 +299,7 @@ class TripsFragment : Fragment() {
             _binding?.achievements?.visibility = VISIBLE
         }
         // This should not happen, thus, reporting to Sentry
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         if (reportErrors) {
             Sentry.captureException(it)
         }
@@ -374,7 +375,7 @@ class TripsFragment : Fragment() {
     }
 
     private fun handleUnknownResponse(responseCode: Int) {
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         if (reportErrors) {
             Sentry.captureMessage("Unknown response code: $responseCode")
         }
@@ -386,7 +387,7 @@ class TripsFragment : Fragment() {
         // If parsing crashes the server probably returned a 302 which forwards to
         // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
         // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         if (reportErrors) {
             Sentry.captureMessage("Forwarded? Forgot Auth header?")
         }
@@ -412,7 +413,7 @@ class TripsFragment : Fragment() {
                             showNoVouchersLeft()
                             // This should hardly ever happen, thus, reporting to Sentry
                             val reportErrors =
-                                runBlocking { appSettings.reportErrorsFlow.first() } // FIXME
+                                runBlocking { appSettings.reportErrorsFlow.first() }
                             if (reportErrors) {
                                 Sentry.captureMessage("Last voucher just got assigned?")
                             }

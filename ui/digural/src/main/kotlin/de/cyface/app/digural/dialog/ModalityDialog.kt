@@ -23,16 +23,13 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings.Global
 import androidx.fragment.app.DialogFragment
 import de.cyface.app.digural.CapturingFragment
 import de.cyface.app.digural.R
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.BundlesExtrasCodes
-import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -77,7 +74,10 @@ class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
 
                 DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE -> {
                     resultCode = DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE
-                    intent.putExtra(DIALOG_MODALITY_KEY, modality.databaseIdentifier) // FIXME: check if this extra is read again
+                    intent.putExtra(
+                        DIALOG_MODALITY_KEY,
+                        modality.databaseIdentifier
+                    )
                     Validate.notNull(measurementId)
                     intent.putExtra(BundlesExtrasCodes.MEASUREMENT_ID, measurementId)
                 }

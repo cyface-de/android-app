@@ -29,6 +29,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.selection.MutableSelection
 import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants.TAG
@@ -37,12 +38,11 @@ import de.cyface.persistence.DefaultPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Measurement
-import de.cyface.utils.Constants
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.utils.settings.AppSettings
+import de.cyface.utils.Constants
 import de.cyface.utils.Utils
 import de.cyface.utils.Validate
-import kotlinx.coroutines.GlobalScope
+import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -63,7 +63,8 @@ class MenuProvider(
     private val settings: AppSettings,
     private val adapter: TripListAdapter,
     private val exportPermissionLauncher: ActivityResultLauncher<Array<String>>,
-    private val context: WeakReference<Context>
+    private val context: WeakReference<Context>,
+    private val scope: LifecycleCoroutineScope
 ) : androidx.core.view.MenuProvider {
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -103,10 +104,10 @@ class MenuProvider(
                             )
                         )
                     } else {
-                        GlobalScope.launch { Exporter(context.get()!!).export() }
+                        scope.launch { Exporter(context.get()!!).export() }
                     }
                 } else {
-                    GlobalScope.launch { Exporter(context.get()!!).export() }
+                    scope.launch { Exporter(context.get()!!).export() }
                 }
 
                 true
@@ -178,7 +179,7 @@ class MenuProvider(
 
         // Check is sync is disabled via frontend
         val syncEnabled = capturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled = runBlocking { settings.uploadEnabledFlow.first() } // FIXME
+        val syncPreferenceEnabled = runBlocking { settings.uploadEnabledFlow.first() }
         Validate.isTrue(
             syncEnabled == syncPreferenceEnabled,
             "sync " + (if (syncEnabled) "enabled" else "disabled")
@@ -214,7 +215,7 @@ class MenuProvider(
             return
         }
 
-        GlobalScope.launch {
+        scope.launch {
             val persistence = DefaultPersistenceLayer(
                 context.get()!!,
                 DefaultPersistenceBehaviour()
@@ -264,7 +265,7 @@ class MenuProvider(
         if (fileOrFolder.isDirectory) {
             val files = fileOrFolder.listFiles()
             Validate.notNull(files)
-            for (child in files) {
+            for (child in files!!) {
                 deleteRecursively(context, child)
             }
         }

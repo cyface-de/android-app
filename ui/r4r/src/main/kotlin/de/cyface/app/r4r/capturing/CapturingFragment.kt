@@ -38,6 +38,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -78,10 +79,9 @@ import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
-import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
-import kotlinx.coroutines.GlobalScope
+import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -401,7 +401,7 @@ class CapturingFragment : Fragment(), DataCapturingListener {
         startResumeButton.isEnabled = false
         pauseButton.isEnabled = false
         stopButton.isEnabled = false
-        GlobalScope.launch {
+        lifecycleScope.launch {
             // OPEN: running capturing
             if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.d(TAG, "onResume: reconnecting DCS succeeded")

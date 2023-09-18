@@ -25,11 +25,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import de.cyface.app.digural.capturing.settings.SettingsFragment
 import de.cyface.camera_service.Constants
 import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.Validate
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
@@ -61,7 +61,7 @@ class ExposureTimeDialog(private val cameraSettings: CameraSettings) : DialogFra
                 else -> throw IllegalArgumentException("Unknown exposure time selected: $which")
             }
             Log.d(Constants.TAG, "Update preference to exposure time -> $exposureTimeNanos ns")
-            GlobalScope.launch { cameraSettings.setStaticExposureTime(exposureTimeNanos) }
+            lifecycleScope.launch { cameraSettings.setStaticExposureTime(exposureTimeNanos) }
             val requestCode = targetRequestCode
             val resultCode: Int
             val intent = Intent()
