@@ -21,7 +21,7 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.11.0
+ * @version 1.12.0
  * @since 1.0.0
  */
 apply plugin: 'com.android.application'
@@ -30,6 +30,7 @@ apply plugin: 'io.sentry.android.gradle' // Exception tracking when using progua
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
 apply plugin: 'kotlin-parcelize' // Generate Parcelable in Kotlin from Annotation
+apply plugin: 'com.google.protobuf' // For Proto DataStore
 
 buildscript {
     repositories {
@@ -197,6 +198,10 @@ dependencies {
     // Exception tracking
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
+    // Proto DataStore with MultiProcess support to store settings
+    implementation "androidx.datastore:datastore:${datastoreVersion}"
+    implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
+
     // To change the material design
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
@@ -258,4 +263,24 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
     // Optional - For better debuggable asserts
     testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
+}
+
+// Required for Proto DataStore
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobuf files in this project. See
+    // https://github.com/google/protobuf-gradle-plugin#customizing-protobuf-compilation
+    // for more information.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
 }

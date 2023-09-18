@@ -16,28 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.r4r.capturing.settings
-
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import de.cyface.utils.settings.AppSettings
+package de.cyface.app.digural.capturing.settings
 
 /**
- * Factory which creates the [ViewModel] with the required dependencies.
- *
- * Survives configuration changes and returns the right instance after Activity recreation.
+ * Interface which defines dependencies specific to this ui.
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 3.4.0
+ * @version 1.0.0
+ * @since 7.9.0
  */
-class SettingsViewModelFactory(private val appSettings: AppSettings) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appSettings) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
+interface SettingsProvider {
+    val customSettings: CustomSettings
 }

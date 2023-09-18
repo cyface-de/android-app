@@ -25,20 +25,24 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import com.github.lzyzsd.circleprogress.DonutProgress
+import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.MainActivity.Companion.accountWithTokenExists
+import de.cyface.app.digural.MeasuringClient
 import de.cyface.app.digural.utils.Constants.TAG
 import de.cyface.app.utils.R
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * A button listener for the button to trigger data sync and show its progress
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.3.5
+ * @version 2.3.6
  * @since 1.0.0
  */
 class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : AbstractButton {
@@ -54,7 +58,10 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
      */
     private var button: ImageButton? = null
     private var progressView: DonutProgress? = null
-    private lateinit var preferences: AppPreferences
+    /**
+     * The settings used by both, UIs and libraries.
+     */
+    private lateinit var appSettings: AppSettings
 
     /**
      * [CyfaceDataCapturingService] to check [WiFiSurveyor.isConnected]
@@ -71,7 +78,7 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
         context = button!!.context
         this.button = button
         this.progressView = progress
-        preferences = AppPreferences(context!!)
+        appSettings = MeasuringClient.appSettings
         onResume() // TODO[MOV-621] the parent's onResume, thus, this class's onResume should automatically be called
         button.setOnClickListener(this)
     }
@@ -142,11 +149,11 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
 
         // Check is sync is disabled via frontend
         val syncEnabled = dataCapturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled = preferences.getUpload()
+        val uploadEnabledPreferred = runBlocking { appSettings.uploadEnabledFlow.first() }
         Validate.isTrue(
-            syncEnabled == syncPreferenceEnabled,
+            syncEnabled == uploadEnabledPreferred,
             "sync " + (if (syncEnabled) "enabled" else "disabled")
-                    + " but syncPreference " + if (syncPreferenceEnabled) "enabled" else "disabled"
+                    + " but syncPreference " + if (uploadEnabledPreferred) "enabled" else "disabled"
         )
         if (!syncEnabled) {
             Toast.makeText(

@@ -24,6 +24,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.MainThread
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
@@ -36,7 +37,7 @@ import de.cyface.uploader.exception.SynchronisationException
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.2.0
  */
 class MenuProvider(
@@ -69,7 +70,8 @@ class MenuProvider(
                     !TrackingSettings.showProblematicManufacturerDialog(
                         activity,
                         true,
-                        SUPPORT_EMAIL
+                        SUPPORT_EMAIL,
+                        activity.lifecycleScope
                     )
                 ) {
                     TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)

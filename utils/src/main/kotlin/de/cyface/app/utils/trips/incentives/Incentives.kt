@@ -31,14 +31,14 @@ import java.net.URL
  * The API to get the voucher data from.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.3.0
  * @property context The authenticator to get the auth token from
  * @property apiEndpoint An API endpoint running a Cyface Incentives API, like `https://some.url/api/v1`
  */
 class Incentives(
     private val context: Context,
-    private val apiEndpoint: String,
+    private val apiEndpoint: URL,
     private val auth: Auth
 ) {
     private val client: OkHttpClient = OkHttpClient()
@@ -97,18 +97,11 @@ class Incentives(
 
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     private fun voucherCountEndpoint(): URL {
-        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "voucher_count")
+        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint.toExternalForm()) + "voucher_count")
     }
 
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     private fun voucherEndpoint(): URL {
-        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint) + "voucher")
-    }
-
-    companion object {
-        /**
-         * The settings key used to identify the settings storing the URL of the server to get incentives from.
-         */
-        const val INCENTIVES_ENDPOINT_URL_SETTINGS_KEY = "de.cyface.incentives.endpoint"
+        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint.toExternalForm()) + "voucher")
     }
 }

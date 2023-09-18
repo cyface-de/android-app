@@ -18,31 +18,22 @@
  */
 package de.cyface.app
 
-import android.Manifest
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager.PERMISSION_GRANTED
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
-import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -57,27 +48,31 @@ import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraPreferences
+import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
-import de.cyface.datacapturing.exception.SetupException
 import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
+import de.cyface.persistence.SetupException
 import de.cyface.persistence.model.ParcelableGeoLocation
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
-import de.cyface.utils.AppPreferences
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
@@ -95,7 +90,7 @@ import java.lang.ref.WeakReference
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 4.1.0
+ * @version 4.2.0
  * @since 1.0.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
@@ -121,14 +116,20 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     private lateinit var navigation: NavController
 
     /**
-     * The `SharedPreferences` used to store the app preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var appPreferences: AppPreferences
+    override val appSettings: AppSettings
+        get() = MeasuringClient.appSettings
 
     /**
-     * The `SharedPreferences` used to store the camera preferences.
+     * The settings used by multiple UIs.
      */
-    private lateinit var cameraPreferences: CameraPreferences
+    override lateinit var uiSettings: UiSettings
+
+    /**
+     * The settings used to store the user preferences for the camera.
+     */
+    override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -169,18 +170,16 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        appPreferences = AppPreferences(this)
-        cameraPreferences = CameraPreferences(this)
+        uiSettings = UiSettings(this, BuildConfig.incentivesServer)
+        cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
-        val sensorFrequency = appPreferences.getSensorFrequency()
+        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
                 this.applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                BuildConfig.cyfaceServer,
-                OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery),
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency
@@ -200,7 +199,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Authorization
-        auth = OAuth2(applicationContext)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -233,7 +232,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
-        showProblematicManufacturerDialog(this, false, Constants.SUPPORT_EMAIL)
+        showProblematicManufacturerDialog(this, false, Constants.SUPPORT_EMAIL, lifecycleScope)
     }
 
     override fun onStart() {
@@ -299,7 +298,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            if (appPreferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+            if (reportErrors) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -349,7 +349,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = appPreferences.getUpload()
+                    val syncEnabledPreference =
+                        runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"

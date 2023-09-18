@@ -18,6 +18,7 @@
  */
 package de.cyface.app.digural
 
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.camera_service.foreground.CameraService
 
 /**
@@ -25,9 +26,10 @@ import de.cyface.camera_service.foreground.CameraService
  * the `Fragments`.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 7.5.0
  */
 interface CameraServiceProvider {
     val cameraService: CameraService
+    val cameraSettings: CameraSettings
 }

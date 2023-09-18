@@ -23,11 +23,16 @@ import android.content.IntentFilter
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
+import de.cyface.energy_settings.TrackingSettings
+import de.cyface.synchronization.settings.SynchronizationSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
-import de.cyface.utils.AppPreferences
+import de.cyface.synchronization.OAuth2
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 /**
  * The implementation of Android's `Application` class for this project.
@@ -36,14 +41,19 @@ import io.sentry.Sentry
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.5.1
+ * @version 1.6.0
  * @since 1.0.0
  */
 class MeasuringClient : Application() {
+
     /**
-     * Stores the user's preferences.
+     * The settings used by both, UIs and libraries.
+     *
+     * Lazy initialization to ensure context is available by then.
      */
-    private lateinit var preferences: AppPreferences
+    private val lazyAppSettings by lazy { // android-utils
+        AppSettings(this)
+    }
 
     /**
      * Reports error events to the user via UI and to Sentry, if opted-in.
@@ -64,14 +74,23 @@ class MeasuringClient : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            if (preferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { lazyAppSettings.reportErrorsFlow.first() }
+            if (reportErrors) {
                 Sentry.captureMessage(errorCode.name + ": " + errorMessage)
             }
         }
 
     override fun onCreate() {
         super.onCreate()
-        preferences = AppPreferences(this)
+
+        // Initialize DataStore once for all settings
+        appSettings = lazyAppSettings
+        TrackingSettings.initialize(this) // energy_settings
+        CyfaceAuthenticator.settings = SynchronizationSettings( // synchronization
+            this,
+            BuildConfig.cyfaceServer,
+            OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+        )
 
         // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
@@ -99,6 +118,11 @@ class MeasuringClient : Application() {
          */
         @JvmStatic
         var errorHandler: ErrorHandler? = null
+            private set
+        /**
+         * The settings used by both, UIs and libraries.
+         */
+        lateinit var appSettings: AppSettings
             private set
     }
 }

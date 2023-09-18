@@ -24,16 +24,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import de.cyface.app.r4r.Application
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 
 /**
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
@@ -54,6 +55,11 @@ class SettingsFragment : Fragment() {
     private lateinit var capturing: CyfaceDataCapturingService
 
     /**
+     * The settings used by both, UIs and libraries.
+     */
+    private lateinit var appSettings: AppSettings
+
+    /**
      * The [SettingsViewModel] for this fragment.
      */
     private lateinit var viewModel: SettingsViewModel
@@ -61,19 +67,18 @@ class SettingsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize ViewModel
-        val appPreferences = AppPreferences(requireContext().applicationContext)
-        viewModel = ViewModelProvider(
-            this,
-            SettingsViewModelFactory(appPreferences)
-        )[SettingsViewModel::class.java]
-
-        // Initialize CapturingService
+        // Get dependencies
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
+
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(
+            this,
+            SettingsViewModelFactory(Application.appSettings)
+        )[SettingsViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -83,7 +88,8 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
-        // Register onClick listeners
+        // Observe UI changes
+        /** app settings **/
         binding.centerMapSwitch.setOnCheckedChangeListener(
             CenterMapSwitchHandler(
                 viewModel,

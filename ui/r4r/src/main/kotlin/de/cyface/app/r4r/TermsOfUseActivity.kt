@@ -25,7 +25,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
-import de.cyface.utils.AppPreferences
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * The TermsOfUserActivity is the first [Activity] started on app launch.
@@ -35,10 +40,10 @@ import de.cyface.utils.AppPreferences
  * When the current terms are accepted or have been before, the [MainActivity] is launched.
  *
  * @author Armin Schnabel
- * @version 1.2.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-class TermsOfUseActivity : Activity(), View.OnClickListener {
+class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * Intent for switching to the main activity after this activity has been finished.
      */
@@ -55,9 +60,9 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     private var isReportingEnabled = false
 
     /**
-     * To check whether the user accepted the terms and opted-in to error reporting.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var preferences: AppPreferences
+    private lateinit var appSettings: AppSettings
 
     /**
      * Allows the user to opt-in to error reporting.
@@ -65,7 +70,7 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     private var acceptReportsCheckbox: CheckBox? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        preferences = AppPreferences(applicationContext)
+        appSettings = Application.appSettings
         callMainActivityIntent = Intent(this, MainActivity::class.java)
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent)
@@ -79,7 +84,8 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
      * @return `True` if the latest privacy policy was accepted by the user.
      */
     private fun currentTermsHadBeenAccepted(): Boolean {
-        return preferences.getAcceptedTerms() == BuildConfig.currentTerms
+        val acceptedTerms = runBlocking { appSettings.acceptedTermsFlow.first() }
+        return acceptedTerms == BuildConfig.currentTerms
     }
 
     /**
@@ -104,8 +110,10 @@ class TermsOfUseActivity : Activity(), View.OnClickListener {
     }
 
     override fun onClick(view: View) {
-        preferences.saveAcceptedTerms(BuildConfig.currentTerms)
-        preferences.saveReportingAccepted(isReportingEnabled)
+        lifecycleScope.launch {
+            appSettings.setAcceptedTerms(BuildConfig.currentTerms)
+            appSettings.setReportErrors(isReportingEnabled)
+        }
         this.startActivity(callMainActivityIntent)
         finish()
     }

@@ -50,16 +50,18 @@ import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
-import de.cyface.utils.AppPreferences
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import java.lang.ref.WeakReference
 
 /**
  * The Map class handles everything around the GoogleMap view.
  *
  * @author Armin Schnabel
- * @version 4.1.0
+ * @version 4.1.1
  * @since 1.0.0
  * @property view The `MapView` element of the `GoogleMap`.
  * @property onMapReadyRunnable The `Runnable` triggered when the `GoogleMap` is loaded and ready.
@@ -99,9 +101,9 @@ class Map(
     private var currentLocation: LatLng? = null
 
     /**
-     * The `SharedPreferences` used to store the user's preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private var preferences: AppPreferences
+    private lateinit var appSettings: AppSettings
 
     /**
      * The `Runnable` triggered when the `GoogleMap` is loaded and ready.
@@ -123,7 +125,10 @@ class Map(
             currentLocation = LatLng(51.027852, 13.720864)
         }
         view.getMapAsync(this)
-        preferences = AppPreferences(applicationContext)
+        if (activity is ServiceProvider) {
+            val serviceProvider = activity as ServiceProvider
+            appSettings = serviceProvider.appSettings
+        }
     }
 
     /**
@@ -137,7 +142,8 @@ class Map(
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
-                if (locationResult.locations.size > 0 && preferences.getCenterMap() && !ignoreAutoZoom) {
+                val centerMap = runBlocking { appSettings.centerMapFlow.first() }
+                if (locationResult.locations.size > 0 && centerMap && !ignoreAutoZoom) {
                     moveToLocation(
                         true,
                         locationResult.locations[locationResult.locations.size - 1]
@@ -372,7 +378,8 @@ class Map(
         } catch (e: SecurityException) {
             if (permissionWereJustGranted) {
                 Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
-                if (preferences.getReportingAccepted()) {
+                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+                if (reportErrors) {
                     Sentry.captureException(e)
                 }
             }
@@ -402,7 +409,8 @@ class Map(
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera")
-                if (!highFrequentRequest && preferences.getReportingAccepted()) {
+                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+                if (!highFrequentRequest && reportErrors) {
                     Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
                 }
                 return
@@ -410,7 +418,8 @@ class Map(
             googleMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?")
-            if (!highFrequentRequest && preferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+            if (!highFrequentRequest && reportErrors) {
                 Sentry.captureException(e)
             }
         }
@@ -435,7 +444,8 @@ class Map(
 
     override fun onLocationChanged(location: Location) {
         // This is used by `ui/cyface`, the `ui/r4r` uses `onLocationResult`
-        if (preferences.getCenterMap() && !ignoreAutoZoom) {
+        val centerMap = runBlocking { appSettings.centerMapFlow.first() }
+        if (centerMap && !ignoreAutoZoom) {
             moveToLocation(true, location)
         }
     }
@@ -456,12 +466,12 @@ class Map(
     /**
      * Adds a [de.cyface.persistence.model.EventType.MODALITY_TYPE_CHANGE] `Event` `Marker` to the `Map`.
      *
-     * @param eventId the identifier of the `Event` or [.TEMPORARY_EVENT_MARKER_ID] if this is only a
+     * @ param eventId the identifier of the `Event` or [.TEMPORARY_EVENT_MARKER_ID] if this is only a
      * temporary marker
      * until the {@param eventId} is known.
-     * @param latLng the `LatLng` of the marker to be added
-     * @param modality the new `Modality` of the `MODALITY_TYPE_CHANGE` marker to be added
-     * @param isMarkerToBeFocused `True` if the newly added `Marker` is to be focused after creation
+     * @ param latLng the `LatLng` of the marker to be added
+     * @ param modality the new `Modality` of the `MODALITY_TYPE_CHANGE` marker to be added
+     * @ param isMarkerToBeFocused `True` if the newly added `Marker` is to be focused after creation
      * /
     fun addMarker(
     eventId: Long, latLng: LatLng, modality: Modality,
@@ -482,7 +492,7 @@ class Map(
     /**
      * Moves the camera of the map to the {@param marker} position and shows the Marker title.
      *
-     * @param marker The `Marker` which is to be focused.
+     * @ param marker The `Marker` which is to be focused.
     */
     fun focusMarker(marker: Marker) {
     marker.showInfoWindow()

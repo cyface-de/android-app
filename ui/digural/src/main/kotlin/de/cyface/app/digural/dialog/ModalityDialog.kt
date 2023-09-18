@@ -28,9 +28,9 @@ import de.cyface.app.digural.CapturingFragment
 import de.cyface.app.digural.R
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.BundlesExtrasCodes
-import de.cyface.utils.AppPreferences
-import de.cyface.utils.AppPreferences.Companion.PREFERENCES_MODALITY_KEY
 import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.runBlocking
 
 /**
  * After the user installed the app for the first time, after accepting the terms, this dialog is shown
@@ -41,14 +41,15 @@ import de.cyface.utils.Validate
  * Make sure the order (0, 1, 2 from left(start) to right(end)) in the TabLayout is consistent in here.
  *
  * @author Armin Schnabel
- * @version 2.1.1
+ * @version 3.0.0
  * @since 1.0.0
  */
-class ModalityDialog : DialogFragment() {
+class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
     /**
      * The id if the `Measurement` if this dialog is called for a specific Measurement.
      */
     private var measurementId: Long? = null
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(R.string.dialog_modality_title).setItems(
@@ -56,7 +57,6 @@ class ModalityDialog : DialogFragment() {
         ) { _: DialogInterface?, which: Int ->
             val fragmentActivity = activity
             Validate.notNull(fragmentActivity)
-            val preferences = AppPreferences(fragmentActivity!!.applicationContext)
             val modality: Modality = when (which) {
                 0 -> Modality.valueOf(Modality.CAR.name)
                 1 -> Modality.valueOf(Modality.BICYCLE.name)
@@ -65,7 +65,7 @@ class ModalityDialog : DialogFragment() {
                 4 -> Modality.valueOf(Modality.TRAIN.name)
                 else -> throw IllegalArgumentException("Unknown modality selected: $which")
             }
-            preferences.saveModality(modality.databaseIdentifier)
+            runBlocking { appSettings.setModality(modality.databaseIdentifier) }
             val requestCode = targetRequestCode
             val resultCode: Int
             val intent = Intent()
@@ -75,7 +75,10 @@ class ModalityDialog : DialogFragment() {
 
                 DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE -> {
                     resultCode = DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE
-                    intent.putExtra(PREFERENCES_MODALITY_KEY, modality.databaseIdentifier)
+                    intent.putExtra(
+                        DIALOG_MODALITY_KEY,
+                        modality.databaseIdentifier
+                    )
                     Validate.notNull(measurementId)
                     intent.putExtra(BundlesExtrasCodes.MEASUREMENT_ID, measurementId)
                 }
@@ -102,5 +105,6 @@ class ModalityDialog : DialogFragment() {
          */
         private const val DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE = 201909193
         private const val DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE = 201909194
+        private const val DIALOG_MODALITY_KEY = "de.cyface.app.modality"
     }
 }

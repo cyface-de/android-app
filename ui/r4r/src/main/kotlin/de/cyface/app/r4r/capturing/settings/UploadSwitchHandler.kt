@@ -28,7 +28,7 @@ import de.cyface.datacapturing.CyfaceDataCapturingService
  * Handles when the user toggles the upload switch.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class UploadSwitchHandler(
@@ -37,19 +37,20 @@ class UploadSwitchHandler(
     private val capturingService: CyfaceDataCapturingService
 ) : CompoundButton.OnCheckedChangeListener {
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        if (viewModel.upload.value != isChecked) {
-            // Also update WifiSurveyor's synchronizationEnabled
-            capturingService.wiFiSurveyor.isSyncEnabled = isChecked
-            viewModel.setUpload(isChecked)
+        if (viewModel.upload.value == isChecked) {
+            return
+        }
 
-            // Show warning to user (storage gets filled)
-            if (!isChecked) {
-                Toast.makeText(
-                    context,
-                    R.string.sync_disabled_toast,
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        // Also update WifiSurveyor's synchronizationEnabled
+        capturingService.wiFiSurveyor.isSyncEnabled = isChecked
+        viewModel.setUpload(isChecked)
+
+        if (!isChecked) {
+            Toast.makeText(
+                context,
+                R.string.sync_disabled_toast,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 }

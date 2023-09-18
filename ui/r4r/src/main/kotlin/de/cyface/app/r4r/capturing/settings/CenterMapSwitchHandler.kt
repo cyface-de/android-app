@@ -27,7 +27,7 @@ import de.cyface.app.utils.R
  * Handles when the user toggles the center map switch.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class CenterMapSwitchHandler(
@@ -36,15 +36,18 @@ class CenterMapSwitchHandler(
 ) : CompoundButton.OnCheckedChangeListener {
 
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
-        if (viewModel.centerMap.value != isChecked) {
-            viewModel.setCenterMap(isChecked)
-            if (isChecked) {
-                Toast.makeText(
-                    context,
-                    R.string.zoom_to_location_enabled_toast,
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        if (viewModel.centerMap.value == isChecked) {
+            return
+        }
+
+        viewModel.setCenterMap(isChecked)
+
+        if (isChecked) {
+            Toast.makeText(
+                context,
+                R.string.zoom_to_location_enabled_toast,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 }

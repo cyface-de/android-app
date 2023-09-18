@@ -16,24 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural.capturing.settings
+syntax = "proto3";
 
-import com.google.android.material.slider.Slider
-import kotlin.math.roundToInt
+option java_package = "de.cyface.app.utils";
+option java_multiple_files = true;
 
 /**
- * Handles UI changes of the 'slider' used to adjust the 'triggering distance' setting.
+ * The data types for the values stored in the `CustomSettings`.
  *
- * @author Armin Schnabel
- * @version 1.0.0
+ * See https://protobuf.dev/programming-guides/proto3/
+ *
+ * Attention: The classes are generated from the file at compile time. Don't forget to rebuild.
+ *
+ * @author: Armin Schnabel
+ * @since: 3.7.0
+ * @version: 1.0.0
  */
-class TriggerDistanceSlideHandler(
-    private val viewModel: SettingsViewModel
-) : Slider.OnChangeListener {
-    override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
-        val roundedDistance = (newValue * 100).roundToInt() / 100f
-        if (viewModel.triggeringDistance.value != roundedDistance) {
-            viewModel.setTriggeringDistance(roundedDistance)
-        }
-    }
+message Settings {
+  // Version of this datastore. It helps to support default values and to migrate data. When the
+  // datastore is newly created, it's 0, after default values are set it's 1, then migration happens.
+  uint32 version = 1;
+
+  // The URL of the server to get incentives from, e.g. 'https://example.com/api/v1'.
+  string incentives_url = 2;
 }

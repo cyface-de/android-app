@@ -22,6 +22,7 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.digural.R
 import de.cyface.app.digural.CapturingFragmentDirections
@@ -34,7 +35,7 @@ import de.cyface.energy_settings.TrackingSettings
  * options are shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.2.0
  */
 class MenuProvider(
@@ -67,7 +68,8 @@ class MenuProvider(
                     !TrackingSettings.showProblematicManufacturerDialog(
                         activity,
                         true,
-                        SUPPORT_EMAIL
+                        SUPPORT_EMAIL,
+                        activity.lifecycleScope
                     )
                 ) {
                     TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)

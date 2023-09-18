@@ -21,7 +21,11 @@ package de.cyface.app.capturing.settings
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import de.cyface.utils.AppPreferences
+import androidx.lifecycle.viewModelScope
+import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
@@ -38,29 +42,32 @@ import de.cyface.utils.AppPreferences
  *   https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 3.4.0
+ * @property appSettings The settings used by both, UIs and libraries.
  */
-class SettingsViewModel(private val appPreferences: AppPreferences) : ViewModel() {
+class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
 
     private val _centerMap = MutableLiveData<Boolean>()
     private val _upload = MutableLiveData<Boolean>()
 
     init {
-        _centerMap.value = appPreferences.getCenterMap()
-        _upload.value = appPreferences.getUpload()
+        runBlocking {
+            _centerMap.value = appSettings.centerMapFlow.first()
+            _upload.value = appSettings.uploadEnabledFlow.first()
+        }
     }
 
     val centerMap: LiveData<Boolean> = _centerMap
     val upload: LiveData<Boolean> = _upload
 
     fun setCenterMap(centerMap: Boolean) {
-        appPreferences.saveCenterMap(centerMap)
+        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
         _centerMap.postValue(centerMap)
     }
 
     fun setUpload(upload: Boolean) {
-        appPreferences.saveUpload(upload)
+        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
         _upload.postValue(upload)
     }
 }

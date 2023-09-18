@@ -33,6 +33,7 @@ import androidx.activity.viewModels
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -47,10 +48,10 @@ import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.app.utils.capturing.settings.CustomPreferences
+import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
-import de.cyface.datacapturing.exception.SetupException
+import de.cyface.persistence.SetupException
 import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
@@ -59,19 +60,22 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
-import de.cyface.utils.AppPreferences
-import de.cyface.utils.AppPreferences.Companion.DEFAULT_SENSOR_FREQUENCY
+import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
 import java.io.IOException
+import java.net.URL
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the
@@ -83,7 +87,7 @@ import java.io.IOException
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.1.0
+ * @version 2.2.0
  * @since 3.2.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider {
@@ -104,9 +108,15 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
     private lateinit var navigation: NavController
 
     /**
-     * The `SharedPreferences` used to store the user's preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var appPreferences: CustomPreferences
+    override val appSettings: AppSettings
+        get() = Application.appSettings
+
+    /**
+     * The settings used by multiple UIs.
+     */
+    override lateinit var uiSettings: UiSettings
 
     /**
      * The authorization.
@@ -139,28 +149,28 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      */
     @Suppress("unused") // Used by Fragments
     private val capturingViewModel: CapturingViewModel by viewModels {
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             capturing.persistenceLayer.measurementRepository!!,
             capturing.persistenceLayer.eventRepository!!,
-            AppPreferences(this).getReportingAccepted()
+            reportErrors
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        appPreferences = CustomPreferences(this)
-        //cameraPreferences = CameraPreferences(this)
+        uiSettings = UiSettings(this, BuildConfig.incentivesServer)
+        //cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
+        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
                 applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                BuildConfig.cyfaceServer,
-                OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery),
                 CapturingEventHandler(),
                 unInterestedListener,
-                DEFAULT_SENSOR_FREQUENCY
+                sensorFrequency
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
@@ -175,7 +185,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
 
         // Authorization
-        auth = OAuth2(applicationContext)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -208,11 +218,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
-        showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL)
-
-        // Inject the Incentives API URL into the preferences, as the `Incentives` from `utils`
-        // cannot reach the `ui.rfr.BuildConfig`.
-        setIncentivesServerUrl()
+        showProblematicManufacturerDialog(this, false, SUPPORT_EMAIL, lifecycleScope)
     }
 
     override fun onStart() {
@@ -278,7 +284,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            if (appPreferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+            if (reportErrors) {
                 Sentry.captureException(e)
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
@@ -328,7 +335,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = appPreferences.getUpload()
+                    val syncEnabledPreference = runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
@@ -370,22 +377,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
         Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
         return existingAccounts.isNotEmpty()
-    }
-
-    /**
-     * As long as the server URL is hardcoded we want to reset it when it's different from the
-     * default URL set in the [BuildConfig]. If not, hardcoded updates would not have an
-     * effect.
-     */
-    private fun setIncentivesServerUrl() {
-        val storedServer = appPreferences.getIncentivesUrl()
-        val server = BuildConfig.incentivesServer
-        @Suppress("KotlinConstantConditions")
-        Validate.isTrue(server != "null")
-        if (storedServer == null || storedServer != server) {
-            Log.d(TAG, "Updating Incentives API URL from " + storedServer + "to" + server)
-            appPreferences.saveIncentivesUrl(server)
-        }
     }
 
     @MainThread

@@ -38,6 +38,7 @@ import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.synchronization.AuthStateManager
 import de.cyface.synchronization.Configuration
+import de.cyface.synchronization.CyfaceAuthenticator
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -63,7 +64,7 @@ import java.util.concurrent.atomic.AtomicReference
  * Use a real device to test the auth workflow for now.
  *
  * @author Armin Schnabel
- * @version 4.0.0
+ * @version 4.0.1
  * @since 1.0.0
  */
 class LoginActivity : AppCompatActivity() {
@@ -90,7 +91,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mExecutor = Executors.newSingleThreadExecutor()
         mAuthStateManager = AuthStateManager.getInstance(this)
-        mConfiguration = Configuration.getInstance(this)
+        mConfiguration = Configuration.getInstance(this, CyfaceAuthenticator.settings)
 
         // Already authorized
         if (mAuthStateManager.current.isAuthorized

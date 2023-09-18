@@ -36,6 +36,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -46,8 +47,8 @@ import de.cyface.app.digural.dialog.ModalityDialog
 import de.cyface.app.digural.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraPreferences
 import de.cyface.camera_service.foreground.CameraService
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
@@ -55,15 +56,18 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Event
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.ConnectionStatusListener
-import de.cyface.utils.AppPreferences
 import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * A `Fragment` for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.5.0
+ * @version 1.5.1
  * @since 1.0.0
  */
 class CapturingFragment : Fragment(), ConnectionStatusListener {
@@ -96,14 +100,14 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         private set
 
     /**
-     * The `SharedPreferences` used to store the user's preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private lateinit var appPreferences: AppPreferences
+    private lateinit var appSettings: AppSettings
 
     /**
      * The `SharedPreferences` used to store the camera preferences.
      */
-    private lateinit var cameraPreferences: CameraPreferences
+    private lateinit var cameraSettings: CameraSettings
 
     /**
      * The `DataCapturingService` which represents the API of the Cyface Android SDK.
@@ -146,7 +150,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             currentMeasurementsEvents = dataCapturingButton!!.loadCurrentMeasurementsEvents()
             map!!.render(currentMeasurementsTracks, currentMeasurementsEvents, false, ArrayList())
         } catch (e: NoSuchMeasurementException) {
-            if (appPreferences.getReportingAccepted()) {
+            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+            if (reportErrors) {
                 Sentry.captureException(e)
             }
             Log.w(
@@ -158,11 +163,16 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appPreferences = AppPreferences(requireContext())
-        cameraPreferences = CameraPreferences(requireContext())
+        cameraSettings =
+            if (activity is CameraServiceProvider) {
+                (activity as CameraServiceProvider).cameraSettings
+            } else {
+                throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
+            }
 
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
+            appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
             cameraService = (activity as CameraServiceProvider).cameraService
         } else {
@@ -172,7 +182,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         // Location permissions are requested by CapturingFragment/Map to react to results.
         permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                val cameraMissing = cameraPermissionMissing(requireContext(), cameraPreferences)
+                val cameraMissing = cameraPermissionMissing(requireContext(), cameraSettings)
                 val notificationMissing = notificationPermissionMissing(requireContext())
                 val locationMissing =
                     !granted(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -201,7 +211,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
     ): View {
         _binding = FragmentCapturingBinding.inflate(inflater, container, false)
         dataCapturingButton =
-            DataCapturingButton(this)
+            DataCapturingButton(this, appSettings, cameraSettings)
         // Register synchronization listener
         capturing.addConnectionStatusListener(this)
         syncButton = SynchronizationButton(capturing)
@@ -241,13 +251,14 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
     private fun showModalitySelectionDialogIfNeeded() {
         registerModalityTabSelectionListener()
-        if (appPreferences.getModality() != null) {
+        val modality = runBlocking { Modality.valueOf(appSettings.modalityFlow.first()) }
+        if (modality != Modality.UNKNOWN) {
             selectModalityTab()
             return
         }
         val fragmentManager = fragmentManager
         Validate.notNull(fragmentManager)
-        val dialog = ModalityDialog()
+        val dialog = ModalityDialog(appSettings)
         dialog.setTargetFragment(this, DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE)
         dialog.isCancelable = false
         dialog.show(fragmentManager!!, "MODALITY_DIALOG")
@@ -258,9 +269,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         val newModality = arrayOfNulls<Modality>(1)
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                val oldModalityId = appPreferences.getModality()
-                val oldModality =
-                    if (oldModalityId == null) null else Modality.valueOf(oldModalityId)
+                val oldModalityId = runBlocking { appSettings.modalityFlow.first() }
+                val oldModality = Modality.valueOf(oldModalityId)
                 when (tab.position) {
                     0 -> newModality[0] = Modality.CAR
                     1 -> newModality[0] = Modality.BICYCLE
@@ -269,8 +279,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
                     4 -> newModality[0] = Modality.TRAIN
                     else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
                 }
-                appPreferences.saveModality(newModality[0]!!.databaseIdentifier)
-                if (oldModality != null && oldModality == newModality[0]) {
+                lifecycleScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
+                if (oldModality == newModality[0]) {
                     Log.d(
                         TAG,
                         "changeModalityType(): old (" + oldModality + " and new Modality (" + newModality[0]
@@ -319,7 +329,7 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
      */
     private fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
-        val modality = appPreferences.getModality()
+        val modality = runBlocking { appSettings.modalityFlow.first() }
         Validate.notNull(modality, "Modality should already be set but isn't.")
 
         // Select the Modality tab
@@ -361,10 +371,10 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
         // Ensure app is only used with required permissions (e.g. location dismissed too ofter)
         if (!isPermissionRequested) {
-            requestMissingPermissions(cameraPreferences)
+            requestMissingPermissions(cameraSettings)
         } else {
             // Dismiss dialog when user gave permissions while app was paused
-            if (!missingPermission(requireContext(), cameraPreferences)) {
+            if (!missingPermission(requireContext(), cameraSettings)) {
                 permissionDialog?.dismiss() // reset previous to show current permission state
                 isPermissionRequested = false
             }
@@ -477,18 +487,18 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
     /**
      * Checks and requests missing permissions.
      *
-     * @param cameraPreferences The camera preferences to check if camera is enabled.
+     * @param cameraSettings The camera preferences to check if camera is enabled.
      */
-    private fun requestMissingPermissions(cameraPreferences: CameraPreferences) {
+    private fun requestMissingPermissions(cameraSettings: CameraSettings) {
         // Without notification permissions the capturing notification is not shown on Android >= 13
         // But capturing still works.
-        val permissionsMissing = missingPermission(requireContext(), cameraPreferences)
+        val permissionsMissing = missingPermission(requireContext(), cameraSettings)
         if (permissionsMissing) {
             val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
-            val cameraEnabled = cameraPreferences.getCameraEnabled()
+            val cameraEnabled = runBlocking { cameraSettings.cameraEnabledFlow.first() }
             if (cameraEnabled) {
                 permissions.add(Manifest.permission.CAMERA)
             }
@@ -501,11 +511,11 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
      * Checks if permissions are missing.
      *
      * @param context The context to check for.
-     * @param cameraPreferences The camera preferences to check if camera is enable.
+     * @param cameraSettings The camera preferences to check if camera is enable.
      * @return `true` if permissions are missing.
      */
-    private fun missingPermission(context: Context, cameraPreferences: CameraPreferences): Boolean {
-        val cameraMissing = cameraPermissionMissing(context, cameraPreferences)
+    private fun missingPermission(context: Context, cameraSettings: CameraSettings): Boolean {
+        val cameraMissing = cameraPermissionMissing(context, cameraSettings)
         val notificationMissing = notificationPermissionMissing(context)
         val locationMissing = !granted(context, Manifest.permission.ACCESS_FINE_LOCATION)
         return cameraMissing || notificationMissing || locationMissing
@@ -521,9 +531,9 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
 
     private fun cameraPermissionMissing(
         context: Context,
-        cameraPreferences: CameraPreferences
+        cameraSettings: CameraSettings
     ): Boolean {
-        val cameraEnabled = cameraPreferences.getCameraEnabled()
+        val cameraEnabled = runBlocking { cameraSettings.cameraEnabledFlow.first() }
         return if (cameraEnabled) !granted(context, Manifest.permission.CAMERA) else false
     }
 

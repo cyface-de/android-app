@@ -61,14 +61,13 @@ import de.cyface.app.CapturingFragment;
 import de.cyface.app.R;
 import de.cyface.app.button.AbstractButton;
 import de.cyface.app.button.ButtonListener;
-import de.cyface.app.notification.CameraEventHandler;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.background.camera.CameraListener;
-import de.cyface.camera_service.CameraPreferences;
-import de.cyface.camera_service.foreground.CameraService;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
+import de.cyface.camera_service.background.camera.CameraListener;
+import de.cyface.camera_service.foreground.CameraService;
+import de.cyface.camera_service.settings.CameraSettings;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
@@ -89,9 +88,9 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.persistence.strategy.DefaultLocationCleaning;
-import de.cyface.utils.AppPreferences;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
+import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry;
 
 // TODO: This class has overstretched its intended scope by several orders of magnitude by now.
@@ -103,7 +102,7 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.8.3
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class DataCapturingButton
@@ -126,13 +125,13 @@ public class DataCapturingButton
      */
     private CameraService cameraService = null;
     /**
-     * The `SharedPreferences` used to store the app preferences.
+     * The settings used by both, UIs and libraries.
      */
-    private AppPreferences preferences;
+    private final AppSettings appSettings;
     /**
-     * The `SharedPreferences` used to store the camera preferences.
+     * The settings used by the camera service.
      */
-    private CameraPreferences cameraPreferences;
+    private final CameraSettings cameraSettings;
     private final static long CALIBRATION_DIALOG_TIMEOUT = 1500L;
     private Collection<CalibrationDialogListener> calibrationDialogListener;
     /**
@@ -173,9 +172,12 @@ public class DataCapturingButton
     private boolean isReportingEnabled;
     private ProgressDialog calibrationProgressDialog;
 
-    public DataCapturingButton(@NonNull final CapturingFragment capturingFragment) {
+    public DataCapturingButton(@NonNull final CapturingFragment capturingFragment,
+            @NonNull final AppSettings appSettings, @NonNull final CameraSettings cameraSettings) {
         this.listener = new HashSet<>();
         this.capturingFragment = capturingFragment;
+        this.appSettings = appSettings;
+        this.cameraSettings = cameraSettings;
     }
 
     @Override
@@ -191,9 +193,7 @@ public class DataCapturingButton
         this.cameraInfoTextView = button.getRootView().findViewById(R.id.camera_capturing_info);
 
         // To get the vehicle
-        preferences = new AppPreferences(context);
-        cameraPreferences = new CameraPreferences(context);
-        isReportingEnabled = preferences.getReportingAccepted();
+        isReportingEnabled = appSettings.getReportErrorsBlocking();
 
         // To load the measurement distance
         this.persistenceLayer = new DefaultPersistenceLayer<>(context, new DefaultPersistenceBehaviour());
@@ -565,7 +565,7 @@ public class DataCapturingButton
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            final var modality = Modality.valueOf(preferences.getModality());
+            final var modality = Modality.valueOf(appSettings.getModalityBlocking());
             Validate.notNull(modality);
 
             currentMeasurementsTracks = new ArrayList<>();
@@ -594,12 +594,11 @@ public class DataCapturingButton
                     });
         } catch (final DataCapturingException e) {
             throw new IllegalStateException(e);
-        } catch (final MissingPermissionException e)  {
+        } catch (final MissingPermissionException e) {
             Toast.makeText(
                     context,
                     context.getString(de.cyface.app.utils.R.string.missing_location_permissions_toast),
-                    Toast.LENGTH_LONG
-            ).show();
+                    Toast.LENGTH_LONG).show();
             throw new IllegalStateException(e);
         }
     }
@@ -699,17 +698,17 @@ public class DataCapturingButton
     private void startCameraService(final long measurementId)
             throws DataCapturingException, MissingPermissionException {
 
-        final var rawModeSelected = cameraPreferences.getRawMode();
-        final var videoModeSelected = cameraPreferences.getVideoMode();
+        final var rawModeSelected = cameraSettings.getRawModeBlocking();
+        final var videoModeSelected = cameraSettings.getVideoModeBlocking();
         // We need to load and pass the preferences for the camera focus here as the preferences
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
-        final var staticFocusSelected = cameraPreferences.getStaticFocus();
-        final var staticFocusDistance = cameraPreferences.getStaticFocusDistance();
-        final var distanceBasedTriggeringSelected = cameraPreferences.getDistanceBasedTriggering();
-        final var triggeringDistance = cameraPreferences.getTriggeringDistance();
-        final var staticExposureTimeSelected = cameraPreferences.getStaticExposure();
-        final var staticExposureTime = cameraPreferences.getStaticExposureTime();
-        final var exposureValueIso100 = cameraPreferences.getStaticExposureValue();
+        final var staticFocusSelected = cameraSettings.getStaticFocusBlocking();
+        final var staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking();
+        final var distanceBasedTriggeringSelected = cameraSettings.getDistanceBasedTriggeringBlocking();
+        final var triggeringDistance = cameraSettings.getTriggeringDistanceBlocking();
+        final var staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking();
+        final var staticExposureTime = cameraSettings.getStaticExposureTimeBlocking();
+        final var exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking();
 
         cameraService.start(
                 measurementId,
@@ -727,8 +726,7 @@ public class DataCapturingButton
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
                     }
-                }
-                );
+                });
     }
 
     /**
@@ -877,7 +875,7 @@ public class DataCapturingButton
     }
 
     private boolean isCameraServiceRequested() {
-        return cameraPreferences.getCameraEnabled();
+        return cameraSettings.getCameraEnabledBlocking();
     }
 
     @Override
@@ -956,7 +954,7 @@ public class DataCapturingButton
     @Override
     public void onNewPictureAcquired(final int picturesCaptured) {
         Log.d(Constants.TAG, "onNewPictureAcquired");
-        final String text = context.getString(R.string.camera_images) + " " + picturesCaptured;
+        final var text = context.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured;
         cameraInfoTextView.setText(text);
         Log.d(TAG, "cameraInfoTextView: " + cameraInfoTextView.getText());
     }

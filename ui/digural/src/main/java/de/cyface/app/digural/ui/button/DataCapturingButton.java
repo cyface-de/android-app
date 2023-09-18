@@ -61,14 +61,13 @@ import de.cyface.app.digural.CapturingFragment;
 import de.cyface.app.digural.R;
 import de.cyface.app.digural.button.AbstractButton;
 import de.cyface.app.digural.button.ButtonListener;
-import de.cyface.app.digural.notification.CameraEventHandler;
 import de.cyface.app.utils.CalibrationDialogListener;
 import de.cyface.app.utils.Map;
-import de.cyface.camera_service.CameraPreferences;
 import de.cyface.camera_service.Constants;
 import de.cyface.camera_service.UIListener;
 import de.cyface.camera_service.background.camera.CameraListener;
 import de.cyface.camera_service.foreground.CameraService;
+import de.cyface.camera_service.settings.CameraSettings;
 import de.cyface.datacapturing.CyfaceDataCapturingService;
 import de.cyface.datacapturing.DataCapturingListener;
 import de.cyface.datacapturing.DataCapturingService;
@@ -89,17 +88,21 @@ import de.cyface.persistence.model.Modality;
 import de.cyface.persistence.model.ParcelableGeoLocation;
 import de.cyface.persistence.model.Track;
 import de.cyface.persistence.strategy.DefaultLocationCleaning;
-import de.cyface.utils.AppPreferences;
 import de.cyface.utils.DiskConsumption;
 import de.cyface.utils.Validate;
+import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry;
 
+// TODO: This class has overstretched its intended scope by several orders of magnitude by now.
+// The initial idea was to have this contain all the UI code for the button triggering data
+// capturing and providing a ViewModel as soon as too much business logic is in here. This is the
+// case now. All this stuff should be moved to a or multiple business logic classes soon.
 /**
  * The button listener for the button to start and stop the data capturing service.
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 3.8.3
+ * @version 4.0.0
  * @since 1.0.0
  */
 public class DataCapturingButton
@@ -121,8 +124,14 @@ public class DataCapturingButton
      * The {@link CameraService} required to control and check the visual capturing process.
      */
     private CameraService cameraService = null;
-    private AppPreferences preferences;
-    private CameraPreferences cameraPreferences;
+    /**
+     * The settings used by both, UIs and libraries.
+     */
+    private final AppSettings appSettings;
+    /**
+     * The settings used by the camera service.
+     */
+    private final CameraSettings cameraSettings;
     private final static long CALIBRATION_DIALOG_TIMEOUT = 1500L;
     private Collection<CalibrationDialogListener> calibrationDialogListener;
     /**
@@ -159,9 +168,12 @@ public class DataCapturingButton
     private final boolean[] onNewGeoLocationAcquiredExceptionTriggered = new boolean[] {false, false, false};
     private ProgressDialog calibrationProgressDialog;
 
-    public DataCapturingButton(@NonNull final CapturingFragment capturingFragment) {
+    public DataCapturingButton(@NonNull final CapturingFragment capturingFragment,
+            @NonNull final AppSettings appSettings, @NonNull final CameraSettings cameraSettings) {
         this.listener = new HashSet<>();
         this.capturingFragment = capturingFragment;
+        this.appSettings = appSettings;
+        this.cameraSettings = cameraSettings;
     }
 
     @Override
@@ -175,10 +187,6 @@ public class DataCapturingButton
         this.measurementIdTextView = button.getRootView().findViewById(R.id.data_capturing_measurement_id);
         this.distanceTextView = button.getRootView().findViewById(R.id.data_capturing_distance);
         this.cameraInfoTextView = button.getRootView().findViewById(R.id.camera_capturing_info);
-
-        // To get the vehicle
-        preferences = new AppPreferences(context);
-        cameraPreferences = new CameraPreferences(context);
 
         // To load the measurement distance
         this.persistenceLayer = new DefaultPersistenceLayer<>(context, new DefaultPersistenceBehaviour());
@@ -365,7 +373,7 @@ public class DataCapturingButton
         // can be used by other apps again
         if (cameraService.reconnect(IS_RUNNING_CALLBACK_TIMEOUT)) {
             Log.w(Constants.TAG, "Zombie CameraService is running and it's "
-                    + (cameraPreferences.getCameraEnabled() ? "" : "*not*") + " requested");
+                    + (cameraSettings.getCameraEnabledBlocking() ? "" : "*not*") + " requested");
             cameraService.stop(
                     new ShutDownFinishedHandler(de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                         @Override
@@ -550,7 +558,7 @@ public class DataCapturingButton
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            final var modality = Modality.valueOf(preferences.getModality());
+            final var modality = Modality.valueOf(appSettings.getModalityBlocking());
             Validate.notNull(modality);
 
             currentMeasurementsTracks = new ArrayList<>();
@@ -567,7 +575,7 @@ public class DataCapturingButton
                             setButtonEnabled(button);
 
                             // Start CameraService
-                            if (cameraPreferences.getCameraEnabled()) {
+                            if (cameraSettings.getCameraEnabledBlocking()) {
                                 Log.d(Constants.TAG, "CameraServiceRequested");
                                 try {
                                     startCameraService(measurementIdentifier);
@@ -579,12 +587,11 @@ public class DataCapturingButton
                     });
         } catch (final DataCapturingException e) {
             throw new IllegalStateException(e);
-        } catch (final MissingPermissionException e)  {
+        } catch (final MissingPermissionException e) {
             Toast.makeText(
                     context,
                     context.getString(de.cyface.app.utils.R.string.missing_location_permissions_toast),
-                    Toast.LENGTH_LONG
-            ).show();
+                    Toast.LENGTH_LONG).show();
             throw new IllegalStateException(e);
         }
     }
@@ -645,7 +652,7 @@ public class DataCapturingButton
                             Toast.makeText(context, R.string.toast_measurement_resumed, Toast.LENGTH_SHORT).show();
 
                             // Start CameraService
-                            if (cameraPreferences.getCameraEnabled()) {
+                            if (cameraSettings.getCameraEnabledBlocking()) {
                                 Log.d(Constants.TAG, "CameraServiceRequested");
                                 try {
                                     startCameraService(measurementIdentifier);
@@ -684,17 +691,17 @@ public class DataCapturingButton
     private void startCameraService(final long measurementId)
             throws DataCapturingException, MissingPermissionException {
 
-        final var rawModeSelected = cameraPreferences.getRawMode();
-        final var videoModeSelected = cameraPreferences.getVideoMode();
+        final var rawModeSelected = cameraSettings.getRawModeBlocking();
+        final var videoModeSelected = cameraSettings.getVideoModeBlocking();
         // We need to load and pass the preferences for the camera focus here as the preferences
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
-        final var staticFocusSelected = cameraPreferences.getStaticFocus();
-        final var staticFocusDistance = cameraPreferences.getStaticFocusDistance();
-        final var distanceBasedTriggeringSelected = cameraPreferences.getDistanceBasedTriggering();
-        final var triggeringDistance = cameraPreferences.getTriggeringDistance();
-        final var staticExposureTimeSelected = cameraPreferences.getStaticExposure();
-        final var staticExposureTime = cameraPreferences.getStaticExposureTime();
-        final var exposureValueIso100 = cameraPreferences.getStaticExposureValue();
+        final var staticFocusSelected = cameraSettings.getStaticFocusBlocking();
+        final var staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking();
+        final var distanceBasedTriggeringSelected = cameraSettings.getDistanceBasedTriggeringBlocking();
+        final var triggeringDistance = cameraSettings.getTriggeringDistanceBlocking();
+        final var staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking();
+        final var staticExposureTime = cameraSettings.getStaticExposureTimeBlocking();
+        final var exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking();
 
         cameraService.start(
                 measurementId,
@@ -712,8 +719,7 @@ public class DataCapturingButton
                     public void startUpFinished(final long measurementIdentifier) {
                         Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished");
                     }
-                }
-                );
+                });
     }
 
     /**
@@ -735,7 +741,7 @@ public class DataCapturingButton
                                         // nothing to do
                                     }
                                 });
-                        if (cameraPreferences.getCameraEnabled()) {
+                        if (cameraSettings.getCameraEnabledBlocking()) {
                             cameraService.stop(new ShutDownFinishedHandler(
                                     de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
                                 @Override
@@ -830,7 +836,7 @@ public class DataCapturingButton
             Log.w(TAG, "Skipping DCS.disconnect() as DCS is null");
             // This should not happen, thus, reporting to Sentry
 
-            if (preferences.getReportingAccepted()) {
+            if (appSettings.getReportErrorsBlocking()) {
                 Sentry.captureMessage("DCButton.onDestroyView: dataCapturingService is null");
             }
         } else {
@@ -881,7 +887,7 @@ public class DataCapturingButton
             // GeoLocations may also arrive shortly after a measurement was stopped. Thus, this may not crash.
             // This happened on the Emulator with emulated live locations.
             Log.w(TAG, "onNewGeoLocationAcquired: No currently captured measurement found, doing nothing.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[0] && preferences.getReportingAccepted()) {
+            if (!onNewGeoLocationAcquiredExceptionTriggered[0] && appSettings.getReportErrorsBlocking()) {
                 onNewGeoLocationAcquiredExceptionTriggered[0] = true;
                 Sentry.captureException(e);
             }
@@ -907,7 +913,7 @@ public class DataCapturingButton
             Log.w(TAG, "onNewGeoLocationAcquired() failed to loadCurrentMeasurementsEvents(). "
                     + "Thus, map.renderMeasurement() is ignored. This should only happen id "
                     + "the capturing already stopped.");
-            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && preferences.getReportingAccepted()) {
+            if (!onNewGeoLocationAcquiredExceptionTriggered[2] && appSettings.getReportErrorsBlocking()) {
                 onNewGeoLocationAcquiredExceptionTriggered[2] = true;
                 Sentry.captureException(e);
             }
@@ -939,7 +945,7 @@ public class DataCapturingButton
     @Override
     public void onNewPictureAcquired(final int picturesCaptured) {
         Log.d(Constants.TAG, "onNewPictureAcquired");
-        final String text = context.getString(R.string.camera_images) + " " + picturesCaptured;
+        final var text = context.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured;
         cameraInfoTextView.setText(text);
         Log.d(TAG, "cameraInfoTextView: " + cameraInfoTextView.getText());
     }
