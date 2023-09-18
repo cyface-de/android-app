@@ -37,6 +37,7 @@ import kotlin.concurrent.thread
  * Calls the API that triggers external cameras to trigger in sync with this smartphones camera.
  *
  * @author Klemens Muthmann
+ * @version 1.0.0
  * @since 4.2.0
  * @constructor Create a new controller from the world wide unique device identifier of this device.
  */

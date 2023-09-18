@@ -44,7 +44,7 @@ import kotlinx.parcelize.Parcelize
  * [BackgroundService].
  *
  * @author Armin Schnabel
- * @version 1.2.3
+ * @version 1.2.4
  * @since 1.0.0
  */
 @Parcelize

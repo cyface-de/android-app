@@ -41,7 +41,7 @@ import kotlinx.coroutines.runBlocking
  * Make sure the order (0, 1, 2 from left(start) to right(end)) in the TabLayout is consistent in here.
  *
  * @author Armin Schnabel
- * @version 2.1.1
+ * @version 3.0.0
  * @since 1.0.0
  */
 class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
@@ -49,6 +49,7 @@ class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
      * The id if the `Measurement` if this dialog is called for a specific Measurement.
      */
     private var measurementId: Long? = null
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
         builder.setTitle(R.string.dialog_modality_title).setItems(

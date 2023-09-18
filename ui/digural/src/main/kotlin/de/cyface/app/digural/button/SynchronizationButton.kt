@@ -42,7 +42,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.3.5
+ * @version 2.3.6
  * @since 1.0.0
  */
 class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : AbstractButton {

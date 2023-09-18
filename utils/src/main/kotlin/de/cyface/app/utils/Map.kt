@@ -61,7 +61,7 @@ import java.lang.ref.WeakReference
  * The Map class handles everything around the GoogleMap view.
  *
  * @author Armin Schnabel
- * @version 4.1.0
+ * @version 4.1.1
  * @since 1.0.0
  * @property view The `MapView` element of the `GoogleMap`.
  * @property onMapReadyRunnable The `Runnable` triggered when the `GoogleMap` is loaded and ready.

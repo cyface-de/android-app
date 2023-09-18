@@ -35,7 +35,7 @@ import de.cyface.energy_settings.TrackingSettings
  * options are shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.2.0
  */
 class MenuProvider(

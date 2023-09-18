@@ -40,7 +40,7 @@ import kotlinx.coroutines.runBlocking
  * The [Fragment] which shows the live speed of the currently captured measurement.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class SpeedFragment : Fragment() {

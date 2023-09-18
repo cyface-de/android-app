@@ -37,7 +37,7 @@ import kotlin.math.round
  * To allow the user to select the exposure time from a set of common values (1/125s, 1/250s, ...)
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 2.9.0
  */
 class ExposureTimeDialog(private val cameraSettings: CameraSettings) : DialogFragment() {

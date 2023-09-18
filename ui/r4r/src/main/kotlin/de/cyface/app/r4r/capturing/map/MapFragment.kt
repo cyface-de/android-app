@@ -58,7 +58,7 @@ import kotlinx.coroutines.runBlocking
  * The [Fragment] which shows a map to the user.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class MapFragment : Fragment() {

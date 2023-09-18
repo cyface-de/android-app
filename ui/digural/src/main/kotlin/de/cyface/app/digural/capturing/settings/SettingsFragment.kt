@@ -56,7 +56,7 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 3.0.0
  * @since 3.2.0
  */
 class SettingsFragment : Fragment() {

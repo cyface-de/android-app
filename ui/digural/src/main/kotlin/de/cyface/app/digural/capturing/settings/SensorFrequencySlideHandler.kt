@@ -24,7 +24,7 @@ import com.google.android.material.slider.Slider
  * Handles UI changes of the 'slider' used to adjust the 'sensor frequency' setting.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  */
 class SensorFrequencySlideHandler(
     private val viewModel: SettingsViewModel

@@ -87,7 +87,7 @@ import java.net.URL
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.1.0
+ * @version 2.2.0
  * @since 3.2.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider {

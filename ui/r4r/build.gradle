@@ -20,7 +20,7 @@
  * Gradle's build file for the app.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.1.0
  * @since 3.2.0
  */
 apply plugin: 'com.android.application'
@@ -193,7 +193,6 @@ dependencies {
 
     // Proto DataStore with SingleProcess support to store settings
     implementation "androidx.datastore:datastore:${datastoreVersion}"
-    //implementation "androidx.datastore:datastore-core-android:${datastoreVersion}"
     implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
 
     // To change the material design

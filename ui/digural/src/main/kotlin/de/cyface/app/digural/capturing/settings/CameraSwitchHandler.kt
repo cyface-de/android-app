@@ -29,7 +29,7 @@ import androidx.core.app.ActivityCompat
  * Handles when the user toggles the camera switch.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 2.0.0
  */
 class CameraSwitchHandler(
