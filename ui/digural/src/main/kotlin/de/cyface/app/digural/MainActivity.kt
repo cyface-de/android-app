@@ -33,6 +33,7 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -40,7 +41,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.button.ExternalCameraController
-import de.cyface.app.digural.capturing.settings.CustomPreferences
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
 import de.cyface.app.digural.notification.DataCapturingEventHandler
