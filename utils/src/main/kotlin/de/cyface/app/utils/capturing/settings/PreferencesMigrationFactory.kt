@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural.capturing.settings
+package de.cyface.app.utils.capturing.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.migrations.SharedPreferencesMigration
 import androidx.datastore.migrations.SharedPreferencesView
-import de.cyface.app.digural.Settings
+import de.cyface.app.utils.Settings
+import de.cyface.app.utils.SharedConstants.TAG
 
 /**
  * Factory for the migration which imports preferences from the previously used SharedPreferences.
@@ -37,32 +39,36 @@ object PreferencesMigrationFactory {
      * *Don't change this, this is migration code!*
      */
     private const val PREFERENCES_NAME = "AppPreferences"
-    private const val DIGURAL_URL_KEY = "de.cyface.digural.server"
-    private const val DEFAULT_URL = "http://localhost:33552/"
+    private const val INCENTIVES_URL_KEY = "de.cyface.incentives.endpoint"
 
     /**
      * @param context The context to search and access the old SharedPreferences from.
+     * @param incentivesUrl The URL of the Incentives API, e.g. "https://example.com/api/v1".
      * @return The migration code which imports preferences from the SharedPreferences if found.
      */
-    fun create(context: Context): SharedPreferencesMigration<Settings> {
+    fun create(context: Context, incentivesUrl: String): SharedPreferencesMigration<Settings> {
         return SharedPreferencesMigration(
             context,
             PREFERENCES_NAME,
-            migrate = ::migratePreferences
+            migrate = { preferences, settings ->
+                migratePreferences(preferences, settings, incentivesUrl)
+            }
         )
     }
 
     private fun migratePreferences(
         preferences: SharedPreferencesView,
-        settings: Settings
+        settings: Settings,
+        incentivesUrl: String
     ): Settings {
+        Log.i(TAG, "Migrating from shared preferences to version 1")
         return settings.toBuilder()
             // Setting version to 1 as it would else default to Protobuf default of 0 which would
             // trigger the StoreMigration from 0 -> 1 which ignores previous settings.
             // This way the last supported version of SharedPreferences is hard-coded here and
             // then the migration steps in StoreMigration starting at version 1 continues from here.
             .setVersion(1)
-            .setDiguralUrl(preferences.getString(DIGURAL_URL_KEY, DEFAULT_URL))
+            .setIncentivesUrl(preferences.getString(INCENTIVES_URL_KEY, incentivesUrl))
             .build()
     }
 }
