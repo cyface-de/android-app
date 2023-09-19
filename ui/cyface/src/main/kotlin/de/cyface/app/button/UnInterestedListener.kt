@@ -21,12 +21,13 @@ package de.cyface.app.button
 import android.content.Context
 import android.location.Location
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class UnInterestedListener : ParcelableCapturingProcessListener {
 
-    override fun contextBasedInitialization(context: Context) {}
+    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {}
     override fun onCameraAccessLost() {}
     override fun onPictureCaptured() {}
     override fun onRecordingStarted() {}
