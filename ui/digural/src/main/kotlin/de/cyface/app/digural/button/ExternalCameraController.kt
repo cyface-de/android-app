@@ -21,6 +21,7 @@ package de.cyface.app.digural.button
 import android.content.Context
 import android.location.Location
 import android.util.Log
+import androidx.lifecycle.LifecycleCoroutineScope
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.app.digural.capturing.DiguralApi
 import de.cyface.app.digural.capturing.settings.CustomSettings
@@ -40,9 +41,12 @@ import kotlin.concurrent.thread
  * @version 1.0.0
  * @since 4.2.0
  * @constructor Create a new controller from the world wide unique device identifier of this device.
+ * @property deviceId The unique identifier of the device which calls the trigger.
  */
 @Parcelize
-class ExternalCameraController(private val deviceId: String) : ParcelableCapturingProcessListener {
+class ExternalCameraController(
+    private val deviceId: String
+) : ParcelableCapturingProcessListener {
     init {
         Validate.notEmpty(deviceId)
     }
@@ -81,37 +85,50 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
         )
 
         /* Begin Retrofit Variant */
-        /*runBlocking {
+        GlobalScope.launch {
             withContext(Dispatchers.IO) {
-                Log.d(TAG, "###########Sending Payload $payload to ${DiguralApi.baseUrl}")
-                DiguralApi.diguralService.trigger(payload)
-            }
-        }*/
-        /* End Retrofit Variant */
-
-        /* Begin Classic Variant */
-        thread {
-            Log.d(TAG, "Sending Payload ${payload.toJson()}")
-            with(targetUrl.openConnection() as HttpURLConnection) {
                 try {
-                    requestMethod = "POST"
-                    setRequestProperty("Content-Type", "application/json")
-                    doOutput = true
-
-                    outputStream.use { os ->
-                        val input: ByteArray =
-                            payload.toJson().toByteArray(Charset.defaultCharset())
-                        os.write(input, 0, input.size)
+                    Log.d(TAG, "Sending Payload $payload to ${DiguralApi.baseUrl}")
+                    val response = DiguralApi.diguralService.trigger(payload)
+                    if (!response.isSuccessful) {
+                        Log.e(TAG, "API call failed with response code: ${response.code()}")
                     }
-                    outputStream.flush()
-                    outputStream.close()
-
-                    Log.d(TAG, "$responseCode")
-                } finally {
-                    disconnect()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
                 }
             }
         }
+        /* End Retrofit Variant */
+
+        /* Begin Classic Variant */
+        /*thread {
+            try {
+                Log.d(TAG, "Sending Payload ${payload.toJson()}")
+                with(targetUrl.openConnection() as HttpURLConnection) {
+                    connectTimeout = 1000
+                    readTimeout = 1000
+                    try {
+                        requestMethod = "POST"
+                        setRequestProperty("Content-Type", "application/json")
+                        doOutput = true
+
+                        outputStream.use { os ->
+                            val input: ByteArray =
+                                payload.toJson().toByteArray(Charset.defaultCharset())
+                            os.write(input, 0, input.size)
+                        }
+                        outputStream.flush()
+                        outputStream.close()
+
+                        Log.d(TAG, "$responseCode")
+                    } finally {
+                        disconnect()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
+            }
+        }*/
         /* End Classic Variant */
     }
 
