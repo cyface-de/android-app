@@ -62,6 +62,7 @@ class ExternalCameraController(
         // A possible solution would be to store this in Room/Sql, as this supports multi-process.
         val address = CustomPreferences(context).getDiguralUrl()
         DiguralApi.baseUrl = address
+        DiguralApi.setToUseWifi(context)
         Log.d(TAG, "Setting digural address to: $address")
     }
 
@@ -98,7 +99,7 @@ class ExternalCameraController(
         }
     }
 
-    override fun shallStop() {
-        TODO("Not yet implemented")
+    override fun shallStop(context: Context) {
+        DiguralApi.shutdown(context)
     }
 }

@@ -34,5 +34,5 @@ class UnInterestedListener : ParcelableCapturingProcessListener {
     override fun onRecordingStopped() {}
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {}
-    override fun shallStop() {}
+    override fun shallStop(context: Context) {}
 }
