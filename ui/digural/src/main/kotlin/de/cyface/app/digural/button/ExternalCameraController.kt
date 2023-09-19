@@ -60,6 +60,7 @@ class ExternalCameraController(
         val customSettings = CustomSettings(context) // may only be initialized once per process
         val address = runBlocking { customSettings.diguralUrlFlow.first() }
         DiguralApi.baseUrl = address
+        DiguralApi.setToUseWifi(context)
         Log.d(TAG, "Setting digural address to: $address")
     }
 
@@ -96,7 +97,7 @@ class ExternalCameraController(
         }
     }
 
-    override fun shallStop() {
-        TODO("Not yet implemented")
+    override fun shallStop(context: Context) {
+        DiguralApi.shutdown(context)
     }
 }
