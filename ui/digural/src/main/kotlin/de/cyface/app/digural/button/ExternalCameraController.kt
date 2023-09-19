@@ -73,13 +73,6 @@ class ExternalCameraController(
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "On About to Capture $location")
         Validate.notNull(this.scope)
-
-        val targetUrl = DiguralApi
-            .baseUrl
-            .toURI()
-            .resolve("PanAiCam/Trigger")
-            .toURL()
-
         if (location == null) {
             return
         }
@@ -92,7 +85,6 @@ class ExternalCameraController(
             location.time
         )
 
-        /* Begin Retrofit Variant */
         scope.launch {
             try {
                 Log.d(TAG, "Sending Payload $payload to ${DiguralApi.baseUrl}")
@@ -104,38 +96,6 @@ class ExternalCameraController(
                 Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
             }
         }
-        /* End Retrofit Variant */
-
-        /* Begin Classic Variant */
-        /*thread {
-            try {
-                Log.d(TAG, "Sending Payload ${payload.toJson()}")
-                with(targetUrl.openConnection() as HttpURLConnection) {
-                    connectTimeout = 1000
-                    readTimeout = 1000
-                    try {
-                        requestMethod = "POST"
-                        setRequestProperty("Content-Type", "application/json")
-                        doOutput = true
-
-                        outputStream.use { os ->
-                            val input: ByteArray =
-                                payload.toJson().toByteArray(Charset.defaultCharset())
-                            os.write(input, 0, input.size)
-                        }
-                        outputStream.flush()
-                        outputStream.close()
-
-                        Log.d(TAG, "$responseCode")
-                    } finally {
-                        disconnect()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
-            }
-        }*/
-        /* End Classic Variant */
     }
 
     override fun shallStop() {
