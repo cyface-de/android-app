@@ -21,22 +21,21 @@ package de.cyface.app.digural.button
 import android.content.Context
 import android.location.Location
 import android.util.Log
-import androidx.lifecycle.LifecycleCoroutineScope
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.app.digural.capturing.DiguralApi
 import de.cyface.app.digural.capturing.settings.CustomPreferences
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
  * Calls the API that triggers external cameras to trigger in sync with this smartphones camera.
  *
  * @author Klemens Muthmann
+ * @author Armin Schnabel
  * @since 4.2.0
  * @constructor Create a new controller from the world wide unique device identifier of this device.
  * @property deviceId The unique identifier of the device which calls the trigger.
@@ -45,11 +44,16 @@ import kotlinx.parcelize.Parcelize
 class ExternalCameraController(
     private val deviceId: String
 ) : ParcelableCapturingProcessListener {
+
+    @IgnoredOnParcel
+    private lateinit var scope: CoroutineScope
+
     init {
         Validate.notEmpty(deviceId)
     }
 
-    override fun contextBasedInitialization(context: Context) {
+    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
+        this.scope = scope
         // FIXME: Known issue: After starting the capturing once, further preference changes
         // are not affecting the preferences received here, even when this is always executed after
         // starting a new BackgroundService. The SharedPreferences don't support multi-process env.
@@ -68,6 +72,7 @@ class ExternalCameraController(
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "On About to Capture $location")
+        Validate.notNull(this.scope)
 
         val targetUrl = DiguralApi
             .baseUrl
@@ -88,17 +93,15 @@ class ExternalCameraController(
         )
 
         /* Begin Retrofit Variant */
-        GlobalScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    Log.d(TAG, "Sending Payload $payload to ${DiguralApi.baseUrl}")
-                    val response = DiguralApi.diguralService.trigger(payload)
-                    if (!response.isSuccessful) {
-                        Log.e(TAG, "API call failed with response code: ${response.code()}")
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
+        scope.launch {
+            try {
+                Log.d(TAG, "Sending Payload $payload to ${DiguralApi.baseUrl}")
+                val response = DiguralApi.diguralService.trigger(payload)
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "API call failed with response code: ${response.code()}")
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
             }
         }
         /* End Retrofit Variant */
