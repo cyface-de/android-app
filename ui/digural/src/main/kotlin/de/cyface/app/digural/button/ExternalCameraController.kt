@@ -26,31 +26,41 @@ import de.cyface.app.digural.capturing.DiguralApi
 import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.net.HttpURLConnection
-import java.nio.charset.Charset
-import kotlin.concurrent.thread
 
 /**
  * Calls the API that triggers external cameras to trigger in sync with this smartphones camera.
  *
  * @author Klemens Muthmann
+ * @author Armin Schnabel
  * @version 1.0.0
  * @since 4.2.0
  * @constructor Create a new controller from the world wide unique device identifier of this device.
+ * @property deviceId The unique identifier of the device which calls the trigger.
  */
 @Parcelize
-class ExternalCameraController(private val deviceId: String) : ParcelableCapturingProcessListener {
+class ExternalCameraController(
+    private val deviceId: String
+) : ParcelableCapturingProcessListener {
+
+    @IgnoredOnParcel
+    private lateinit var scope: CoroutineScope
+
     init {
         Validate.notEmpty(deviceId)
     }
 
-    override fun contextBasedInitialization(context: Context) {
+    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
+        this.scope = scope
         val customSettings = CustomSettings(context) // may only be initialized once per process
         val address = runBlocking { customSettings.diguralUrlFlow.first() }
         DiguralApi.baseUrl = address
+        DiguralApi.setToUseWifi(context)
         Log.d(TAG, "Setting digural address to: $address")
     }
 
@@ -61,13 +71,7 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "On About to Capture $location")
-
-        val targetUrl = DiguralApi
-            .baseUrl
-            .toURI()
-            .resolve("PanAiCam/Trigger")
-            .toURL()
-
+        Validate.notNull(this.scope)
         if (location == null) {
             return
         }
@@ -80,42 +84,20 @@ class ExternalCameraController(private val deviceId: String) : ParcelableCapturi
             location.time
         )
 
-        /* Begin Retrofit Variant */
-        /*runBlocking {
-            withContext(Dispatchers.IO) {
-                Log.d(TAG, "###########Sending Payload $payload to ${DiguralApi.baseUrl}")
-                DiguralApi.diguralService.trigger(payload)
-            }
-        }*/
-        /* End Retrofit Variant */
-
-        /* Begin Classic Variant */
-        thread {
-            Log.d(TAG, "Sending Payload ${payload.toJson()}")
-            with(targetUrl.openConnection() as HttpURLConnection) {
-                try {
-                    requestMethod = "POST"
-                    setRequestProperty("Content-Type", "application/json")
-                    doOutput = true
-
-                    outputStream.use { os ->
-                        val input: ByteArray =
-                            payload.toJson().toByteArray(Charset.defaultCharset())
-                        os.write(input, 0, input.size)
-                    }
-                    outputStream.flush()
-                    outputStream.close()
-
-                    Log.d(TAG, "$responseCode")
-                } finally {
-                    disconnect()
+        scope.launch {
+            try {
+                Log.d(TAG, "Sending Payload $payload to ${DiguralApi.baseUrl}")
+                val response = DiguralApi.diguralService.trigger(payload)
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "API call failed with response code: ${response.code()}")
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
             }
         }
-        /* End Classic Variant */
     }
 
-    override fun shallStop() {
-        TODO("Not yet implemented")
+    override fun shallStop(context: Context) {
+        DiguralApi.shutdown(context)
     }
 }

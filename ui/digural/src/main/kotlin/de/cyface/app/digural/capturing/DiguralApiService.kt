@@ -16,23 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.button
+package de.cyface.app.digural.capturing
 
-import android.content.Context
-import android.location.Location
-import de.cyface.camera_service.background.ParcelableCapturingProcessListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.parcelize.Parcelize
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.POST
 
-@Parcelize
-class UnInterestedListener : ParcelableCapturingProcessListener {
-
-    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {}
-    override fun onCameraAccessLost() {}
-    override fun onPictureCaptured() {}
-    override fun onRecordingStarted() {}
-    override fun onRecordingStopped() {}
-    override fun onCameraError(reason: String) {}
-    override fun onAboutToCapture(measurementId: Long, location: Location?) {}
-    override fun shallStop(context: Context) {}
+/**
+ * Interface which describes the Digural API endpoints.
+ *
+ * @author Klemens Muthmann
+ * @author Armin Schnabel
+ * @version 1.0.0
+ * @since 3.7.3
+ */
+interface DiguralApiService {
+    /**
+     * The endpoint which accepts trigger events with location data.
+     */
+    @POST("PanAiCam/Trigger")
+    suspend fun trigger(@Body location: Location): Response<Void>
 }

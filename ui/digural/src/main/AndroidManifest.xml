@@ -17,6 +17,8 @@
 
     <!-- Needed to check if wifi is available -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Needed to request wifi to be used for Digural API Trigger Request -->
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <!-- Google Maps Android API permission -->
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
