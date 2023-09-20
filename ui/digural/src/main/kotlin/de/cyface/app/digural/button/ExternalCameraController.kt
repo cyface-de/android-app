@@ -27,7 +27,9 @@ import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
