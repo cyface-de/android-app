@@ -41,19 +41,38 @@ class DiguralUrlChangeHandler(
 ) : View.OnClickListener {
 
     override fun onClick(v: View?) {
-        val previousValue = viewModel.diguralServerUrl.value
-        val newValue = valueHolder.text
+        val newValue = valueHolder.text.toString()
+        val previousValue = viewModel.diguralServerUrl.value!!.toExternalForm()
         val context = fragment.requireContext()
-        if (newValue != null && newValue.toString() != previousValue?.toExternalForm()) {
-            try {
-                viewModel.setDiguralServerUrl(URL(newValue.toString()))
-            } catch (e: MalformedURLException) {
-                Toast.makeText(context, R.string.url_malformed_toast, Toast.LENGTH_LONG)
-                    .show()
-                viewModel.setDiguralServerUrl(previousValue!!)
-            }
+        if (previousValue == newValue) {
+            clearFocusAndKeyboard(context, v)
+            return
         }
 
+        // Invalid url format
+        try {
+            // Expected format:
+            // - starts with `http://` or `https://`
+            // - followed by either an IP v4 address or a hostname
+            // - may be followed by a port number `:port`
+            // - should end with `/`
+            // For simplicity, all IP addresses like 999.999.999.999 are accepted.
+            // For simplicity, only hostnames of the format [a-ZA-Z0-9\-\.]+ are accepted.
+            val regex = """^(http://|https://)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9\-\.]+)(:\d+)?/$""".toRegex()
+            if (!newValue.matches(regex)) {
+                throw MalformedURLException("Unexpected URL format: $newValue")
+            }
+            viewModel.setDiguralServerUrl(URL(newValue))
+        } catch (e: MalformedURLException) {
+            Toast.makeText(context, R.string.url_malformed_toast, Toast.LENGTH_LONG)
+                .show()
+            valueHolder.setText(previousValue)
+        }
+
+        clearFocusAndKeyboard(context, v)
+    }
+
+    private fun clearFocusAndKeyboard(context: Context, v: View?) {
         // Clear focus
         valueHolder.clearFocus()
 
@@ -61,5 +80,4 @@ class DiguralUrlChangeHandler(
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(v!!.windowToken, 0)
     }
-
 }
