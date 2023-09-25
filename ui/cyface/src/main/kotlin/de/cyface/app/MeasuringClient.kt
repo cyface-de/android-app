@@ -57,13 +57,15 @@ class MeasuringClient : Application() {
      * Reports error events to the user via UI and to Sentry, if opted-in.
      */
     private val errorListener =
-        ErrorHandler.ErrorListener { errorCode: ErrorCode, errorMessage: String ->
+        ErrorHandler.ErrorListener { errorCode, errorMessage, fromBackground ->
             val appName = applicationContext.getString(R.string.app_name)
-            Toast.makeText(
-                this@MeasuringClient,
-                String.format("%s - %s", errorMessage, appName),
-                Toast.LENGTH_LONG
-            ).show()
+            if (!fromBackground) { // RFR-772
+                Toast.makeText(
+                    this@MeasuringClient,
+                    String.format("%s - %s", errorMessage, appName),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
 
             // There are two cases we can have network errors
             // 1. during authentication (AuthTokenRequest), either login or before upload
