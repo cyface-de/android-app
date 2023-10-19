@@ -18,12 +18,8 @@
  */
 package de.cyface.app.digural.capturing.settings
 
-import android.content.Context
 import android.content.Intent
-import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CameraMetadata
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -44,6 +40,7 @@ import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.app.digural.dialog.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -56,7 +53,7 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
- * @version 3.0.0
+ * @version 3.0.1
  * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
@@ -255,15 +252,12 @@ class SettingsFragment : Fragment() {
 
                 // Manual Sensor support and features
                 if (cameraEnabled) {
-                    val characteristics = loadCameraCharacteristics()
-                    val manualSensorSupported = Utils.isFeatureSupported(
-                        characteristics,
-                        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
-                    )
-                    // TODO: could also be a LiveData field
-                    viewModel.manualSensorSupported = manualSensorSupported
-                    setManualSensorSupport(characteristics, manualSensorSupported)
-                    if (!manualSensorSupported) {
+                    val cameraInfo = CameraInfo(requireContext())
+                    viewModel.manualSensorSupported = cameraInfo.manualSensorSupported
+
+                    if (cameraInfo.manualSensorSupported) {
+                        setManualSensorSupport(cameraInfo)
+                    } else {
                         //binding.staticFocusDistanceSlider.visibility = INVISIBLE
                         binding.staticFocusWrapper.visibility = INVISIBLE
                         // binding.staticExposureTimeSlider.setVisibility(View.INVISIBLE);
@@ -363,20 +357,15 @@ class SettingsFragment : Fragment() {
         return binding.root
     }
 
-    private fun setManualSensorSupport(
-        characteristics: CameraCharacteristics,
-        manualSensorSupported: Boolean
-    ) {
-        // Show supported camera features (camera permissions required)
-        val minFocusDistance =
-            characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE)
-        displaySupportLevelsAndUnits(characteristics, manualSensorSupported, minFocusDistance!!)
+    private fun setManualSensorSupport(cameraInfo: CameraInfo) {
+        displaySupportLevelsAndUnits(cameraInfo)
+
         // is null when camera permissions are missing, is 0.0 when "lens is fixed-focus" (e.g. emulators)
         // It's ok when this is not set in those cases as the fragment informs about missing manual focus mode
-        if (minFocusDistance.toDouble() != 0.0) {
+        if (cameraInfo.minFocusDistance != null && cameraInfo.minFocusDistance != 0.0f) {
             // Flooring to the next smaller 0.25 step as max focus distance to fix exception:
             // stepSize(0.25) must be a factor of range [0.25;9.523809] on Pixel 6
-            binding.staticFocusDistanceSlider.valueTo = floor(minFocusDistance * 4) / 4
+            binding.staticFocusDistanceSlider.valueTo = floor(cameraInfo.minFocusDistance!! * 4) / 4
         }
     }
 
@@ -396,58 +385,25 @@ class SettingsFragment : Fragment() {
     }
 
     /**
-     * Returns the features supported by the camera hardware.
-     *
-     * @return The hardware feature support
-     */
-    private fun loadCameraCharacteristics(): CameraCharacteristics {
-        val cameraManager =
-            requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        return try {
-            Validate.notNull(cameraManager)
-            val cameraId = Utils.getMainRearCameraId(cameraManager, null)
-            cameraManager.getCameraCharacteristics(cameraId)
-        } catch (e: CameraAccessException) {
-            throw IllegalStateException(e)
-        }
-    }
-
-    /**
      * Displays the supported camera2 features in the view.
      *
-     * @param characteristics the features to check
-     * @param isManualSensorSupported `True` if the 'manual sensor' feature is supported
-     * @param minFocusDistance the minimum focus distance supported
+     * @param cameraInfo The hardware info about the camera available for capturing.
      */
-    private fun displaySupportLevelsAndUnits(
-        characteristics: CameraCharacteristics,
-        isManualSensorSupported: Boolean, minFocusDistance: Float
-    ) {
+    private fun displaySupportLevelsAndUnits(cameraInfo: CameraInfo) {
+        binding.hardwareSupport.text = cameraInfo.supportedHardwareLevel
 
-        // Display camera2 API support level
-        val camera2Level = getCamera2SupportLevel(characteristics)
-        binding.hardwareSupport.text = camera2Level
-
-        // Display 'manual sensor' support
         binding.manualSensorSupport.text =
-            if (isManualSensorSupported) "supported" else "no supported"
+            if (cameraInfo.manualSensorSupported) "supported" else "no supported"
 
-        // Display whether the focus distance setting is calibrated (i.e. has a unit)
-        val calibrationLevel = getFocusDistanceCalibration(characteristics)
-        val unitDetails =
-            if (calibrationLevel == FOCUS_DISTANCE_NOT_CALIBRATED) "uncalibrated" else "dioptre"
-        val unit =
-            if (calibrationLevel == FOCUS_DISTANCE_NOT_CALIBRATED) "" else " [dioptre]"
-        binding.focusDistance.text = calibrationLevel
-        binding.staticFocusUnit.text = unitDetails
+        val isFocusCalibrated = cameraInfo.focusDistanceCalibration != FOCUS_DISTANCE_NOT_CALIBRATED
+        binding.focusDistance.text = cameraInfo.focusDistanceCalibration
+        binding.staticFocusUnit.text = if (isFocusCalibrated) "dioptre" else "uncalibrated"
 
         // Display focus distance ranges
-        val hyperFocalDistance =
-            characteristics.get(CameraCharacteristics.LENS_INFO_HYPERFOCAL_DISTANCE)
-        val hyperFocalDistanceText = hyperFocalDistance.toString() + unit
-        val shortestFocalDistanceText = minFocusDistance.toString() + unit
-        binding.hyperFocalDistance.text = hyperFocalDistanceText
-        binding.minimumFocusDistance.text = shortestFocalDistanceText
+        binding.hyperFocalDistance.text =
+            "${cameraInfo.hyperFocalDistance}${if (isFocusCalibrated) " [dioptre]" else ""}"
+        binding.minimumFocusDistance.text =
+            "${cameraInfo.minFocusDistance}${if (isFocusCalibrated) " [dioptre]" else ""}"
     }
 
     /**
@@ -468,26 +424,6 @@ class SettingsFragment : Fragment() {
             CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED -> FOCUS_DISTANCE_NOT_CALIBRATED
             else -> "unknown: $focusDistanceCalibration"
         }
-    }
-
-    /**
-     * Returns the support level for the 'camera2' API, see http://stackoverflow.com/a/31240881/5815054.
-     *
-     * @param characteristics the camera hardware features to check
-     * @return the support level as simple `String`
-     */
-    private fun getCamera2SupportLevel(characteristics: CameraCharacteristics): String {
-        val supportedHardwareLevel = characteristics
-            .get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
-        var supportLevel = "unknown"
-        if (supportedHardwareLevel != null) {
-            when (supportedHardwareLevel) {
-                CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY -> supportLevel = "legacy"
-                CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED -> supportLevel = "limited"
-                CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL -> supportLevel = "full"
-            }
-        }
-        return supportLevel
     }
 
 
