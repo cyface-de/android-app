@@ -86,6 +86,7 @@ ext {
     okHttpVersion = "4.11.0"
     // 1.1.0-alpha05: ':persistence:mergeExtDexDebugAndroidTest' fails (transitive dependency)
     datastoreVersion = "1.1.0-alpha04" // only 1.1.0 supports multi-process datastore
+    desugaringVersion = "2.0.3"
 
     // Kotlin components
     coroutinesVersion = "1.6.4"
