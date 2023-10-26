@@ -20,6 +20,7 @@ package de.cyface.app.digural
 
 import android.app.Application
 import android.content.IntentFilter
+import android.os.StrictMode
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
@@ -104,6 +105,17 @@ class MeasuringClient : Application() {
             IntentFilter(ErrorHandler.ERROR_INTENT)
         )
         errorHandler!!.addListener(errorListener)
+
+        // Use strict mode in dev environment to crash e.g. when a resource failed to call close
+        if (BuildConfig.DEBUG) {
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build()
+            )
+        }
     }
 
     override fun onTerminate() {
