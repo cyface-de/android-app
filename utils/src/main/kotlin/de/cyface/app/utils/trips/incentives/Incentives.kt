@@ -20,7 +20,7 @@ package de.cyface.app.utils.trips.incentives
 
 import android.content.Context
 import de.cyface.synchronization.Auth
-import de.cyface.uploader.DefaultAuthenticator
+import de.cyface.uploader.DefaultUploader
 import net.openid.appauth.AuthorizationException
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -31,7 +31,7 @@ import java.net.URL
  * The API to get the voucher data from.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.3.0
  * @property context The authenticator to get the auth token from
  * @property apiEndpoint An API endpoint running a Cyface Incentives API, like `https://some.url/api/v1`
@@ -97,11 +97,11 @@ class Incentives(
 
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     private fun voucherCountEndpoint(): URL {
-        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint.toExternalForm()) + "voucher_count")
+        return URL(DefaultUploader.returnUrlWithTrailingSlash(apiEndpoint.toExternalForm()) + "voucher_count")
     }
 
     @Suppress("MemberVisibilityCanBePrivate") // Part of the API
     private fun voucherEndpoint(): URL {
-        return URL(DefaultAuthenticator.returnUrlWithTrailingSlash(apiEndpoint.toExternalForm()) + "voucher")
+        return URL(DefaultUploader.returnUrlWithTrailingSlash(apiEndpoint.toExternalForm()) + "voucher")
     }
 }
