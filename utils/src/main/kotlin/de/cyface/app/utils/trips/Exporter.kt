@@ -30,7 +30,7 @@ import android.widget.Toast
 import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.SharedConstants.DATABASE_NAME
-import de.cyface.persistence.dao.DefaultFileDao
+import de.cyface.persistence.io.DefaultFileIOHandler
 import de.cyface.persistence.serialization.Point3DFile
 import de.cyface.utils.Utils
 import de.cyface.utils.Validate
@@ -56,7 +56,7 @@ import kotlin.math.pow
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 2.0.0
+ * @version 2.0.1
  * @since 1.0.0
  */
 class Exporter(context: Context) {
@@ -86,7 +86,7 @@ class Exporter(context: Context) {
                 .show()
         }
 
-        val fileAccess = DefaultFileDao()
+        val fileAccess = DefaultFileIOHandler()
         val accelerations =
             fileAccess.getFolderPath(context, Point3DFile.ACCELERATIONS_FOLDER_NAME)
         val rotations = fileAccess.getFolderPath(context, Point3DFile.ROTATIONS_FOLDER_NAME)
