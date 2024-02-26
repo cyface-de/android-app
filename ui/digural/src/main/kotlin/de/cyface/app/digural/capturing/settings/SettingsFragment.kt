@@ -432,6 +432,7 @@ class SettingsFragment : Fragment() {
      *
      * @param data an intent which may contain result data
      */
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE) {

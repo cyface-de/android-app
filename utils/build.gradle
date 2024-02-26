@@ -38,7 +38,7 @@ buildscript {
     dependencies {
         // Exception tracking when using proguard
         classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7"
     }
 }
 
@@ -50,8 +50,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+
         // Placeholders for AndroidManifest.xml
         manifestPlaceholders = [
                 // Dummy schema, required by the AppAuth dependency.
