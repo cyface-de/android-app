@@ -119,9 +119,9 @@ ext {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     // Java version
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    kotlinTargetJavaVersion = "11"
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    kotlinTargetJavaVersion = "17"
 
     // Android-frontend
     sentryAndroidVersion = '7.4.0'
