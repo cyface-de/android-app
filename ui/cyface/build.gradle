@@ -41,7 +41,7 @@ buildscript {
     dependencies {
         // Exception tracking when using proguard
         classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7"
     }
 }
 
@@ -163,6 +163,8 @@ android {
     compileOptions {
         sourceCompatibility rootProject.ext.sourceCompatibility
         targetCompatibility rootProject.ext.targetCompatibility
+
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -218,6 +220,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
 
     // OAuth 2.0 with OpenID Connect
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
