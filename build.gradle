@@ -26,8 +26,8 @@
  */
 
 buildscript {
-    ext.gradle_version = '7.4.2' // Major release available but breaks publish [RFR-412]
-    ext.kotlin_version = "1.8.22" // Build fails when upgrading to 1.9.0/10
+    ext.gradle_version = '8.2.2'
+    ext.kotlin_version = "1.9.22"
     ext.matcher_version = "1.2.4"
 
     repositories {
@@ -45,7 +45,7 @@ buildscript {
 
 plugins {
     // To generate Proto DataStores for settings in ui/digural and utils/
-    id 'com.google.protobuf' version '0.8.19' apply false // Maybe keep in sync with other usages
+    id 'com.google.protobuf' version '0.9.4' apply false // Maybe keep in sync with other usages
 }
 
 ext {
@@ -90,7 +90,7 @@ ext {
     navigationVersion = "2.7.7"
     okHttpVersion = "4.12.0"
     // 1.1.0-alpha05: ':persistence:mergeExtDexDebugAndroidTest' fails (transitive dependency)
-    datastoreVersion = "1.1.0-beta01" // only 1.1.0 supports multi-process datastore
+    datastoreVersion = "1.1.0-alpha04" // only 1.1.0 supports multi-process datastore
 
     // Kotlin components
     coroutinesVersion = "1.6.4"
