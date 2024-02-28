@@ -93,7 +93,7 @@ ext {
     datastoreVersion = "1.1.0-alpha04" // only 1.1.0 supports multi-process datastore
 
     // Kotlin components
-    coroutinesVersion = "1.6.4"
+    coroutinesVersion = "1.7.3"
 
     // Other dependencies
     materialDialogsVersion = "3.3.0"
@@ -131,6 +131,7 @@ ext {
     materialVersion = '1.11.0'
     circelProgressVersion = "1.1.0" // Version > 1.1.0 (1.2.1) is currently not available
     androidxRecyclerViewVersion = "1.3.2"
+    coreLibraryDesugaringVersion = "2.0.4"
 }
 
 // Attention: Overwrites also the repositories used to retrieve the transitive dependencies in the submodules
