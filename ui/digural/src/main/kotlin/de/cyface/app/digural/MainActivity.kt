@@ -40,6 +40,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.LoginActivity
+import de.cyface.app.digural.auth.WebdavAuth
+import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.app.digural.button.ExternalCameraController
 import de.cyface.app.digural.capturing.settings.SettingsProvider
 import de.cyface.app.digural.capturing.settings.CustomSettings
@@ -76,9 +78,6 @@ import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.TokenResponse
 import java.io.IOException
 import java.lang.ref.WeakReference
 
@@ -87,8 +86,7 @@ import java.lang.ref.WeakReference
  * class.
  *
  * It calls the [de.cyface.app.auth.LoginActivity] if the user is unauthorized and uses the
- * outcome of the OAuth 2 authorization flow to negotiate the final authorized state. This is done
- * by performing the "authorization code exchange" if required.
+ * outcome of the to authorize [WebdavAuth].
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
@@ -141,7 +139,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The authorization.
      */
-    override lateinit var auth: OAuth2
+    override lateinit var auth: WebdavAuth
 
     /**
      * Instead of registering the `DataCapturingButton/CapturingFragment` here, the `CapturingFragment`
@@ -190,7 +188,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 ACCOUNT_TYPE,
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
-                sensorFrequency
+                sensorFrequency,
+                WebdavAuthenticator(this)
             )
             val deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
@@ -208,7 +207,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Authorization
-        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
+        auth = WebdavAuth(applicationContext, WebdavAuthenticator.settings)
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -253,23 +252,26 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             return
         }
 
-        // the stored AuthState is incomplete, so check if we are currently receiving the result of
-        // the authorization flow from the browser.
-        val response = AuthorizationResponse.fromIntent(intent)
+        // FIXME: Handle intend from he LoginActivity as in pre-Oauth code
+        /*val response = AuthorizationResponse.fromIntent(intent)
         val ex = AuthorizationException.fromIntent(intent)
         if (response != null || ex != null) {
             auth.updateAfterAuthorization(response, ex)
         }
         if (response?.authorizationCode != null) {
             // authorization code exchange is required
-            auth.updateAfterAuthorization(response, ex)
-            exchangeAuthorizationCode(response)
-        } else if (ex != null) {
+            auth.updateAfterAuthorization(response, ex)*/
+            val username = BuildConfig.testLogin
+            val password = BuildConfig.testPassword
+            auth.onLogIn(username, password, applicationContext, ACCOUNT_TYPE, AUTHORITY)
+
+            onAuthorized("logged in, account updated")
+        /*} else if (ex != null) {
             onUnauthorized("Auth flow failed: " + ex.message)
         } else {
             // The user is not logged in / logged out -> LoginActivity is called
             onUnauthorized("No auth state retained - re-auth required", false)
-        }
+        }*/
     }
 
     @Deprecated("Deprecated in Java")
@@ -315,7 +317,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         // Authorization
-        auth.dispose()
+        //auth.dispose()
     }
 
     /**
@@ -407,33 +409,6 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         runOnUiThread {
             Log.d(TAG, "authorized ($message)")
             startSynchronization()
-        }
-    }
-
-    @MainThread
-    private fun exchangeAuthorizationCode(authorizationResponse: AuthorizationResponse) {
-        Log.d(TAG, "Exchanging authorization code")
-        val requestSuccessful = auth.performTokenRequest(
-            authorizationResponse.createTokenExchangeRequest()
-        ) { tokenResponse: TokenResponse?, authException: AuthorizationException? ->
-            val authSuccessful = auth.handleCodeExchangeResponse(
-                tokenResponse,
-                authException,
-                ACCOUNT_TYPE,
-                applicationContext,
-                AUTHORITY
-            )
-            if (authSuccessful) {
-                onAuthorized("code exchanged, account updated")
-            } else {
-                onUnauthorized(
-                    ("Authorization Code exchange failed"
-                            + if (authException != null) authException.error else "")
-                )
-            }
-        }
-        if (!requestSuccessful) {
-            onUnauthorized("Client authentication method is unsupported")
         }
     }
 

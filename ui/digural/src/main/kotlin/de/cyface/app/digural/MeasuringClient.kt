@@ -20,16 +20,14 @@ package de.cyface.app.digural
 
 import android.app.Application
 import android.content.IntentFilter
-import android.os.StrictMode
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
+import de.cyface.app.digural.auth.WebdavAuth
+import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.synchronization.settings.SynchronizationSettings
-import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
-import de.cyface.synchronization.ErrorHandler.ErrorCode
-import de.cyface.synchronization.OAuth2
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
@@ -89,14 +87,14 @@ class MeasuringClient : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        CyfaceAuthenticator.settings = SynchronizationSettings( // synchronization
+        WebdavAuthenticator.settings = SynchronizationSettings( // synchronization
             this,
             BuildConfig.cyfaceServer,
-            OAuth2.Companion.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+            WebdavAuth.dummyAuthConfig()
         )
 
         // Register the activity to be called by the authenticator to request credentials from the user.
-        CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
+        WebdavAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
 
         // Register error listener
         errorHandler = ErrorHandler()
@@ -107,7 +105,7 @@ class MeasuringClient : Application() {
         errorHandler!!.addListener(errorListener)
 
         // Use strict mode in dev environment to crash e.g. when a resource failed to call close
-        if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) {
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectLeakedClosableObjects()
@@ -115,7 +113,7 @@ class MeasuringClient : Application() {
                     .penaltyDeath()
                     .build()
             )
-        }
+        }*/
     }
 
     override fun onTerminate() {

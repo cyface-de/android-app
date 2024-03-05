@@ -227,7 +227,9 @@ dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
 
     // OAuth 2.0 with OpenID Connect
-    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
+    //implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
+    // Used for WebDAV Communication
+    implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"

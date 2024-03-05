@@ -19,7 +19,6 @@
 package de.cyface.app.digural.auth
 
 import android.annotation.TargetApi
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -33,28 +32,10 @@ import androidx.annotation.ColorRes
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
 import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.R
-import de.cyface.synchronization.AuthStateManager
-import de.cyface.synchronization.Configuration
-import de.cyface.synchronization.CyfaceAuthenticator
-import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationRequest
-import net.openid.appauth.AuthorizationService
-import net.openid.appauth.AuthorizationServiceConfiguration
-import net.openid.appauth.ClientSecretBasic
-import net.openid.appauth.RegistrationRequest
-import net.openid.appauth.RegistrationResponse
-import net.openid.appauth.ResponseTypeValues
-import net.openid.appauth.browser.AnyBrowserMatcher
-import net.openid.appauth.browser.BrowserMatcher
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A login screen that offers login via email/password.
@@ -69,34 +50,20 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class LoginActivity : AppCompatActivity() {
 
-    private val TAG = "de.cyface.app.digural.login"
+    private val TAG = MainActivity.TAG + ".login"
     private val EXTRA_FAILED = "failed"
     private val RC_AUTH = 100
 
-    private var mAuthService: AuthorizationService? = null
-    private lateinit var mAuthStateManager: AuthStateManager
-    private lateinit var mConfiguration: Configuration
-
-    private val mClientId = AtomicReference<String>()
-    private val mAuthRequest = AtomicReference<AuthorizationRequest?>()
-    private val mAuthIntent = AtomicReference<CustomTabsIntent?>()
-    private var mAuthIntentLatch = CountDownLatch(1)
     private lateinit var mExecutor: ExecutorService
 
     private var mUsePendingIntents = false
 
-    private var mBrowserMatcher: BrowserMatcher = AnyBrowserMatcher.INSTANCE
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mExecutor = Executors.newSingleThreadExecutor()
-        mAuthStateManager = AuthStateManager.getInstance(this)
-        mConfiguration = Configuration.getInstance(this, CyfaceAuthenticator.settings)
 
         // Already authorized
-        if (mAuthStateManager.current.isAuthorized
-            && !mConfiguration.hasConfigurationChanged()
-        ) {
+        if (/*mAuthStateManager.current.isAuthorized*/true) {
             // As the LoginActivity should only be shown when the user is not authenticated
             // we can't forward to `MainActivity` just like that as this would lead to a loop.
             //Log.i(TAG, "User is already authenticated, processing to token activity")
@@ -111,16 +78,10 @@ class LoginActivity : AppCompatActivity() {
             mExecutor.submit { initializeAppAuth() }
         }
         findViewById<View>(R.id.start_auth).setOnClickListener { startAuth() }
-        if (!mConfiguration.isValid) {
+        /*if (!mConfiguration.isValid) {
             displayError(mConfiguration.configurationError!!, false)
             return
-        }
-        if (mConfiguration.hasConfigurationChanged()) {
-            // discard any existing authorization state due to the change of configuration
-            Log.i(TAG, "Configuration change detected, discarding old state")
-            mAuthStateManager.replace(AuthState())
-            mConfiguration.acceptConfiguration()
-        }
+        }*/
         if (intent.getBooleanExtra(EXTRA_FAILED, false)) {
             show("Authorization canceled")
         }
@@ -142,25 +103,25 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mAuthService != null) {
+        /*if (mAuthService != null) {
             mAuthService!!.dispose()
-        }
+        }*/
     }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         displayAuthOptions()
-        if (resultCode == RESULT_CANCELED) {
+        /*if (resultCode == RESULT_CANCELED) {
             show("Authorization canceled")
-        } else {
+        } else {*/
             show("Logging in ...")
             //Toast.makeText(applicationContext, "Logging in ...", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtras(data!!.extras!!)
             startActivity(intent)
             finish() // added because of our workflow where MainActivity calls LoginActivity
-        }
+        //}
     }
 
     @MainThread
@@ -169,7 +130,7 @@ class LoginActivity : AppCompatActivity() {
 
         // WrongThread inference is incorrect for lambdas
         // noinspection WrongThread
-        mExecutor.submit { doAuth() }
+        //mExecutor.submit { doAuth() }
     }
 
     /**
@@ -179,17 +140,17 @@ class LoginActivity : AppCompatActivity() {
     @WorkerThread
     private fun initializeAppAuth() {
         Log.i(TAG, "Initializing AppAuth")
-        recreateAuthorizationService()
-        if (mAuthStateManager.current.authorizationServiceConfiguration != null) {
+        //recreateAuthorizationService()
+        //if (mAuthStateManager.current.authorizationServiceConfiguration != null) {
             // configuration is already created, skip to client initialization
             Log.i(TAG, "auth config already established")
-            initializeClient()
+            //initializeClient()
             return
-        }
+        //}
 
         // if we are not using discovery, build the authorization service configuration directly
         // from the static configuration values.
-        if (mConfiguration.discoveryUri == null) {
+        /*if (mConfiguration.discoveryUri == null) {
             Log.i(TAG, "Creating auth config")
             val config = AuthorizationServiceConfiguration(
                 mConfiguration.authEndpointUri!!,
@@ -215,35 +176,14 @@ class LoginActivity : AppCompatActivity() {
                 )
             },
             mConfiguration.connectionBuilder
-        )
-    }
-
-    @MainThread
-    private fun handleConfigurationRetrievalResult(
-        config: AuthorizationServiceConfiguration?,
-        ex: AuthorizationException?
-    ) {
-        if (config == null) {
-            Log.i(TAG, "Failed to retrieve discovery document", ex)
-            val message = if (ex!!.message == "Network error") "Offline?" else ex.message
-            displayError(
-                getString(
-                    de.cyface.app.utils.R.string.failed_to_retrieve_discovery,
-                    message
-                ), true
-            )
-            return
-        }
-        Log.i(TAG, "Discovery document retrieved")
-        mAuthStateManager.replace(AuthState(config))
-        mExecutor.submit { initializeClient() }
+        )*/
     }
 
     /**
      * Initiates a dynamic registration request if a client ID is not provided by the static
      * configuration.
      */
-    @WorkerThread
+    /*@WorkerThread
     private fun initializeClient() {
         if (mConfiguration.clientId != null) {
             Log.i(TAG, "Using static client ID: " + mConfiguration.clientId)
@@ -279,9 +219,9 @@ class LoginActivity : AppCompatActivity() {
                 ex
             )
         }
-    }
+    }*/
 
-    @MainThread
+    /*@MainThread
     private fun handleRegistrationResponse(
         response: RegistrationResponse?,
         ex: AuthorizationException?
@@ -300,13 +240,13 @@ class LoginActivity : AppCompatActivity() {
         Log.i(TAG, "Dynamically registered client: " + response.clientId)
         mClientId.set(response.clientId)
         initializeAuthRequest()
-    }
+    }*/
 
     /**
      * Performs the authorization request, using the browser selected in the spinner,
      * and a user-provided `login_hint` if available.
      */
-    @WorkerThread
+    /*@WorkerThread
     private fun doAuth() {
         try {
             mAuthIntentLatch.await()
@@ -335,9 +275,9 @@ class LoginActivity : AppCompatActivity() {
             )
             startActivityForResult(intent, RC_AUTH)
         }
-    }
+    }*/
 
-    private fun recreateAuthorizationService() {
+    /*private fun recreateAuthorizationService() {
         if (mAuthService != null) {
             Log.i(TAG, "Discarding existing AuthService instance")
             mAuthService!!.dispose()
@@ -353,7 +293,7 @@ class LoginActivity : AppCompatActivity() {
         builder.setBrowserMatcher(mBrowserMatcher)
         builder.setConnectionBuilder(mConfiguration.connectionBuilder)
         return AuthorizationService(this, builder.build())
-    }
+    }*/
 
     @MainThread
     private fun displayLoading(loadingMessage: String) {
@@ -384,8 +324,8 @@ class LoginActivity : AppCompatActivity() {
 
     @MainThread
     private fun initializeAuthRequest() {
-        createAuthRequest(this@LoginActivity)
-        warmUpBrowser(this@LoginActivity)
+        /*createAuthRequest(this@LoginActivity)
+        warmUpBrowser(this@LoginActivity)*/
         displayAuthOptions()
     }
 
@@ -412,7 +352,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
-        private fun warmUpBrowser(loginActivity: LoginActivity) {
+        /*private fun warmUpBrowser(loginActivity: LoginActivity) {
             loginActivity.mAuthIntentLatch = CountDownLatch(1)
             loginActivity.mExecutor.execute {
                 Log.i(loginActivity.TAG, "Warming up browser instance for auth request")
@@ -435,6 +375,6 @@ class LoginActivity : AppCompatActivity() {
             )
                 .setScope(loginActivity.mConfiguration.scope)
             loginActivity.mAuthRequest.set(authRequestBuilder.build())
-        }
+        }*/
     }
 }

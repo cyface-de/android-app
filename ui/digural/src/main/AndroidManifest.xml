@@ -95,7 +95,7 @@
             android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
         </activity>
 
-        <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
+        <!-- The LoginActivity automatically launched by the WebdavAuthenticator -->
         <activity
             android:name=".auth.LoginActivity"
             android:label="@string/title_activity_login"
@@ -115,7 +115,7 @@
         <!-- Not exposing the Sync/Auth service as the system can still call them [CY-5524]. -->
         <!-- See https://developer.android.com/guide/topics/manifest/activity-element#exported -->
         <!-- "If `false`, the activity can be launched ... [by] privileged system components." -->
-        <service android:name="de.cyface.synchronization.CyfaceAuthenticatorService"
+        <service android:name="de.cyface.app.digural.auth.WebdavAuthenticatorService"
             android:exported="false"
             android:process=":sync"> <!-- should be fine to use the sync process -->
             <intent-filter>
@@ -126,7 +126,7 @@
                 android:resource="@xml/authenticator" />
         </service>
         <service
-            android:name="de.cyface.synchronization.CyfaceSyncService"
+            android:name="de.cyface.app.digural.upload.WebdavSyncService"
             android:exported="false"
             android:process=":sync">
             <intent-filter>
