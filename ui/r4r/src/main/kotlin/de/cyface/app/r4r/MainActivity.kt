@@ -59,8 +59,8 @@ import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
-import de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.CyfaceSyncService.Companion.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor

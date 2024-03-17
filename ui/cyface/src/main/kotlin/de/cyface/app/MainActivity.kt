@@ -63,6 +63,7 @@ import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProces
 import de.cyface.persistence.SetupException
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.CyfaceSyncService.Companion.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
@@ -333,7 +334,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         Log.d(TAG, "startSynchronization: No validAccountExists, requesting LoginActivity")
         accountManager.addAccount(
             ACCOUNT_TYPE,
-            de.cyface.synchronization.Constants.AUTH_TOKEN_TYPE,
+            AUTH_TOKEN_TYPE,
             null,
             null,
             this,
