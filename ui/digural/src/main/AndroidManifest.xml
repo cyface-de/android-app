@@ -111,6 +111,31 @@
             android:process=":persistence_process"
             android:syncable="true"
             tools:replace="android:authorities" />
+
+        <!-- Not exposing the Sync/Auth service as the system can still call them [CY-5524]. -->
+        <!-- See https://developer.android.com/guide/topics/manifest/activity-element#exported -->
+        <!-- "If `false`, the activity can be launched ... [by] privileged system components." -->
+        <service android:name="de.cyface.synchronization.CyfaceAuthenticatorService"
+            android:exported="false"
+            android:process=":sync"> <!-- should be fine to use the sync process -->
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <service
+            android:name="de.cyface.synchronization.CyfaceSyncService"
+            android:exported="false"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync_adapter" />
+        </service>
     </application>
 
 </manifest>
