@@ -14,21 +14,46 @@ on:
       - main
 
 jobs:
-  build:
+  androidTest:
     # Faster, but MacOS costs 8 ct/min instead of 0.8 ct/min of on Linux.
     # Unfortunately, `DataCapturingServiceTest.testDisconnectReconnect` fails on linux stack.
     # But as this is a public repository, Github Actions are currently free of charge.
-    runs-on: macos-latest # as recommended in `actions/android-emulator-runner`
+    #runs-on: macos-latest # as recommended in `actions/android-emulator-runner`
 
-    # To test against multiple APIs
+    # But we had to add `free-disk-space` to fix emulator flakiness. It only runs on ubuntu.
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 55
     strategy:
       matrix:
         api-level: [ 28 ]
         target: [ google_apis ] # required to avoid NPE in `Maps` at `GoogleMap.clear()`
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      # From https://github.com/android/nowinandroid/pull/1219/files to fix flaky emulator start
+      # See https://github.com/ReactiveCircus/android-emulator-runner/issues/324#issuecomment-1998737488
+      - name: Delete unnecessary tools 🔧
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          android: false # Keep Don't remove Android tools
+          tool-cache: true # Remove image tool cache - rm -rf "$AGENT_TOOLSDIRECTORY"
+          dotnet: true # rm -rf /usr/share/dotnet
+          haskell: true # rm -rf /opt/ghc...
+          swap-storage: true # rm -f /mnt/swapfile (4GiB)
+          docker-images: false # Takes 16s (`nowinandroid`), enable if needed in the future
+          large-packages: false # includes google-cloud-sdk and it's slow
+
+      # Set up KVM permissions to enable efficient Android emulator runs by modifying udev rules for universal access.
+      # From https://github.com/android/nowinandroid/blob/main/.github/workflows/Build.yaml#L142
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls /dev/kvm
+
+      - name: Checkout
+        uses: actions/checkout@v4
         # Does not work out of the box with a private repository
         # see https://github.com/actions/checkout/issues/287
         #with:
@@ -78,8 +103,8 @@ jobs:
       #  run: ./gradlew :ui:cyface:test :ui:r4r:test
 
       # Add caching to speed up connected tests below (see `actions/android-emulator-runner`)
-      - name: Gradle cache
-        uses: gradle/gradle-build-action@v2
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
 
       #- name: AVD cache
       #  uses: actions/cache@v3
@@ -103,19 +128,37 @@ jobs:
       #    disable-animations: true
       #    script: echo "Generated AVD snapshot for caching."
 
+      # From https://github.com/android/nowinandroid/blob/main/.github/workflows/Build.yaml#L142
+      - name: Build projects before running emulator
+        run: ./gradlew packageDebugAndroidTest
+
       # Only execute mock tests to exclude `@FlakyTest`s (instead of running `connectedCheck`)
       - name: Connected tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          force-avd-creation: false
+          #target: ${{ matrix.target }}
+          # From https://github.com/android/nowinandroid >>>
+          arch: x86_64
+          disable-animations: true
+          disk-size: 6000M
+          heap-size: 600M
+          # <<<<
           # default options are: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           # Action recommendation: -no-snapshot-save -camera-back none
           # To support future camera capturing tests: -camera-back emulated
-          #   but this lead to `Timeout waiting for emulator` error
+          #   but this lead to `Timeout waiting for emulator` error (which might be fixed now!)
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: ./gradlew :ui:cyface:connectedDebugAndroidTest
+          #avd-name: ubuntu-avd-28
+          #force-avd-creation: false
+          script: ./gradlew :ui:cyface:connectedDebugAndroidTest --daemon
           # To execute a single test class
-          #script: ./gradlew :ui:cyface:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=de.cyface.app.CapturingNotificationTest
+          #script: ./gradlew :ui:cyface:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=de.cyface.app.CapturingNotificationTest --daemon
+
+      # From https://github.com/android/nowinandroid/blob/main/.github/workflows/Build.yaml#L142
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.api-level }}
+          path: '**/build/reports/androidTests'
