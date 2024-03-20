@@ -130,7 +130,7 @@ jobs:
 
       # From https://github.com/android/nowinandroid/blob/main/.github/workflows/Build.yaml#L142
       - name: Build projects before running emulator
-        run: ./gradlew packageDebugAndroidTest
+        run: ./gradlew :ui:cyface:packageDebugAndroidTest
 
       # Only execute mock tests to exclude `@FlakyTest`s (instead of running `connectedCheck`)
       - name: Connected tests
