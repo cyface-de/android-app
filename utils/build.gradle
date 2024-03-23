@@ -58,10 +58,6 @@ android {
                 // Replace this in the app which in integrated the SDK.
                 'appAuthRedirectScheme': 'com.example.PLACEHOLDER'
         ]
-
-        // Ensure that the backend's "CyfaceFull" flavor is always used
-        missingDimensionStrategy 'project', 'cyface'
-        missingDimensionStrategy 'mode', 'full'
     }
 
     buildTypes {
