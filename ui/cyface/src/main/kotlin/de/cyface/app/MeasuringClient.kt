@@ -26,9 +26,8 @@ import de.cyface.app.auth.LoginActivity
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
-import de.cyface.synchronization.ErrorHandler.ErrorCode
 import de.cyface.synchronization.OAuth2
-import de.cyface.synchronization.settings.SynchronizationSettings
+import de.cyface.synchronization.settings.DefaultSynchronizationSettings
 import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
@@ -86,7 +85,7 @@ class MeasuringClient : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        CyfaceAuthenticator.settings = SynchronizationSettings( // synchronization
+        CyfaceAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
             this,
             BuildConfig.cyfaceServer,
             OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)

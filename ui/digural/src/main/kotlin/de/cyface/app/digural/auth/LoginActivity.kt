@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,423 +18,401 @@
  */
 package de.cyface.app.digural.auth
 
-import android.annotation.TargetApi
-import android.app.PendingIntent
+import android.accounts.Account
+import android.accounts.AccountAuthenticatorActivity
+import android.accounts.AccountManager
+import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import android.view.View
-import android.view.View.VISIBLE
-import android.widget.TextView
-import android.widget.Toast
-import androidx.annotation.AnyThread
-import androidx.annotation.ColorRes
-import androidx.annotation.MainThread
-import androidx.annotation.WorkerThread
-import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
-import de.cyface.app.digural.MainActivity
+import android.widget.Button
+import android.widget.ProgressBar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.textfield.TextInputEditText
+import de.cyface.app.digural.MeasuringClient
+import de.cyface.app.digural.MeasuringClient.Companion.errorHandler
 import de.cyface.app.digural.R
-import de.cyface.synchronization.AuthStateManager
-import de.cyface.synchronization.Configuration
+import de.cyface.app.digural.upload.WebdavSyncService
+import de.cyface.app.digural.utils.Constants
+import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
+import de.cyface.app.digural.utils.Constants.AUTHORITY
+import de.cyface.app.digural.utils.Constants.TAG
 import de.cyface.synchronization.CyfaceAuthenticator
-import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationRequest
-import net.openid.appauth.AuthorizationService
-import net.openid.appauth.AuthorizationServiceConfiguration
-import net.openid.appauth.ClientSecretBasic
-import net.openid.appauth.RegistrationRequest
-import net.openid.appauth.RegistrationResponse
-import net.openid.appauth.ResponseTypeValues
-import net.openid.appauth.browser.AnyBrowserMatcher
-import net.openid.appauth.browser.BrowserMatcher
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicReference
+import de.cyface.synchronization.ErrorHandler
+import de.cyface.synchronization.ErrorHandler.ErrorCode
+import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
+import io.sentry.Sentry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.lang.RuntimeException
+import java.lang.ref.WeakReference
+import java.util.regex.Pattern
 
 /**
  * A login screen that offers login via email/password.
  *
- * *ATTENTION*:
- * The browser page opened by this activity stops working on the emulator after some time.
- * Use a real device to test the auth workflow for now.
- *
  * @author Armin Schnabel
- * @version 4.0.1
+ * @version 3.3.0
  * @since 1.0.0
  */
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AccountAuthenticatorActivity() {
+    private lateinit var context: WeakReference<Context>
 
-    private val TAG = "de.cyface.app.digural.login"
-    private val EXTRA_FAILED = "failed"
-    private val RC_AUTH = 100
+    private val activityScope = CoroutineScope(Job() + Dispatchers.IO)
 
-    private var mAuthService: AuthorizationService? = null
-    private lateinit var mAuthStateManager: AuthStateManager
-    private lateinit var mConfiguration: Configuration
+    /**
+     * The settings used by both, UIs and libraries.
+     */
+    private val appSettings: AppSettings
+        get() = MeasuringClient.appSettings
 
-    private val mClientId = AtomicReference<String>()
-    private val mAuthRequest = AtomicReference<AuthorizationRequest?>()
-    private val mAuthIntent = AtomicReference<CustomTabsIntent?>()
-    private var mAuthIntentLatch = CountDownLatch(1)
-    private lateinit var mExecutor: ExecutorService
+    // UI references
+    private var progressBar: ProgressBar? = null
 
-    private var mUsePendingIntents = false
+    /**
+     * A `Button` which is used to confirm the entered credentials.
+     */
+    private var loginButton: Button? = null
 
-    private var mBrowserMatcher: BrowserMatcher = AnyBrowserMatcher.INSTANCE
+    /**
+     * Needs to be resettable for testing. That's the only way to mock a single method of Android's Activity's
+     */
+    @JvmField
+    var loginInput: TextInputEditText? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mExecutor = Executors.newSingleThreadExecutor()
-        mAuthStateManager = AuthStateManager.getInstance(this)
-        mConfiguration = Configuration.getInstance(this, CyfaceAuthenticator.settings)
+    @JvmField
+    var passwordInput: TextInputEditText? = null
 
-        // Already authorized
-        if (mAuthStateManager.current.isAuthorized
-            && !mConfiguration.hasConfigurationChanged()
-        ) {
-            // As the LoginActivity should only be shown when the user is not authenticated
-            // we can't forward to `MainActivity` just like that as this would lead to a loop.
-            //Log.i(TAG, "User is already authenticated, processing to token activity")
-            Log.e(TAG, "User is already authenticated")
-            show("User is already authenticated")
-            finish()
-            return
-        }
+    /**
+     * Needs to be nullable and resettable for testing as Android's `Patterns` is null in unit test.
+     *
+     * That's the only way to mock a single method of Android's Activity's.
+     */
+    @JvmField
+    var eMailPattern: Pattern? = Patterns.EMAIL_ADDRESS
 
-        setContentView(R.layout.activity_login)
-        findViewById<View>(R.id.retry).setOnClickListener {
-            mExecutor.submit { initializeAppAuth() }
-        }
-        findViewById<View>(R.id.start_auth).setOnClickListener { startAuth() }
-        if (!mConfiguration.isValid) {
-            displayError(mConfiguration.configurationError!!, false)
-            return
-        }
-        if (mConfiguration.hasConfigurationChanged()) {
-            // discard any existing authorization state due to the change of configuration
-            Log.i(TAG, "Configuration change detected, discarding old state")
-            mAuthStateManager.replace(AuthState())
-            mConfiguration.acceptConfiguration()
-        }
-        if (intent.getBooleanExtra(EXTRA_FAILED, false)) {
-            show("Authorization canceled")
-        }
-        displayLoading(getString(de.cyface.app.utils.R.string.initializing))
-        mExecutor.submit { initializeAppAuth() }
-    }
+    private val errorListener = ErrorHandler.ErrorListener { errorCode, errorMessage, _ ->
+        if (errorCode == ErrorCode.UNAUTHORIZED) {
+            passwordInput!!.error = errorMessage
+            passwordInput!!.requestFocus()
 
-    override fun onStart() {
-        super.onStart()
-        if (mExecutor.isShutdown) {
-            mExecutor = Executors.newSingleThreadExecutor()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mExecutor.shutdownNow()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (mAuthService != null) {
-            mAuthService!!.dispose()
+            // All other errors are shown as toast by the MeasuringClient
         }
     }
 
     @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        displayAuthOptions()
-        if (resultCode == RESULT_CANCELED) {
-            show("Authorization canceled")
-        } else {
-            show("Logging in ...")
-            //Toast.makeText(applicationContext, "Logging in ...", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtras(data!!.extras!!)
-            startActivity(intent)
-            finish() // added because of our workflow where MainActivity calls LoginActivity
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login)
+        context = WeakReference(this)
+
+        // Set up the login form
+        loginInput = findViewById(R.id.input_login)
+        passwordInput = findViewById(R.id.input_password)
+        loginButton = findViewById(R.id.login_button)
+        loginButton!!.setOnClickListener { attemptLogin() }
+        progressBar = findViewById(R.id.login_progress_bar)
+        errorHandler!!.addListener(errorListener)
     }
 
-    @MainThread
-    fun startAuth() {
-        displayLoading(getString(de.cyface.app.utils.R.string.making_authorization_request))
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // Required to get the latest intent in `onResume`, when using `singleTask` launch mode
+        setIntent(intent)
+    }
 
-        // WrongThread inference is incorrect for lambdas
-        // noinspection WrongThread
-        mExecutor.submit { doAuth() }
+    override fun onDestroy() {
+        errorHandler!!.removeListener(errorListener)
+        super.onDestroy()
     }
 
     /**
-     * Initializes the authorization service configuration if necessary, either from the local
-     * static values or by retrieving an OpenID discovery document.
+     * Attempts to sign in with the account specified by the login form.
+     *
+     * If there are form errors (invalid email, missing fields, etc.), the
+     * errors are presented and no actual login attempt is made.
      */
-    @WorkerThread
-    private fun initializeAppAuth() {
-        Log.i(TAG, "Initializing AppAuth")
-        recreateAuthorizationService()
-        if (mAuthStateManager.current.authorizationServiceConfiguration != null) {
-            // configuration is already created, skip to client initialization
-            Log.i(TAG, "auth config already established")
-            initializeClient()
+    private fun attemptLogin() {
+        // Update view
+        loginInput!!.error = null
+        passwordInput!!.error = null
+        loginButton!!.isEnabled = false
+
+        // Check for valid credentials
+        Validate.notNull(loginInput!!.text)
+        Validate.notNull(passwordInput!!.text)
+        val login = loginInput!!.text.toString()
+        val password = passwordInput!!.text.toString()
+        if (!credentialsAreValid(login, password, LOGIN_MUST_BE_AN_EMAIL_ADDRESS)) {
+            loginButton!!.isEnabled = true
             return
         }
 
-        // if we are not using discovery, build the authorization service configuration directly
-        // from the static configuration values.
-        if (mConfiguration.discoveryUri == null) {
-            Log.i(TAG, "Creating auth config")
-            val config = AuthorizationServiceConfiguration(
-                mConfiguration.authEndpointUri!!,
-                mConfiguration.tokenEndpointUri!!,
-                mConfiguration.registrationEndpointUri,
-                mConfiguration.endSessionEndpoint
-            )
-            mAuthStateManager.replace(AuthState(config))
-            initializeClient()
-            return
-        }
+        // Update view
+        progressBar!!.isIndeterminate = true
+        progressBar!!.visibility = View.VISIBLE
 
-        // WrongThread inference is incorrect for lambdas
-        // noinspection WrongThread
-        runOnUiThread { displayLoading(getString(de.cyface.app.utils.R.string.retrieving_discovery_document)) }
-        Log.i(TAG, "Retrieving OpenID discovery doc")
-        AuthorizationServiceConfiguration.fetchFromUrl(
-            mConfiguration.discoveryUri!!,
-            { config: AuthorizationServiceConfiguration?, ex: AuthorizationException? ->
-                handleConfigurationRetrievalResult(
-                    config,
-                    ex
+        // The CyfaceAuthenticator reads the credentials from the account so we store them there
+        updateAccount(this, login, password)
+
+        // Send async login attempt
+        activityScope.launch {
+            try {
+                val account: Account = getAccount(context.get()!!)
+
+                // Verify the login credentials
+                WebdavAuth(context.get()!!, WebdavAuthenticator.settings).login(
+                    login, password, context.get()!!, ACCOUNT_TYPE, AUTHORITY
                 )
-            },
-            mConfiguration.connectionBuilder
-        )
-    }
 
-    @MainThread
-    private fun handleConfigurationRetrievalResult(
-        config: AuthorizationServiceConfiguration?,
-        ex: AuthorizationException?
-    ) {
-        if (config == null) {
-            Log.i(TAG, "Failed to retrieve discovery document", ex)
-            val message = if (ex!!.message == "Network error") "Offline?" else ex.message
-            displayError(
-                getString(
-                    de.cyface.app.utils.R.string.failed_to_retrieve_discovery,
-                    message
-                ), true
-            )
-            return
-        }
-        Log.i(TAG, "Discovery document retrieved")
-        mAuthStateManager.replace(AuthState(config))
-        mExecutor.submit { initializeClient() }
-    }
+                // Explicitly calling WebdavAuthenticator.getAuthToken(), see its documentation
+                val authenticator = WebdavAuthenticator(context.get()!!)
+                val authToken = authenticator.getAuthToken(
+                        null,
+                        account,
+                        WebdavSyncService.AUTH_TOKEN_TYPE,
+                        null
+                    ).getString(AccountManager.KEY_AUTHTOKEN)!!
 
-    /**
-     * Initiates a dynamic registration request if a client ID is not provided by the static
-     * configuration.
-     */
-    @WorkerThread
-    private fun initializeClient() {
-        if (mConfiguration.clientId != null) {
-            Log.i(TAG, "Using static client ID: " + mConfiguration.clientId)
-            // use a statically configured client ID
-            mClientId.set(mConfiguration.clientId)
-            runOnUiThread { initializeAuthRequest() }
-            return
-        }
-        val lastResponse = mAuthStateManager.current.lastRegistrationResponse
-        if (lastResponse != null) {
-            Log.i(TAG, "Using dynamic client ID: " + lastResponse.clientId)
-            // already dynamically registered a client ID
-            mClientId.set(lastResponse.clientId)
-            runOnUiThread { initializeAuthRequest() }
-            return
-        }
+                Validate.notNull(authToken)
+                Log.d(TAG, "Setting auth token to: **" + authToken.substring(authToken.length - 7))
+                val accountManager = AccountManager.get(context.get())
+                accountManager.setAuthToken(
+                    account,
+                    WebdavSyncService.AUTH_TOKEN_TYPE,
+                    authToken
+                )
+                //return@async AuthTokenRequestParams(account, true)
 
-        // WrongThread inference is incorrect for lambdas
-        // noinspection WrongThread
-        runOnUiThread { displayLoading(getString(de.cyface.app.utils.R.string.dynamically_registering_client)) }
-        Log.i(TAG, "Dynamically registering client")
-        val registrationRequest = RegistrationRequest.Builder(
-            mAuthStateManager.current.authorizationServiceConfiguration!!,
-            listOf(mConfiguration.redirectUri)
-        )
-            .setTokenEndpointAuthenticationMethod(ClientSecretBasic.NAME)
-            .build()
-        mAuthService!!.performRegistrationRequest(
-            registrationRequest
-        ) { response: RegistrationResponse?, ex: AuthorizationException? ->
-            handleRegistrationResponse(
-                response,
-                ex
-            )
-        }
-    }
+                // Equals tutorial's "finishLogin()"
+                val intent = Intent()
+                intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name)
+                intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, ACCOUNT_TYPE)
+                intent.putExtra(
+                    AccountManager.KEY_AUTHTOKEN,
+                    WebdavSyncService.AUTH_TOKEN_TYPE
+                )
 
-    @MainThread
-    private fun handleRegistrationResponse(
-        response: RegistrationResponse?,
-        ex: AuthorizationException?
-    ) {
-        mAuthStateManager.updateAfterRegistration(response, ex)
-        if (response == null) {
-            Log.i(TAG, "Failed to dynamically register client", ex)
-            displayErrorLater(
-                getString(
-                    de.cyface.app.utils.R.string.failed_to_register_client,
-                    ex!!.message
-                ), true
-            )
-            return
-        }
-        Log.i(TAG, "Dynamically registered client: " + response.clientId)
-        mClientId.set(response.clientId)
-        initializeAuthRequest()
-    }
+                // Return the information back to the Authenticator
+                setAccountAuthenticatorResult(intent.extras)
+                setResult(RESULT_OK, intent)
 
-    /**
-     * Performs the authorization request, using the browser selected in the spinner,
-     * and a user-provided `login_hint` if available.
-     */
-    @WorkerThread
-    private fun doAuth() {
-        try {
-            mAuthIntentLatch.await()
-        } catch (ex: InterruptedException) {
-            Log.w(TAG, "Interrupted while waiting for auth intent")
-        }
-        if (mUsePendingIntents) { // We currently always use the other option below
-            val completionIntent = Intent(this, MainActivity::class.java)
-            val cancelIntent = Intent(this, LoginActivity::class.java)
-            cancelIntent.putExtra(EXTRA_FAILED, true)
-            cancelIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            var flags = 0
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                flags = flags or PendingIntent.FLAG_MUTABLE
+                // Hide the keyboard or else it can overlap the permission request
+                runOnUiThread {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        loginButton!!.windowInsetsController!!.hide(WindowInsetsCompat.Type.ime())
+                    } else {
+                        ViewCompat.getWindowInsetsController(loginButton!!)!!
+                            .hide(WindowInsetsCompat.Type.ime())
+                    }
+                    progressBar!!.visibility = View.GONE
+                    finish()
+                }
+            } catch (e: Exception) {
+                // Using ErrorHandler to show soft error like "account not activated" instead
+                when (e) {
+                    is LoginFailed -> {
+                        ErrorHandler.sendErrorIntent(
+                            context.get(),
+                            ErrorCode.AUTHENTICATION_ERROR.code,
+                            e.message,
+                            false
+                        )
+                    }
+                }
+
+                reportError(e)
+
+                runOnUiThread {
+                    progressBar!!.visibility = View.GONE
+                    // Clean up if the getAuthToken failed, else the LoginActivity is probably not shown
+                    try {
+                        val account: Account = getAccount(context.get()!!)
+                        deleteAccount(context.get()!!, account)
+                    } catch (e: RuntimeException) {
+                        Log.e(TAG, "Failed to delete account after login failure.", e)
+                    }
+                    loginButton!!.isEnabled = true
+                }
             }
-            mAuthService!!.performAuthorizationRequest(
-                mAuthRequest.get()!!,
-                PendingIntent.getActivity(this, 0, completionIntent, flags),
-                PendingIntent.getActivity(this, 0, cancelIntent, flags),
-                mAuthIntent.get()!!
-            )
-        } else {
-            val intent = mAuthService!!.getAuthorizationRequestIntent(
-                mAuthRequest.get()!!,
-                mAuthIntent.get()!!
-            )
-            startActivityForResult(intent, RC_AUTH)
         }
     }
 
-    private fun recreateAuthorizationService() {
-        if (mAuthService != null) {
-            Log.i(TAG, "Discarding existing AuthService instance")
-            mAuthService!!.dispose()
+    private fun reportError(e: Exception) {
+        // Before, we could not capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
+        // We also didn't want to capture the errors in the error handler as we don't have the stacktrace there.
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        if (reportErrors) {
+            Sentry.captureException(e)
         }
-        mAuthService = createAuthorizationService()
-        mAuthRequest.set(null)
-        mAuthIntent.set(null)
+        // "the authenticator could not honor the request due to a network error"
+        Log.d(TAG, "Login failed - removing account to allow new login.", e)
     }
 
-    private fun createAuthorizationService(): AuthorizationService {
-        Log.i(TAG, "Creating authorization service")
-        val builder = AppAuthConfiguration.Builder()
-        builder.setBrowserMatcher(mBrowserMatcher)
-        builder.setConnectionBuilder(mConfiguration.connectionBuilder)
-        return AuthorizationService(this, builder.build())
+    /**
+     * Returns the Cyface account. Throws a Runtime Exception if no or more than one account exists.
+     *
+     * @param context the Context to load the AccountManager
+     * @return the only existing account
+     */
+    private fun getAccount(context: Context): Account {
+        val accountManager = AccountManager.get(context)
+        val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
+        Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
+        Validate.isTrue(existingAccounts.isNotEmpty(), "No account exists.")
+        return existingAccounts[0]
     }
 
-    @MainThread
-    private fun displayLoading(loadingMessage: String) {
-        findViewById<View>(R.id.loading_container).visibility = VISIBLE
-        findViewById<View>(R.id.auth_container).visibility = View.GONE
-        findViewById<View>(R.id.error_container).visibility = View.GONE
-        (findViewById<View>(R.id.loading_description) as TextView).text =
-            loadingMessage
-    }
-
-    @MainThread
-    private fun displayError(error: String, recoverable: Boolean) {
-        findViewById<View>(R.id.error_container).visibility = VISIBLE
-        findViewById<View>(R.id.loading_container).visibility = View.GONE
-        findViewById<View>(R.id.auth_container).visibility = View.GONE
-        (findViewById<View>(R.id.error_description) as TextView).text = error
-        findViewById<View>(R.id.retry).visibility = if (recoverable) VISIBLE else View.GONE
-    }
-
-    // WrongThread inference is incorrect in this case
-    @AnyThread
-    private fun displayErrorLater(
-        error: String,
-        @Suppress("SameParameterValue") recoverable: Boolean
-    ) {
-        runOnUiThread { displayError(error, recoverable) }
-    }
-
-    @MainThread
-    private fun initializeAuthRequest() {
-        createAuthRequest(this@LoginActivity)
-        warmUpBrowser(this@LoginActivity)
-        displayAuthOptions()
-    }
-
-    @MainThread
-    private fun displayAuthOptions() {
-        findViewById<View>(R.id.auth_container).visibility = VISIBLE
-        findViewById<View>(R.id.loading_container).visibility = View.GONE
-        findViewById<View>(R.id.error_container).visibility = View.GONE
-    }
-
-    @Suppress("SameParameterValue")
-    @MainThread
-    private fun show(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private fun getColorCompat(@ColorRes color: Int): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getColor(color)
-        } else {
-            resources.getColor(color)
+    /**
+     * Checks if the format of the credentials provided is valid, i.e. has the allowed length and
+     * is not empty and, if requested, checks if the login is an email address.
+     *
+     * @param login The login string
+     * @param password The password string
+     * @param loginMustBeAnEmailAddress True if the login should be checked to be a valid email address
+     * @return true is the credentials are in a valid format
+     */
+    fun credentialsAreValid(
+        login: String?,
+        password: String?,
+        loginMustBeAnEmailAddress: Boolean
+    ): Boolean {
+        var valid = true
+        if (login.isNullOrEmpty()) {
+            loginInput!!.error =
+                getString(R.string.error_message_field_required)
+            loginInput!!.requestFocus()
+            valid = false
+        } else if (login.length < 4) {
+            loginInput!!.error =
+                getString(R.string.error_message_login_too_short)
+            loginInput!!.requestFocus()
+            valid = false
+        } else if (loginMustBeAnEmailAddress && !eMailPattern!!.matcher(login).matches()) {
+            loginInput!!.error = getString(R.string.error_message_invalid_email)
+            loginInput!!.requestFocus()
+            valid = false
         }
+        if (password.isNullOrEmpty()) {
+            passwordInput!!.error =
+                getString(R.string.error_message_field_required)
+            passwordInput!!.requestFocus()
+            valid = false
+        } else if (password.length < 6) {
+            passwordInput!!.error =
+                getString(R.string.error_message_password_too_short)
+            passwordInput!!.requestFocus()
+            valid = false
+        } else if (password.length > 20) {
+            passwordInput!!.error =
+                getString(R.string.error_message_password_too_short)
+            passwordInput!!.requestFocus()
+            valid = false
+        }
+        return valid
     }
 
     companion object {
-        private fun warmUpBrowser(loginActivity: LoginActivity) {
-            loginActivity.mAuthIntentLatch = CountDownLatch(1)
-            loginActivity.mExecutor.execute {
-                Log.i(loginActivity.TAG, "Warming up browser instance for auth request")
-                val intentBuilder = loginActivity.mAuthService!!.createCustomTabsIntentBuilder(
-                    loginActivity.mAuthRequest.get()!!.toUri()
-                )
-                intentBuilder.setToolbarColor(loginActivity.getColorCompat(de.cyface.app.utils.R.color.defaultPrimary))
-                loginActivity.mAuthIntent.set(intentBuilder.build())
-                loginActivity.mAuthIntentLatch.countDown()
+        // True if the login must match the email pattern TODO [CY-4099]: Needs to be configurable from outside
+        private const val LOGIN_MUST_BE_AN_EMAIL_ADDRESS = false
+
+        /**
+         * Updates the credentials
+         *
+         * @param context The [Context] required to add an [Account]
+         * @param login The username of the account
+         * @param password The password of the account
+         */
+        private fun updateAccount(context: Context, login: String, password: String) {
+            Validate.notEmpty(login)
+            Validate.notEmpty(password)
+            val accountManager = AccountManager.get(context)
+            val account = Account(login, ACCOUNT_TYPE)
+
+            // Update credentials if the account already exists
+            var accountUpdated = false
+            val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
+            for (existingAccount in existingAccounts) {
+                if (existingAccount == account) {
+                    accountManager.setPassword(account, password)
+                    accountUpdated = true
+                    Log.d(TAG, "Updated existing account.")
+                }
             }
+
+            // Add new account when it does not yet exist
+            if (!accountUpdated) {
+
+                // Delete unused Cyface accounts
+                for (existingAccount in existingAccounts) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        accountManager.removeAccountExplicitly(existingAccount)
+                    } else {
+                        accountManager.removeAccount(account, null, null)
+                    }
+                    Log.d(TAG, "Removed existing account: $existingAccount")
+                }
+                createAccount(context, login, password)
+            }
+            Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
         }
 
-        private fun createAuthRequest(loginActivity: LoginActivity) {
-            Log.i(loginActivity.TAG, "Creating auth request")
-            val authRequestBuilder = AuthorizationRequest.Builder(
-                loginActivity.mAuthStateManager.current.authorizationServiceConfiguration!!,
-                loginActivity.mClientId.get(),
-                ResponseTypeValues.CODE,
-                loginActivity.mConfiguration.redirectUri
-            )
-                .setScope(loginActivity.mConfiguration.scope)
-            loginActivity.mAuthRequest.set(authRequestBuilder.build())
+        /**
+         * Creates a temporary `Account` which can only be used to check the credentials.
+         *
+         * **ATTENTION:** If the login is successful you need to use `WiFiSurveyor.makeAccountSyncable`
+         * to ensure the `WifiSurveyor` works as expected. We cannot inject the `WiFiSurveyor` as the
+         * [LoginActivity] is called by Android.
+         *
+         * @param context The current Android context (i.e. Activity or Service).
+         * @param username The username of the account to be created.
+         * @param password The password of the account to be created. May be null if a custom [CyfaceAuthenticator] is
+         * used instead of a LoginActivity to return tokens as in `MovebisDataCapturingService`.
+         */
+        private fun createAccount(
+            context: Context, username: String,
+            password: String
+        ) {
+            val accountManager = AccountManager.get(context)
+            val newAccount = Account(username, ACCOUNT_TYPE)
+            Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
+            Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
+            Log.v(de.cyface.synchronization.Constants.TAG, "New account added")
+            ContentResolver.setSyncAutomatically(newAccount, Constants.AUTHORITY, false)
+            // Synchronization can be disabled via {@link CyfaceDataCapturingService#setSyncEnabled}
+            ContentResolver.setIsSyncable(newAccount, Constants.AUTHORITY, 1)
+            // Do not use validateAccountFlags in production code as periodicSync flags are set async
+
+            // PeriodicSync and syncAutomatically is set dynamically by the {@link WifiSurveyor}
+        }
+
+        /**
+         * This method removes the existing account. This is useful as we add a temporary account to check
+         * the credentials but we have to remove it when the credentials are incorrect.
+         *
+         * This static method must be implemented as in the non-static `WiFiSurveyor.deleteAccount`.
+         * We cannot inject the `WiFiSurveyor` as the [LoginActivity] is called by Android.
+         *
+         * @param context The [Context] to get the [AccountManager]
+         * @param account the `Account` to be removed
+         */
+        private fun deleteAccount(context: Context, account: Account) {
+            ContentResolver.removePeriodicSync(account, Constants.AUTHORITY, Bundle.EMPTY)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
+                AccountManager.get(context).removeAccount(account, null, null)
+            } else {
+                AccountManager.get(context).removeAccountExplicitly(account)
+            }
         }
     }
 }

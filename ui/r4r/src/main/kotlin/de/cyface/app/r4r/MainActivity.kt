@@ -170,7 +170,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                 ACCOUNT_TYPE,
                 CapturingEventHandler(),
                 unInterestedListener,
-                sensorFrequency
+                sensorFrequency,
+                CyfaceAuthenticator(this)
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.

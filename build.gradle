@@ -65,10 +65,10 @@ ext {
     // When `android-app` is checkout out, `rootProject.uploaderVersion` in the submodules will point
     // to `android-app/build.gradle` instead of `submodule/build.gradle`.
     cyfaceSerializationVersion = "3.2.0"
-    cyfaceUploaderVersion = "1.2.0"
+    cyfaceUploaderVersion = "1.3.0"
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.11.0"
+    cyfaceAndroidBackendVersion = "7.11.1"
     cyfaceEnergySettingsVersion = "4.0.6"
     cyfaceCameraServiceVersion = "4.5.4"
 
@@ -94,6 +94,9 @@ ext {
 
     // Kotlin components
     coroutinesVersion = "1.7.3"
+
+    // Digural UI dependencies
+    sardineVersion = "0.9"
 
     // Other dependencies
     materialDialogsVersion = "3.3.0"

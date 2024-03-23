@@ -34,9 +34,11 @@ android.enableJetifier=false
 android.defaults.buildfeatures.buildconfig=true
 android.nonFinalResIds=false
 
+# Github
 githubUser=
 githubToken=
 
+# Cyface / RFR UI >>>>>>>>>>>>>>
 google.maps_api_key=
 google.maps-api_key.r4r=
 
@@ -65,5 +67,11 @@ cyface.local_oauth_discovery=
 cyface.emulator_api=
 cyface.emulator_incentives_api=
 cyface.emulator_oauth_discovery=
+# <<<<<<<<<<<<<< Cyface / RFR
+
+# Digural UI >>>>>>>>>>>>>>
+digural.api=
+digural.staging_api=
+# <<<<<<<<<<<<<< Digural
 
 # keep an empty line at the end for the CI to inject new lines easily

@@ -183,7 +183,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 ACCOUNT_TYPE,
                 DataCapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
-                sensorFrequency
+                sensorFrequency,
+                CyfaceAuthenticator(this)
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.

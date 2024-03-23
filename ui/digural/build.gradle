@@ -68,23 +68,14 @@ android {
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
         buildConfigField "int", "currentTerms", "5"
 
-        // Ensure that the backend's "CyfaceFull" flavor is always used
-        missingDimensionStrategy 'project', 'cyface'
-        missingDimensionStrategy 'mode', 'full'
-
         // Placeholders for AndroidManifest.xml
         manifestPlaceholders = [
                 // Load Google Maps API key
                 googleMapsApiKey:"${project.findProperty('google.maps_api_key')}",
 
-                // Define app link scheme for AppAuth redirect
-                // Ensure this is consistent with the redirect URI defined below in `oauthRedirect`
-                // or specify additional redirect URIs in AndroidManifest.xml
-                'appAuthRedirectScheme': 'de.cyface.app.digural'
+                // The SDK requires us to replace this, but we don't use it
+                'appAuthRedirectScheme': 'NOT_IN_USE'
         ]
-
-        // oauth redirect uri
-        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect.digural')}\""
     }
 
     buildTypes {
@@ -92,37 +83,9 @@ android {
             // Run code coverage reports by default on debug builds.
             testCoverageEnabled = true
 
-            // Select one of the APIs below, depending on your needs
-
-            // Phone - to local collector - ! only if iptables allow connection from outside
-            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
-            //manifestPlaceholders = [usesCleartextTraffic:"true"]
-
-            // Phone - to local production - ! only if iptables allow connection from outside
-            // CertPathValidatorException: Trust anchor for certification path not found.
-            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
-            //manifestPlaceholders = [usesCleartextTraffic:"false"]
-
-            // EMULATOR - to local collector
-            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
-            //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
-
             // Staging
-            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
-            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
-            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
-            buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
-            buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
+            buildConfigField "String", "collectorApi", "\"${project.findProperty('digural.staging_api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"true"] // external Digural camera API uses http
-
-            // MOCK-API - only supports login - used by UI test on CI
-            //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
-            //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
-            //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
@@ -131,9 +94,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // signingConfig is set by the CI
-            buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
-            buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
-            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
+            buildConfigField "String", "collectorApi", "\"${project.findProperty('digural.api')}\""
             manifestPlaceholders = [usesCleartextTraffic:"true"] // external Digural camera API uses http
         }
     }
@@ -226,8 +187,8 @@ dependencies {
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
 
-    // OAuth 2.0 with OpenID Connect
-    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
+    // Used for WebDAV Communication
+    implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
