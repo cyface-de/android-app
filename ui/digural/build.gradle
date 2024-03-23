@@ -73,14 +73,9 @@ android {
                 // Load Google Maps API key
                 googleMapsApiKey:"${project.findProperty('google.maps_api_key')}",
 
-                // Define app link scheme for AppAuth redirect
-                // Ensure this is consistent with the redirect URI defined below in `oauthRedirect`
-                // or specify additional redirect URIs in AndroidManifest.xml
-                'appAuthRedirectScheme': 'de.cyface.app.digural'
+                // The SDK requires us to replace this, but we don't use it
+                'appAuthRedirectScheme': 'NOT_IN_USE'
         ]
-
-        // oauth redirect uri
-        buildConfigField "String", "oauthRedirect", "\"${project.findProperty('cyface.oauth_redirect.digural')}\""
     }
 
     buildTypes {
@@ -92,24 +87,20 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
-            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
             buildConfigField "String", "testPassword", "\"${project.findProperty('cyface.staging_password')}\""
             manifestPlaceholders = [usesCleartextTraffic:"true"] // external Digural camera API uses http
@@ -117,7 +108,6 @@ android {
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
-            //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
         }
         release {
@@ -129,7 +119,6 @@ android {
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
-            buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
             manifestPlaceholders = [usesCleartextTraffic:"true"] // external Digural camera API uses http
         }
     }
@@ -222,8 +211,6 @@ dependencies {
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
 
-    // OAuth 2.0 with OpenID Connect
-    //implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
     // Used for WebDAV Communication
     implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
 

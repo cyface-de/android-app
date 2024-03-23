@@ -21,7 +21,6 @@ package de.cyface.app.digural.upload
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import de.cyface.app.digural.BuildConfig
 import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.persistence.DefaultPersistenceBehaviour
@@ -37,7 +36,7 @@ import kotlinx.coroutines.runBlocking
  * Further details are described in the [Android
  * documentation](https://developer.android.com/training/sync-adapters/creating-sync-adapter.html#CreateSyncAdapterService).
  *
- * This is a custom implementation of the [de.cyface.synchronization.SyncService].
+ * This is a custom implementation of the [de.cyface.synchronization.CyfaceSyncService].
  *
  * @author Armin Schnabel
  * @version 1.0.0
@@ -50,11 +49,13 @@ class WebdavSyncService : Service() {
                 val persistence = DefaultPersistenceLayer(this, DefaultPersistenceBehaviour())
                 val deviceId = persistence.restoreOrCreateDeviceId()
                 val collectorApi = collectorApi()
+                val auth = WebdavAuth(applicationContext, WebdavAuthenticator.settings)
+                val account = auth.getAccount()
                 syncAdapter = SyncAdapter(
                     applicationContext,
                     true,
-                    WebdavAuth(applicationContext, WebdavAuthenticator.settings),
-                    WebdavUploader(collectorApi, deviceId, BuildConfig.testLogin), //FIXME: username
+                    auth,
+                    WebdavUploader(collectorApi, deviceId, account.name, auth.getPassword(account)),
                 )
             }
         }
@@ -93,5 +94,7 @@ class WebdavSyncService : Service() {
          * Lock object used to synchronize synchronisation adapter creation as described in the Android documentation.
          */
         private val LOCK = Any()
+
+        const val AUTH_TOKEN_TYPE = "de.cyface.digural.auth_token_type"
     }
 }

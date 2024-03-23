@@ -19,6 +19,19 @@
   <string name="toast_measurement_paused">Trip paused</string>
   <string name="toast_measurement_resumed">Trip resumed</string>
 
+  <!-- Login -->
+  <string name="logo_content_description" translatable="false">Digural Logo</string>
+  <string name="login_name">Login</string>
+  <string name="password">Password</string>
+  <string name="username">Login</string>
+  <string name="your_request">Your request</string>
+  <string name="no_login_contact_us">Login Problems? Please <font color="#3f8730">contact us</font>.</string>
+  <string name="title_activity_login">Sign in</string>
+  <string name="error_message_field_required">This field is required</string>
+  <string name="error_message_invalid_email">This email address is invalid</string>
+  <string name="error_message_password_too_short">This password is too short</string>
+  <string name="error_message_login_too_short">This username is too short</string>
+
   <!-- Settings -->
   <string name="drawer_setting_speed_sensor">External sensor</string>
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>

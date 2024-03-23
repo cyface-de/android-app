@@ -29,7 +29,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import de.cyface.synchronization.LoginActivityProvider
-import de.cyface.synchronization.settings.SynchronizationSettings
+import de.cyface.synchronization.settings.DefaultSynchronizationSettings
 
 /**
  * The WebdavAuthenticator is called by the [AccountManager] to fulfill all account relevant
@@ -57,9 +57,8 @@ class WebdavAuthenticator(private val context: Context) :
         response: AccountAuthenticatorResponse, accountType: String,
         authTokenType: String, requiredFeatures: Array<String>?, options: Bundle
     ): Bundle {
-        // FIXME: This is probably needed to call the login activity to get the webdav credentials?
         Log.d(TAG, "WebdavAuthenticator.addAccount: start LoginActivity to authenticate")
-        val intent = Intent(context, LOGIN_ACTIVITY)
+        val intent = Intent(context, getLoginActivity())
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
         val bundle = Bundle()
         bundle.putParcelable(AccountManager.KEY_INTENT, intent)
@@ -131,10 +130,10 @@ class WebdavAuthenticator(private val context: Context) :
         /**
          * Custom settings used by this library.
          */
-        lateinit var settings: SynchronizationSettings
+        lateinit var settings: DefaultSynchronizationSettings
     }
 
-    override fun getLoginActivity(): Class<out Activity?>? {
-        return LOGIN_ACTIVITY
+    override fun getLoginActivity(): Class<out Activity> {
+        return LOGIN_ACTIVITY!!
     }
 }

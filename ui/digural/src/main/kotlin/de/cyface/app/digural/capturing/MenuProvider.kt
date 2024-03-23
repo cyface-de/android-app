@@ -22,6 +22,7 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.digural.R
@@ -29,6 +30,7 @@ import de.cyface.app.digural.CapturingFragmentDirections
 import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.utils.Constants.SUPPORT_EMAIL
 import de.cyface.energy_settings.TrackingSettings
+import de.cyface.uploader.exception.SynchronisationException
 
 /**
  * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
@@ -97,17 +99,11 @@ class MenuProvider(
             }
             /*R.id.logout_item -> {
                 try {
-                    Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
-                    // This inform the auth server that the user wants to end its session
-                    activity.auth.endSession(activity)
-                    //signOut() // instead of `endSession()` to sign out softly for testing
                     activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.account.name)
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                // This is done by MainActivity.onActivityResult -> signOut()
-                //(activity as MainActivity).startSynchronization()
                 true
             }*/
             else -> {

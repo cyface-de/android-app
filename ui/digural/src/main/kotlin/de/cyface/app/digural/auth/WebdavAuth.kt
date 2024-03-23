@@ -8,10 +8,16 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
+import com.thegrizzlylabs.sardineandroid.impl.SardineException
+import de.cyface.app.digural.upload.WebdavSyncService
+import de.cyface.app.digural.upload.WebdavUploader
+import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.synchronization.Auth
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.settings.SynchronizationSettings
 import de.cyface.utils.Validate
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
 /**
@@ -26,14 +32,11 @@ import org.json.JSONObject
  * @param context The context to load settings and accounts from.
  * @param settings The settings which store the user preferences.
  */
-class WebdavAuth(context: Context, settings: SynchronizationSettings) : Auth {
+class WebdavAuth(private val context: Context, private val settings: SynchronizationSettings) : Auth {
 
     private var authorized = false
 
     private var sardine = OkHttpSardine()
-
-    // FIXME: Use the old native LoginActivity to ask the user for the credentials.
-    // Store the credentials in the account manager where the password is encrypted.
 
     override fun performActionWithFreshTokens(action: (accessToken: String?, idToken: String?, ex: Exception?) -> Unit) {
         // The webdav library automatically logs the user in again upon each API access
@@ -67,7 +70,7 @@ class WebdavAuth(context: Context, settings: SynchronizationSettings) : Auth {
                 accountManager.setPassword(account, password)
                 accountManager.setAuthToken(
                     account,
-                    Constants.AUTH_TOKEN_TYPE,
+                    WebdavSyncService.AUTH_TOKEN_TYPE,
                     WebdavAuthenticator.DUMMY_TOKEN
                 )
                 accountUpdated = true
@@ -123,7 +126,7 @@ class WebdavAuth(context: Context, settings: SynchronizationSettings) : Auth {
         Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, userData))
         accountManager.setAuthToken(
             newAccount,
-            Constants.AUTH_TOKEN_TYPE,
+            WebdavSyncService.AUTH_TOKEN_TYPE,
             WebdavAuthenticator.DUMMY_TOKEN
         )
         Validate.isTrue(accountManager.getAccountsByType(accountType).size == 1)
@@ -136,25 +139,16 @@ class WebdavAuth(context: Context, settings: SynchronizationSettings) : Auth {
         // PeriodicSync and syncAutomatically is set dynamically by the {@link WifiSurveyor}
     }
 
-    fun isAuthorized(): Boolean {
-        // FIXME: This should be checked via the Account Manager as we use different instances
-        // of [WebdavAuth].
-        return authorized
-    }
-
-    fun signOut() {
+    private fun signOut() {
         authorized = false
-        sardine.setCredentials(null, null) // FIXME: is this allowed?
-        // FIXME: we don't use the same sardine instance in the uploader
+        sardine.setCredentials(null, null)
         // After this method is called, `MainActivity` deletes the account from account manager.
     }
 
     /**
      * To be called after the user just logged in. Updates the account in the account manager.
-     *
-     * FIXME: compare with pre-OAuth2 `LoginActivity.attemptLogin()` flow.
      */
-    fun onLogIn(
+    fun login(
         username: String,
         password: String,
         applicationContext: Context,
@@ -163,11 +157,49 @@ class WebdavAuth(context: Context, settings: SynchronizationSettings) : Auth {
     ) {
         updateAccount(applicationContext, username, password, accountType, authority)
 
-        // FIXME: we anyway don't use the same sardine instance in the uploader
         sardine.setCredentials(username, password)
+
+        // Send a small request to ensure the credentials are correct
+        try {
+            val rootDir = WebdavUploader.returnUrlWithTrailingSlash(collectorApi()) + "files/$username/"
+            sardine.list(rootDir)
+            Log.d(Constants.TAG, "Login successful.")
+        } catch (e: SardineException) {
+            Log.e(Constants.TAG, "Login failed: ${e.message}")
+            signOut()
+            throw LoginFailed(e)
+        }
+
+        // Credentials are valid, store password safely in the Keystore for Uploader to retrive
+
         authorized = true
     }
 
+    /**
+     * Reads the Collector API URL from the preferences.
+     *
+     * @return The URL as string
+     */
+    private fun collectorApi(): String {
+        // The `collectorApi` stands for the webdav API which collects the data from us.
+        val apiEndpoint =
+            runBlocking { WebdavAuthenticator.settings.collectorUrlFlow.first() }
+        Validate.notNull(
+            apiEndpoint,
+            "Sync canceled: Server url not available. Please set the applications server url preference."
+        )
+        return apiEndpoint
+    }
+
+    fun getAccount(): Account {
+        val accountManager = AccountManager.get(context)
+        return accountManager.getAccountsByType(ACCOUNT_TYPE)[0]
+    }
+
+    fun getPassword(account: Account): String {
+        val accountManager = AccountManager.get(context)
+        return accountManager.getPassword(account)
+    }
 
     companion object {
         /**

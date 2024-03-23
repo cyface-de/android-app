@@ -26,7 +26,7 @@ import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.synchronization.settings.SynchronizationSettings
+import de.cyface.synchronization.settings.DefaultSynchronizationSettings
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
@@ -87,7 +87,7 @@ class MeasuringClient : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        WebdavAuthenticator.settings = SynchronizationSettings( // synchronization
+        WebdavAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
             this,
             BuildConfig.cyfaceServer,
             WebdavAuth.dummyAuthConfig()
@@ -105,7 +105,7 @@ class MeasuringClient : Application() {
         errorHandler!!.addListener(errorListener)
 
         // Use strict mode in dev environment to crash e.g. when a resource failed to call close
-        /*if (BuildConfig.DEBUG) {
+        /*if (BuildConfig.DEBUG) { // Cannot be enabled due to an open issue in the sardine library
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectLeakedClosableObjects()

@@ -2,7 +2,6 @@ package de.cyface.app.digural.upload
 
 import android.util.Log
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
-import de.cyface.app.digural.BuildConfig
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.model.Json
 import de.cyface.model.Json.JsonObject
@@ -44,11 +43,22 @@ import javax.net.ssl.SSLException
  * @since 3.8.0
  * @property apiEndpoint An API endpoint running a Webdav data collector service, like `https://some.url/api/v3`
  */
-class WebdavUploader(private val apiEndpoint: String, private val deviceId: String, private val username: String): Uploader {
+class WebdavUploader(
+    private val apiEndpoint: String,
+    private val deviceId: String,
+    private val login: String,
+    password: String
+) : Uploader {
 
     private val sardine = OkHttpSardine()
 
-    //FIXME: content is just copied from OAuth2
+    init {
+        require(apiEndpoint.isNotEmpty())
+        require(deviceId.isNotEmpty())
+        require(login.isNotEmpty())
+        require(password.isNotEmpty())
+        sardine.setCredentials(login, password)
+    }
 
     @Suppress("unused", "CyclomaticComplexMethod", "LongMethod") // Part of the API
     override fun uploadMeasurement(
@@ -99,7 +109,7 @@ class WebdavUploader(private val apiEndpoint: String, private val deviceId: Stri
 
     private fun devicesDirectory(): String {
         // We currently assume, that each user has their own webdav user so no user id is stored
-        return returnUrlWithTrailingSlash(apiEndpoint) + "files/$username/devices"
+        return returnUrlWithTrailingSlash(apiEndpoint) + "files/${login}/devices"
     }
 
     @Throws(UploadFailed::class)
@@ -110,14 +120,10 @@ class WebdavUploader(private val apiEndpoint: String, private val deviceId: Stri
         endpoint: URL
     ): Result {
         return try {
-            // FIXME: the library has PRs which support input streams but they are not merged
+            // TODO: the sardine library has PRs which support input streams but they are not merged
             // also, the connections are not closed, same with the PRs (not merged for 5+ years)
             //FileInputStream(file).use { fis ->
             //val bufferedInputStream = BufferedInputStream(fis)
-
-            // FIXME: Get credentials from account manager
-            Log.d(TAG, "logging in ...")
-            sardine.setCredentials(BuildConfig.testLogin, BuildConfig.testPassword)
 
             // We currently cannot merge multiple upload-chunk requests into one file on server side.
             // Thus, we prevent slicing the file into multiple files by increasing the chunk size.
@@ -235,11 +241,17 @@ class WebdavUploader(private val apiEndpoint: String, private val deviceId: Stri
                 Log.w(TAG, "Caught InterruptedIOException: ${exception.message}")
                 // Request interrupted [DAT-741]. Try again later.
                 if (exception.message?.contains("thread interrupted") == true) {
-                    throw UploadFailed(NetworkUnavailableException("Network interrupted during upload", exception))
+                    throw UploadFailed(
+                        NetworkUnavailableException(
+                            "Network interrupted during upload",
+                            exception
+                        )
+                    )
                 }
                 // InterruptedIOException while reading the response. Try again later.
                 throw UploadFailed(SynchronisationException(exception))
             }
+
             is IOException -> handleIOException(exception)
             // File is too large to be uploaded. Handle in caller (e.g. skip the upload).
             // The max size is currently static and set to 100 MB which should be about 44 hours of 100 Hz measurement.
