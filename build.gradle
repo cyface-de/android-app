@@ -127,8 +127,8 @@ ext {
     kotlinTargetJavaVersion = "17"
 
     // Android-frontend
-    sentryAndroidVersion = '7.4.0'
-    sentryAndroidGradlePluginVersion = "2.0.1"
+    sentryAndroidVersion = '7.6.0'
+    sentryAndroidGradlePluginVersion = "4.3.1"
     mapPlayServicesVersion = '18.2.0'
     locationPlayServicesVersion = '21.1.0'
     materialVersion = '1.11.0'
