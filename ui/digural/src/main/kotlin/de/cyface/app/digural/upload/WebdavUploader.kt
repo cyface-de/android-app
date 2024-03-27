@@ -206,11 +206,12 @@ class WebdavUploader(
         val isAttachmentUpload = !isMeasurementUpload
 
         // Attachment Upload
-        if (isAttachmentUpload && !sardine.exists(attachmentsDirectory(measurementId))) {
-            // Check if parent dir exists (should usually be the case)
+        val attachmentsDir = attachmentsDirectory(measurementId)
+        if (isAttachmentUpload && !sardine.exists(attachmentsDir)) {
             ensureMeasurementDirectoryExists(measurementId)
-            ensureDirectoryExists(sardine, attachmentsDirectory(measurementId))
-        } else {
+            Log.d(TAG, "Creating directory: $attachmentsDir")
+            sardine.createDirectory(attachmentsDir)
+        } else if (isMeasurementUpload) {
             // Measurement Upload
             ensureMeasurementDirectoryExists(measurementId)
         }
