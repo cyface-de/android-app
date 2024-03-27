@@ -87,7 +87,11 @@ class WebdavUploader(
         progressListener: UploadProgressListener
     ): Result {
         val endpoint = URL(measurementDirectory(metaData.measurementIdentifier.toLong()))
-        return uploadFile(metaData, file, MEASUREMENT_FILE_FILENAME, endpoint)
+        val result = uploadFile(metaData, file, MEASUREMENT_FILE_FILENAME, endpoint, progressListener)
+        if (result != Result.UPLOAD_FAILED) {
+            progressListener.updatedProgress(1.0f) // the whole file is uploaded
+        }
+        return result
     }
 
     override fun uploadAttachment(
@@ -99,7 +103,11 @@ class WebdavUploader(
         progressListener: UploadProgressListener
     ): Result {
         val endpoint = attachmentsEndpoint(measurementId)
-        return uploadFile(metaData, file, fileName, endpoint)
+        val result = uploadFile(metaData, file, fileName, endpoint, progressListener)
+        if (result != Result.UPLOAD_FAILED) {
+            progressListener.updatedProgress(1.0f) // the whole file is uploaded
+        }
+        return result
     }
 
     override fun measurementsEndpoint(): URL {
@@ -136,7 +144,8 @@ class WebdavUploader(
         metaData: RequestMetaData,
         file: File,
         fileName: String,
-        endpoint: URL
+        endpoint: URL,
+        progressListener: UploadProgressListener
     ): Result {
         return try {
             // TODO: the sardine library has PRs which support input streams but they are not merged
