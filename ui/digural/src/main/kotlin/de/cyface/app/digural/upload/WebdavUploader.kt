@@ -19,6 +19,7 @@
 package de.cyface.app.digural.upload
 
 import android.util.Log
+import com.thegrizzlylabs.sardineandroid.Sardine
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.model.Json
@@ -154,30 +155,9 @@ class WebdavUploader(
             // ** attention ** It's normal to see the log info:
             // `Authenticating for response: Response{protocol=http/1.1, code=401, message=Unauthorized,`
 
-            // Create the directories
-            Log.e(TAG, "Checking for directories ...")
-            if (!sardine.exists(devicesDirectory())) {
-                Log.d(TAG, "create devices directory ...")
-                sardine.createDirectory(devicesDirectory())
-            }
-            if (!sardine.exists(deviceDirectory())) {
-                Log.d(TAG, "create device directory ...")
-                sardine.createDirectory(deviceDirectory())
-            }
-            if (!sardine.exists(measurementsDirectory())) {
-                Log.d(TAG, "create measurements directory ...")
-                sardine.createDirectory(measurementsDirectory())
-            }
-            val measurementId = metaData.measurementIdentifier.toLong()
-            if (!sardine.exists(measurementDirectory(measurementId))) {
-                Log.d(TAG, "create measurement directory ...")
-                sardine.createDirectory(measurementDirectory(measurementId))
-            }
             val isMeasurementUpload = fileName == MEASUREMENT_FILE_FILENAME
-            if (!isMeasurementUpload && !sardine.exists(attachmentsDirectory(measurementId))) {
-                Log.d(TAG, "create attachments directory ...")
-                sardine.createDirectory(attachmentsDirectory(measurementId))
-            }
+            val measurementId = metaData.measurementIdentifier.toLong()
+            ensureDirectoriesExist(isMeasurementUpload, measurementId)
 
             // File uploads
             val uploadDir = endpoint.toExternalForm()
@@ -213,6 +193,53 @@ class WebdavUploader(
             handleUploadException(e)
         }
     }
+
+    /**
+     * Function to check and create directories for upload if they don't exist.
+     *
+     * It's less important how many requests are made for the measurement upload, as this only
+     * happens once every hour or so, but for attachments we should try to minimize the number of
+     * requests.
+     */
+    private fun ensureDirectoriesExist(isMeasurementUpload: Boolean, measurementId: Long) {
+        Log.e(TAG, "Checking for directories ...")
+        val isAttachmentUpload = !isMeasurementUpload
+
+        // Attachment Upload
+        if (isAttachmentUpload && !sardine.exists(attachmentsDirectory(measurementId))) {
+            // Check if parent dir exists (should usually be the case)
+            ensureMeasurementDirectoryExists(measurementId)
+            ensureDirectoryExists(sardine, attachmentsDirectory(measurementId))
+        } else {
+            // Measurement Upload
+            ensureMeasurementDirectoryExists(measurementId)
+        }
+    }
+
+    /**
+     * Function to check and create measurement directory if it doesn't exist.
+     *
+     * This directory contains the measurement files and the attachments folder.
+     */
+    private fun ensureMeasurementDirectoryExists(measurementId: Long) {
+        if (!sardine.exists(measurementDirectory(measurementId))) {
+            ensureDirectoryExists(sardine, devicesDirectory())
+            ensureDirectoryExists(sardine, deviceDirectory())
+            ensureDirectoryExists(sardine, measurementsDirectory())
+            ensureDirectoryExists(sardine, measurementDirectory(measurementId))
+        }
+    }
+
+    /**
+     * Function to check and create directory if it doesn't exist
+     */
+    private fun ensureDirectoryExists(sardine: Sardine, directory: String) {
+        if (!sardine.exists(directory)) {
+            Log.d(TAG, "Creating directory: $directory")
+            sardine.createDirectory(directory)
+        }
+    }
+
 
     /**
      * Handles exceptions thrown during upload.
