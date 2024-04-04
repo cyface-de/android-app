@@ -114,21 +114,21 @@
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">%1$.0f of %2$.0f km to unlock the voucher</string>
-    <string name="achievements_unlocked">nextbike voucher unlocked</string>
-    <string name="show_voucher">show voucher</string>
-    <string name="voucher_code_is">voucher code: %s</string>
-    <string name="valid_until">valid until: %s</string>
-    <string name="copy_voucher_code">copy voucher code</string>
-    <string name="voucher_code">voucher code</string>
-    <string name="voucher_left">%d x 15 minutes nextbike vouchers left</string>
-    <string name="voucher_details">1x 15 free minutes on the next rental</string>
-    <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
+    <string name="achievements_progress">%1$d of %2$d trips left to unlock the raffle ticket</string>
+    <string name="voucher_left">%d raffle tickets left</string>
+    <string name="achievements_unlocked">raffle ticket unlocked</string>
+    <string name="show_voucher">show raffle ticket</string>
+    <string name="voucher_code">raffle ticket code</string>
+    <string name="voucher_code_is">raffle ticket: %s</string>
+    <string name="valid_until">Redeemable until %s via email</string>
+    <string name="voucher_details">to gewinnspiel@ready-for-robots.de</string>
+    <string name="copy_voucher_code">send email</string>
+    <!--<string name="voucher_terms">open terms and conditions</string> -->
     <string name="error_message_no_connection">No connection to the server</string>
     <string name="error_message_authentication_failed">Authentication failed</string>
     <string name="error_message_server_unavailable">Server unavailable</string>
     <string name="error_message_request_failed">Server request failed</string>
-    <string name="error_message_no_voucher_left">Unfortunately, no vouchers are left</string>
+    <string name="error_message_no_voucher_left">Unfortunately, no raffle tickets are left</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>

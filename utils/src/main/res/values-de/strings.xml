@@ -111,21 +111,21 @@
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">Noch %1$.0f von %2$.0f km bis zum Gutschein</string>
-    <string name="achievements_unlocked">nextbike Gutschein freigeschaltet</string>
-    <string name="show_voucher">Gutschein anzeigen</string>
-    <string name="voucher_code_is">Gutscheincode: %s</string>
-    <string name="valid_until">gültig bis: %s</string>
-    <string name="copy_voucher_code">Gutscheincode kopieren</string>
-    <string name="voucher_code">Gutscheincode</string>
-    <string name="voucher_left">%d x 15 Minuten nextbike Gutscheine übrig</string>
-    <string name="voucher_details">1x 15 Freiminuten auf die nächste Ausleihe</string>
-    <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
+    <string name="achievements_progress">Noch %1$d von %2$d Fahrten bis zum Gewinnspiellos</string>
+    <string name="voucher_left">%d Gewinnspiellose übrig</string>
+    <string name="achievements_unlocked">Gewinnspiellos freigeschaltet</string>
+    <string name="show_voucher">Gewinnspiellos anzeigen</string>
+    <string name="voucher_code">Gewinnspiellos</string>
+    <string name="voucher_code_is">Gewinnspiellos: %s</string>
+    <string name="valid_until">Einlösbar bis %s per E-Mail</string>
+    <string name="voucher_details">an gewinnspiel@ready-for-robots.de</string>
+    <string name="copy_voucher_code">E-Mail senden</string><!-- FIXME: E-Mail Vorlage erstellen -->
+    <!--<string name="voucher_terms">Teilnahmebedingungen öffnen</string> FIXME: Link zu Teilnahmebedingungen -->
     <string name="error_message_no_connection">Keine Verbindung zum Server</string>
     <string name="error_message_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="error_message_server_unavailable">Server nicht erreichbar</string>
     <string name="error_message_request_failed">Serveranfrage fehlgeschlagen</string>
-    <string name="error_message_no_voucher_left">Leider sind keine Gutscheine mehr übrig</string>
+    <string name="error_message_no_voucher_left">Leider sind keine Gewinnspiellose mehr übrig</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>
