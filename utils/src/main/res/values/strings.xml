@@ -114,7 +114,8 @@
     <string name="toast_item_created_on_tracks_nearest_position">The item was created and moved onto the track</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">%1$d of %2$d trips left to unlock the raffle ticket</string>
+    <string name="days_within_geo_fence_progress">%1$d of %2$d days of cycling near the town hall to unlock the raffle ticket</string>
+    <string name="sync_progress">%1$d of %2$d measurements to upload to unlock the raffle ticket</string>
     <string name="voucher_left">%d raffle tickets left</string>
     <string name="achievements_unlocked">raffle ticket unlocked</string>
     <string name="show_voucher">show raffle ticket</string>
@@ -128,7 +129,9 @@
     <string name="error_message_authentication_failed">Authentication failed</string>
     <string name="error_message_server_unavailable">Server unavailable</string>
     <string name="error_message_request_failed">Server request failed</string>
-    <string name="error_message_no_voucher_left">Unfortunately, no raffle tickets are left</string>
+    <string name="error_message_no_voucher_left">Currently, there are no giveaways available</string>
+    <string name="error_message_no_active_event">Currently, there are no giveaways planned</string>
+    <string name="error_message_next_event">Next giveaway starting at %s</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Trip details</string>

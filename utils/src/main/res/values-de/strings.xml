@@ -111,7 +111,8 @@
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">Noch %1$d von %2$d Fahrten bis zum Gewinnspiellos</string>
+    <string name="days_within_geo_fence_progress">Noch %1$d von %2$d Tagen nähe Rathaus Radfahren bis zum Gewinnlos</string>
+    <string name="sync_progress">Noch %1$d von %2$d Messungen hochladen bis zum Gewinnlos</string>
     <string name="voucher_left">%d Gewinnspiellose übrig</string>
     <string name="achievements_unlocked">Gewinnspiellos freigeschaltet</string>
     <string name="show_voucher">Gewinnspiellos anzeigen</string>
@@ -125,7 +126,10 @@
     <string name="error_message_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="error_message_server_unavailable">Server nicht erreichbar</string>
     <string name="error_message_request_failed">Serveranfrage fehlgeschlagen</string>
-    <string name="error_message_no_voucher_left">Leider sind keine Gewinnspiellose mehr übrig</string>
+    <!-- E.g. for users from other municipalities or when no vouchers are left -->
+    <string name="error_message_no_voucher_left">Derzeit sind keine Gewinnaktionen verfügbar</string>
+    <string name="error_message_no_active_event">Derzeit sind keine Gewinnaktionen geplant</string>
+    <string name="error_message_next_event">Nächste Gewinnaktion ab %s</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>
