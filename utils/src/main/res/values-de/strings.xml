@@ -113,15 +113,15 @@
     <!-- Achievements in Trips View -->
     <string name="days_within_geo_fence_progress">Noch %1$d von %2$d Tagen nähe Rathaus Radfahren bis zum Gewinnlos</string>
     <string name="sync_progress">Noch %1$d von %2$d Messungen hochladen bis zum Gewinnlos</string>
-    <string name="voucher_left">%d Gewinnspiellose übrig</string>
-    <string name="achievements_unlocked">Gewinnspiellos freigeschaltet</string>
-    <string name="show_voucher">Gewinnspiellos anzeigen</string>
-    <string name="voucher_code">Gewinnspiellos</string>
-    <string name="voucher_code_is">Gewinnspiellos: %s</string>
+    <string name="voucher_left">%d Gewinnlose übrig</string>
+    <string name="achievements_unlocked">Gewinnlos freigeschaltet</string>
+    <string name="show_voucher">Gewinnlos anzeigen</string>
+    <string name="voucher_code">Gewinnlos</string>
+    <string name="voucher_code_is">Gewinnlos: %s</string>
     <string name="valid_until">Einlösbar bis %s per E-Mail</string>
     <string name="voucher_details">an gewinnspiel@ready-for-robots.de</string>
-    <string name="copy_voucher_code">E-Mail senden</string><!-- FIXME: E-Mail Vorlage erstellen -->
-    <!--<string name="voucher_terms">Teilnahmebedingungen öffnen</string> FIXME: Link zu Teilnahmebedingungen -->
+    <string name="copy_voucher_code">E-Mail senden</string>
+    <string name="email_subject">Gewinnlos: %s</string>
     <string name="error_message_no_connection">Keine Verbindung zum Server</string>
     <string name="error_message_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="error_message_server_unavailable">Server nicht erreichbar</string>

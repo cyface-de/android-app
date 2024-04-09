@@ -18,9 +18,9 @@
  */
 package de.cyface.app.utils.trips
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -32,7 +32,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -476,7 +475,7 @@ class TripsFragment : Fragment() {
                     daysWithMeasurementsAboveMinimumLength.add(measurementDay)
                 }
 
-                tracks.forEach  trackLoop@ { track ->
+                tracks.forEach trackLoop@{ track ->
                     val locationsWithinGeoFenceCount = track.geoLocations.count { location ->
                         geoFence.isWithin(location!!)
                     }
@@ -496,7 +495,8 @@ class TripsFragment : Fragment() {
             it.status == MeasurementStatus.FINISHED || it.status == MeasurementStatus.SYNCABLE_ATTACHMENTS
         }
         val measurementsSynced = unSyncedMeasurements.isEmpty()
-        val allConditionsMet = daysAboveThresholdUnlocked && daysWithinGeoFenceUnlocked && measurementsSynced
+        val allConditionsMet =
+            daysAboveThresholdUnlocked && daysWithinGeoFenceUnlocked && measurementsSynced
 
         return UnlockCondition(
             ridesWithinEvent = measurementCount,
@@ -515,14 +515,18 @@ class TripsFragment : Fragment() {
         // Condition 1: days with measurements within the geo fence
         if (!p.daysWithinGeoFenceUnlocked) {
             val left = p.requiredDaysWithinGeoFence - p.daysWithinGeoFence.size
-            text = getString(R.string.days_within_geo_fence_progress, left, p.requiredDaysWithinGeoFence)
+            text = getString(
+                R.string.days_within_geo_fence_progress,
+                left,
+                p.requiredDaysWithinGeoFence
+            )
             progressDouble = min(p.geoFenceProgress(), 100.0)
         } else
         // Condition 2: all measurements synced
-        if (!p.measurementsSynced) {
-            text = getString(R.string.sync_progress, p.unSyncedMeasurements, p.ridesWithinEvent)
-            progressDouble = min(p.syncProgress(), 100.0)
-        }
+            if (!p.measurementsSynced) {
+                text = getString(R.string.sync_progress, p.unSyncedMeasurements, p.ridesWithinEvent)
+                progressDouble = min(p.syncProgress(), 100.0)
+            }
 
         binding.achievementsError.visibility = GONE
         binding.achievementsUnlocked.visibility = GONE
@@ -640,11 +644,22 @@ class TripsFragment : Fragment() {
                                     binding.achievementValidUntil.text =
                                         getString(R.string.valid_until, untilText)
 
-                                    // FIXME: Replace with email template
-                                    // To: gewinnspiel@ready-for-robots.de
-                                    // Re: Gewinnlos: TEST_VOUCHER_1
                                     binding.achievementsReceivedButton.setOnClickListener {
-                                        val clipboard =
+                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                            data = Uri.parse("mailto:")
+                                            putExtra(
+                                                Intent.EXTRA_EMAIL,
+                                                arrayOf("gewinnspiel@ready-for-robots.de")
+                                            )
+                                            putExtra(
+                                                Intent.EXTRA_SUBJECT,
+                                                getString(R.string.email_subject, code)
+                                            )
+                                        }
+                                        startActivity(intent)
+
+                                        // Copy to clipboard
+                                        /*val clipboard =
                                             getSystemService(
                                                 requireContext(),
                                                 ClipboardManager::class.java
@@ -654,7 +669,7 @@ class TripsFragment : Fragment() {
                                                 getString(R.string.voucher_code),
                                                 code
                                             )
-                                        clipboard!!.setPrimaryClip(clip)
+                                        clipboard!!.setPrimaryClip(clip)*/
                                     }
                                 }
                             } catch (e: JSONException) {
@@ -678,7 +693,8 @@ class TripsFragment : Fragment() {
     private fun showNoVouchersLeft() {
         Handler(Looper.getMainLooper()).post {
             // This could also be another problem than "offline"
-            _binding?.achievementsErrorMessage?.text = getString(R.string.error_message_no_voucher_left)
+            _binding?.achievementsErrorMessage?.text =
+                getString(R.string.error_message_no_voucher_left)
             _binding?.achievementsProgress?.visibility = GONE
             _binding?.achievementsUnlocked?.visibility = GONE
             _binding?.achievementsReceived?.visibility = GONE
@@ -774,6 +790,7 @@ class TripsFragment : Fragment() {
         fun geoFenceProgress(): Double {
             return (daysWithinGeoFence.size / requiredDaysWithinGeoFence).toDouble()
         }
+
         fun syncProgress(): Double {
             return (unSyncedMeasurements / ridesWithinEvent).toDouble()
         }

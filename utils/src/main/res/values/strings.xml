@@ -124,7 +124,8 @@
     <string name="valid_until">Redeemable until %s via email</string>
     <string name="voucher_details">to gewinnspiel@ready-for-robots.de</string>
     <string name="copy_voucher_code">send email</string>
-    <!--<string name="voucher_terms">open terms and conditions</string> -->
+    <!-- Intentionally not translated -->
+    <string name="email_subject">Gewinnlos: %s</string>
     <string name="error_message_no_connection">No connection to the server</string>
     <string name="error_message_authentication_failed">Authentication failed</string>
     <string name="error_message_server_unavailable">Server unavailable</string>
