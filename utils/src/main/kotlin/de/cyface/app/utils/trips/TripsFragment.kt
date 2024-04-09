@@ -169,7 +169,7 @@ class TripsFragment : Fragment() {
     /**
      * The [GeoFence] which [requiredDaysWithMeasurementsWithinGeoFence] need to pass to unlock a raffle code.
      */
-    private val geoFence = GeoFence(51.396828, 12.221149, 200.0)
+    private val geoFence = GeoFence(51.395503, 12.220760, 150.0)
 
     /**
      * The API to get the voucher data from or `null` when no such things show be shown to the user.
