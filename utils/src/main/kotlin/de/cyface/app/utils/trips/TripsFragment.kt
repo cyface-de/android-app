@@ -69,6 +69,7 @@ import java.lang.ref.WeakReference
 import java.net.ConnectException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -314,7 +315,7 @@ class TripsFragment : Fragment() {
             binding.achievementsUnlockedButton.setOnClickListener {
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
-                        showVoucher()
+                        showVoucher(activeEvent.activeUntil)
                     }
                 }
             }
@@ -445,8 +446,14 @@ class TripsFragment : Fragment() {
             // Load Tracks to check conditions like geoFence
             val tracks = persistence.loadTracks(measurement.id)
             if (tracks.isNotEmpty() && tracks.first().geoLocations.isNotEmpty()) {
-                val timestamp = tracks.first().geoLocations.first()!!.timestamp
-                val measurementDay = Date(timestamp)
+                val calendar = Calendar.getInstance().apply {
+                    timeInMillis = measurement.timestamp
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val measurementDay = calendar.time
 
                 tracks.forEach trackLoop@{ track ->
                     val locationsWithinGeoFenceCount = track.geoLocations.count { location ->
@@ -565,7 +572,7 @@ class TripsFragment : Fragment() {
         }
     }
 
-    private fun showVoucher() {
+    private fun showVoucher(activeUntil: Date) {
         try {
             incentives!!.voucher(
                 object : Callback {
@@ -577,9 +584,8 @@ class TripsFragment : Fragment() {
                         // Capture all responses, also non-successful response codes
                         if (response.code == 428) {
                             // User from wrong municipality tried to request a voucher [RFR-605]
+                            // Or API does not agree with client that achievement was unlocked.
                             throw IllegalStateException("Voucher not allowed for this user")
-                            // FIXME: add response body handling to throw an exception with
-                            // more details about what condition failed
                         } else if (response.code == 204) {
                             // if this is in face 204: The last voucher just got assigned
                             // else the server forgot to send a JSON content
@@ -594,7 +600,7 @@ class TripsFragment : Fragment() {
                             try {
                                 val json = JSONObject(response.body!!.string())
                                 val code = json.getString("code")
-                                val until = json.getString("until")
+                                //val until = json.getString("until")
                                 Handler(Looper.getMainLooper()).post {
                                     binding.achievementsError.visibility = GONE
                                     binding.achievementsUnlocked.visibility = GONE
@@ -603,14 +609,15 @@ class TripsFragment : Fragment() {
                                     binding.achievementsReceivedContent.text =
                                         getString(R.string.voucher_code_is, code)
                                     @Suppress("SpellCheckingInspection")
-                                    val format =
-                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-                                    val validUntil = format.parse(until)
-                                    val untilText =
-                                        SimpleDateFormat.getDateInstance(
-                                            SimpleDateFormat.LONG,
-                                            Locale.getDefault()
-                                        ).format(validUntil!!.time)
+                                    //val format =
+                                    // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+                                    //val validUntil = format.parse(until)
+                                    val calendar = Calendar.getInstance().apply {
+                                        time = activeUntil
+                                        add(Calendar.HOUR_OF_DAY, -2) // remove time zone
+                                    }
+                                    val displayFormat = SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY)
+                                    val untilText = displayFormat.format(calendar.time)
                                     binding.achievementValidUntil.text =
                                         getString(R.string.valid_until, untilText)
 
@@ -758,11 +765,11 @@ class TripsFragment : Fragment() {
         val achievementUnlocked: Boolean = false
     ) {
         fun geoFenceProgress(): Double {
-            return (daysWithinGeoFence.size / requiredDaysWithinGeoFence).toDouble()
+            return daysWithinGeoFence.size.toDouble() / requiredDaysWithinGeoFence.toDouble() * 100.0
         }
 
         fun syncProgress(): Double {
-            return (unSyncedMeasurements / ridesWithinEvent).toDouble()
+            return unSyncedMeasurements.toDouble() / ridesWithinEvent.toDouble() * 100.0
         }
     }
 }
