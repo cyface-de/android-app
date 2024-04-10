@@ -18,9 +18,9 @@
  */
 package de.cyface.app.utils.trips
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -32,7 +32,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -46,7 +45,11 @@ import de.cyface.app.utils.databinding.FragmentTripsBinding
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
+import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.model.Measurement
+import de.cyface.persistence.model.MeasurementStatus
+import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -66,8 +69,15 @@ import java.lang.ref.WeakReference
 import java.net.ConnectException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * The [Fragment] which shows all finished measurements to the user.
@@ -94,6 +104,11 @@ class TripsFragment : Fragment() {
     private lateinit var capturing: CyfaceDataCapturingService
 
     /**
+     * An implementation of the persistence layer which caches some data during capturing.
+     */
+    private lateinit var persistence: DefaultPersistenceLayer<CapturingPersistenceBehaviour>
+
+    /**
      * The settings used by both, UIs and libraries.
      */
     private lateinit var appSettings: AppSettings
@@ -109,10 +124,37 @@ class TripsFragment : Fragment() {
     private var tracker: androidx.recyclerview.selection.SelectionTracker<Long>? = null
 
     /**
-     * defined by E-Mail from Matthias Koss, 23.05.23
+     * The raffle events - sorted by date ASC!
      */
-    @Suppress("SpellCheckingInspection")
-    private val distanceGoalKm = 15.0
+    private val events = listOf(
+        // test event
+        Event(
+            "2024-04-01T00:00:00Z",
+            "2024-04-20T23:59:59Z",
+            "2024-04-21T23:59:59Z"
+        ),
+        // event 1
+        Event(
+            "2024-05-01T00:00:00Z",
+            "2024-05-31T23:59:59Z",
+            "2024-06-01T23:59:59Z"
+        ),
+    )
+
+    /**
+     * The minimum number of days with measurements which pass through the [geoFence] to unlock a raffle code.
+     */
+    private val requiredDaysWithMeasurementsWithinGeoFence = 3
+
+    /**
+     * The minimum number of GNSS measurements within the [geoFence] to count as "measurement within [geoFence]".
+     */
+    private val requiredLocationsWithinGeoFence = 10
+
+    /**
+     * The [GeoFence] which [requiredDaysWithMeasurementsWithinGeoFence] need to pass to unlock a raffle code.
+     */
+    private val geoFence = GeoFence(51.395503, 12.220760, 150.0)
 
     /**
      * The API to get the voucher data from or `null` when no such things show be shown to the user.
@@ -152,6 +194,7 @@ class TripsFragment : Fragment() {
         if (activity is ServiceProvider) {
             val serviceProvider = activity as ServiceProvider
             capturing = serviceProvider.capturing
+            persistence = capturing.persistenceLayer
             uiSettings = serviceProvider.uiSettings
             appSettings = serviceProvider.appSettings
 
@@ -205,32 +248,7 @@ class TripsFragment : Fragment() {
 
             // Show achievements progress
             if (incentives != null) {
-                // Check voucher availability
-                lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
-                        showVouchersLeft()
-                    }
-                }
-
-                val totalDistanceKm = totalDistanceKm(measurements)
-                val progress = min(totalDistanceKm / distanceGoalKm * 100.0, 100.0)
-
-                if (progress < 100) {
-                    showProgress(progress, distanceGoalKm, totalDistanceKm)
-                } else {
-                    // Show request voucher button
-                    binding.achievementsError.visibility = GONE
-                    binding.achievementsProgress.visibility = GONE
-                    binding.achievementsReceived.visibility = GONE
-                    binding.achievementsUnlocked.visibility = VISIBLE
-                    binding.achievementsUnlockedButton.setOnClickListener {
-                        lifecycleScope.launch {
-                            withContext(Dispatchers.IO) {
-                                showVoucher()
-                            }
-                        }
-                    }
-                }
+                showAchievements(measurements)
             }
         }
 
@@ -247,6 +265,60 @@ class TripsFragment : Fragment() {
         )
 
         return binding.root
+    }
+
+    /**
+     * Main method to check the achievements and update the UI with the current state.
+     *
+     * @param measurements The measurements to check for achievements.
+     */
+    private fun showAchievements(measurements: List<Measurement>) {
+
+        // Check for active events
+        val activeEvent = findActiveEvent(events)
+        if (activeEvent == null) {
+            val nextEvent = findNextEvent(events)
+            showNoActiveEvent(nextEvent)
+            return
+        }
+
+        // Check voucher availability (or participating municipality => 0 vouchers [RFR-997])
+        // TODO: Fix this race-condition with the next checks
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                showVouchersLeft()
+            }
+        }
+
+        // Check achievement unlock conditions
+        val eventMeasurements = measurements.filter {
+            Date(it.timestamp).after(activeEvent.startTime) &&
+                    Date(it.timestamp).before(activeEvent.endTime)
+        }
+        val conditions = checkMeasurements(
+            eventMeasurements,
+            requiredDaysWithMeasurementsWithinGeoFence,
+            requiredLocationsWithinGeoFence,
+            geoFence
+        )
+
+        // Show progress to user
+        if (!conditions.achievementUnlocked) {
+            showProgress(conditions)
+        } else {
+            // Show request voucher button
+            binding.achievementsError.visibility = GONE
+            binding.achievementsProgress.visibility = GONE
+            binding.achievementsReceived.visibility = GONE
+            binding.achievementsUnlocked.visibility = VISIBLE
+            binding.achievementsUnlockedButton.setOnClickListener {
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        showVoucher(activeEvent.activeUntil)
+                    }
+                }
+            }
+        }
     }
 
     private fun handleException(e: Exception) {
@@ -305,75 +377,6 @@ class TripsFragment : Fragment() {
         }
     }
 
-    private fun showProgress(
-        progress: Double,
-        @Suppress("SameParameterValue") distanceGoalKm: Double,
-        totalDistanceKm: Double
-    ) {
-        binding.achievementsError.visibility = GONE
-        binding.achievementsUnlocked.visibility = GONE
-        binding.achievementsReceived.visibility = GONE
-        binding.achievementsProgress.visibility = VISIBLE
-        val missingKm = distanceGoalKm - totalDistanceKm
-        binding.achievementsProgressContent.text =
-            getString(R.string.achievements_progress, missingKm, distanceGoalKm)
-        binding.achievementsProgressBar.progress = progress.roundToInt()
-    }
-
-    private fun totalDistanceKm(measurements: List<Measurement>): Double {
-        var totalDistanceKm = 0.0
-        measurements.forEach { measurement ->
-            val distanceKm = measurement.distance.div(1000.0)
-            totalDistanceKm += distanceKm
-        }
-        return totalDistanceKm
-    }
-
-    private fun showVouchersLeft() {
-        try {
-            incentives!!.availableVouchers(
-                object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        handleError(e)
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        if (response.code == 200) {
-                            try {
-                                val json = JSONObject(response.body!!.string())
-                                val availableVouchers = json.getInt("vouchers")
-                                if (availableVouchers > 0) {
-                                    Handler(Looper.getMainLooper()).post {
-                                        // Can be null when switching tab before response returns
-                                        _binding?.achievementsVouchersLeft?.text =
-                                            getString(R.string.voucher_left, availableVouchers)
-                                        _binding?.achievementsError?.visibility = GONE
-                                        _binding?.achievements?.visibility = VISIBLE
-                                    }
-                                } else {
-                                    showNoVouchersLeft()
-                                    //_binding?.achievementsError?.visibility = GONE
-                                    //_binding?.achievements?.visibility = GONE
-                                }
-                            } catch (e: JSONException) {
-                                handleJsonException(e)
-                            }
-                        } else {
-                            handleUnknownResponse(response.code)
-                        }
-                    }
-
-                },
-                object : AuthExceptionListener {
-                    override fun onException(e: AuthorizationException) {
-                        handleAuthorizationException(e)
-                    }
-                })
-        } catch (e: Exception) {
-            handleException(e)
-        }
-    }
-
     private fun handleUnknownResponse(responseCode: Int) {
         val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         if (reportErrors) {
@@ -394,7 +397,181 @@ class TripsFragment : Fragment() {
         throw java.lang.IllegalStateException("Forwarded? Forgot Auth header?", e)
     }
 
-    private fun showVoucher() {
+    /**
+     * Finds the currently active event among a list of events.
+     *
+     * @param events The list of events.
+     * @return The active event or `null` if no such event is left.
+     */
+    private fun findActiveEvent(events: List<Event>): Event? {
+        val now = Date()
+        return events.firstOrNull { now.after(it.startTime) && now.before(it.activeUntil) }
+    }
+
+    /**
+     * Finds the next event among a list of events.
+     *
+     * @param events The list of events.
+     * @return The next event or `null` if no such event is left.
+     */
+    private fun findNextEvent(events: List<Event>): Event? {
+        val now = Date()
+        return events.firstOrNull { it.startTime.after(now) }
+    }
+
+    /**
+     * Loads the tracks for a list of measurements to check for the raffle unlock conditions.
+     *
+     * @param measurements The measurements to check.
+     * @param requiredDaysWithinGeoFence The minimum number of days with measurements which need to
+     * pass through the [geoFence].
+     * @param requiredLocationsWithinGeoFence The minimum number of GNSS measurements within the [geoFence] to count as
+     * "measurement within [geoFence]".
+     * @param geoFence The [GeoFence] which [requiredDaysWithinGeoFence] measurements need to pass.
+     * @return A `Future` which resolves to `true` if all conditions are passed.
+     */
+    private fun checkMeasurements(
+        measurements: List<Measurement>,
+        @Suppress("SameParameterValue") requiredDaysWithinGeoFence: Int,
+        @Suppress("SameParameterValue") requiredLocationsWithinGeoFence: Int,
+        geoFence: GeoFence
+    ): UnlockCondition {
+        var measurementCount = 0
+        val daysWithinGeoFence = mutableSetOf<Date>()
+
+        measurements.forEach { measurement ->
+            measurementCount++
+
+            // Load Tracks to check conditions like geoFence
+            val tracks = persistence.loadTracks(measurement.id)
+            if (tracks.isNotEmpty() && tracks.first().geoLocations.isNotEmpty()) {
+                val calendar = Calendar.getInstance().apply {
+                    timeInMillis = measurement.timestamp
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val measurementDay = calendar.time
+
+                tracks.forEach trackLoop@{ track ->
+                    val locationsWithinGeoFenceCount = track.geoLocations.count { location ->
+                        geoFence.isWithin(location!!)
+                    }
+                    if (locationsWithinGeoFenceCount >= requiredLocationsWithinGeoFence) {
+                        daysWithinGeoFence.add(measurementDay)
+                        return@trackLoop
+                    }
+                }
+            }
+        }
+
+        val daysWithinGeoFenceUnlocked =
+            daysWithinGeoFence.size >= requiredDaysWithinGeoFence
+        val unSyncedMeasurements = measurements.filter {
+            it.status == MeasurementStatus.FINISHED || it.status == MeasurementStatus.SYNCABLE_ATTACHMENTS
+        }
+        val measurementsSynced = unSyncedMeasurements.isEmpty()
+        val allConditionsMet = daysWithinGeoFenceUnlocked && measurementsSynced
+
+        return UnlockCondition(
+            ridesWithinEvent = measurementCount,
+            daysWithinGeoFence = daysWithinGeoFence.toSet(),
+            requiredDaysWithinGeoFence = requiredDaysWithinGeoFence,
+            daysWithinGeoFenceUnlocked = daysWithinGeoFenceUnlocked,
+            unSyncedMeasurements = unSyncedMeasurements.size,
+            measurementsSynced = measurementsSynced,
+            achievementUnlocked = allConditionsMet
+        )
+    }
+
+    private fun showProgress(p: UnlockCondition) {
+        var text = "Unknown Progress"
+        var progressDouble: Double? = null
+        // Condition 1: days with measurements within the geo fence
+        if (!p.daysWithinGeoFenceUnlocked) {
+            val left = p.requiredDaysWithinGeoFence - p.daysWithinGeoFence.size
+            text = getString(
+                R.string.days_within_geo_fence_progress,
+                left,
+                p.requiredDaysWithinGeoFence
+            )
+            progressDouble = min(p.geoFenceProgress(), 100.0)
+        } else
+        // Condition 2: all measurements synced
+            if (!p.measurementsSynced) {
+                text = getString(R.string.sync_progress, p.unSyncedMeasurements, p.ridesWithinEvent)
+                progressDouble = min(p.syncProgress(), 100.0)
+            }
+
+        binding.achievementsError.visibility = GONE
+        binding.achievementsUnlocked.visibility = GONE
+        binding.achievementsReceived.visibility = GONE
+        binding.achievementsProgress.visibility = VISIBLE
+        binding.achievementsProgressContent.text = text
+        binding.achievementsProgressBar.progress = progressDouble!!.roundToInt()
+    }
+
+    private fun showNoActiveEvent(nextEvent: Event?) {
+        val text = if (nextEvent == null) {
+            getString(R.string.error_message_no_active_event)
+        } else {
+            val next = SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY)
+            getString(R.string.error_message_next_event, next.format(nextEvent.startTime))
+        }
+        _binding?.achievementsErrorMessage?.text = text
+        _binding?.achievementsError?.visibility = VISIBLE
+        _binding?.achievements?.visibility = VISIBLE
+
+    }
+
+    private fun showVouchersLeft() {
+        try {
+            incentives!!.availableVouchers(
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        handleError(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        if (response.code == 200) {
+                            try {
+                                val json = JSONObject(response.body!!.string())
+                                val availableVouchers = json.getInt("vouchers")
+                                if (availableVouchers > 0) {
+                                    Handler(Looper.getMainLooper()).post {
+                                        // Can be null when switching tab before response returns
+                                        // We don't want to show number of raffle tickets left
+                                        /*_binding?.numberOfVouchersLeft?.text =
+                                            getString(R.string.voucher_left, availableVouchers)*/
+                                        _binding?.achievementsError?.visibility = GONE
+                                        _binding?.achievements?.visibility = VISIBLE
+                                    }
+                                } else {
+                                    showNoVouchersLeft()
+                                    _binding?.achievementsError?.visibility = GONE
+                                    _binding?.achievements?.visibility = GONE
+                                }
+                            } catch (e: JSONException) {
+                                handleJsonException(e)
+                            }
+                        } else {
+                            handleUnknownResponse(response.code)
+                        }
+                    }
+
+                },
+                object : AuthExceptionListener {
+                    override fun onException(e: AuthorizationException) {
+                        handleAuthorizationException(e)
+                    }
+                })
+        } catch (e: Exception) {
+            handleException(e)
+        }
+    }
+
+    private fun showVoucher(activeUntil: Date) {
         try {
             incentives!!.voucher(
                 object : Callback {
@@ -405,7 +582,8 @@ class TripsFragment : Fragment() {
                     override fun onResponse(call: Call, response: Response) {
                         // Capture all responses, also non-successful response codes
                         if (response.code == 428) {
-                            // Use from wrong municipality tried to request a voucher [RFR-605]
+                            // User from wrong municipality tried to request a voucher [RFR-605]
+                            // Or API does not agree with client that achievement was unlocked.
                             throw IllegalStateException("Voucher not allowed for this user")
                         } else if (response.code == 204) {
                             // if this is in face 204: The last voucher just got assigned
@@ -421,7 +599,7 @@ class TripsFragment : Fragment() {
                             try {
                                 val json = JSONObject(response.body!!.string())
                                 val code = json.getString("code")
-                                val until = json.getString("until")
+                                //val until = json.getString("until")
                                 Handler(Looper.getMainLooper()).post {
                                     binding.achievementsError.visibility = GONE
                                     binding.achievementsUnlocked.visibility = GONE
@@ -430,18 +608,34 @@ class TripsFragment : Fragment() {
                                     binding.achievementsReceivedContent.text =
                                         getString(R.string.voucher_code_is, code)
                                     @Suppress("SpellCheckingInspection")
-                                    val format =
-                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-                                    val validUntil = format.parse(until)
-                                    val untilText =
-                                        SimpleDateFormat.getDateInstance(
-                                            SimpleDateFormat.LONG,
-                                            Locale.getDefault()
-                                        ).format(validUntil!!.time)
+                                    //val format =
+                                    // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+                                    //val validUntil = format.parse(until)
+                                    val calendar = Calendar.getInstance().apply {
+                                        time = activeUntil
+                                        add(Calendar.HOUR_OF_DAY, -2) // remove time zone
+                                    }
+                                    val displayFormat = SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY)
+                                    val untilText = displayFormat.format(calendar.time)
                                     binding.achievementValidUntil.text =
                                         getString(R.string.valid_until, untilText)
+
                                     binding.achievementsReceivedButton.setOnClickListener {
-                                        val clipboard =
+                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                            data = Uri.parse("mailto:")
+                                            putExtra(
+                                                Intent.EXTRA_EMAIL,
+                                                arrayOf("gewinnspiel@ready-for-robots.de")
+                                            )
+                                            putExtra(
+                                                Intent.EXTRA_SUBJECT,
+                                                getString(R.string.email_subject, code)
+                                            )
+                                        }
+                                        startActivity(intent)
+
+                                        // Copy to clipboard
+                                        /*val clipboard =
                                             getSystemService(
                                                 requireContext(),
                                                 ClipboardManager::class.java
@@ -451,7 +645,7 @@ class TripsFragment : Fragment() {
                                                 getString(R.string.voucher_code),
                                                 code
                                             )
-                                        clipboard!!.setPrimaryClip(clip)
+                                        clipboard!!.setPrimaryClip(clip)*/
                                     }
                                 }
                             } catch (e: JSONException) {
@@ -493,5 +687,87 @@ class TripsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    /**
+     * A event, like e.g. a raffle.
+     *
+     * @param startTime The earliest time at which a raffle ticket can be unlocked.
+     * @param endTime The latest time at which a raffle ticket can be unlocked.
+     * @param activeUntil The latest time until which the raffle ticket can be redeemed.
+     */
+    data class Event(
+        val startTime: Date,
+        val endTime: Date,
+        val activeUntil: Date
+    ) {
+        constructor(
+            startTimeString: String,
+            endTimeString: String,
+            activeUntilString: String
+        ) : this(
+            SimpleDateFormat(
+                @Suppress("SpellCheckingInspection") "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                Locale.US
+            ).apply { timeZone = TimeZone.getTimeZone("UTC") }.parse(startTimeString)!!,
+            SimpleDateFormat(
+                @Suppress("SpellCheckingInspection") "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                Locale.US
+            ).apply { timeZone = TimeZone.getTimeZone("UTC") }.parse(endTimeString)!!,
+            SimpleDateFormat(
+                @Suppress("SpellCheckingInspection") "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                Locale.US
+            ).apply { timeZone = TimeZone.getTimeZone("UTC") }.parse(activeUntilString)!!,
+        )
+    }
+
+    /**
+     * A geo fence which is defined by a center location and a radius.
+     *
+     * @param centerLat The latitude of the center.
+     * @param centerLon The longitude of the center.
+     * @param radiusMeters The radius in meters.
+     */
+    data class GeoFence(
+        val centerLat: Double,
+        val centerLon: Double,
+        val radiusMeters: Double
+    ) {
+        /**
+         * Checks if a given location is within the [GeoFence].
+         *
+         * @param location The location to check.
+         * @return `true` if the location is within.
+         */
+        fun isWithin(location: ParcelableGeoLocation): Boolean {
+            val earthRadiusMeters = 6371000.0 // average earth radius in meters
+            val dLat = Math.toRadians(centerLat - location.lat)
+            val dLon = Math.toRadians(centerLon - location.lon)
+            val lat1 = Math.toRadians(location.lat)
+            val lat2 = Math.toRadians(centerLat)
+            val a = sin(dLat / 2) * sin(dLat / 2) +
+                    sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
+            val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+            val distance = earthRadiusMeters * c
+            return distance <= radiusMeters
+        }
+    }
+
+    data class UnlockCondition(
+        val ridesWithinEvent: Int = 0,
+        val daysWithinGeoFence: Set<Date> = emptySet(),
+        val requiredDaysWithinGeoFence: Int,
+        val daysWithinGeoFenceUnlocked: Boolean = false,
+        val unSyncedMeasurements: Int,
+        val measurementsSynced: Boolean = false,
+        val achievementUnlocked: Boolean = false
+    ) {
+        fun geoFenceProgress(): Double {
+            return daysWithinGeoFence.size.toDouble() / requiredDaysWithinGeoFence.toDouble() * 100.0
+        }
+
+        fun syncProgress(): Double {
+            return unSyncedMeasurements.toDouble() / ridesWithinEvent.toDouble() * 100.0
+        }
     }
 }

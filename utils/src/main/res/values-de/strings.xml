@@ -111,21 +111,25 @@
     <string name="toast_item_created_on_tracks_nearest_position">Der Eintrag wurde erstellt und auf den Track verschoben</string>
 
     <!-- Achievements in Trips View -->
-    <string name="achievements_progress">Noch %1$.0f von %2$.0f km bis zum Gutschein</string>
-    <string name="achievements_unlocked">nextbike Gutschein freigeschaltet</string>
-    <string name="show_voucher">Gutschein anzeigen</string>
-    <string name="voucher_code_is">Gutscheincode: %s</string>
-    <string name="valid_until">gültig bis: %s</string>
-    <string name="copy_voucher_code">Gutscheincode kopieren</string>
-    <string name="voucher_code">Gutscheincode</string>
-    <string name="voucher_left">%d x 15 Minuten nextbike Gutscheine übrig</string>
-    <string name="voucher_details">1x 15 Freiminuten auf die nächste Ausleihe</string>
-    <string name="voucher_details2">in Schkeuditz - nextbike Nordsachsen</string>
+    <string name="days_within_geo_fence_progress">Noch %1$d von %2$d Tagen nähe Rathaus Radfahren bis zum Gewinnlos</string>
+    <string name="sync_progress">Noch %1$d von %2$d Messungen hochladen bis zum Gewinnlos</string>
+    <string name="voucher_left">%d Gewinnlose übrig</string>
+    <string name="achievements_unlocked">Gewinnlos freigeschaltet</string>
+    <string name="show_voucher">Gewinnlos anzeigen</string>
+    <string name="voucher_code">Gewinnlos</string>
+    <string name="voucher_code_is">Gewinnlos: %s</string>
+    <string name="valid_until">Einlösbar bis %s per E-Mail</string>
+    <string name="voucher_details">an gewinnspiel@ready-for-robots.de</string>
+    <string name="copy_voucher_code">E-Mail senden</string>
+    <string name="email_subject">Gewinnlos: %s</string>
     <string name="error_message_no_connection">Keine Verbindung zum Server</string>
     <string name="error_message_authentication_failed">Authentifizierung fehlgeschlagen</string>
     <string name="error_message_server_unavailable">Server nicht erreichbar</string>
     <string name="error_message_request_failed">Serveranfrage fehlgeschlagen</string>
-    <string name="error_message_no_voucher_left">Leider sind keine Gutscheine mehr übrig</string>
+    <!-- E.g. for users from other municipalities or when no vouchers are left -->
+    <string name="error_message_no_voucher_left">Derzeit sind keine Gewinnaktionen verfügbar</string>
+    <string name="error_message_no_active_event">Derzeit sind keine Gewinnaktionen geplant</string>
+    <string name="error_message_next_event">Nächste Gewinnaktion ab %s</string>
 
     <!-- Trip Details -->
     <string name="trip_details">Fahrtdetails</string>
