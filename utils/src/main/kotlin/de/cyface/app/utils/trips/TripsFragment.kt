@@ -130,31 +130,15 @@ class TripsFragment : Fragment() {
         Event(
             "2024-04-01T00:00:00Z",
             "2024-04-20T23:59:59Z",
-            "2024-04-24T23:59:59Z" // FIXME
+            "2024-04-21T23:59:59Z"
         ),
         // event 1
         Event(
             "2024-05-01T00:00:00Z",
             "2024-05-31T23:59:59Z",
-            "2024-06-14T23:59:59Z" // FIXME
-        ),
-        // event 2
-        Event(
-            "2024-08-01T00:00:00Z",
-            "2024-08-30T23:59:59Z",
-            "2024-09-14T23:59:59Z" // FIXME
+            "2024-06-01T23:59:59Z"
         ),
     )
-
-    /**
-     * The minimum length of a measurement in meters to be valid for the raffle condition.
-     */
-    private val minimumMeasurementMeters = 1000.0
-
-    /**
-     * The minimum number of measurements with [minimumMeasurementMeters] to unlock a raffle code.
-     */
-    private val requiredDaysWithMinimumLength = 7
 
     /**
      * The minimum number of days with measurements which pass through the [geoFence] to unlock a raffle code.
@@ -313,8 +297,6 @@ class TripsFragment : Fragment() {
         }
         val conditions = checkMeasurements(
             eventMeasurements,
-            minimumMeasurementMeters,
-            requiredDaysWithMinimumLength,
             requiredDaysWithMeasurementsWithinGeoFence,
             requiredLocationsWithinGeoFence,
             geoFence
@@ -441,26 +423,21 @@ class TripsFragment : Fragment() {
      * Loads the tracks for a list of measurements to check for the raffle unlock conditions.
      *
      * @param measurements The measurements to check.
-     * @param minLength The minimum length of a measurement in meters to be valid for the raffle condition.
-     * @param requiredDaysWithMinimumLength The minimum number of measurements with [minLength] to unlock a raffle code.
-     * @param requiredDaysWithMeasurementsWithinGeoFence The minimum number of days with measurements which need to
+     * @param requiredDaysWithinGeoFence The minimum number of days with measurements which need to
      * pass through the [geoFence].
      * @param requiredLocationsWithinGeoFence The minimum number of GNSS measurements within the [geoFence] to count as
      * "measurement within [geoFence]".
-     * @param geoFence The [GeoFence] which [requiredDaysWithMeasurementsWithinGeoFence] measurements need to pass.
+     * @param geoFence The [GeoFence] which [requiredDaysWithinGeoFence] measurements need to pass.
      * @return A `Future` which resolves to `true` if all conditions are passed.
      */
     private fun checkMeasurements(
         measurements: List<Measurement>,
-        @Suppress("SameParameterValue") minLength: Double,
-        @Suppress("SameParameterValue") requiredDaysWithMinimumLength: Int,
-        @Suppress("SameParameterValue") requiredDaysWithMeasurementsWithinGeoFence: Int,
+        @Suppress("SameParameterValue") requiredDaysWithinGeoFence: Int,
         @Suppress("SameParameterValue") requiredLocationsWithinGeoFence: Int,
         geoFence: GeoFence
     ): UnlockCondition {
         var measurementCount = 0
-        val daysWithMeasurementsAboveMinimumLength = mutableSetOf<Date>()
-        val daysWithMeasurementsWithinGeoFence = mutableSetOf<Date>()
+        val daysWithinGeoFence = mutableSetOf<Date>()
 
         measurements.forEach { measurement ->
             measurementCount++
@@ -471,40 +448,33 @@ class TripsFragment : Fragment() {
                 val timestamp = tracks.first().geoLocations.first()!!.timestamp
                 val measurementDay = Date(timestamp)
 
-                if (measurement.distance >= minLength) {
-                    daysWithMeasurementsAboveMinimumLength.add(measurementDay)
-                }
-
                 tracks.forEach trackLoop@{ track ->
                     val locationsWithinGeoFenceCount = track.geoLocations.count { location ->
                         geoFence.isWithin(location!!)
                     }
                     if (locationsWithinGeoFenceCount >= requiredLocationsWithinGeoFence) {
-                        daysWithMeasurementsWithinGeoFence.add(measurementDay)
+                        daysWithinGeoFence.add(measurementDay)
                         return@trackLoop
                     }
                 }
             }
         }
 
-        val daysAboveThresholdUnlocked =
-            daysWithMeasurementsAboveMinimumLength.size >= requiredDaysWithMinimumLength
         val daysWithinGeoFenceUnlocked =
-            daysWithMeasurementsWithinGeoFence.size >= requiredDaysWithMeasurementsWithinGeoFence
+            daysWithinGeoFence.size >= requiredDaysWithinGeoFence
         val unSyncedMeasurements = measurements.filter {
             it.status == MeasurementStatus.FINISHED || it.status == MeasurementStatus.SYNCABLE_ATTACHMENTS
         }
         val measurementsSynced = unSyncedMeasurements.isEmpty()
-        val allConditionsMet =
-            daysAboveThresholdUnlocked && daysWithinGeoFenceUnlocked && measurementsSynced
+        val allConditionsMet = daysWithinGeoFenceUnlocked && measurementsSynced
 
         return UnlockCondition(
             ridesWithinEvent = measurementCount,
-            daysWithMeasurementsAboveMinimumLength.toSet(),
-            requiredDaysWithMeasurementsWithinGeoFence,
-            daysWithinGeoFenceUnlocked,
-            unSyncedMeasurements.size,
-            measurementsSynced,
+            daysWithinGeoFence = daysWithinGeoFence.toSet(),
+            requiredDaysWithinGeoFence = requiredDaysWithinGeoFence,
+            daysWithinGeoFenceUnlocked = daysWithinGeoFenceUnlocked,
+            unSyncedMeasurements = unSyncedMeasurements.size,
+            measurementsSynced = measurementsSynced,
             achievementUnlocked = allConditionsMet
         )
     }
