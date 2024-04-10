@@ -291,7 +291,6 @@ class TripsFragment : Fragment() {
         }
 
         // Check achievement unlock conditions
-        // FIXME: Add a test for start and end date to ensure they are included
         val eventMeasurements = measurements.filter {
             Date(it.timestamp).after(activeEvent.startTime) &&
                     Date(it.timestamp).before(activeEvent.endTime)
@@ -548,7 +547,7 @@ class TripsFragment : Fragment() {
                                         _binding?.achievementsError?.visibility = GONE
                                         _binding?.achievements?.visibility = VISIBLE
                                     }
-                                } else { //FIXME
+                                } else {
                                     showNoVouchersLeft()
                                     _binding?.achievementsError?.visibility = GONE
                                     _binding?.achievements?.visibility = GONE
@@ -734,7 +733,6 @@ class TripsFragment : Fragment() {
         val centerLon: Double,
         val radiusMeters: Double
     ) {
-        // FIXME: ensure the distance is correct (test)
         /**
          * Checks if a given location is within the [GeoFence].
          *
