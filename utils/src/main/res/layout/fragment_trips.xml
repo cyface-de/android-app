@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="@string/achievements_progress"
+        android:lineSpacingMultiplier="1.25"
         android:textAppearance="?attr/textAppearanceSubtitle1"
         app:drawableLeftCompat="@drawable/baseline_workspace_premium_24"
         app:drawableTint="@color/text" />
@@ -74,7 +74,7 @@
         android:progressTint="@color/defaultPrimary" />
 
       <TextView
-        android:id="@+id/achievementsVouchersLeft"
+        android:id="@+id/numberOfVouchersLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"
@@ -136,36 +136,25 @@
         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
       <TextView
+          android:id="@+id/achievementValidUntil"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/achievementsReceivedContent"
+          android:paddingBottom="16dp"
+          android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+      <TextView
         android:id="@+id/achievementVoucherDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/achievementsReceivedContent"
+        app:layout_constraintTop_toBottomOf="@id/achievementValidUntil"
         android:paddingBottom="16dp"
         android:textAppearance="?attr/textAppearanceSubtitle2"
         android:text="@string/voucher_details"/>
-
-      <TextView
-        android:id="@+id/achievementVoucherDetails2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails"
-        android:paddingBottom="16dp"
-        android:textAppearance="?attr/textAppearanceSubtitle2"
-        android:text="@string/voucher_details2"/>
-
-      <TextView
-        android:id="@+id/achievementValidUntil"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails2"
-        android:paddingBottom="16dp"
-        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
       <Button
         android:id="@+id/achievementsReceivedButton"
@@ -173,7 +162,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/achievementValidUntil"
+        app:layout_constraintTop_toBottomOf="@id/achievementVoucherDetails"
         android:text="@string/copy_voucher_code" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

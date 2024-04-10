@@ -19,6 +19,8 @@
 package de.cyface.app.utils.trips.incentives
 
 import android.content.Context
+import android.util.Log
+import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.synchronization.Auth
 import de.cyface.uploader.DefaultUploader
 import net.openid.appauth.AuthorizationException
@@ -61,6 +63,7 @@ class Incentives(
 
             // Try to send the request
             val url = voucherCountEndpoint().toString()
+            Log.d(TAG, "Voucher count request to $url")
             val request = Request.Builder()
                 .url(url)
                 .addHeader("Authorization", "Bearer $accessToken")
@@ -87,6 +90,7 @@ class Incentives(
 
             // Try to send the request
             val url = voucherEndpoint().toString()
+            Log.d(TAG, "Voucher request to $url")
             val request = Request.Builder()
                 .url(url)
                 .addHeader("Authorization", "Bearer $accessToken")
