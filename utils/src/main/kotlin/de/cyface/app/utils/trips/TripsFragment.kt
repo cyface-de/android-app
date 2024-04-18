@@ -127,12 +127,6 @@ class TripsFragment : Fragment() {
      * The raffle events - sorted by date ASC!
      */
     private val events = listOf(
-        // test event
-        Event(
-            "2024-04-01T00:00:00Z",
-            "2024-04-20T23:59:59Z",
-            "2024-04-21T23:59:59Z"
-        ),
         // event 1
         Event(
             "2024-05-01T00:00:00Z",
