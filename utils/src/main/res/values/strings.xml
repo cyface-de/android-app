@@ -35,6 +35,7 @@
     <string name="authorization_canceled">Login aborted</string>
     <string name="logging_in">Logging in …</string>
     <string name="retry">Try again</string>
+    <string name="message_logout_aborted_or_failed">Logout aborted or failed</string>
 
     <!-- BottomNavigationView -->
     <string name="trips">Trips</string>

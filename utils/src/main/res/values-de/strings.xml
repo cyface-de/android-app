@@ -34,6 +34,7 @@
     <string name="authorization_canceled">Anmeldung abgebrochen</string>
     <string name="logging_in">Sie werden eingeloggt …</string>
     <string name="retry">Erneut versuchen</string>
+    <string name="message_logout_aborted_or_failed">Logout abgebrochen oder fehlgeschlagen</string>
 
     <!-- BottomNavigationView, also used as Toolbar / AppBar title -->
     <string name="trips">Fahrten</string>

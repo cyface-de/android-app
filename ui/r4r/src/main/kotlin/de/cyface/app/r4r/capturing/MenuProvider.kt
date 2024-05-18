@@ -105,18 +105,16 @@ class MenuProvider(
                 try {
                     Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
 
-                    stopBackgroundServices()
                     // This inform the auth server that the user wants to end its session
                     activity.auth.endSession(activity)
-                    //signOut() // instead of `endSession()` to sign out softly for testing
+                    //signOut() // use instead of `endSession()` to sign out softly for testing
 
-                    // FIXME: Disabled as this can also be done by the callback
-                    //activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.accountOrNull.name)
+                    // THe account is removed in `MainActivity.signOut()` instead of here
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                // This is done by MainActivity.onActivityResult -> signOut()
+                // We currently start the `LoginActivity` explicitly in `MainActivity.signOut()`
                 //(activity as MainActivity).startSynchronization()
                 true
             }
@@ -125,14 +123,5 @@ class MenuProvider(
                 false
             }
         }
-    }
-    private fun stopBackgroundServices() {
-        // Ensure no background processes survive which try to use the old auth state
-        val intent1 = Intent(activity, DataCapturingBackgroundService::class.java)
-        activity.stopService(intent1)
-        val intent2 = Intent(activity, CyfaceSyncService::class.java)
-        activity.stopService(intent2)
-        val intent3 = Intent(activity, AuthorizationService::class.java)
-        activity.stopService(intent3)
     }
 }
