@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -24,6 +24,9 @@ import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -51,13 +54,13 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
-import de.cyface.persistence.SetupException
 import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDialog
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
+import de.cyface.persistence.SetupException
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.CyfaceSyncService.Companion.AUTH_TOKEN_TYPE
@@ -65,9 +68,9 @@ import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
-import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
+import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -75,7 +78,7 @@ import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
 import java.io.IOException
-import java.net.URL
+import kotlin.system.exitProcess
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the
@@ -87,8 +90,6 @@ import java.net.URL
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.2.0
- * @since 3.2.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider {
 
@@ -186,7 +187,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
 
         // Authorization
-        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings, "MainActivity")
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -255,10 +256,21 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         super.onActivityResult(requestCode, resultCode, data)
 
         // Authorization
-        if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Handler().postDelayed({ signOut(true); finish() }, 2000)
-        } else {
-            show("Sign out canceled")
+        if (requestCode == END_SESSION_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Handler().postDelayed({
+                    // [LEIP-233] There is an open bug which leads to `Credentials incorrect` error
+                    // after re-login (app restart required). We tried, without success:
+                    // - stopBackgroundServices() w/DCBGService, CyfaceSyncService and AuthService
+                    // - cacheDir.deleteRecursively()
+                    // - restartApp() in `signOut()`
+                    // We don't need to cancel pending jobs are we don't use the job scheduler.
+                    signOut(true)
+                }, 2000)
+            } else {
+                show(getString(de.cyface.app.utils.R.string.message_logout_aborted_or_failed))
+                Log.e("MainActivity", "Sign out canceled or failed")
+            }
         }
     }
 
@@ -336,7 +348,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference = runBlocking { appSettings.uploadEnabledFlow.first() }
+                    val syncEnabledPreference =
+                        runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $syncEnabledPreference"
@@ -440,14 +453,35 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // E.g. `MainActivity.onStart()` calls `signOut()` when the user is already signed out
         // so there is no account to be removed.
         if (removeAccount) {
-            // Also remove account from account manager
             capturing.removeAccount(capturing.wiFiSurveyor.account.name)
         }
 
+        // Ensure the login screen is shown after logout
         val mainIntent = Intent(this, LoginActivity::class.java)
-        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(mainIntent)
-        finish()
+
+        // Restarting the app after the account is removed help to fix a bug where the app crashes
+        // when switching to the `trips` tab after re-login (with incentives active)
+        if (removeAccount) {
+            // [LEIP-233] restarting the app completely does not fix the `Credentials incorrect` error
+            // after re-login, a manual app restart is still required after re-login.
+            restartApp(this)
+        } else {
+            // With `restartApp()`: when aborting login the app restarts every 2s
+            finish()
+        }
+    }
+
+    private fun restartApp(context: Context) {
+        val intent = Intent(context, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent)
+        exitProcess(0)
     }
 
     @MainThread
