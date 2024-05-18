@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -22,6 +22,7 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.CapturingFragmentDirections
@@ -29,14 +30,13 @@ import de.cyface.app.MainActivity
 import de.cyface.app.R
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
 import de.cyface.energy_settings.TrackingSettings
+import de.cyface.uploader.exception.SynchronisationException
 
 /**
  * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
  * options are shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 2.0.1
- * @since 3.2.0
  */
 class MenuProvider(
     private val activity: MainActivity,
@@ -98,21 +98,25 @@ class MenuProvider(
                 navController.navigate(action)
                 true
             }
-            /*R.id.logout_item -> {
+
+            R.id.logout_item -> {
                 try {
                     Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
+
                     // This inform the auth server that the user wants to end its session
                     activity.auth.endSession(activity)
-                    //signOut() // instead of `endSession()` to sign out softly for testing
-                    activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.account.name)
+                    //signOut() // use instead of `endSession()` to sign out softly for testing
+
+                    // The account is removed in `MainActivity.signOut()` instead of here
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
                 // Show login screen
-                // This is done by MainActivity.onActivityResult -> signOut()
+                // We currently start the `LoginActivity` explicitly in `MainActivity.signOut()`
                 //(activity as MainActivity).startSynchronization()
                 true
-            }*/
+            }
+
             else -> {
                 false
             }

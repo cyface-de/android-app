@@ -109,7 +109,7 @@ class MenuProvider(
                     activity.auth.endSession(activity)
                     //signOut() // use instead of `endSession()` to sign out softly for testing
 
-                    // THe account is removed in `MainActivity.signOut()` instead of here
+                    // The account is removed in `MainActivity.signOut()` instead of here
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
