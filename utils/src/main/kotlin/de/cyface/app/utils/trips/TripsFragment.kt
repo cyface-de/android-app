@@ -543,8 +543,10 @@ class TripsFragment : Fragment() {
                                     }
                                 } else {
                                     showNoVouchersLeft()
-                                    _binding?.achievementsError?.visibility = GONE
-                                    _binding?.achievements?.visibility = GONE
+                                    /*Handler(Looper.getMainLooper()).post {
+                                        _binding?.achievementsError?.visibility = GONE
+                                        _binding?.achievements?.visibility = GONE
+                                    }*/
                                 }
                             } catch (e: JSONException) {
                                 handleJsonException(e)

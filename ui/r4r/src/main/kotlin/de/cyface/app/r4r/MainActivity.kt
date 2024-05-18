@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -24,15 +24,23 @@ import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -60,6 +68,7 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.synchronization.CyfaceAuthenticator
+import de.cyface.synchronization.CyfaceAuthenticatorService
 import de.cyface.synchronization.CyfaceSyncService.Companion.AUTH_TOKEN_TYPE
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
@@ -75,7 +84,7 @@ import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
 import java.io.IOException
-import java.net.URL
+import kotlin.system.exitProcess
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the
@@ -87,8 +96,6 @@ import java.net.URL
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 2.2.0
- * @since 3.2.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider {
 
@@ -186,7 +193,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         }
 
         // Authorization
-        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings)
+        auth = OAuth2(applicationContext, CyfaceAuthenticator.settings, "MainActivity")
 
         /****************************************************************************************/
         // Crashes with RuntimeException: `capturing`/`auth` not initialized when this is above
@@ -255,12 +262,41 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         super.onActivityResult(requestCode, resultCode, data)
 
         // Authorization
-        if (requestCode == END_SESSION_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Handler().postDelayed({ signOut(true); finish() }, 2000)
-        } else {
-            show("Sign out canceled")
+        if (requestCode == END_SESSION_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Handler().postDelayed({
+                    // upload after re-login not working, have to restart the app manually
+                    //stopBackgroundServices()
+                    //cancelPendingJobs() we don't use the job scheduler at the moment
+                    //restartApp()
+                    cacheDir.deleteRecursively()
+                    signOut(true)
+                    //finish()
+                }, 2000)
+            } else {
+                show("Logout abgebrochen oder fehlgeschlagen") // FIXME
+                Log.e("MainActivity", "Sign out canceled or failed")
+            }
         }
     }
+
+    /*private fun stopBackgroundServices() {
+        // Ensure no background processes survive which try to use the old auth state
+        /*val intent1 = Intent(this, DataCapturingBackgroundService::class.java)
+        stopService(intent1)*/
+        val intent2 = Intent(this, CyfaceSyncService::class.java)
+        stopService(intent2)
+        /*val intent3 = Intent(this, AuthorizationService::class.java)
+        stopService(intent3)*/
+    }*/
+
+    /*private fun restartApp() {
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        finish()
+        Runtime.getRuntime().exit(0)
+    }*/
 
     /**
      * Fixes "home" (back) button in the top action bar when in the fragment details fragment.
@@ -441,13 +477,31 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         // so there is no account to be removed.
         if (removeAccount) {
             // Also remove account from account manager
+            //if (account != null) {
             capturing.removeAccount(capturing.wiFiSurveyor.account.name)
+            //} else {
+            //    Log.w(TAG, "No account found to be removed.") // FIXME: why does this happen?
+            //}
+            val mainIntent = Intent(this, LoginActivity::class.java)
+            mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(mainIntent)
+            restartApp(this)
+        } else {
+            val mainIntent = Intent(this, LoginActivity::class.java)
+            mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(mainIntent)
+            //restartApp(this)
+            finish()
         }
+    }
 
-        val mainIntent = Intent(this, LoginActivity::class.java)
-        mainIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        startActivity(mainIntent)
-        finish()
+    private fun restartApp(context: Context) {
+        val intent = Intent(context, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent,
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent)
+        exitProcess(0)
     }
 
     @MainThread

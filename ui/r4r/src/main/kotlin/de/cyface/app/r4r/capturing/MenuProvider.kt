@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -23,22 +23,22 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.annotation.MainThread
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
+import de.cyface.datacapturing.backend.DataCapturingBackgroundService
 import de.cyface.energy_settings.TrackingSettings
+import de.cyface.synchronization.CyfaceSyncService
 import de.cyface.uploader.exception.SynchronisationException
+import net.openid.appauth.AuthorizationService
 
 /**
  * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 2.0.1
- * @since 3.2.0
  */
 class MenuProvider(
     private val activity: MainActivity,
@@ -101,13 +101,17 @@ class MenuProvider(
                 true
             }
 
-            /*R.id.logout_item -> {
+            R.id.logout_item -> {
                 try {
                     Toast.makeText(activity.applicationContext, "Logging out ...", Toast.LENGTH_SHORT).show()
+
+                    stopBackgroundServices()
                     // This inform the auth server that the user wants to end its session
                     activity.auth.endSession(activity)
                     //signOut() // instead of `endSession()` to sign out softly for testing
-                    activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.account.name)
+
+                    // FIXME: Disabled as this can also be done by the callback
+                    //activity.capturing.removeAccount(activity.capturing.wiFiSurveyor.accountOrNull.name)
                 } catch (e: SynchronisationException) {
                     throw IllegalStateException(e)
                 }
@@ -115,11 +119,20 @@ class MenuProvider(
                 // This is done by MainActivity.onActivityResult -> signOut()
                 //(activity as MainActivity).startSynchronization()
                 true
-            }*/
+            }
 
             else -> {
                 false
             }
         }
+    }
+    private fun stopBackgroundServices() {
+        // Ensure no background processes survive which try to use the old auth state
+        val intent1 = Intent(activity, DataCapturingBackgroundService::class.java)
+        activity.stopService(intent1)
+        val intent2 = Intent(activity, CyfaceSyncService::class.java)
+        activity.stopService(intent2)
+        val intent3 = Intent(activity, AuthorizationService::class.java)
+        activity.stopService(intent3)
     }
 }
