@@ -1,8 +1,6 @@
 # This workflow ensures the building step works
 #
 # @author Armin Schnabel
-# @version 1.0.0
-# @since 3.2.0
 name: Gradle Build
 
 on:
@@ -48,6 +46,7 @@ jobs:
           echo "githubToken=${{ secrets.GH_READ_TOKEN }}" >> gradle.properties
           # This mock API accepts all credentials and allows the UI test to skip the login
           echo "cyface.staging_api=https://demo.cyface.de/api/v2" >> gradle.properties
+          echo "cyface.staging_provider_api=https://demo.cyface.de/provider" >> gradle.properties
           echo "cyface.staging_incentives_api=https://demo.cyface.de/incentives" >> gradle.properties
           echo "cyface.staging_oauth_discovery=https://demo.cyface.de/auth" >> gradle.properties
           echo "cyface.staging_user=guestLogin" >> gradle.properties

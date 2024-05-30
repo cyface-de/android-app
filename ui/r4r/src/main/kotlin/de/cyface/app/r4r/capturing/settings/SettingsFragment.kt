@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,26 +18,44 @@
  */
 package de.cyface.app.r4r.capturing.settings
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.r4r.Application
+import de.cyface.app.r4r.BuildConfig
+import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.SharedConstants
+import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.utils.settings.AppSettings
+import de.cyface.synchronization.Auth
+import io.sentry.Sentry
+import net.openid.appauth.AuthorizationException
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Callback
+import okhttp3.Response
+import java.io.IOException
 
 /**
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
- * @version 2.0.1
- * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
+
+    /**
+     * The authenticator to get the auth token from.
+     */
+    private lateinit var auth: Auth
 
     /**
      * This property is only valid between onCreateView and onDestroyView.
@@ -53,11 +71,6 @@ class SettingsFragment : Fragment() {
      * The capturing service object which controls data capturing and synchronization.
      */
     private lateinit var capturing: CyfaceDataCapturingService
-
-    /**
-     * The settings used by both, UIs and libraries.
-     */
-    private lateinit var appSettings: AppSettings
 
     /**
      * The [SettingsViewModel] for this fragment.
@@ -88,6 +101,13 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
 
+        if (activity is ServiceProvider) {
+            val serviceProvider = activity as ServiceProvider
+            this.auth = serviceProvider.auth
+        } else {
+            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+        }
+
         // Observe UI changes
         /** app settings **/
         binding.centerMapSwitch.setOnCheckedChangeListener(
@@ -103,6 +123,9 @@ class SettingsFragment : Fragment() {
                 capturing
             )
         )
+        binding.deleteAccountButton.setOnClickListener {
+            showDeleteAccountConfirmationDialog()
+        }
 
         // Observe view model and update UI
         viewModel.centerMap.observe(viewLifecycleOwner) { centerMapValue ->
@@ -117,6 +140,94 @@ class SettingsFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun showDeleteAccountConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.confirm_delete_account_title)
+            .setMessage(R.string.confirm_delete_account_message)
+            .setPositiveButton(R.string.delete_account) { _, _ ->
+                deleteAccount(
+                    object : Callback {
+                        override fun onResponse(call: Call, response: Response) {
+                            if (response.code == 202) {
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.delete_account_success,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+
+                                // This inform the auth server that the user wants to end its session
+                                auth.endSession(requireActivity())
+                            } else {
+                                Sentry.captureMessage("Account deletion failed: ${response.code}")
+                                requireActivity().runOnUiThread {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.delete_account_failed,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call, e: IOException) {
+                            Sentry.captureException(e)
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(
+                                    context,
+                                    R.string.delete_account_error,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    },
+                    object : AuthExceptionListener {
+                        override fun onException(e: AuthorizationException) {
+                            Sentry.captureException(e)
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(context, R.string.auth_error, Toast.LENGTH_LONG)
+                                    .show()
+                            }
+                        }
+                    }
+                )
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /**
+     * Requests the account and user data deletion for the currently logged in user.
+     *
+     * @param handler the handler which receives the response in case of success
+     * @param authErrorHandler the handler which receives the auth errors
+     */
+    private fun deleteAccount(
+        handler: Callback,
+        authErrorHandler: AuthExceptionListener
+    ) {
+        val client = OkHttpClient()
+        auth.performActionWithFreshTokens { accessToken, _, ex ->
+            if (ex != null) {
+                authErrorHandler.onException(ex as AuthorizationException)
+                return@performActionWithFreshTokens
+            }
+
+            val userId = auth.userId()!!
+
+            // Try to send the request
+            val url = BuildConfig.providerServer + "/users/$userId"
+            Log.d(SharedConstants.TAG, "Account deletion request to $url")
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer $accessToken")
+                .delete()
+                .build()
+            client.newCall(request).enqueue(handler)
+        }
     }
 
     override fun onDestroyView() {

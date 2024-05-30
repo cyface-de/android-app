@@ -1,8 +1,6 @@
 # This workflow creates a signed Android Bundle which can be uploaded to Play Store Console
 #
 # @author Armin Schnabel
-# @version 1.0.0
-# @since 3.2.0
 name: Gradle Publish
 
 on:
@@ -51,6 +49,7 @@ jobs:
           echo "githubToken=${{ secrets.GITHUB_TOKEN }}" >> gradle.properties
           # Inject Cyface APIs URL
           echo "cyface.api=${{ secrets.PUBLIC_API }}" >> gradle.properties
+          echo "cyface.provider_api=${{ secrets.PUBLIC_PROVIDER_API }}" >> gradle.properties
           echo "cyface.incentives_api=${{ secrets.PUBLIC_INCENTIVES_API }}" >> gradle.properties
           echo "cyface.oauth_discovery=${{ secrets.PUBLIC_OAUTH_DISCOVERY }}" >> gradle.properties
           # Inject OAuth redirect URIs
