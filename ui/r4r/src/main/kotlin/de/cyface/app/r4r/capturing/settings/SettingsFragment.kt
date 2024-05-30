@@ -82,7 +82,9 @@ class SettingsFragment : Fragment() {
 
         // Get dependencies
         if (activity is ServiceProvider) {
-            capturing = (activity as ServiceProvider).capturing
+            val serviceProvider = activity as ServiceProvider
+            capturing = serviceProvider.capturing
+            auth = serviceProvider.auth
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
@@ -100,13 +102,6 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-
-        if (activity is ServiceProvider) {
-            val serviceProvider = activity as ServiceProvider
-            this.auth = serviceProvider.auth
-        } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
-        }
 
         // Observe UI changes
         /** app settings **/

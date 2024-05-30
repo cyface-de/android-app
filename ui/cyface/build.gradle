@@ -62,8 +62,6 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("String", "localHostIp", '"10.0.2.2"')
-        // we don't describe this provider build variable in the README so it's probably deprecated
-        // buildConfigField("String", "provider", '"de.cyface.app.provider"')
 
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
         buildConfigField "int", "currentTerms", "5"
@@ -92,17 +90,20 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.local_provider_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.local_provider_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.emulator_provider_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
