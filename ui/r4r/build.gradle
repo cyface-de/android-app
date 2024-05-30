@@ -83,6 +83,7 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.local_provider_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.local_incentives_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
@@ -90,18 +91,21 @@ android {
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.local_provider_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.local_incentives_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.emulator_provider_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.emulator_incentives_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.staging_provider_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
             buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
@@ -110,6 +114,7 @@ android {
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.demo_provider_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
@@ -122,6 +127,7 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.provider_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
             buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
@@ -218,6 +224,8 @@ dependencies {
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
+    // Http Requests (can't use Volley lib as it does not return status code in failure-/handler)
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
 
     // Kotlin components
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"

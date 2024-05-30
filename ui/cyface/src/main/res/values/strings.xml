@@ -24,4 +24,12 @@
   <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
+  <string name="delete_account">Delete account</string>
+  <string name="confirm_delete_account_title">Delete user account</string>
+  <string name="confirm_delete_account_message">Are you sure you want to delete your account and all linked data irreversibly?</string>
+  <string name="cancel">Cancel</string>
+  <string name="delete_account_success">Account and data successfully deleted</string>
+  <string name="delete_account_failed">Account deletion failed</string>
+  <string name="delete_account_error">Error while deleting accuont</string>
+  <string name="auth_error">Error during authentication</string>
 </resources>

@@ -22,4 +22,12 @@
   <string name="drawer_setting_speed_sensor">Externer Sensor</string>
   <string name="bluetooth_setup_failed">Fehler beim Starten der Bluetooth Komponente</string>
   <string name="settings_sensor_frequency">Sensorfrequenz</string>
+  <string name="delete_account">Account löschen</string>
+  <string name="confirm_delete_account_title">Nutzeraccount löschen</string>
+  <string name="confirm_delete_account_message">Sind Sie sicher, dass Sie Ihren Account und alle verbundenen Daten unwiderruflich löschen möchten?</string>
+  <string name="cancel">Abbrechen</string>
+  <string name="delete_account_success">Account und Daten wurden gelöscht</string>
+  <string name="delete_account_failed">Account löschen fehlgeschlafen</string>
+  <string name="delete_account_error">Fehler beim Account löschen</string>
+  <string name="auth_error">Fehler bei der Authentifizierung</string>
 </resources>

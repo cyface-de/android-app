@@ -62,8 +62,6 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("String", "localHostIp", '"10.0.2.2"')
-        // we don't describe this provider build variable in the README so it's probably deprecated
-        // buildConfigField("String", "provider", '"de.cyface.app.provider"')
 
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
         buildConfigField "int", "currentTerms", "5"
@@ -92,22 +90,26 @@ android {
 
             // Phone - to local collector - ! only if iptables allow connection from outside
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.local_provider_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"]
 
             // Phone - to local production - ! only if iptables allow connection from outside
             // CertPathValidatorException: Trust anchor for certification path not found.
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.local_production_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.local_provider_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.local_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"]
 
             // EMULATOR - to local collector
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.emulator_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.emulator_provider_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.emulator_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"true"] // for local collector testing
 
             // Staging
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.staging_api')}\""
+            buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.staging_provider_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.staging_incentives_api')}\""
             buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.staging_oauth_discovery')}\""
             buildConfigField "String", "testLogin", "\"${project.findProperty('cyface.staging_user')}\""
@@ -116,6 +118,7 @@ android {
 
             // MOCK-API - only supports login - used by UI test on CI
             //buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.demo_api')}\""
+            //buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.demo_provider_api')}\""
             //buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.demo_incentives_api')}\""
             //buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.demo_oauth_discovery')}\""
             //manifestPlaceholders = [usesCleartextTraffic:"false"] // for local collector testing
@@ -128,6 +131,7 @@ android {
 
             // signingConfig is set by the CI
             buildConfigField "String", "cyfaceServer", "\"${project.findProperty('cyface.api')}\""
+            buildConfigField "String", "providerServer", "\"${project.findProperty('cyface.provider_api')}\""
             buildConfigField "String", "incentivesServer", "\"${project.findProperty('cyface.incentives_api')}\""
             buildConfigField "String", "oauthDiscovery", "\"${project.findProperty('cyface.oauth_discovery')}\""
             manifestPlaceholders = [usesCleartextTraffic:"false"]
@@ -225,6 +229,8 @@ dependencies {
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
+    // Http Requests (can't use Volley lib as it does not return status code in failure-/handler)
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
 
     // OAuth 2.0 with OpenID Connect
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
