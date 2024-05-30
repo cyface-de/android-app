@@ -25,6 +25,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.fragment.app.FragmentActivity
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import com.thegrizzlylabs.sardineandroid.impl.SardineException
 import de.cyface.app.digural.upload.WebdavSyncService
@@ -60,6 +61,14 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
         // The webdav library automatically logs the user in again upon each API access
         // So there is no need to actively check the token freshness.
         action(WebdavAuthenticator.DUMMY_TOKEN, WebdavAuthenticator.DUMMY_TOKEN, null)
+    }
+
+    override fun userId(): String {
+        return DUMMY_USER_ID
+    }
+
+    override fun endSession(activity: FragmentActivity) {
+        TODO("Not yet implemented")
     }
 
     /**
@@ -220,6 +229,8 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
     }
 
     companion object {
+        const val DUMMY_USER_ID = "WEBDAV_DOES_NOT_USE_USER_DELETION_NO_ID_REQUIRED"
+
         /**
          * Returns a dummy auth config as the [WebdavAuth] does not require such.
          */
