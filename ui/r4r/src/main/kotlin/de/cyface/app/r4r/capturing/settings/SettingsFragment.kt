@@ -25,15 +25,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.r4r.Application
 import de.cyface.app.r4r.BuildConfig
+import de.cyface.app.r4r.CameraServiceProvider
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
+import de.cyface.camera_service.CameraInfo
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.Auth
 import io.sentry.Sentry
@@ -77,6 +81,31 @@ class SettingsFragment : Fragment() {
      */
     private lateinit var viewModel: SettingsViewModel
 
+    /**
+     * Can be launched to request permissions.
+     */
+    var permissionLauncher: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { result ->
+            if (result.isNotEmpty()) {
+                val allGranted = result.values.none { !it }
+                if (allGranted) {
+                    //showCameraModeDialog(this)
+                    viewModel.setCameraEnabled(true, requireContext())
+                } else {
+                    Toast.makeText(
+                        context,
+                        requireContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    // Workaround to ensure it's updated back to false on permission denial
+                    viewModel.setCameraEnabled(true, requireContext())
+                    viewModel.setCameraEnabled(false, requireContext())
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -88,11 +117,17 @@ class SettingsFragment : Fragment() {
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
+        val cameraSettings =
+            if (activity is CameraServiceProvider) {
+                (activity as CameraServiceProvider).cameraSettings
+            } else {
+                throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
+            }
 
         // Initialize ViewModel
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(Application.appSettings)
+            SettingsViewModelFactory(Application.appSettings, cameraSettings)
         )[SettingsViewModel::class.java]
     }
 
@@ -121,8 +156,16 @@ class SettingsFragment : Fragment() {
         binding.deleteAccountButton.setOnClickListener {
             showDeleteAccountConfirmationDialog()
         }
+        /** camera settings **/
+        binding.cameraEnabledSwitch.setOnCheckedChangeListener(
+            CameraSwitchHandler(
+                viewModel,
+                this
+            )
+        )
 
         // Observe view model and update UI
+        /** app settings **/
         viewModel.centerMap.observe(viewLifecycleOwner) { centerMapValue ->
             run {
                 binding.centerMapSwitch.isChecked = centerMapValue!!
@@ -131,6 +174,32 @@ class SettingsFragment : Fragment() {
         viewModel.upload.observe(viewLifecycleOwner) { uploadValue ->
             run {
                 binding.uploadSwitch.isChecked = uploadValue!!
+            }
+        }
+        /** camera settings **/
+        viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabled ->
+            run {
+                binding.cameraEnabledSwitch.isChecked = cameraEnabled
+                //binding.cameraSettingsWrapper.visibility = if (cameraEnabled) View.VISIBLE else View.GONE
+
+                // Manual Sensor support and features
+                if (cameraEnabled) {
+                    val cameraInfo = CameraInfo(requireContext())
+                    viewModel.manualSensorSupported = cameraInfo.manualSensorSupported
+
+                    /*
+                    if (cameraInfo.manualSensorSupported) {
+                        setManualSensorSupport(cameraInfo)
+                    } else {
+                        //binding.staticFocusDistanceSlider.visibility = INVISIBLE
+                        binding.staticFocusWrapper.visibility = View.INVISIBLE
+                        // binding.staticExposureTimeSlider.setVisibility(View.INVISIBLE);
+                        // binding.staticExposureValueSlider.visibility = INVISIBLE
+                        binding.staticExposureTimeWrapper.visibility = View.INVISIBLE
+                        binding.staticExposureValueWrapper.visibility = View.INVISIBLE
+                    }
+                    */
+                }
             }
         }
 

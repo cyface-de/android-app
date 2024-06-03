@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -20,6 +20,7 @@ package de.cyface.app.r4r.capturing.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 
 /**
@@ -28,15 +29,18 @@ import de.cyface.utils.settings.AppSettings
  * Survives configuration changes and returns the right instance after Activity recreation.
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 3.4.0
+ * @param appSettings The settings used by both, UIs and libraries.
+ * @param cameraSettings The camera-specific settings.
  */
-class SettingsViewModelFactory(private val appSettings: AppSettings) :
+class SettingsViewModelFactory(
+    private val appSettings: AppSettings,
+    private val cameraSettings: CameraSettings,
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appSettings) as T
+            return SettingsViewModel(appSettings, cameraSettings) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

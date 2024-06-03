@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -102,8 +102,6 @@ import io.sentry.Sentry;
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 4.0.0
- * @since 1.0.0
  */
 public class DataCapturingButton
         implements AbstractButton, DataCapturingListener, View.OnLongClickListener, CameraListener {

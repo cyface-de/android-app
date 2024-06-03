@@ -43,7 +43,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.auth.LoginActivity
-import de.cyface.app.button.UnInterestedListener
+import de.cyface.app.capturing.UnInterestedListener
 import de.cyface.app.databinding.ActivityMainBinding
 import de.cyface.app.notification.CameraEventHandler
 import de.cyface.app.notification.DataCapturingEventHandler

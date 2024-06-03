@@ -16,13 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural.button
+package de.cyface.app.digural.capturing
 
 import android.content.Context
 import android.location.Location
 import android.util.Log
 import de.cyface.app.digural.MainActivity.Companion.TAG
-import de.cyface.app.digural.capturing.DiguralApi
 import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import de.cyface.utils.Validate
@@ -76,7 +75,7 @@ class ExternalCameraController(
             return
         }
 
-        val payload = de.cyface.app.digural.capturing.Location(
+        val payload = Location(
             deviceId,
             measurementId,
             location.latitude,

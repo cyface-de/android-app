@@ -62,6 +62,32 @@
         app:layout_constraintRight_toRightOf="parent" />
       </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- camera enabled -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/camera_enabled_wrapper"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/upload">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/camera_capturing"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+      <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/camera_enabled_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <!-- account deletion -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -69,7 +95,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/upload"
+      app:layout_constraintTop_toBottomOf="@id/camera_enabled_wrapper"
       android:orientation="horizontal">
       <TextView
         android:layout_width="wrap_content"

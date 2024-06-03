@@ -78,8 +78,9 @@
       </intent-filter>
     </activity>
 
+    <!-- MainActivity is called by LoginActivity. -->
     <!-- See https://github.com/openid/AppAuth-Android/blob/master/app/AndroidManifest.xml
-    for more details on how to handle AppAuth redirects and app links. Activity is called by LoginActivity. -->
+    for more details on how to handle AppAuth redirects and app links. -->
     <activity
       android:name=".MainActivity"
       android:exported="true"

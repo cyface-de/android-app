@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -27,7 +27,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.util.Log
-import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
@@ -38,7 +37,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
-import de.cyface.app.digural.button.ExternalCameraController
+import de.cyface.app.digural.capturing.ExternalCameraController
 import de.cyface.app.digural.capturing.settings.SettingsProvider
 import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.app.digural.databinding.ActivityMainBinding
@@ -83,8 +82,6 @@ import java.lang.ref.WeakReference
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 5.0.0
- * @since 1.0.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider, SettingsProvider {
 
