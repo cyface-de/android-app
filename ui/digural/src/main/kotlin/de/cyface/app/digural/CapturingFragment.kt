@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -67,8 +67,6 @@ import kotlinx.coroutines.runBlocking
  * A `Fragment` for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.5.1
- * @since 1.0.0
  */
 class CapturingFragment : Fragment(), ConnectionStatusListener {
 
@@ -174,9 +172,14 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             capturing = (activity as ServiceProvider).capturing
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
-            cameraService = (activity as CameraServiceProvider).cameraService
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
+        }
+        if (activity is CameraServiceProvider) {
+            cameraService = (activity as CameraServiceProvider).cameraService
+            cameraSettings = (activity as CameraServiceProvider).cameraSettings
+        } else {
+            throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
         }
 
         // Location permissions are requested by CapturingFragment/Map to react to results.

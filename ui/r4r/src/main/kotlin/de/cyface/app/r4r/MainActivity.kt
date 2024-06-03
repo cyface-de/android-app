@@ -45,13 +45,18 @@ import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.r4r.auth.LoginActivity
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
+import de.cyface.app.r4r.capturing.UnInterestedListener
 import de.cyface.app.r4r.databinding.ActivityMainBinding
+import de.cyface.app.r4r.notification.CameraEventHandler
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiSettings
+import de.cyface.camera_service.background.camera.CameraListener
+import de.cyface.camera_service.foreground.CameraService
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.model.CapturedData
@@ -91,7 +96,7 @@ import kotlin.system.exitProcess
  * @author Klemens Muthmann
  * @author Armin Schnabel
  */
-class MainActivity : AppCompatActivity(), ServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -102,6 +107,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * The capturing service object which controls data capturing and synchronization.
      */
     override lateinit var capturing: CyfaceDataCapturingService
+
+    /**
+     * The `CameraService` which collects camera data if the user did activate this feature.
+     */
+    override lateinit var cameraService: CameraService
 
     /**
      * The controller which allows to navigate through the navigation graph.
@@ -118,6 +128,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
      * The settings used by multiple UIs.
      */
     override lateinit var uiSettings: UiSettings
+
+    /**
+     * The settings used to store the user preferences for the camera.
+     */
+    override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -145,6 +160,20 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
         override fun onCapturingStopped() {}
     }
 
+    private val unInterestedCameraListener: CameraListener = object :
+        CameraListener {
+        override fun onNewPictureAcquired(picturesCaptured: Int) {}
+        override fun onNewVideoStarted() {}
+        override fun onVideoStopped() {}
+        override fun onLowDiskSpace(allocation: DiskConsumption) {}
+        override fun onErrorState(e: Exception) {}
+        override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
+            return false
+        }
+
+        override fun onCapturingStopped() {}
+    }
+
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
@@ -160,7 +189,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         uiSettings = UiSettings(this, BuildConfig.incentivesServer)
-        //cameraSettings = CameraSettings(this)
+        cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
         val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
@@ -178,10 +207,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider {
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             //startSynchronization() // We do this in displayAuthorized() instead!
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
-            /*cameraService = CameraService(
-                fragmentRoot.getContext(), fragmentRoot.getContext().getContentResolver(),
-                de.cyface.app.utils.Constants.AUTHORITY, CameraEventHandler(), dataCapturingButton
-            )*/
+            cameraService = CameraService(
+                this.applicationContext,
+                CameraEventHandler(),
+                unInterestedCameraListener, // here was the capturing button but it registers itself, too
+                UnInterestedListener()
+            )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }

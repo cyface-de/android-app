@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -53,8 +53,6 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
- * @version 3.0.1
- * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
 
@@ -369,11 +367,6 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     /**
      * Displays a dialog for the user to select a camera mode (video- or picture mode).
      */
@@ -424,6 +417,11 @@ class SettingsFragment : Fragment() {
             CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED -> FOCUS_DISTANCE_NOT_CALIBRATED
             else -> "unknown: $focusDistanceCalibration"
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 

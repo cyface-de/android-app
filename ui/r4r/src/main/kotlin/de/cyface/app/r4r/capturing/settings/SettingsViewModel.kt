@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,10 +18,13 @@
  */
 package de.cyface.app.r4r.capturing.settings
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -42,25 +45,43 @@ import kotlinx.coroutines.runBlocking
  *   https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 3.4.0
  * @property appSettings The settings used by both, UIs and libraries.
  */
-class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
+class SettingsViewModel(
+    private val appSettings: AppSettings,
+    private val cameraSettings: CameraSettings,
+) : ViewModel() {
 
+    /** app settings **/
     private val _centerMap = MutableLiveData<Boolean>()
     private val _upload = MutableLiveData<Boolean>()
 
-    init {
-        runBlocking {
-            _centerMap.value = appSettings.centerMapFlow.first()
-            _upload.value = appSettings.uploadEnabledFlow.first()
-        }
-    }
+    /** camera settings  **/
+    private val _cameraEnabled = MutableLiveData<Boolean>()
 
+    /** camera settings  **/
+    val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
+
+    /**
+     * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
+     */
+    var manualSensorSupported = false
+
+    /** app settings **/
     val centerMap: LiveData<Boolean> = _centerMap
     val upload: LiveData<Boolean> = _upload
 
+    init {
+        runBlocking {
+            /** app settings **/
+            _centerMap.value = appSettings.centerMapFlow.first()
+            _upload.value = appSettings.uploadEnabledFlow.first()
+            /** camera settings  **/
+            _cameraEnabled.value = cameraSettings.cameraEnabledFlow.first()
+        }
+    }
+
+    /** app settings **/
     fun setCenterMap(centerMap: Boolean) {
         viewModelScope.launch { appSettings.setCenterMap(centerMap) }
         _centerMap.postValue(centerMap)
@@ -70,5 +91,12 @@ class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
         viewModelScope.launch { appSettings.setUploadEnabled(upload) }
         _upload.postValue(upload)
     }
-}
 
+    /** camera settings **/
+    fun setCameraEnabled(cameraEnabled: Boolean, context: Context) {
+        viewModelScope.launch {
+            cameraSettings.setCameraEnabled(cameraEnabled)
+        }
+        _cameraEnabled.postValue(cameraEnabled)
+    }
+}

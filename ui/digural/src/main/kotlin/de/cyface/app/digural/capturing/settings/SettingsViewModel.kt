@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -46,8 +46,6 @@ import java.net.URL
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 1.0.1
- * @since 4.0.0
  * @property appSettings The settings used by both, UIs and libraries.
  * @property cameraSettings The settings used by the camera library.
  * @property customSettings The UI-specific settings.
@@ -58,6 +56,7 @@ class SettingsViewModel(
     private val customSettings: CustomSettings
 ) : ViewModel() {
 
+    /** app settings **/
     private val _centerMap = MutableLiveData<Boolean>()
     private val _upload = MutableLiveData<Boolean>()
     private val _sensorFrequency = MutableLiveData<Int>()
@@ -82,6 +81,27 @@ class SettingsViewModel(
      */
     var manualSensorSupported = false
 
+    /** app settings **/
+    val centerMap: LiveData<Boolean> = appSettings.centerMapFlow.asLiveData()
+    val uploadEnabled: LiveData<Boolean> = appSettings.uploadEnabledFlow.asLiveData()
+    val sensorFrequency: LiveData<Int> = appSettings.sensorFrequencyFlow.asLiveData()
+
+    /** camera settings  **/
+    val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
+    val videoMode: LiveData<Boolean> = cameraSettings.videoModeFlow.asLiveData()
+    val rawMode: LiveData<Boolean> = cameraSettings.rawModeFlow.asLiveData()
+    val distanceBasedTriggering: LiveData<Boolean> =
+        cameraSettings.distanceBasedTriggeringFlow.asLiveData()
+    val triggeringDistance: LiveData<Float> = cameraSettings.triggeringDistanceFlow.asLiveData()
+    val staticFocus: LiveData<Boolean> = cameraSettings.staticFocusFlow.asLiveData()
+    val staticFocusDistance: LiveData<Float> = cameraSettings.staticFocusDistanceFlow.asLiveData()
+    val staticExposure: LiveData<Boolean> = cameraSettings.staticExposureFlow.asLiveData()
+    val staticExposureTime: LiveData<Long> = cameraSettings.staticExposureTimeFlow.asLiveData()
+    val staticExposureValue: LiveData<Int> = cameraSettings.staticExposureValueFlow.asLiveData()
+
+    /** custom settings **/
+    val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
+
     init {
         runBlocking {
             /** app settings **/
@@ -103,27 +123,6 @@ class SettingsViewModel(
             _diguralServerUrl.value = customSettings.diguralUrlFlow.first()
         }
     }
-
-    /** app settings **/
-    val centerMap: LiveData<Boolean> = appSettings.centerMapFlow.asLiveData()
-    val uploadEnabled: LiveData<Boolean> = appSettings.uploadEnabledFlow.asLiveData()
-    val sensorFrequency: LiveData<Int> = appSettings.sensorFrequencyFlow.asLiveData()
-
-    /** camera settings  **/
-    val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
-    val videoMode: LiveData<Boolean> = cameraSettings.videoModeFlow.asLiveData()
-    val rawMode: LiveData<Boolean> = cameraSettings.rawModeFlow.asLiveData()
-    val distanceBasedTriggering: LiveData<Boolean> =
-        cameraSettings.distanceBasedTriggeringFlow.asLiveData()
-    val triggeringDistance: LiveData<Float> = cameraSettings.triggeringDistanceFlow.asLiveData()
-    val staticFocus: LiveData<Boolean> = cameraSettings.staticFocusFlow.asLiveData()
-    val staticFocusDistance: LiveData<Float> = cameraSettings.staticFocusDistanceFlow.asLiveData()
-    val staticExposure: LiveData<Boolean> = cameraSettings.staticExposureFlow.asLiveData()
-    val staticExposureTime: LiveData<Long> = cameraSettings.staticExposureTimeFlow.asLiveData()
-    val staticExposureValue: LiveData<Int> = cameraSettings.staticExposureValueFlow.asLiveData()
-
-    /** custom settings **/
-    val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
 
     /** app settings **/
     fun setCenterMap(centerMap: Boolean) {

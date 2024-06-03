@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -29,8 +29,6 @@ import de.cyface.utils.settings.AppSettings
  * Survives configuration changes and returns the right instance after Activity recreation.
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 3.4.0
  * @param appSettings The settings used by both, UIs and libraries.
  * @param cameraSettings The camera-specific settings.
  */

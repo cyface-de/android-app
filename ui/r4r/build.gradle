@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -20,13 +20,12 @@
  * Gradle's build file for the app.
  *
  * @author Armin Schnabel
- * @version 1.1.0
- * @since 3.2.0
  */
 apply plugin: 'com.android.application'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
+apply plugin: 'kotlin-parcelize' // Generate Parcelable in Kotlin from Annotation
 apply plugin: 'com.google.protobuf' // For Proto DataStore
 
 buildscript {
@@ -240,6 +239,7 @@ dependencies {
     implementation project(':synchronization')
     implementation project(':persistence')
     implementation project(':energy_settings')
+    implementation project(':camera_service')
     implementation project(':utils')
 
     // Dependencies for instrumentation tests
