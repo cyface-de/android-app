@@ -97,12 +97,13 @@ class WebdavUploader(
     override fun uploadAttachment(
         jwtToken: String,
         metaData: RequestMetaData,
-        measurementId: Long,
         file: File,
         fileName: String,
         progressListener: UploadProgressListener
     ): Result {
-        val endpoint = attachmentsEndpoint(measurementId)
+        val measurementId = metaData.measurementIdentifier.toLong()
+        val deviceId = metaData.deviceIdentifier
+        val endpoint = attachmentsEndpoint(deviceId, measurementId)
         val result = uploadFile(metaData, file, fileName, endpoint, progressListener)
         if (result != Result.UPLOAD_FAILED) {
             progressListener.updatedProgress(1.0f) // the whole file is uploaded
@@ -114,7 +115,10 @@ class WebdavUploader(
         return URL(measurementsDirectory())
     }
 
-    override fun attachmentsEndpoint(measurementId: Long): URL {
+    override fun attachmentsEndpoint(deviceId: String, measurementId: Long): URL {
+        // For Webdav we use another directory structure than in the Collector API, here we use:
+        // /files/<login>/devices/<deviceId>/measurements/<measurementId>/attachments
+        // But the API uses /measurements/<deviceId>/<measurementId>/attachments
         return URL(attachmentsDirectory(measurementId))
     }
 
