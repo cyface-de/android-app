@@ -82,11 +82,11 @@ class WebdavUploader(
     @Suppress("unused", "CyclomaticComplexMethod", "LongMethod") // Part of the API
     override fun uploadMeasurement(
         jwtToken: String,
-        metaData: RequestMetaData,
+        metaData: RequestMetaData<RequestMetaData.MeasurementIdentifier>,
         file: File,
         progressListener: UploadProgressListener
     ): Result {
-        val endpoint = URL(measurementDirectory(metaData.measurementIdentifier.toLong()))
+        val endpoint = URL(measurementDirectory(metaData.identifier.measurementId.toLong()))
         val result = uploadFile(metaData, file, MEASUREMENT_FILE_FILENAME, endpoint, progressListener)
         if (result != Result.UPLOAD_FAILED) {
             progressListener.updatedProgress(1.0f) // the whole file is uploaded
@@ -96,13 +96,13 @@ class WebdavUploader(
 
     override fun uploadAttachment(
         jwtToken: String,
-        metaData: RequestMetaData,
+        metaData: RequestMetaData<RequestMetaData.AttachmentIdentifier>,
         file: File,
         fileName: String,
         progressListener: UploadProgressListener
     ): Result {
-        val measurementId = metaData.measurementIdentifier.toLong()
-        val deviceId = metaData.deviceIdentifier
+        val measurementId = metaData.identifier.measurementId.toLong()
+        val deviceId = metaData.identifier.deviceId
         val endpoint = attachmentsEndpoint(deviceId, measurementId)
         val result = uploadFile(metaData, file, fileName, endpoint, progressListener)
         if (result != Result.UPLOAD_FAILED) {
@@ -144,8 +144,8 @@ class WebdavUploader(
     }
 
     @Throws(UploadFailed::class)
-    private fun uploadFile(
-        metaData: RequestMetaData,
+    private fun <T : RequestMetaData.MeasurementIdentifier> uploadFile(
+        metaData: RequestMetaData<T>,
         file: File,
         fileName: String,
         endpoint: URL,
@@ -169,7 +169,7 @@ class WebdavUploader(
             // `Authenticating for response: Response{protocol=http/1.1, code=401, message=Unauthorized,`
 
             val isMeasurementUpload = fileName == MEASUREMENT_FILE_FILENAME
-            val measurementId = metaData.measurementIdentifier.toLong()
+            val measurementId = metaData.identifier.measurementId.toLong()
             ensureDirectoriesExist(isMeasurementUpload, measurementId)
 
             // File uploads
@@ -374,35 +374,37 @@ class WebdavUploader(
          * @param metaData The metadata to convert.
          * @return The meta data as `Map`.
          */
-        fun preRequestBody(metaData: RequestMetaData): Map<String, String> {
+        fun <T : RequestMetaData.MeasurementIdentifier> preRequestBody(
+            metaData: RequestMetaData<T>,
+        ): Map<String, String> {
             val attributes: MutableMap<String, String> = HashMap()
 
             // Location meta data
-            metaData.startLocation?.let { startLocation ->
+            metaData.measurementMetaData.startLocation?.let { startLocation ->
                 attributes["startLocLat"] = startLocation.latitude.toString()
                 attributes["startLocLon"] = startLocation.longitude.toString()
                 attributes["startLocTS"] = startLocation.timestamp.toString()
             }
-            metaData.endLocation?.let { endLocation ->
+            metaData.measurementMetaData.endLocation?.let { endLocation ->
                 attributes["endLocLat"] = endLocation.latitude.toString()
                 attributes["endLocLon"] = endLocation.longitude.toString()
                 attributes["endLocTS"] = endLocation.timestamp.toString()
             }
-            attributes["locationCount"] = metaData.locationCount.toString()
+            attributes["locationCount"] = metaData.measurementMetaData.locationCount.toString()
 
             // Remaining meta data
-            attributes["deviceId"] = metaData.deviceIdentifier
-            attributes["measurementId"] = metaData.measurementIdentifier
-            attributes["deviceType"] = metaData.deviceType
-            attributes["osVersion"] = metaData.operatingSystemVersion
-            attributes["appVersion"] = metaData.applicationVersion
-            attributes["length"] = metaData.length.toString()
-            attributes["modality"] = metaData.modality
-            attributes["formatVersion"] = metaData.formatVersion.toString()
-            attributes["logCount"] = metaData.logCount.toString()
-            attributes["imageCount"] = metaData.imageCount.toString()
-            attributes["videoCount"] = metaData.videoCount.toString()
-            attributes["filesSize"] = metaData.filesSize.toString()
+            attributes["deviceId"] = metaData.identifier.deviceId
+            attributes["measurementId"] = metaData.identifier.measurementId
+            attributes["deviceType"] = metaData.deviceMetaData.deviceType
+            attributes["osVersion"] = metaData.deviceMetaData.operatingSystemVersion
+            attributes["appVersion"] = metaData.applicationMetaData.applicationVersion
+            attributes["length"] = metaData.measurementMetaData.length.toString()
+            attributes["modality"] = metaData.measurementMetaData.modality
+            attributes["formatVersion"] = metaData.applicationMetaData.formatVersion.toString()
+            attributes["logCount"] = metaData.attachmentMetaData.logCount.toString()
+            attributes["imageCount"] = metaData.attachmentMetaData.imageCount.toString()
+            attributes["videoCount"] = metaData.attachmentMetaData.videoCount.toString()
+            attributes["filesSize"] = metaData.attachmentMetaData.filesSize.toString()
             return attributes
         }
     }
