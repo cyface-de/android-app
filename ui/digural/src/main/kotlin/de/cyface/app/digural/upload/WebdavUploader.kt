@@ -24,7 +24,6 @@ import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.model.Json
 import de.cyface.model.Json.JsonObject
-import de.cyface.model.RequestMetaData
 import de.cyface.uploader.Result
 import de.cyface.uploader.UploadProgressListener
 import de.cyface.uploader.Uploader
@@ -44,6 +43,9 @@ import de.cyface.uploader.exception.UnauthorizedException
 import de.cyface.uploader.exception.UnexpectedResponseCode
 import de.cyface.uploader.exception.UploadFailed
 import de.cyface.uploader.exception.UploadSessionExpired
+import de.cyface.uploader.model.Attachment
+import de.cyface.uploader.model.Measurement
+import de.cyface.uploader.model.Uploadable
 import java.io.File
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -58,8 +60,6 @@ import javax.net.ssl.SSLException
  * To use this interface just call [WebdavUploader.uploadMeasurement] or [WebdavUploader.uploadAttachment].
  *
  * @author Armin Schnabel
- * @version 1.0.0
- * @since 3.8.0
  * @property apiEndpoint An API endpoint running a Webdav data collector service, like `https://some.url/api/v3`
  */
 class WebdavUploader(
@@ -82,12 +82,18 @@ class WebdavUploader(
     @Suppress("unused", "CyclomaticComplexMethod", "LongMethod") // Part of the API
     override fun uploadMeasurement(
         jwtToken: String,
-        metaData: RequestMetaData,
+        uploadable: Measurement,
         file: File,
         progressListener: UploadProgressListener
     ): Result {
-        val endpoint = URL(measurementDirectory(metaData.measurementIdentifier.toLong()))
-        val result = uploadFile(metaData, file, MEASUREMENT_FILE_FILENAME, endpoint, progressListener)
+        val endpoint = URL(measurementDirectory(uploadable.identifier.measurementIdentifier))
+        val result = uploadFile(
+            uploadable,
+            uploadable.identifier.measurementIdentifier,
+            file,
+            MEASUREMENT_FILE_FILENAME,
+            endpoint,
+        )
         if (result != Result.UPLOAD_FAILED) {
             progressListener.updatedProgress(1.0f) // the whole file is uploaded
         }
@@ -96,14 +102,21 @@ class WebdavUploader(
 
     override fun uploadAttachment(
         jwtToken: String,
-        metaData: RequestMetaData,
-        measurementId: Long,
+        uploadable: Attachment,
         file: File,
         fileName: String,
         progressListener: UploadProgressListener
     ): Result {
-        val endpoint = attachmentsEndpoint(measurementId)
-        val result = uploadFile(metaData, file, fileName, endpoint, progressListener)
+        val measurementId = uploadable.identifier.measurementIdentifier
+        val deviceId = uploadable.identifier.deviceIdentifier.toString()
+        val endpoint = attachmentsEndpoint(deviceId, measurementId)
+        val result = uploadFile(
+            uploadable,
+            uploadable.identifier.measurementIdentifier,
+            file,
+            fileName,
+            endpoint
+        )
         if (result != Result.UPLOAD_FAILED) {
             progressListener.updatedProgress(1.0f) // the whole file is uploaded
         }
@@ -114,7 +127,10 @@ class WebdavUploader(
         return URL(measurementsDirectory())
     }
 
-    override fun attachmentsEndpoint(measurementId: Long): URL {
+    override fun attachmentsEndpoint(deviceId: String, measurementId: Long): URL {
+        // For Webdav we use another directory structure than in the Collector API, here we use:
+        // /files/<login>/devices/<deviceId>/measurements/<measurementId>/attachments
+        // But the API uses /measurements/<deviceId>/<measurementId>/attachments
         return URL(attachmentsDirectory(measurementId))
     }
 
@@ -141,11 +157,11 @@ class WebdavUploader(
 
     @Throws(UploadFailed::class)
     private fun uploadFile(
-        metaData: RequestMetaData,
+        uploadable: Uploadable,
+        measurementId: Long,
         file: File,
         fileName: String,
-        endpoint: URL,
-        progressListener: UploadProgressListener
+        endpoint: URL
     ): Result {
         return try {
             // TODO: the sardine library has PRs which support input streams but they are not merged
@@ -165,7 +181,6 @@ class WebdavUploader(
             // `Authenticating for response: Response{protocol=http/1.1, code=401, message=Unauthorized,`
 
             val isMeasurementUpload = fileName == MEASUREMENT_FILE_FILENAME
-            val measurementId = metaData.measurementIdentifier.toLong()
             ensureDirectoriesExist(isMeasurementUpload, measurementId)
 
             // File uploads
@@ -175,7 +190,7 @@ class WebdavUploader(
                 val metaDataUri = "$uploadDir/meta.json"
                 if (!sardine.exists(metaDataUri)) {
                     Log.d(TAG, "upload meta data")
-                    val metaDataMap = preRequestBody(metaData)
+                    val metaDataMap = uploadable.toMap()
                     val metaDataJson = JsonObject.Builder()
                     metaDataMap.keys.forEach {
                         metaDataJson.add(Json.jsonKeyValue(it, metaDataMap.getValue(it)))
@@ -362,44 +377,6 @@ class WebdavUploader(
             } else {
                 "$url/"
             }
-        }
-
-        /**
-         * Assembles a `Map` which contains the metadata.
-         *
-         * @param metaData The metadata to convert.
-         * @return The meta data as `Map`.
-         */
-        fun preRequestBody(metaData: RequestMetaData): Map<String, String> {
-            val attributes: MutableMap<String, String> = HashMap()
-
-            // Location meta data
-            metaData.startLocation?.let { startLocation ->
-                attributes["startLocLat"] = startLocation.latitude.toString()
-                attributes["startLocLon"] = startLocation.longitude.toString()
-                attributes["startLocTS"] = startLocation.timestamp.toString()
-            }
-            metaData.endLocation?.let { endLocation ->
-                attributes["endLocLat"] = endLocation.latitude.toString()
-                attributes["endLocLon"] = endLocation.longitude.toString()
-                attributes["endLocTS"] = endLocation.timestamp.toString()
-            }
-            attributes["locationCount"] = metaData.locationCount.toString()
-
-            // Remaining meta data
-            attributes["deviceId"] = metaData.deviceIdentifier
-            attributes["measurementId"] = metaData.measurementIdentifier
-            attributes["deviceType"] = metaData.deviceType
-            attributes["osVersion"] = metaData.operatingSystemVersion
-            attributes["appVersion"] = metaData.applicationVersion
-            attributes["length"] = metaData.length.toString()
-            attributes["modality"] = metaData.modality
-            attributes["formatVersion"] = metaData.formatVersion.toString()
-            attributes["logCount"] = metaData.logCount.toString()
-            attributes["imageCount"] = metaData.imageCount.toString()
-            attributes["videoCount"] = metaData.videoCount.toString()
-            attributes["filesSize"] = metaData.filesSize.toString()
-            return attributes
         }
     }
 }
