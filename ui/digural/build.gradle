@@ -22,10 +22,10 @@
  * @author Armin Schnabel
  * @author Klemens Muthmann
  */
-apply plugin: 'com.android.application'
+apply plugin: alias(libs.plugins.android.application)
 apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
-apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: alias(libs.plugins.jetbrains.kotlin.android)
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
 apply plugin: 'kotlin-parcelize' // Generate Parcelable in Kotlin from Annotation
 apply plugin: 'com.google.protobuf' // For Proto DataStore
@@ -132,6 +132,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        mlModelBinding = true // Machine learning
     }
 }
 
@@ -195,6 +196,10 @@ dependencies {
 
     // Used for WebDAV Communication
     implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
+
+    // Machine Learning
+    implementation libs.tensorflow.lite.support
+    implementation libs.tensorflow.lite.metadata
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
