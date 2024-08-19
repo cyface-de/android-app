@@ -88,6 +88,74 @@
         app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Wrapper for camera settings -->
+    <LinearLayout
+        android:id="@+id/camera_settings_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/camera_enabled_wrapper">
+
+    <!-- distance-based capturing mode -->
+    <TextView
+        android:id="@+id/distance_based_capturing_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt"
+        android:text="@string/distance_based_capturing" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:gravity="center_vertical"
+        android:paddingStart="4pt"
+        android:paddingLeft="4pt"
+        android:paddingEnd="4pt"
+        android:paddingRight="4pt">
+
+      <androidx.appcompat.widget.SwitchCompat
+          android:id="@+id/distance_based_switcher"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+      <LinearLayout
+          android:id="@+id/distance_based_wrapper"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/distance_based_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:stepSize="1"
+            android:valueFrom="1"
+            android:valueTo="100" />
+
+        <TextView
+            android:id="@+id/distance_based"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/distance_based_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4pt"
+            android:paddingLeft="4pt"
+            android:paddingEnd="4pt"
+            android:paddingRight="4pt" />
+      </LinearLayout>
+    </LinearLayout>
+    </LinearLayout>
+
     <!-- account deletion -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -95,7 +163,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/camera_enabled_wrapper"
+      app:layout_constraintTop_toBottomOf="@id/camera_settings_wrapper"
       android:orientation="horizontal">
       <TextView
         android:layout_width="wrap_content"

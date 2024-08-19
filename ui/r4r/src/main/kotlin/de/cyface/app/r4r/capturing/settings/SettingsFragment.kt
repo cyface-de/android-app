@@ -23,6 +23,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -34,6 +36,7 @@ import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.CameraServiceProvider
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
+import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
@@ -48,6 +51,7 @@ import okhttp3.Request
 import okhttp3.Callback
 import okhttp3.Response
 import java.io.IOException
+import kotlin.math.roundToInt
 
 /**
  * The [Fragment] which shows the settings to the user.
@@ -163,6 +167,16 @@ class SettingsFragment : Fragment() {
                 this
             )
         )
+        binding.distanceBasedSwitcher.setOnCheckedChangeListener(
+            DistanceBasedSwitchHandler(
+                requireContext(),
+                viewModel
+            )
+        )
+        binding.distanceBasedSlider.addOnChangeListener(
+            TriggerDistanceSlideHandler(viewModel)
+        )
+        binding.distanceBasedUnit.text = TRIGGER_DISTANCE_UNIT
 
         // Observe view model and update UI
         /** app settings **/
@@ -180,7 +194,7 @@ class SettingsFragment : Fragment() {
         viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabled ->
             run {
                 binding.cameraEnabledSwitch.isChecked = cameraEnabled
-                //binding.cameraSettingsWrapper.visibility = if (cameraEnabled) View.VISIBLE else View.GONE
+                binding.cameraSettingsWrapper.visibility = if (cameraEnabled) View.VISIBLE else View.GONE
 
                 // Manual Sensor support and features
                 if (cameraEnabled) {
@@ -200,6 +214,25 @@ class SettingsFragment : Fragment() {
                     }
                     */
                 }
+            }
+        }
+        viewModel.distanceBasedTriggering.observe(viewLifecycleOwner) { distanceBased ->
+            run {
+                binding.distanceBasedSwitcher.isChecked = distanceBased
+                binding.distanceBasedWrapper.visibility = if (distanceBased) VISIBLE else INVISIBLE
+            }
+        }
+        viewModel.triggeringDistance.observe(viewLifecycleOwner) { triggeringDistance ->
+            run {
+                val roundedDistance = (triggeringDistance * 100).roundToInt() / 100f
+                Log.d(TAG, "updateView -> triggering distance to $roundedDistance")
+                binding.distanceBasedSlider.value = roundedDistance
+
+                val text = StringBuilder(roundedDistance.toString())
+                while (text.length < 4) {
+                    text.append("0")
+                }
+                binding.distanceBased.text = text
             }
         }
 
@@ -297,6 +330,13 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        /**
+         * The unit of the [.triggerDistancePreference] value shown in the **UI**.
+         */
+        private const val TRIGGER_DISTANCE_UNIT = "m"
     }
 }
 

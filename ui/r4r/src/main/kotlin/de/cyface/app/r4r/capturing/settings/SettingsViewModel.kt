@@ -58,9 +58,14 @@ class SettingsViewModel(
 
     /** camera settings  **/
     private val _cameraEnabled = MutableLiveData<Boolean>()
+    private val _distanceBasedTriggering = MutableLiveData<Boolean>()
+    private val _triggeringDistance = MutableLiveData<Float>()
 
     /** camera settings  **/
     val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
+    val distanceBasedTriggering: LiveData<Boolean> =
+        cameraSettings.distanceBasedTriggeringFlow.asLiveData()
+    val triggeringDistance: LiveData<Float> = cameraSettings.triggeringDistanceFlow.asLiveData()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -78,6 +83,8 @@ class SettingsViewModel(
             _upload.value = appSettings.uploadEnabledFlow.first()
             /** camera settings  **/
             _cameraEnabled.value = cameraSettings.cameraEnabledFlow.first()
+            _distanceBasedTriggering.value = cameraSettings.distanceBasedTriggeringFlow.first()
+            _triggeringDistance.value = cameraSettings.triggeringDistanceFlow.first()
         }
     }
 
@@ -98,5 +105,13 @@ class SettingsViewModel(
             cameraSettings.setCameraEnabled(cameraEnabled)
         }
         _cameraEnabled.postValue(cameraEnabled)
+    }
+
+    fun setDistanceBasedTriggering(distanceBasedTriggering: Boolean) {
+        viewModelScope.launch { cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering) }
+    }
+
+    fun setTriggeringDistance(triggeringDistance: Float) {
+        viewModelScope.launch { cameraSettings.setTriggeringDistance(triggeringDistance) }
     }
 }

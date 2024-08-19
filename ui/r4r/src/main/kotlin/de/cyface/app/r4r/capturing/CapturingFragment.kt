@@ -763,10 +763,10 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // We need to load and pass the preferences for the camera focus here as the preferences
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
         val staticFocusSelected = cameraSettings.getStaticFocusBlocking()
-        val staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking()
+        val staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking()*/
         val distanceBasedTriggeringSelected = cameraSettings.getDistanceBasedTriggeringBlocking()
         val triggeringDistance = cameraSettings.getTriggeringDistanceBlocking()
-        val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
+        /*val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
         val staticExposureTime = cameraSettings.getStaticExposureTimeBlocking()
         val exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking()*/
 
@@ -780,7 +780,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // Usual cycling velocity in cities should be around 15-20 km/h, but outside the
         // city it can be up to 50 km/h. So we set the distance to 15m to ensure we stay
         // below the max image capturing frequency of 1 Hz for now.
-        val triggeringDistance = 15.0f
+        //val triggeringDistance = 15.0f
         cameraService.start(
             measurementId,
             false,
@@ -790,7 +790,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             false,
             0L,
             0,
-            true, // For testing, switch this to false to capture w/1 Hz
+            distanceBasedTriggeringSelected, // For testing, switch this to false to capture w/1 Hz
             triggeringDistance,
             object :
                 StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
