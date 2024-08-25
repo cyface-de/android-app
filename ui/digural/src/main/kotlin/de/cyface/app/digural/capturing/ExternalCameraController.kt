@@ -91,7 +91,7 @@ class ExternalCameraController(
                     Log.e(TAG, "API call failed with response code: ${response.code()}")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to send DiGuRaL trigger request", e)
+                Log.w(TAG, "Failed to send DiGuRaL trigger request", e)
             }
         }
     }

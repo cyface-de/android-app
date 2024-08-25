@@ -66,7 +66,7 @@ ext {
     cyfaceUploaderVersion = "1.4.1"
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.12.2"
+    cyfaceAndroidBackendVersion = "7.12.3"
     cyfaceEnergySettingsVersion = "4.0.6"
     cyfaceCameraServiceVersion = "4.5.8"
 
@@ -95,6 +95,10 @@ ext {
 
     // Digural UI dependencies
     sardineVersion = "0.9"
+
+    // Machine Learning
+    tensorflowLiteSupport = "0.1.0"
+    tensorflowLiteMetadata = "0.1.0"
 
     // Other dependencies
     materialDialogsVersion = "3.3.0"
