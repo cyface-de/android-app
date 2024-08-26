@@ -313,7 +313,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 getString(R.string.error_message_password_too_short)
             passwordInput!!.requestFocus()
             valid = false
-        } else if (password.length > 20) {
+        } else if (password.length > 33) {
             passwordInput!!.error =
                 getString(R.string.error_message_password_too_short)
             passwordInput!!.requestFocus()
