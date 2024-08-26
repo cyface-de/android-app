@@ -712,6 +712,7 @@ public class DataCapturingButton
                 exposureValueIso100,
                 distanceBasedTriggeringSelected,
                 triggeringDistance,
+                true,
                 new StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     @Override
                     public void startUpFinished(final long measurementIdentifier) {
