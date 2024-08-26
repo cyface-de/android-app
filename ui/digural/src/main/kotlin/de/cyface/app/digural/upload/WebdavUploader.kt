@@ -152,7 +152,8 @@ class WebdavUploader(
 
     private fun devicesDirectory(): String {
         // We currently assume, that each user has their own webdav user so no user id is stored
-        return returnUrlWithTrailingSlash(apiEndpoint) + "files/${login}/devices"
+        // Upload to the shared folder `digural-upload`
+        return returnUrlWithTrailingSlash(apiEndpoint) + "files/${login}/digural-upload/devices"
     }
 
     @Throws(UploadFailed::class)
