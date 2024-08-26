@@ -78,7 +78,7 @@ public final class LoginActivityTest {
         // Missing email
         boolean invalidInputResult2 = oocut.credentialsAreValid("", "test", true);
         // Password overlong
-        boolean invalidInputResult3 = oocut.credentialsAreValid("test@cyface.de", "1234567890123456789012345", true);
+        boolean invalidInputResult3 = oocut.credentialsAreValid("test@cyface.de", "1234567890123456789012345678901234567890", true);
         // null password
         boolean invalidInputResult4 = oocut.credentialsAreValid("test@cyface.de", null, true);
         // null email
