@@ -52,6 +52,9 @@ import java.io.InterruptedIOException
 import java.net.MalformedURLException
 import java.net.SocketTimeoutException
 import java.net.URL
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.net.ssl.SSLException
 
 /**
@@ -86,14 +89,12 @@ class WebdavUploader(
         file: File,
         progressListener: UploadProgressListener
     ): Result {
-        val endpoint = URL(measurementDirectory(uploadable.identifier.measurementIdentifier))
-        val result = uploadFile(
-            uploadable,
-            uploadable.identifier.measurementIdentifier,
-            file,
-            MEASUREMENT_FILE_FILENAME,
-            endpoint,
-        )
+        if (uploadable.timestamp() === null) {
+            Log.i(TAG, "Skipping measurement upload without location: ${uploadable.identifier}")
+            return Result.UPLOAD_SKIPPED
+        }
+        val endpoint = URL(imuDirectory(uploadable))
+        val result = uploadFile(uploadable, file, MEASUREMENT_FILE_FILENAME, endpoint)
         if (result != Result.UPLOAD_FAILED) {
             progressListener.updatedProgress(1.0f) // the whole file is uploaded
         }
@@ -107,62 +108,67 @@ class WebdavUploader(
         fileName: String,
         progressListener: UploadProgressListener
     ): Result {
-        val measurementId = uploadable.identifier.measurementIdentifier
-        val deviceId = uploadable.identifier.deviceIdentifier.toString()
-        val endpoint = attachmentsEndpoint(deviceId, measurementId)
-        val result = uploadFile(
-            uploadable,
-            uploadable.identifier.measurementIdentifier,
-            file,
-            fileName,
-            endpoint
-        )
+        if (uploadable.timestamp() === null) {
+            Log.i(TAG, "Skipping attachment upload without location: ${uploadable.identifier}")
+            return Result.UPLOAD_SKIPPED
+        }
+        val endpoint = attachmentsEndpoint(uploadable)
+        val result = uploadFile(uploadable, file, fileName, endpoint)
         if (result != Result.UPLOAD_FAILED) {
             progressListener.updatedProgress(1.0f) // the whole file is uploaded
         }
         return result
     }
 
-    override fun measurementsEndpoint(): URL {
-        return URL(measurementsDirectory())
+    override fun measurementsEndpoint(uploadable: Uploadable): URL {
+        return URL(imuDirectory(uploadable))
     }
 
-    override fun attachmentsEndpoint(deviceId: String, measurementId: Long): URL {
+    override fun attachmentsEndpoint(uploadable: Uploadable): URL {
+        @Suppress("SpellCheckingInspection")
         // For Webdav we use another directory structure than in the Collector API, here we use:
-        // /files/<login>/devices/<deviceId>/measurements/<measurementId>/attachments
+        // /files/<login>/digural-upload/<YYYY>_<MM>_<DD>/<deviceId>_<measurementId>/imgs
         // But the API uses /measurements/<deviceId>/<measurementId>/attachments
-        return URL(attachmentsDirectory(measurementId))
+        return URL(imagesDirectory(uploadable))
     }
 
-    private fun attachmentsDirectory(measurementId: Long): String {
-        return measurementDirectory(measurementId) + "/attachments"
+    private fun imuDirectory(uploadable: Uploadable): String {
+        return sensorDirectory(uploadable) + "/imu"
     }
 
-    private fun measurementDirectory(measurementId: Long): String {
-        return measurementsDirectory() + "/$measurementId"
+    private fun sensorDirectory(uploadable: Uploadable): String {
+        return deviceMeasurementDirectory(uploadable) + "/sensor"
     }
 
-    private fun measurementsDirectory(): String {
-        return deviceDirectory() + "/measurements"
+    private fun imagesDirectory(uploadable: Uploadable): String {
+        @Suppress("SpellCheckingInspection")
+        return deviceMeasurementDirectory(uploadable) + "/imgs"
     }
 
-    private fun deviceDirectory(): String {
-        return devicesDirectory() + "/$deviceId"
+    private fun deviceMeasurementDirectory(uploadable: Uploadable): String {
+        return dateDirectory(uploadable) + "/${deviceId}_${uploadable.measurementId()}"
     }
 
-    private fun devicesDirectory(): String {
-        // We currently assume, that each user has their own webdav user so no user id is stored
-        // Upload to the shared folder `digural-upload`
-        return returnUrlWithTrailingSlash(apiEndpoint) + "files/${login}/digural-upload/devices"
+    private fun dateDirectory(uploadable: Uploadable): String {
+        val timestamp = uploadable.timestamp()
+        if (timestamp === null) {
+            throw IllegalArgumentException("Measurement must have at least one location.")
+        }
+        val date = Instant.ofEpochMilli(timestamp)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .format(DateTimeFormatter.ofPattern("yyyy_MM_dd"))
+
+        // The same user is used on all devices, so no user id is stored in the path.
+        return returnUrlWithTrailingSlash(apiEndpoint) + "files/${login}/digural-upload/$date"
     }
 
     @Throws(UploadFailed::class)
     private fun uploadFile(
         uploadable: Uploadable,
-        measurementId: Long,
         file: File,
         fileName: String,
-        endpoint: URL
+        endpoint: URL,
     ): Result {
         return try {
             // TODO: the sardine library has PRs which support input streams but they are not merged
@@ -181,16 +187,19 @@ class WebdavUploader(
             // ** attention ** It's normal to see the log info:
             // `Authenticating for response: Response{protocol=http/1.1, code=401, message=Unauthorized,`
 
+            // Skip uploads without startLocation as this is needed for the upload folder name
+
+
             val isMeasurementUpload = fileName == MEASUREMENT_FILE_FILENAME
-            ensureDirectoriesExist(isMeasurementUpload, measurementId)
+            ensureDirectoriesExist(isMeasurementUpload, uploadable)
 
             // File uploads
             val uploadDir = endpoint.toExternalForm()
             if (isMeasurementUpload) {
                 // Meta file
-                val metaDataUri = "$uploadDir/meta.json"
+                val metaDataUri = "$uploadDir/metadata.json"
                 if (!sardine.exists(metaDataUri)) {
-                    Log.d(TAG, "upload meta data")
+                    Log.d(TAG, "Upload meta data to $metaDataUri ...")
                     val metaDataMap = uploadable.toMap()
                     val metaDataJson = JsonObject.Builder()
                     metaDataMap.keys.forEach {
@@ -202,14 +211,14 @@ class WebdavUploader(
                 // Measurement file
                 val measurementUri = "$uploadDir/$fileName"
                 if (!sardine.exists(measurementUri)) {
-                    Log.d(TAG, "upload measurement: $fileName")
+                    Log.d(TAG, "Upload measurement: $fileName ...")
                     sardine.put(measurementUri, file, "application/octet-stream")
                 }
             } else {
                 // Attachment file
                 val attachmentUri = "$uploadDir/$fileName"
                 if (!sardine.exists(attachmentUri)) {
-                    Log.d(TAG, "upload attachment: $fileName")
+                    Log.d(TAG, "Upload attachment: $fileName ...")
                     sardine.put(attachmentUri, file, "application/octet-stream")
                 }
             }
@@ -226,19 +235,23 @@ class WebdavUploader(
      * happens once every hour or so, but for attachments we should try to minimize the number of
      * requests.
      */
-    private fun ensureDirectoriesExist(isMeasurementUpload: Boolean, measurementId: Long) {
+    private fun ensureDirectoriesExist(isMeasurementUpload: Boolean, uploadable: Uploadable) {
         Log.e(TAG, "Checking for directories ...")
         val isAttachmentUpload = !isMeasurementUpload
 
-        // Attachment Upload
-        val attachmentsDir = attachmentsDirectory(measurementId)
-        if (isAttachmentUpload && !sardine.exists(attachmentsDir)) {
-            ensureMeasurementDirectoryExists(measurementId)
-            Log.d(TAG, "Creating directory: $attachmentsDir")
-            sardine.createDirectory(attachmentsDir)
-        } else if (isMeasurementUpload) {
+        val imagesDir = imagesDirectory(uploadable)
+        val imuDir = imuDirectory(uploadable)
+        if (isAttachmentUpload && !sardine.exists(imagesDir)) {
+            // Attachment Upload
+            ensureDeviceMeasurementDirectoryExists(uploadable)
+            Log.d(TAG, "Creating directory: $imagesDir")
+            sardine.createDirectory(imagesDir)
+        } else if (isMeasurementUpload && !sardine.exists(imuDir)) {
             // Measurement Upload
-            ensureMeasurementDirectoryExists(measurementId)
+            ensureDeviceMeasurementDirectoryExists(uploadable)
+            ensureDirectoryExists(sardine, sensorDirectory(uploadable))
+            Log.d(TAG, "Creating directory: $imuDir")
+            sardine.createDirectory(imuDir)
         }
     }
 
@@ -247,12 +260,10 @@ class WebdavUploader(
      *
      * This directory contains the measurement files and the attachments folder.
      */
-    private fun ensureMeasurementDirectoryExists(measurementId: Long) {
-        if (!sardine.exists(measurementDirectory(measurementId))) {
-            ensureDirectoryExists(sardine, devicesDirectory())
-            ensureDirectoryExists(sardine, deviceDirectory())
-            ensureDirectoryExists(sardine, measurementsDirectory())
-            ensureDirectoryExists(sardine, measurementDirectory(measurementId))
+    private fun ensureDeviceMeasurementDirectoryExists(uploadable: Uploadable) {
+        if (!sardine.exists(deviceMeasurementDirectory(uploadable))) {
+            ensureDirectoryExists(sardine, dateDirectory(uploadable))
+            ensureDirectoryExists(sardine, deviceMeasurementDirectory(uploadable))
         }
     }
 
@@ -358,6 +369,7 @@ class WebdavUploader(
     }
 
     companion object {
+        @Suppress("SpellCheckingInspection")
         private const val MEASUREMENT_FILE_FILENAME = "measurement.ccyf"
         private const val MB_FROM_MEDIA_HTTP_UPLOADER = 0x100000
 
