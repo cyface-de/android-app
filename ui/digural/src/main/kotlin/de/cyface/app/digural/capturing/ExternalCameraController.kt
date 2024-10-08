@@ -96,7 +96,36 @@ class ExternalCameraController(
         }
     }
 
-    override fun shallStop(context: Context) {
+    override fun onStart() {
+        scope.launch {
+            try {
+                Log.d(TAG, "Sending Start to ${DiguralApi.baseUrl}")
+                val response = DiguralApi.diguralService.start()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "API call failed with response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to send DiGuRaL start request", e)
+            }
+        }
+    }
+
+    override fun onClose(context: Context) {
+        scope.launch {
+            try {
+                Log.d(TAG, "Sending Stop to ${DiguralApi.baseUrl}")
+                val response = DiguralApi.diguralService.stop()
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "API call failed with response code: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to send DiGuRaL stop request", e)
+            }
+        }
         DiguralApi.shutdown(context)
+    }
+
+    override fun shallStop(context: Context) {
+        // Nothing to do
     }
 }

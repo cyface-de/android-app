@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,6 +18,9 @@
  */
 package de.cyface.app.digural.capturing
 
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -27,8 +30,6 @@ import retrofit2.http.POST
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
- * @since 3.7.3
  */
 interface DiguralApiService {
     /**
@@ -36,4 +37,18 @@ interface DiguralApiService {
      */
     @POST("PanAiCam/Trigger")
     suspend fun trigger(@Body location: Location): Response<Void>
+
+    /**
+     * The endpoint which accepts start events with an empty String body -d ''.
+     */
+    @Suppress("SpellCheckingInspection")
+    @POST("start-aufnahme")
+    suspend fun start(@Body body: RequestBody = "".toRequestBody("application/json".toMediaType())): Response<Void>
+
+    /**
+     * The endpoint which accepts stop events with an empty String body -d ''.
+     */
+    @Suppress("SpellCheckingInspection")
+    @POST("stop-aufnahme")
+    suspend fun stop(@Body body: RequestBody = "".toRequestBody("application/json".toMediaType())): Response<Void>
 }
