@@ -46,8 +46,6 @@ import org.json.JSONObject
  * accounts, and handling sessions.
  *
  * @author Armin Schnabel
- * @version 1.0.0
- * @since 3.8.0
  * @param context The context to load settings and accounts from.
  * @param settings The settings which store the user preferences.
  */
@@ -57,7 +55,9 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
 
     private var sardine = OkHttpSardine()
 
-    override fun performActionWithFreshTokens(action: (accessToken: String?, idToken: String?, ex: Exception?) -> Unit) {
+    override fun performActionWithFreshTokens(
+        action: (accessToken: String?, idToken: String?, ex: Exception?) -> Unit
+    ) {
         // The webdav library automatically logs the user in again upon each API access
         // So there is no need to actively check the token freshness.
         action(WebdavAuthenticator.DUMMY_TOKEN, WebdavAuthenticator.DUMMY_TOKEN, null)
@@ -197,7 +197,7 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
             throw LoginFailed(e)
         }
 
-        // Credentials are valid, store password safely in the Keystore for Uploader to retrive
+        // Credentials are valid, store password safely in the Keystore for Uploader to retrieve
 
         authorized = true
     }

@@ -24,6 +24,7 @@ import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.model.Json
 import de.cyface.model.Json.JsonObject
+import de.cyface.synchronization.NoLocationData
 import de.cyface.uploader.Result
 import de.cyface.uploader.UploadProgressListener
 import de.cyface.uploader.Uploader
@@ -121,15 +122,23 @@ class WebdavUploader(
     }
 
     override fun measurementsEndpoint(uploadable: Uploadable): URL {
-        return URL(imuDirectory(uploadable))
+        try {
+            return URL(imuDirectory(uploadable))
+        } catch (e: Exception) {
+            throw UploadFailed(e)
+        }
     }
 
     override fun attachmentsEndpoint(uploadable: Uploadable): URL {
-        @Suppress("SpellCheckingInspection")
-        // For Webdav we use another directory structure than in the Collector API, here we use:
-        // /files/<login>/digural-upload/<YYYY>_<MM>_<DD>/<deviceId>_<measurementId>/imgs
-        // But the API uses /measurements/<deviceId>/<measurementId>/attachments
-        return URL(imagesDirectory(uploadable))
+        try {
+            @Suppress("SpellCheckingInspection")
+            // For Webdav we use another directory structure than in the Collector API, here we use:
+            // /files/<login>/digural-upload/<YYYY>_<MM>_<DD>/<deviceId>_<measurementId>/imgs
+            // But the API uses /measurements/<deviceId>/<measurementId>/attachments
+            return URL(imagesDirectory(uploadable))
+        } catch (e: Exception) {
+            throw UploadFailed(e)
+        }
     }
 
     private fun imuDirectory(uploadable: Uploadable): String {
@@ -152,7 +161,8 @@ class WebdavUploader(
     private fun dateDirectory(uploadable: Uploadable): String {
         val timestamp = uploadable.timestamp()
         if (timestamp === null) {
-            throw IllegalArgumentException("Measurement must have at least one location.")
+            Log.i(TAG, "Skip attachment upload w/o location for measurement: $uploadable")
+            throw NoLocationData("Skip upload as upload dir required date from missing location data")
         }
         val date = Instant.ofEpochMilli(timestamp)
             .atZone(ZoneId.systemDefault())
