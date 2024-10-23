@@ -27,12 +27,34 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 class UnInterestedListener : ParcelableCapturingProcessListener {
 
-    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {}
-    override fun onCameraAccessLost() {}
-    override fun onPictureCaptured() {}
-    override fun onRecordingStarted() {}
-    override fun onRecordingStopped() {}
-    override fun onCameraError(reason: String) {}
-    override fun onAboutToCapture(measurementId: Long, location: Location?) {}
-    override fun shallStop(context: Context) {}
+    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
+        // Nothing to do
+    }
+    override fun onCameraAccessLost() {
+        // Nothing to do
+    }
+    override fun onPictureCaptured() {
+        // Nothing to do
+    }
+    override fun onRecordingStarted() {
+        // Nothing to do
+    }
+    override fun onRecordingStopped() {
+        // Nothing to do
+    }
+    override fun onCameraError(reason: String) {
+        // Nothing to do
+    }
+    override fun onAboutToCapture(measurementId: Long, location: Location?) {
+        // Nothing to do
+    }
+    override fun onStart() {
+        // Nothing to do
+    }
+    override fun onClose(context: Context) {
+        // Nothing to do
+    }
+    override fun shallStop(context: Context) {
+        // Nothing to do
+    }
 }

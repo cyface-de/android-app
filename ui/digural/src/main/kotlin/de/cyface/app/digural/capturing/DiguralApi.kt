@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -55,8 +55,6 @@ import java.util.concurrent.TimeUnit
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
- * @since 3.7.3
  * @property baseUrl The base URL for the API endpoints.
  * @property retrofit The Retrofit client, initialized with specified settings.
  * @property diguralService A service interface for making API calls.
