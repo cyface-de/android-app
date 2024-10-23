@@ -25,6 +25,7 @@ import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.model.Json
 import de.cyface.model.Json.JsonObject
 import de.cyface.synchronization.NoLocationData
+import de.cyface.synchronization.SyncAdapter.Companion.fileNamePrefix
 import de.cyface.uploader.Result
 import de.cyface.uploader.UploadProgressListener
 import de.cyface.uploader.Uploader
@@ -250,9 +251,13 @@ class WebdavUploader(
                 //   image name → [timestamp].jpg (not required in the txt format as of now)
                 // - as the `txt` files are created in post-processing, all log files can also be
                 //   uploaded into `img` or another directory.
-                val attachmentUri = "$uploadDir/$fileName"
+
+                val diguralFileName = fileName.removePrefix(
+                    fileNamePrefix(uploadable.deviceId(), uploadable.measurementId())
+                )
+                val attachmentUri = "$uploadDir/$diguralFileName"
                 if (!sardine.exists(attachmentUri)) {
-                    Log.d(TAG, "Upload attachment: $fileName ...")
+                    Log.d(TAG, "Upload attachment: $diguralFileName ...")
                     sardine.put(attachmentUri, file, "application/octet-stream")
                 }
             }
