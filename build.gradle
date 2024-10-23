@@ -63,7 +63,7 @@ ext {
     // When `android-app` is checkout out, `rootProject.uploaderVersion` in the submodules will point
     // to `android-app/build.gradle` instead of `submodule/build.gradle`.
     cyfaceSerializationVersion = "3.4.2"
-    cyfaceUploaderVersion = "1.5.0"
+    cyfaceUploaderVersion = "1.5.1"
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
     cyfaceAndroidBackendVersion = "7.12.6"
