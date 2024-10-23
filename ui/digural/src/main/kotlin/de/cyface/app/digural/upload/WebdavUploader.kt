@@ -216,6 +216,30 @@ class WebdavUploader(
                 }
             } else {
                 // Attachment file
+                //
+                // Regarding `data.json` file: [LEIP-283]
+                // All required information is already contained in other uploaded log files.
+                // We anyhow do not have all information available which is required in the
+                // `data.json`, e.g. `yaw/pitch/roll` or geometry of the image (this info is not
+                // easily available during upload as the upload happens in multiple parts and the
+                // geometry of the image are only in the image EXIF header, but during measurement
+                // upload we only have the geometry of the track available. Thus, this would require
+                // significant refactoring.
+                // Thus, the whole `data.json` file should be created during post-processing.
+                //
+                // Regarding `${recId}_{l,m,r,p}.txt` files: [LEIP-282]
+                // We currently create an `annotations.json` file in the COCO format which contains
+                // all annotations of all images instead of one YOLO `txt` file per image.
+                // - advantage: significant less upload request to next cloud (~50%)
+                // - we can create the `txt` files per image in post-processing like other meta files
+                // - all required information is available in the COCO `json file:
+                //   rectId.txt = attachment-id → images.id
+                //   recognized object → COCO-class-Id → convert to Digural class ID
+                //   recognized bounding box → not normalized, but image width/height is available
+                //   confidence-score → in COCO-JSON per object for each image
+                //   image name → [timestamp].jpg (not required in the txt format as of now)
+                // - as the `txt` files are created in post-processing, all log files can also be
+                //   uploaded into `img` or another directory.
                 val attachmentUri = "$uploadDir/$fileName"
                 if (!sardine.exists(attachmentUri)) {
                     Log.d(TAG, "Upload attachment: $fileName ...")
