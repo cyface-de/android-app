@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -32,6 +32,7 @@ import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
 
 /**
  * The implementation of Android's `Application` class for this project.
@@ -40,8 +41,6 @@ import kotlinx.coroutines.runBlocking
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.7.0
- * @since 1.0.0
  */
 class MeasuringClient : Application() {
 
@@ -63,7 +62,7 @@ class MeasuringClient : Application() {
             if (!fromBackground) { // RFR-772
                 Toast.makeText(
                     this@MeasuringClient,
-                    String.format("%s - %s", errorMessage, appName),
+                    String.format(Locale.getDefault(), "%s - %s", errorMessage, appName),
                     Toast.LENGTH_LONG
                 ).show()
             }
