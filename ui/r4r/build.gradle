@@ -37,7 +37,7 @@ buildscript {
     dependencies {
         // Exception tracking when using proguard
         classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$rootProject.ext.androidNavigationPluginVersion"
     }
 }
 
@@ -211,7 +211,7 @@ dependencies {
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     // Allows to select list entries in the recycler view list
-    implementation "androidx.recyclerview:recyclerview-selection:1.1.0"
+    implementation "androidx.recyclerview:recyclerview-selection:$rootProject.ext.androidxRecyclerViewSelectionVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
