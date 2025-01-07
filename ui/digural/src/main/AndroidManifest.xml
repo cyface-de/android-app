@@ -64,17 +64,8 @@
 
         <!-- Google Maps for Android requirements -->
         <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}" />
-
-        <!-- This workaround is required to use GoogleMaps with API 28.
-        From https://issuetracker.google.com/issues/79478779 -->
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false" />
 
         <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
         <!-- `exported="true"` or else the app cannot be launched after installation! -->

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -44,8 +44,6 @@ import org.junit.runner.RunWith
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.2.2
- * @since 3.0.0
  */
 @RunWith(AndroidJUnit4::class)
 class CapturingNotificationTest {
@@ -212,9 +210,11 @@ class CapturingNotificationTest {
         // We now request "Allow app to access location only while in foreground"
         val allowButtonSelector =
             @Suppress("SpellCheckingInspection")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) By.res("com.android.permissioncontroller:id/permission_allow_foreground_only_button") else By.res(
-                "com.android.packageinstaller:id/permission_allow_button"
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                By.res("com.android.permissioncontroller:id/permission_allow_foreground_only_button")
+            } else {
+                By.res("com.android.packageinstaller:id/permission_allow_button")
+            }
 
         // Location permission added in Android M
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

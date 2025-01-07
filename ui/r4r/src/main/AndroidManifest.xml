@@ -57,7 +57,6 @@
     tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
     tools:replace="android:usesCleartextTraffic"
     android:usesCleartextTraffic="${usesCleartextTraffic}">
-    <!--tools:targetApi="31"> targetApi 31 was added by the generated code, not sure why -->
 
     <!-- Sentry DSN. This ids the account but is not a secret. -->
     <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />

@@ -231,7 +231,7 @@ dependencies {
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
 
     // OAuth 2.0 with OpenID Connect
-    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion"
+    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
@@ -248,6 +248,7 @@ dependencies {
     //androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     //androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
+    //androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     // UiAutomator Testing
     //androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"

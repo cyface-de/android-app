@@ -33,7 +33,8 @@
   <!-- Settings -->
   <string name="drawer_setting_speed_sensor">Externer Sensor</string>
   <string name="settings_sensor_frequency">Sensorfrequenz</string>
-  <!-- Digural -->
+
+  <!-- Digural Settings -->
   <string name="settings_digural_server_address">Digural Server Adresse</string>
   <string name="url_malformed_toast">Fehlerhaftes Adress-Format. Änderung wurde verworfen.</string>
 </resources>

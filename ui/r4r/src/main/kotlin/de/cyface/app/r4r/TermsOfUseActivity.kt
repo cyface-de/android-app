@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -40,8 +40,6 @@ import kotlinx.coroutines.runBlocking
  * When the current terms are accepted or have been before, the [MainActivity] is launched.
  *
  * @author Armin Schnabel
- * @version 2.0.0
- * @since 1.0.0
  */
 class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
     /**
