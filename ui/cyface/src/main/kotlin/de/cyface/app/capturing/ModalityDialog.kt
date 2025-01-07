@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.dialog
+package de.cyface.app.capturing
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -24,7 +24,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import de.cyface.app.CapturingFragment
 import de.cyface.app.R
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.BundlesExtrasCodes

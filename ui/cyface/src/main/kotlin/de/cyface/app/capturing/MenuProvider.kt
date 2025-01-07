@@ -25,7 +25,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import de.cyface.app.CapturingFragmentDirections
 import de.cyface.app.MainActivity
 import de.cyface.app.R
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL

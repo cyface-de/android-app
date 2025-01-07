@@ -57,7 +57,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import de.cyface.app.CapturingFragment;
+import de.cyface.app.capturing.CapturingFragment;
 import de.cyface.app.R;
 import de.cyface.app.button.AbstractButton;
 import de.cyface.app.button.ButtonListener;

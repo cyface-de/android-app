@@ -46,7 +46,7 @@ import de.cyface.app.auth.LoginActivity
 import de.cyface.app.capturing.UnInterestedListener
 import de.cyface.app.databinding.ActivityMainBinding
 import de.cyface.app.notification.CameraEventHandler
-import de.cyface.app.notification.DataCapturingEventHandler
+import de.cyface.app.notification.CapturingEventHandler
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                DataCapturingEventHandler(),
+                CapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
                 CyfaceAuthenticator(this)

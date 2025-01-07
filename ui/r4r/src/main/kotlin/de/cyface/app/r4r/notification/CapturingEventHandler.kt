@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural.notification
+package de.cyface.app.r4r.notification
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -28,12 +28,12 @@ import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.Parcel
-import android.os.Parcelable.Creator
+import android.os.Parcelable
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import de.cyface.app.digural.MainActivity
-import de.cyface.app.digural.R
-import de.cyface.app.digural.utils.Constants.TAG
+import de.cyface.app.r4r.MainActivity
+import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.R
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID
@@ -43,14 +43,15 @@ import de.cyface.utils.Validate
 
 /**
  * A [EventHandlingStrategy] to respond to specified events triggered by the
- * [DataCapturingBackgroundService].
+ * [de.cyface.datacapturing.backend.DataCapturingBackgroundService].
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
  * @version 3.0.2
  * @since 2.5.0
  */
-class DataCapturingEventHandler : EventHandlingStrategy {
+class CapturingEventHandler : EventHandlingStrategy {
+    @Suppress("unused")
     constructor() {
         // Nothing to do here.
     }
@@ -99,14 +100,14 @@ class DataCapturingEventHandler : EventHandlingStrategy {
                     PendingIntent.FLAG_UPDATE_CURRENT
                 )
             }
-        val notificationManager = context
+        val notificationManager: NotificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             createNotificationChannelIfNotExists(
                 context, NOTIFICATION_CHANNEL_ID_WARNING,
-                context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
-                context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
+                context.getString(R.string.notification_channel_name_warning),
+                context.getString(R.string.notification_channel_description_warning),
                 NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true
             )
         }
@@ -114,7 +115,7 @@ class DataCapturingEventHandler : EventHandlingStrategy {
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
-            .setSmallIcon(R.drawable.ic_logo_only_c)
+            .setSmallIcon(de.cyface.app.r4r.R.drawable.ic_logo_white)
             .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
             .setContentText(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space))
             .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2)
@@ -150,7 +151,7 @@ class DataCapturingEventHandler : EventHandlingStrategy {
                 NotificationManager.IMPORTANCE_LOW, false, Color.GREEN, false
             )
         }
-        val builder = NotificationCompat.Builder(context, channelId)
+        val builder: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)
             .setContentTitle(context.getText(de.cyface.datacapturing.R.string.capturing_active))
             .setContentIntent(onClickPendingIntent).setWhen(System.currentTimeMillis())
             .setOngoing(true)
@@ -160,7 +161,8 @@ class DataCapturingEventHandler : EventHandlingStrategy {
         // What works is: use a png to replace the icon on API < 21 or to reuse the same vector icon
         // The most elegant solution seems to be to have PNGs for the icons and the vector xml in drawable-anydpi-v21,
         // see https://stackoverflow.com/a/37334176/5815054
-        builder.setSmallIcon(R.drawable.ic_logo_only_c)
+        // TODO: test this on old devices / emulator and add those PNGs if crashing
+        builder.setSmallIcon(de.cyface.app.r4r.R.drawable.ic_logo_white)
         return builder.build()
     }
 
@@ -170,13 +172,13 @@ class DataCapturingEventHandler : EventHandlingStrategy {
          */
         @Suppress("unused")
         @JvmField
-        val CREATOR: Creator<DataCapturingEventHandler?> =
-            object : Creator<DataCapturingEventHandler?> {
-                override fun createFromParcel(`in`: Parcel): DataCapturingEventHandler {
-                    return DataCapturingEventHandler(`in`)
+        val CREATOR: Parcelable.Creator<CapturingEventHandler?> =
+            object : Parcelable.Creator<CapturingEventHandler?> {
+                override fun createFromParcel(`in`: Parcel): CapturingEventHandler {
+                    return CapturingEventHandler(`in`)
                 }
 
-                override fun newArray(size: Int): Array<DataCapturingEventHandler?> {
+                override fun newArray(size: Int): Array<CapturingEventHandler?> {
                     return arrayOfNulls(size)
                 }
             }
@@ -196,7 +198,7 @@ class DataCapturingEventHandler : EventHandlingStrategy {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 return
             }
-            val manager =
+            val manager: NotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             Validate.notNull(manager, "Manager for service notifications not available.")
             if (manager.getNotificationChannel(channelId) == null) {

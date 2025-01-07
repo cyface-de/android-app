@@ -57,7 +57,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import de.cyface.app.digural.CapturingFragment;
+import de.cyface.app.digural.capturing.CapturingFragment;
 import de.cyface.app.digural.R;
 import de.cyface.app.digural.button.AbstractButton;
 import de.cyface.app.digural.button.ButtonListener;

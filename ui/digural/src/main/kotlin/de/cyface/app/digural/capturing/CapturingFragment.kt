@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2024 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app
+package de.cyface.app.digural.capturing
 
 import android.Manifest
 import android.app.AlertDialog
@@ -36,14 +36,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import de.cyface.app.button.SynchronizationButton
-import de.cyface.app.capturing.MenuProvider
-import de.cyface.app.databinding.FragmentCapturingBinding
-import de.cyface.app.dialog.ModalityDialog
-import de.cyface.app.ui.button.DataCapturingButton
+import de.cyface.app.digural.CameraServiceProvider
+import de.cyface.app.digural.MainActivity
+import de.cyface.app.digural.R
+import de.cyface.app.digural.button.SynchronizationButton
+import de.cyface.app.digural.databinding.FragmentCapturingBinding
+import de.cyface.app.digural.ui.button.DataCapturingButton
 import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.foreground.CameraService
@@ -59,14 +61,13 @@ import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
  * A `Fragment` for the main UI used for data capturing and supervision of the capturing process.
  *
  * @author Armin Schnabel
- * @version 1.5.1
- * @since 1.0.0
  */
 class CapturingFragment : Fragment(), ConnectionStatusListener {
 
@@ -172,9 +173,14 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
             capturing = (activity as ServiceProvider).capturing
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
-            cameraService = (activity as CameraServiceProvider).cameraService
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
+        }
+        if (activity is CameraServiceProvider) {
+            cameraService = (activity as CameraServiceProvider).cameraService
+            cameraSettings = (activity as CameraServiceProvider).cameraSettings
+        } else {
+            throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
         }
 
         // Location permissions are requested by CapturingFragment/Map to react to results.
@@ -208,7 +214,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCapturingBinding.inflate(inflater, container, false)
-        dataCapturingButton = DataCapturingButton(this, appSettings, cameraSettings)
+        dataCapturingButton =
+            DataCapturingButton(this, appSettings, cameraSettings)
         // Register synchronization listener
         capturing.addConnectionStatusListener(this)
         syncButton = SynchronizationButton(capturing)
@@ -276,8 +283,8 @@ class CapturingFragment : Fragment(), ConnectionStatusListener {
                     4 -> newModality[0] = Modality.TRAIN
                     else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
                 }
-                runBlocking { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
-                if (oldModality != null && oldModality == newModality[0]) {
+                lifecycleScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
+                if (oldModality == newModality[0]) {
                     Log.d(
                         TAG,
                         "changeModalityType(): old (" + oldModality + " and new Modality (" + newModality[0]

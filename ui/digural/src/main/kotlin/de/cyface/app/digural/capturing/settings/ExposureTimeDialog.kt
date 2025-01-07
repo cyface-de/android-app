@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural.dialog
+package de.cyface.app.digural.capturing.settings
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -26,7 +26,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import de.cyface.app.digural.capturing.settings.SettingsFragment
 import de.cyface.camera_service.Constants
 import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.Validate

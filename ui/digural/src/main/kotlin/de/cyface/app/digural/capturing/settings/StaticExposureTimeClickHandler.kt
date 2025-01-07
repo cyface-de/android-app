@@ -21,7 +21,6 @@ package de.cyface.app.digural.capturing.settings
 import android.view.View
 import androidx.fragment.app.FragmentManager
 import de.cyface.app.digural.capturing.settings.SettingsFragment.Companion.DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE
-import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.utils.Validate
 
 /**

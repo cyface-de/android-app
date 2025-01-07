@@ -37,8 +37,7 @@ import androidx.lifecycle.lifecycleScope
 import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.Application
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
-import de.cyface.app.digural.dialog.ExposureTimeDialog
-import de.cyface.app.digural.dialog.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
+import de.cyface.app.digural.capturing.settings.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.Utils

@@ -48,6 +48,7 @@ import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.capturing.UnInterestedListener
 import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.notification.CameraEventHandler
+import de.cyface.app.r4r.notification.CapturingEventHandler
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL

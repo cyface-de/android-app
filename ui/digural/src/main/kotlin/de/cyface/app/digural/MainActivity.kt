@@ -42,7 +42,7 @@ import de.cyface.app.digural.capturing.settings.SettingsProvider
 import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
-import de.cyface.app.digural.notification.DataCapturingEventHandler
+import de.cyface.app.digural.notification.CapturingEventHandler
 import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 this.applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                DataCapturingEventHandler(),
+                CapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
                 WebdavAuthenticator(this)

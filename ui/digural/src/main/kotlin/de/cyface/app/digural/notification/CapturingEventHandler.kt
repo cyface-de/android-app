@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.notification
+package de.cyface.app.digural.notification
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -31,9 +31,9 @@ import android.os.Parcel
 import android.os.Parcelable.Creator
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import de.cyface.app.MainActivity
-import de.cyface.app.R
-import de.cyface.app.utils.Constants.TAG
+import de.cyface.app.digural.MainActivity
+import de.cyface.app.digural.R
+import de.cyface.app.digural.utils.Constants.TAG
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID
@@ -50,7 +50,7 @@ import de.cyface.utils.Validate
  * @version 3.0.2
  * @since 2.5.0
  */
-class DataCapturingEventHandler : EventHandlingStrategy {
+class CapturingEventHandler : EventHandlingStrategy {
     constructor() {
         // Nothing to do here.
     }
@@ -170,13 +170,13 @@ class DataCapturingEventHandler : EventHandlingStrategy {
          */
         @Suppress("unused")
         @JvmField
-        val CREATOR: Creator<DataCapturingEventHandler?> =
-            object : Creator<DataCapturingEventHandler?> {
-                override fun createFromParcel(`in`: Parcel): DataCapturingEventHandler {
-                    return DataCapturingEventHandler(`in`)
+        val CREATOR: Creator<CapturingEventHandler?> =
+            object : Creator<CapturingEventHandler?> {
+                override fun createFromParcel(`in`: Parcel): CapturingEventHandler {
+                    return CapturingEventHandler(`in`)
                 }
 
-                override fun newArray(size: Int): Array<DataCapturingEventHandler?> {
+                override fun newArray(size: Int): Array<CapturingEventHandler?> {
                     return arrayOfNulls(size)
                 }
             }
