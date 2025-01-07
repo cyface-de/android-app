@@ -201,7 +201,6 @@ dependencies {
     implementation project(':datacapturing')
     implementation project(':synchronization')
     implementation project(':persistence')
-    implementation project(':bluetooth-le')
     implementation project(':energy_settings')
     implementation project(':camera_service')
     implementation project(':utils')

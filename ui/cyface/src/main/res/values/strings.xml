@@ -21,7 +21,6 @@
 
   <!-- Settings -->
   <string name="drawer_setting_speed_sensor">External sensor</string>
-  <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
   <string name="delete_account">Delete account</string>

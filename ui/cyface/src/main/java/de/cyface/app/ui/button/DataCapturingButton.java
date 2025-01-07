@@ -994,32 +994,4 @@ public class DataCapturingButton
     public void onCapturingStopped() {
         setButtonStatus(button, FINISHED);
     }
-
-    /*
-     * TODO [CY-3577] re-enable
-     * Adds an already paired Bluetooth CSC sensor device information to the provided Intent. If no such device is
-     * found, a warning is issued and no information is added.
-     * <p>
-     * The information is added as two extras with the keys {@link BluetoothLeSetup#BLUETOOTH_LE_DEVICE} and
-     * {@link BluetoothLeSetup#WHEEL_CIRCUMFERENCE}. The first is the Android {@link BluetoothDevice} object while
-     * the second is a double parameter specifying the used vehicles wheel circumference in centimeters.
-     *
-     * @ param intent The {@link Intent} to add the parameters to.
-     *
-     * private void addBluetoothDeviceToIntent(final Intent intent) {
-     * final String bluetoothDeviceMac = preferences.getString(BluetoothLeSetup.BLUETOOTHLE_DEVICE_MAC_KEY, "");
-     * double wheelCircumference = preferences.getFloat(BluetoothLeSetup.BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0);
-     * Validate.notEmpty(bluetoothDeviceMac);
-     * Validate.isTrue(wheelCircumference > 0);
-     *
-     * Log.d(TAG, "Using registered Bluetooth CSC sensor MAC: " + bluetoothDeviceMac + ", Wheel Circumference: "
-     * + wheelCircumference);
-     * BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(bluetoothDeviceMac);
-     * if (device == null) {
-     * return;
-     * }
-     * intent.putExtra(BluetoothLeSetup.BLUETOOTH_LE_DEVICE, device);
-     * intent.putExtra(BluetoothLeSetup.WHEEL_CIRCUMFERENCE, Double.valueOf(wheelCircumference).floatValue());
-     * }
-     */
 }
