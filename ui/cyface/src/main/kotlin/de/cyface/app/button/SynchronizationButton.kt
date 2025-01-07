@@ -25,9 +25,8 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
 import com.github.lzyzsd.circleprogress.DonutProgress
-import de.cyface.app.MainActivity
 import de.cyface.app.MainActivity.Companion.accountWithTokenExists
-import de.cyface.app.MeasuringClient
+import de.cyface.app.Application
 import de.cyface.app.utils.Constants.TAG
 import de.cyface.app.utils.R
 import de.cyface.datacapturing.CyfaceDataCapturingService
@@ -78,7 +77,7 @@ class SynchronizationButton(dataCapturingService: CyfaceDataCapturingService) : 
         context = button!!.context
         this.button = button
         this.progressView = progress
-        appSettings = MeasuringClient.appSettings
+        appSettings = Application.appSettings
         onResume() // TODO[MOV-621] the parent's onResume, thus, this class's onResume should automatically be called
         button.setOnClickListener(this)
     }

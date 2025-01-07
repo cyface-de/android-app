@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
      * The settings used by both, UIs and libraries.
      */
     override val appSettings: AppSettings
-        get() = MeasuringClient.appSettings
+        get() = Application.appSettings
 
     /**
      * The settings used by multiple UIs.

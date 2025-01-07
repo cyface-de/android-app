@@ -34,8 +34,8 @@ import android.widget.ProgressBar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
-import de.cyface.app.digural.MeasuringClient
-import de.cyface.app.digural.MeasuringClient.Companion.errorHandler
+import de.cyface.app.digural.Application
+import de.cyface.app.digural.Application.Companion.errorHandler
 import de.cyface.app.digural.R
 import de.cyface.app.digural.upload.WebdavSyncService
 import de.cyface.app.digural.utils.Constants
@@ -74,7 +74,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
      * The settings used by both, UIs and libraries.
      */
     private val appSettings: AppSettings
-        get() = MeasuringClient.appSettings
+        get() = Application.appSettings
 
     // UI references
     private var progressBar: ProgressBar? = null

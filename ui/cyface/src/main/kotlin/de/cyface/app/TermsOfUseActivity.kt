@@ -70,7 +70,7 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
     private var acceptReportsCheckbox: CheckBox? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appSettings = MeasuringClient.appSettings
+        appSettings = Application.appSettings
         callMainActivityIntent = Intent(this, MainActivity::class.java)
         if (currentTermsHadBeenAccepted()) {
             startActivity(callMainActivityIntent)

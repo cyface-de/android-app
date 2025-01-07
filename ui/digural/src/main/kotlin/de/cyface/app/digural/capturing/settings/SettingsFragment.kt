@@ -35,7 +35,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import de.cyface.app.digural.CameraServiceProvider
-import de.cyface.app.digural.MeasuringClient
+import de.cyface.app.digural.Application
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.dialog.ExposureTimeDialog
 import de.cyface.app.digural.dialog.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
@@ -122,7 +122,7 @@ class SettingsFragment : Fragment() {
         // Initialize ViewModel
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(MeasuringClient.appSettings, cameraSettings, customSettings)
+            SettingsViewModelFactory(Application.appSettings, cameraSettings, customSettings)
         )[SettingsViewModel::class.java]
     }
 

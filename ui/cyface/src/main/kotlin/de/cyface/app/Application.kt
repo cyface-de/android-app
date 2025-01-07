@@ -16,19 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cyface.app.digural
+package de.cyface.app
 
 import android.app.Application
 import android.content.IntentFilter
+import android.os.StrictMode
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import de.cyface.app.digural.auth.LoginActivity
-import de.cyface.app.digural.auth.WebdavAuth
-import de.cyface.app.digural.auth.WebdavAuthenticator
+import de.cyface.app.auth.LoginActivity
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.synchronization.settings.DefaultSynchronizationSettings
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
-import de.cyface.utils.settings.AppSettings
+import de.cyface.synchronization.OAuth2
+import de.cyface.synchronization.settings.DefaultSynchronizationSettings
+import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -42,7 +43,7 @@ import java.util.Locale
  * @author Klemens Muthmann
  * @author Armin Schnabel
  */
-class MeasuringClient : Application() {
+class Application : Application() {
 
     /**
      * The settings used by both, UIs and libraries.
@@ -61,7 +62,7 @@ class MeasuringClient : Application() {
             val appName = applicationContext.getString(R.string.app_name)
             if (!fromBackground) { // RFR-772
                 Toast.makeText(
-                    this@MeasuringClient,
+                    this@Application,
                     String.format(Locale.getDefault(), "%s - %s", errorMessage, appName),
                     Toast.LENGTH_LONG
                 ).show()
@@ -86,14 +87,14 @@ class MeasuringClient : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        WebdavAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
+        CyfaceAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
             this,
-            BuildConfig.collectorApi,
-            WebdavAuth.dummyAuthConfig()
+            BuildConfig.cyfaceServer,
+            OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
         )
 
         // Register the activity to be called by the authenticator to request credentials from the user.
-        WebdavAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
+        CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
 
         // Register error listener
         errorHandler = ErrorHandler()
@@ -104,7 +105,7 @@ class MeasuringClient : Application() {
         errorHandler!!.addListener(errorListener)
 
         // Use strict mode in dev environment to crash e.g. when a resource failed to call close
-        /*if (BuildConfig.DEBUG) { // Cannot be enabled due to an open issue in the sardine library
+        if (BuildConfig.DEBUG) {
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectLeakedClosableObjects()
@@ -112,7 +113,7 @@ class MeasuringClient : Application() {
                     .penaltyDeath()
                     .build()
             )
-        }*/
+        }
     }
 
     override fun onTerminate() {

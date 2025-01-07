@@ -48,7 +48,7 @@
     <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
     <!-- tools:replace="android:usesCleartextTraffic" required when testing against local collector -->
     <application
-        android:name=".MeasuringClient"
+        android:name=".Application"
         android:allowBackup="false"
         android:icon="@mipmap/ic_logo"
         android:label="@string/app_name"

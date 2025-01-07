@@ -28,7 +28,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.BuildConfig
-import de.cyface.app.MeasuringClient
+import de.cyface.app.Application
 import de.cyface.app.R
 import de.cyface.app.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
@@ -92,7 +92,7 @@ class SettingsFragment : Fragment() {
         // Initialize ViewModel
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(MeasuringClient.appSettings)
+            SettingsViewModelFactory(Application.appSettings)
         )[SettingsViewModel::class.java]
     }
 
