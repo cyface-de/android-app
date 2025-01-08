@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -76,6 +76,7 @@ import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
@@ -177,23 +178,24 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
+        // With async call the app crashes as late-init `capturing` is not initialized yet.
         val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
-                this.applicationContext,
+                applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
                 CapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
-                CyfaceAuthenticator(this)
+                CyfaceAuthenticator(this@MainActivity)
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             // startSynchronization() // This is done in onAuthorized() instead
             // TODO: dataCapturingService!!.addConnectionStatusListener(this)
             cameraService = CameraService(
-                this.applicationContext,
+                applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
                 UnInterestedListener()
@@ -313,9 +315,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureException(e)
+            lifecycleScope.launch {
+                val reportErrors = appSettings.reportErrorsFlow.first()
+                if (reportErrors) {
+                    Sentry.captureException(e)
+                }
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
@@ -363,17 +367,18 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
                     Validate.notNull(account)
 
-                    // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference =
-                        runBlocking { appSettings.uploadEnabledFlow.first() }
-                    Log.d(
-                        WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $syncEnabledPreference"
-                    )
-                    capturing.wiFiSurveyor.makeAccountSyncable(
-                        account,
-                        syncEnabledPreference
-                    )
+                    lifecycleScope.launch {
+                        // Set synchronizationEnabled to the current user preferences
+                        val syncEnabledPreference = appSettings.uploadEnabledFlow.first()
+                        Log.d(
+                            WiFiSurveyor.TAG,
+                            "Setting syncEnabled for new account to preference: $syncEnabledPreference"
+                        )
+                        capturing.wiFiSurveyor.makeAccountSyncable(
+                            account,
+                            syncEnabledPreference
+                        )
+                    }
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

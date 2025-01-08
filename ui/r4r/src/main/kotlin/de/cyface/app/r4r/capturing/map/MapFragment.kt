@@ -37,6 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.MapsInitializer
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
@@ -52,6 +53,7 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -111,14 +113,7 @@ class MapFragment : Fragment() {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private val capturingViewModel: CapturingViewModel by activityViewModels {
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        CapturingViewModelFactory(
-            persistence.measurementRepository!!,
-            persistence.eventRepository!!,
-            reportErrors
-        )
-    }
+    private lateinit var capturingViewModel: CapturingViewModel
 
     /**
      * The `Runnable` triggered when the `Map` is loaded and ready.
@@ -171,6 +166,16 @@ class MapFragment : Fragment() {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
 
+        lifecycleScope.launch {
+            // Initialize capturingViewModel asynchronously
+            val reportErrors = appSettings.reportErrorsFlow.first()
+            capturingViewModel = CapturingViewModelFactory(
+                capturing.persistenceLayer.measurementRepository!!,
+                capturing.persistenceLayer.eventRepository!!,
+                reportErrors
+            ).create(CapturingViewModel::class.java)
+        }
+
         // Location permissions are requested by CapturingFragment/Map to react to results.
         permissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -204,7 +209,7 @@ class MapFragment : Fragment() {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
+        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, viewLifecycleOwner, permissionLauncher)
 
         return root
     }

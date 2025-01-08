@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -53,7 +53,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.lang.RuntimeException
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern
@@ -62,7 +61,7 @@ import java.util.regex.Pattern
  * A login screen that offers login via email/password.
  *
  * @author Armin Schnabel
- * @version 3.3.0
+ * @version 3.3.1
  * @since 1.0.0
  */
 class LoginActivity : AccountAuthenticatorActivity() {
@@ -171,9 +170,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 val account: Account = getAccount(context.get()!!)
 
                 // Verify the login credentials
-                WebdavAuth(context.get()!!, WebdavAuthenticator.settings).login(
-                    login, password, context.get()!!, ACCOUNT_TYPE, AUTHORITY
-                )
+                WebdavAuth(context.get()!!, WebdavAuthenticator.settings)
+                    .login(login, password, context.get()!!, ACCOUNT_TYPE, AUTHORITY)
 
                 // Explicitly calling WebdavAuthenticator.getAuthToken(), see its documentation
                 val authenticator = WebdavAuthenticator(context.get()!!)
@@ -248,10 +246,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
         }
     }
 
-    private fun reportError(e: Exception) {
+    private suspend fun reportError(e: Exception) {
         // Before, we could not capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
         // We also didn't want to capture the errors in the error handler as we don't have the stacktrace there.
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        val reportErrors = appSettings.reportErrorsFlow.first()
         if (reportErrors) {
             Sentry.captureException(e)
         }

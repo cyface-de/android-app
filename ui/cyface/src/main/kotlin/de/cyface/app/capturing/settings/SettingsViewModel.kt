@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -25,7 +25,6 @@ import androidx.lifecycle.viewModelScope
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
@@ -42,7 +41,7 @@ import kotlinx.coroutines.runBlocking
  *   https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.4.0
  * @property appSettings The settings used by both, UIs and libraries.
  */
@@ -52,7 +51,7 @@ class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
     private val _upload = MutableLiveData<Boolean>()
 
     init {
-        runBlocking {
+        viewModelScope.launch {
             _centerMap.value = appSettings.centerMapFlow.first()
             _upload.value = appSettings.uploadEnabledFlow.first()
         }

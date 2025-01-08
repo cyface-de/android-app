@@ -36,7 +36,6 @@ import de.cyface.synchronization.Constants
 import de.cyface.synchronization.settings.SynchronizationSettings
 import de.cyface.utils.Validate
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 
 /**
@@ -175,7 +174,7 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
     /**
      * To be called after the user just logged in. Updates the account in the account manager.
      */
-    fun login(
+    suspend fun login(
         username: String,
         password: String,
         applicationContext: Context,
@@ -188,7 +187,9 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
 
         // Send a small request to ensure the credentials are correct
         try {
-            val rootDir = WebdavUploader.returnUrlWithTrailingSlash(collectorApi()) + "files/$username/"
+            // The `collectorApi` stands for the webdav API which collects the data from us.
+            val collectorApi = WebdavAuthenticator.settings.collectorUrlFlow.first()
+            val rootDir = WebdavUploader.returnUrlWithTrailingSlash(collectorApi) + "files/$username/"
             sardine.list(rootDir)
             Log.d(Constants.TAG, "Login successful.")
         } catch (e: SardineException) {
@@ -200,22 +201,6 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
         // Credentials are valid, store password safely in the Keystore for Uploader to retrieve
 
         authorized = true
-    }
-
-    /**
-     * Reads the Collector API URL from the preferences.
-     *
-     * @return The URL as string
-     */
-    private fun collectorApi(): String {
-        // The `collectorApi` stands for the webdav API which collects the data from us.
-        val apiEndpoint =
-            runBlocking { WebdavAuthenticator.settings.collectorUrlFlow.first() }
-        Validate.notNull(
-            apiEndpoint,
-            "Sync canceled: Server url not available. Please set the applications server url preference."
-        )
-        return apiEndpoint
     }
 
     fun getAccount(): Account {

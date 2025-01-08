@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -28,7 +28,6 @@ import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
@@ -72,7 +71,7 @@ class SettingsViewModel(
     val upload: LiveData<Boolean> = _upload
 
     init {
-        runBlocking {
+        viewModelScope.launch {
             /** app settings **/
             _centerMap.value = appSettings.centerMapFlow.first()
             _upload.value = appSettings.uploadEnabledFlow.first()

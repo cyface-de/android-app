@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,28 +18,32 @@
  */
 package de.cyface.app.utils.trips.incentives
 
-import android.content.Context
 import android.util.Log
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.synchronization.Auth
 import de.cyface.uploader.DefaultUploader
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationException
+import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
+import okio.IOException
 import java.net.URL
+import kotlin.coroutines.resumeWithException
 
 /**
  * The API to get the voucher data from.
  *
  * @author Armin Schnabel
- * @version 2.0.1
+ * @version 3.0.0
  * @since 3.3.0
- * @property context The authenticator to get the auth token from
  * @property apiEndpoint An API endpoint running a Cyface Incentives API, like `https://some.url/api/v1`
+ * @property auth The authenticator to get the auth token from
  */
 class Incentives(
-    private val context: Context,
     private val apiEndpoint: URL,
     private val auth: Auth
 ) {
@@ -48,54 +52,84 @@ class Incentives(
     /**
      * Requests the number of available vouchers.
      *
-     * @param handler the handler which receives the response in case of success
-     * @param authErrorHandler the handler which receives the auth errors
+     * @return The [Response] from the voucher count request.
+     * @throws AuthorizationException if there is an error refreshing the access token.
+     * @throws IOException if there is a network error.
      */
-    fun availableVouchers(
-        handler: Callback,
-        authErrorHandler: AuthExceptionListener
-    ) {
-        auth.performActionWithFreshTokens { accessToken, _, ex ->
-            if (ex != null) {
-                authErrorHandler.onException(ex as AuthorizationException)
-                return@performActionWithFreshTokens
-            }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun availableVouchers(): Response {
+        return suspendCancellableCoroutine { continuation ->
+            auth.performActionWithFreshTokens { accessToken, _, ex ->
+                if (ex != null) {
+                    continuation.resumeWithException(ex as AuthorizationException)
+                    return@performActionWithFreshTokens
+                }
 
-            // Try to send the request
-            val url = voucherCountEndpoint().toString()
-            Log.d(TAG, "Voucher count request to $url")
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer $accessToken")
-                .build()
-            client.newCall(request).enqueue(handler)
+                // Try to send the request
+                val url = voucherCountEndpoint().toString()
+                Log.d(TAG, "Voucher count request to $url")
+                val request = Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .build()
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        continuation.resumeWithException(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        continuation.resume(response) {
+                            response.close() // close to release resources
+                        }
+                    }
+                })
+            }
         }
     }
 
     /**
      * Requests a voucher for the currently logged in user.
      *
-     * @param handler the handler which receives the response in case of success
-     * @param authErrorHandler the handler which receives the auth errors
+     * @return The [Response] from the voucher request.
+     * @throws AuthorizationException if there is an error refreshing the access token.
+     * @throws IOException if there is a network error.
      */
-    fun voucher(
-        handler: Callback,
-        authErrorHandler: AuthExceptionListener
-    ) {
-        auth.performActionWithFreshTokens { accessToken, _, ex ->
-            if (ex != null) {
-                authErrorHandler.onException(ex as AuthorizationException)
-                return@performActionWithFreshTokens
-            }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun voucher(): Response {
+        return suspendCancellableCoroutine { continuation ->
+            auth.performActionWithFreshTokens { accessToken, _, ex ->
+                if (ex != null) {
+                    continuation.resumeWithException(ex as AuthorizationException)
+                    return@performActionWithFreshTokens
+                }
 
-            // Try to send the request
-            val url = voucherEndpoint().toString()
-            Log.d(TAG, "Voucher request to $url")
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer $accessToken")
-                .build()
-            client.newCall(request).enqueue(handler)
+                // Try to send the request
+                val url = voucherEndpoint().toString()
+                Log.d(TAG, "Voucher request to $url")
+                val request = Request.Builder()
+                    .url(url)
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .build()
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        continuation.resumeWithException(e)
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        if (!response.isSuccessful) {
+                            continuation.resumeWithException(
+                                IOException("Unexpected HTTP response: ${response.code}")
+                            )
+                        } else {
+                            continuation.resume(response) {
+                                response.close() // close to release resources
+                            }
+                        }
+                    }
+                })
+            }
         }
     }
 

@@ -31,8 +31,10 @@ import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.OAuth2
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
@@ -75,9 +77,12 @@ class Application : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            val reportErrors = runBlocking { lazyAppSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureMessage(errorCode.name + ": " + errorMessage)
+            CoroutineScope(Dispatchers.Default).launch {
+                lazyAppSettings.reportErrorsFlow.firstOrNull()?.let { reportErrors ->
+                    if (reportErrors) {
+                        Sentry.captureMessage(errorCode.name + ": " + errorMessage)
+                    }
+                }
             }
         }
 

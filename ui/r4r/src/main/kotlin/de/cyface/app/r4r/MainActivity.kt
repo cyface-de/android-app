@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -32,7 +32,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -79,6 +78,7 @@ import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
@@ -175,24 +175,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onCapturingStopped() {}
     }
 
-    /**
-     * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
-     */
-    @Suppress("unused") // Used by Fragments
-    private val capturingViewModel: CapturingViewModel by viewModels {
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        CapturingViewModelFactory(
-            capturing.persistenceLayer.measurementRepository!!,
-            capturing.persistenceLayer.eventRepository!!,
-            reportErrors
-        )
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         uiSettings = UiSettings(this, BuildConfig.incentivesServer)
         cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
+        // With async call the app crashes as late-init `capturing` is not initialized yet.
         val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
@@ -202,14 +190,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 CapturingEventHandler(),
                 unInterestedListener,
                 sensorFrequency,
-                CyfaceAuthenticator(this)
+                CyfaceAuthenticator(this@MainActivity)
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             //startSynchronization() // We do this in displayAuthorized() instead!
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
             cameraService = CameraService(
-                this.applicationContext,
+                applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
                 UnInterestedListener()
@@ -329,9 +317,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureException(e)
+            lifecycleScope.launch {
+                val reportErrors = appSettings.reportErrorsFlow.first()
+                if (reportErrors) {
+                    Sentry.captureException(e)
+                }
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
@@ -379,16 +369,18 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
                     Validate.notNull(account)
 
-                    // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference =
-                        runBlocking { appSettings.uploadEnabledFlow.first() }
-                    Log.d(
-                        WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $syncEnabledPreference"
-                    )
-                    capturing.wiFiSurveyor.makeAccountSyncable(
-                        account, syncEnabledPreference
-                    )
+                    lifecycleScope.launch {
+                        // Set synchronizationEnabled to the current user preferences
+                        val syncEnabledPreference =
+                            appSettings.uploadEnabledFlow.first()
+                        Log.d(
+                            WiFiSurveyor.TAG,
+                            "Setting syncEnabled for new account to preference: $syncEnabledPreference"
+                        )
+                        capturing.wiFiSurveyor.makeAccountSyncable(
+                            account, syncEnabledPreference
+                        )
+                    }
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

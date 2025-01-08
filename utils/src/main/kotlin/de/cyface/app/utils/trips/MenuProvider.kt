@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -45,7 +45,6 @@ import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Arrays
@@ -55,7 +54,7 @@ import java.util.Arrays
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 3.2.0
  */
 class MenuProvider(
@@ -179,12 +178,13 @@ class MenuProvider(
 
         // Check is sync is disabled via frontend
         val syncEnabled = capturingService.wiFiSurveyor.isSyncEnabled
-        val syncPreferenceEnabled = runBlocking { settings.uploadEnabledFlow.first() }
-        Validate.isTrue(
-            syncEnabled == syncPreferenceEnabled,
-            "sync " + (if (syncEnabled) "enabled" else "disabled")
-                    + " but syncPreference " + if (syncPreferenceEnabled) "enabled" else "disabled"
-        )
+        scope.launch {
+            val syncPreferenceEnabled = settings.uploadEnabledFlow.first()
+            require(syncEnabled == syncPreferenceEnabled) {
+                "sync " + (if (syncEnabled) "enabled" else "disabled") +
+                    " but syncPreference " + if (syncPreferenceEnabled) "enabled" else "disabled"
+            }
+        }
         if (!syncEnabled) {
             Toast.makeText(
                 context.get(),

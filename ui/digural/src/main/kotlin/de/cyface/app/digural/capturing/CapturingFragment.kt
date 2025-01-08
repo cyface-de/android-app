@@ -164,14 +164,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private val viewModel: CapturingViewModel by activityViewModels {
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        CapturingViewModelFactory(
-            persistence.measurementRepository!!,
-            persistence.eventRepository!!,
-            reportErrors
-        )
-    }
+    private lateinit var viewModel: CapturingViewModel
 
     /**
      * Handler for [startResumeButton] clicks.
@@ -204,6 +197,14 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
         }
+
+        // With async call the app crashes as late-init `viewModel` is not initialized yet.
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        viewModel = CapturingViewModelFactory(
+            capturing.persistenceLayer.measurementRepository!!,
+            capturing.persistenceLayer.eventRepository!!,
+            reportErrors
+        ).create(CapturingViewModel::class.java)
     }
 
     /**
@@ -221,7 +222,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         startResumeButton = binding.startResumeButton
         stopButton = binding.stopButton
         pauseButton = binding.pauseButton
-        showModalitySelectionDialogIfNeeded()
+        lifecycleScope.launch { showModalitySelectionDialogIfNeeded() }
 
         // Update UI elements with the updates from the ViewModel
         viewModel.measurementId.observe(viewLifecycleOwner) {
@@ -330,11 +331,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         return root
     }
 
-    private fun showModalitySelectionDialogIfNeeded() {
+    private suspend fun showModalitySelectionDialogIfNeeded() {
         registerModalityTabSelectionListener()
-        val modality = runBlocking { Modality.valueOf(appSettings.modalityFlow.first()) }
+        val modality = Modality.valueOf(appSettings.modalityFlow.first())
         if (modality != Modality.UNKNOWN) {
-            selectModalityTab()
+            lifecycleScope.launch { selectModalityTab() }
             return
         }
         val fragmentManager = fragmentManager
@@ -398,29 +399,31 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val newModality = arrayOfNulls<Modality>(1)
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                val oldModalityId = runBlocking { appSettings.modalityFlow.first() }
-                val oldModality = Modality.valueOf(oldModalityId)
-                when (tab.position) {
-                    0 -> newModality[0] = Modality.CAR
-                    1 -> newModality[0] = Modality.BICYCLE
-                    2 -> newModality[0] = Modality.WALKING
-                    3 -> newModality[0] = Modality.BUS
-                    4 -> newModality[0] = Modality.TRAIN
-                    else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
-                }
-                lifecycleScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
-                if (oldModality == newModality[0]) {
-                    Log.d(
-                        TAG,
-                        "changeModalityType(): old (" + oldModality + " and new Modality (" + newModality[0]
-                                + ") types are equal not recording event."
-                    )
-                    return
-                }
-                capturing.changeModalityType(newModality[0]!!)
+                lifecycleScope.launch {
+                    val oldModalityId = appSettings.modalityFlow.first()
+                    val oldModality = Modality.valueOf(oldModalityId)
+                    when (tab.position) {
+                        0 -> newModality[0] = Modality.CAR
+                        1 -> newModality[0] = Modality.BICYCLE
+                        2 -> newModality[0] = Modality.WALKING
+                        3 -> newModality[0] = Modality.BUS
+                        4 -> newModality[0] = Modality.TRAIN
+                        else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
+                    }
+                    lifecycleScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
+                    if (oldModality == newModality[0]) {
+                        Log.d(
+                            TAG,
+                            "changeModalityType(): old (" + oldModality + " and new Modality (" + newModality[0]
+                                    + ") types are equal not recording event."
+                        )
+                        return@launch
+                    }
+                    capturing.changeModalityType(newModality[0]!!)
 
-                // Deactivated for pro app until we show them their own tiles:
-                // if (map != null) { map.loadCyfaceTiles(newModality[0].getDatabaseIdentifier()); }
+                    // Deactivated for pro app until we show them their own tiles:
+                    // if (map != null) { map.loadCyfaceTiles(newModality[0].getDatabaseIdentifier()); }
+                }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab) {
@@ -445,7 +448,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE) {
-            selectModalityTab()
+            lifecycleScope.launch { selectModalityTab() }
         }
     }
 
@@ -456,9 +459,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * Make sure the order (0, 1, 2 from left(start) to right(end)) in the TabLayout xml file is consistent
      * with the order here to map the correct enum to each tab.
      */
-    private fun selectModalityTab() {
+    private suspend fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
-        val modality = runBlocking { appSettings.modalityFlow.first() }
+        val modality = appSettings.modalityFlow.first()
         Validate.notNull(modality, "Modality should already be set but isn't.")
 
         // Select the Modality tab

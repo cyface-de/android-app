@@ -109,7 +109,7 @@ class MarkerFragment : Fragment() {
         _binding = FragmentMarkerBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher, true)
+        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, viewLifecycleOwner, permissionLauncher, true)
 
         return root
     }
