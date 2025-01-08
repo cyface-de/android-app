@@ -204,6 +204,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         }
     }
 
+    /**
+     * All non-graphical initializations should go into onCreate (which might be called before Activity's onCreate
+     * finishes). All view-related initializations go into onCreateView and final initializations which depend on the
+     * Activity's onCreate and the fragment's onCreateView to be finished belong into the onActivityCreated method
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -22,15 +22,12 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import de.cyface.app.digural.R
-import de.cyface.app.digural.CapturingFragmentDirections
 import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.utils.Constants.SUPPORT_EMAIL
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.uploader.exception.SynchronisationException
 
 /**
  * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
