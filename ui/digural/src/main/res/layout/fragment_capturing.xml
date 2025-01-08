@@ -7,15 +7,24 @@
     android:layout_height="match_parent"
     tools:context=".capturing.CapturingFragment">
 
-  <FrameLayout
-      android:id="@+id/mapFragmentContainer"
+  <com.google.android.material.tabs.TabLayout
+      android:id="@+id/tabLayout"
       android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_marginBottom="8dp"
+      android:layout_height="wrap_content"
       app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintBottom_toTopOf="@+id/tripTitle"
+      app:layout_constraintBottom_toTopOf="@id/pager"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent" />
+
+  <androidx.viewpager2.widget.ViewPager2
+      android:id="@+id/pager"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_marginBottom="8dp"
+      app:layout_constraintBottom_toTopOf="@+id/tripTitle"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/tabLayout" />
 
   <!-- Keep the tabs consistent with helper class Modality -->
   <com.google.android.material.tabs.TabLayout
@@ -25,7 +34,7 @@
       android:paddingBottom="30pt"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/mapFragmentContainer"
+      app:layout_constraintTop_toBottomOf="@+id/pager"
       app:layout_constraintBottom_toTopOf="@+id/tripTitle"
       app:tabIconTint="@color/text">
 

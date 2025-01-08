@@ -34,12 +34,17 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -317,12 +322,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             Lifecycle.State.RESUMED
         )
 
-        // Show MapFragment as child fragment
-        val childFragmentManager = childFragmentManager
-        val fragmentTransaction = childFragmentManager.beginTransaction()
-        val mapFragment = MapFragment()
-        fragmentTransaction.replace(R.id.mapFragmentContainer, mapFragment)
-        fragmentTransaction.commit()
+        // Dynamically add tabs
+        val tabLayout = binding.tabLayout
+        tabLayout.addTab(tabLayout.newTab())
 
         return root
     }
@@ -343,8 +345,52 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Allows to change the tabs by swiping horizontally and handles animation
+        val viewPager = view.findViewById<ViewPager2>(R.id.pager)
+        // Tab Swiping disabled to ease touch-control in the Google Map
+        viewPager.isUserInputEnabled = false
+
+        // Add TabItems to TabLayout
+        val tabLayout: TabLayout = view.findViewById(R.id.tabLayout)
+
+        // Connect adapter to ViewPager (which provides pages to the view pager)
+        val fragmentManager: FragmentManager = childFragmentManager
+        val adapter = PagerAdapter(fragmentManager, lifecycle)
+        viewPager.adapter = adapter
+
+        // Hide the TabLayout if there's only one tab and adjust constraints accordingly
+        if (adapter.itemCount == 1) {
+            tabLayout.visibility = View.GONE
+
+            // Adjust constraints programmatically to remove space taken by the hidden TabLayout
+            val constraintLayout = view as ConstraintLayout
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(constraintLayout)
+            constraintSet.clear(viewPager.id, ConstraintSet.TOP) // Remove the top constraint
+            constraintSet.connect(
+                viewPager.id,
+                ConstraintSet.TOP,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.TOP
+            ) // Connect ViewPager2 directly to the parent top
+            constraintSet.applyTo(constraintLayout)
+        } else {
+            // Connect TabLayout to Adapter
+            tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    viewPager.currentItem = tab.position
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab) { /* Nothing to do */ }
+                override fun onTabReselected(tab: TabLayout.Tab) { /* Nothing to do */ }
+            })
+        }
+
         // `reconnect()` is called in `onResume()` which is called after `onViewCreated`
     }
+
 
     private fun registerModalityTabSelectionListener() {
         val tabLayout = binding.modalityTabs
@@ -1045,6 +1091,21 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     toastMessage,
                     if (longDuration) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
                 ).show()
+        }
+    }
+
+    // Supplies the fragments to the ViewPager
+    private class PagerAdapter(fragmentManager: FragmentManager?, lifecycle: Lifecycle?) :
+        FragmentStateAdapter(fragmentManager!!, lifecycle!!)
+    {
+        override fun createFragment(position: Int): Fragment {
+            // Ordered list, make sure titles list match this order
+            require(position == 0)
+            return MapFragment()
+        }
+
+        override fun getItemCount(): Int {
+            return 1
         }
     }
 
