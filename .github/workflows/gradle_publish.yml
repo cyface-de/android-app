@@ -111,17 +111,17 @@ jobs:
       # We currently upload the app manually to Play Store, but we could automate this using a
       # Google Service Account and the Github Action `r0adkll/upload-google-play`.
       - name: Make Digural app available
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Signed App Bundle
           path: ${{ steps.sign_app_digural.outputs.signedReleaseFile }}
       - name: Make R4R app available
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Signed App Bundle
           path: ${{ steps.sign_app_r4r.outputs.signedReleaseFile }}
       - name: Make Cyface app available
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Signed App Bundle
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}
