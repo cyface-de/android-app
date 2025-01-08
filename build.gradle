@@ -58,7 +58,7 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceUtilsVersion = "4.0.8"
+    cyfaceUtilsVersion = "4.0.9"
     // (!) Match versions `android-app`, `SDK` and `camera-service`.
     // When `android-app` is checkout out, `rootProject.uploaderVersion` in the submodules will point
     // to `android-app/build.gradle` instead of `submodule/build.gradle`.
@@ -67,7 +67,7 @@ ext {
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
     cyfaceAndroidBackendVersion = "7.12.8"
-    cyfaceEnergySettingsVersion = "4.1.1"
+    cyfaceEnergySettingsVersion = "4.1.2"
     cyfaceCameraServiceVersion = "4.7.2"
 
     // Android SDK versions
