@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import de.cyface.app.r4r.Application
 import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.CameraServiceProvider
@@ -41,6 +42,7 @@ import de.cyface.camera_service.CameraInfo
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.Auth
 import io.sentry.Sentry
+import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationException
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -53,6 +55,8 @@ import java.io.IOException
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
+ * @version 2.0.1
+ * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
 

@@ -44,6 +44,8 @@ import org.junit.runner.RunWith
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @version 1.2.3
+ * @since 3.0.0
  */
 @RunWith(AndroidJUnit4::class)
 class CapturingNotificationTest {

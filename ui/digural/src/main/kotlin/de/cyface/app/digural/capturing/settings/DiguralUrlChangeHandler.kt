@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -22,8 +22,10 @@ import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.textfield.TextInputEditText
 import de.cyface.app.digural.R
+import kotlinx.coroutines.launch
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -31,7 +33,7 @@ import java.net.URL
  * Handles when the user changes the Digural Server Url.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class DiguralUrlChangeHandler(

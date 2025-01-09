@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -21,13 +21,15 @@ package de.cyface.app.r4r.capturing.settings
 import android.content.Context
 import android.widget.CompoundButton
 import android.widget.Toast
+import androidx.lifecycle.viewModelScope
 import de.cyface.app.utils.R
+import kotlinx.coroutines.launch
 
 /**
  * Handles when the user toggles the center map switch.
  *
  * @author Armin Schnabel
- * @version 1.0.1
+ * @version 1.0.2
  * @since 3.2.0
  */
 class CenterMapSwitchHandler(

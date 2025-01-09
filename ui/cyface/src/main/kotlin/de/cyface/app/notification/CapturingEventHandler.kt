@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -47,7 +47,7 @@ import de.cyface.utils.Validate
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
- * @version 3.0.2
+ * @version 3.0.3
  * @since 2.5.0
  */
 class CapturingEventHandler : EventHandlingStrategy {

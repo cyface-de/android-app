@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
  *   https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
  *
  * @author Armin Schnabel
- * @version 2.0.1
+ * @version 3.0.0
  * @since 3.4.0
  * @property appSettings The settings used by both, UIs and libraries.
  */

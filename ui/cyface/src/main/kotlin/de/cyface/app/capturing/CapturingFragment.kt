@@ -101,6 +101,8 @@ import java.util.concurrent.TimeUnit
  * The [ViewModel]s are responsible for holding the `LiveData` data.
  *
  * @author Armin Schnabel
+ * @version 2.0.0
+ * @since 1.0.0
  */
 class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -21,6 +21,8 @@
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
+ * @version 2.0.0
+ * @since 1.0.0
  */
 apply plugin: 'com.android.application'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard

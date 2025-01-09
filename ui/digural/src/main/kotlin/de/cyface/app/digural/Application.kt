@@ -43,6 +43,8 @@ import java.util.Locale
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @version 5.0.0
+ * @since 1.0.0
  */
 class Application : Application() {
 

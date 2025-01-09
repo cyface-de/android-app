@@ -96,6 +96,8 @@ import kotlin.system.exitProcess
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @version 5.0.0
+ * @since 1.0.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
 

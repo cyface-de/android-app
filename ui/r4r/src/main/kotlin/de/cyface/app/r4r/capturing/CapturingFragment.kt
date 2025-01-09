@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -104,6 +104,8 @@ import java.util.concurrent.TimeUnit
  * The [ViewModel]s are responsible for holding the `LiveData` data.
  *
  * @author Armin Schnabel
+ * @version 2.0.0
+ * @since 1.0.0
  */
 class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 

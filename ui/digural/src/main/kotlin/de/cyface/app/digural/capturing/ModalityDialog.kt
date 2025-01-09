@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -40,7 +40,7 @@ import kotlinx.coroutines.runBlocking
  * Make sure the order (0, 1, 2 from left(start) to right(end)) in the TabLayout is consistent in here.
  *
  * @author Armin Schnabel
- * @version 3.0.0
+ * @version 3.0.1
  * @since 1.0.0
  */
 class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {

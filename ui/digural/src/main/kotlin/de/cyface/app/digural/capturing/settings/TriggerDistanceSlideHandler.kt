@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,14 +18,17 @@
  */
 package de.cyface.app.digural.capturing.settings
 
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.slider.Slider
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
  * Handles UI changes of the 'slider' used to adjust the 'triggering distance' setting.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
+ * @since 3.2.0
  */
 class TriggerDistanceSlideHandler(
     private val viewModel: SettingsViewModel

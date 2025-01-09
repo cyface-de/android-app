@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -22,13 +22,16 @@ import android.content.Context
 import android.util.Log
 import android.widget.CompoundButton
 import android.widget.Toast
+import androidx.lifecycle.viewModelScope
 import de.cyface.app.digural.capturing.settings.SettingsFragment.Companion.TAG
+import kotlinx.coroutines.launch
 
 /**
  * Handles UI changes of the 'switcher' used to en-/disable 'distance based triggering' feature.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
+ * @since 3.2.0
  */
 class DistanceBasedSwitchHandler(
     private val context: Context,

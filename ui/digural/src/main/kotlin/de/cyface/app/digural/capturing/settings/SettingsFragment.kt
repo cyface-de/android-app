@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -52,6 +52,8 @@ import kotlin.math.roundToInt
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
+ * @version 2.0.1
+ * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
 
