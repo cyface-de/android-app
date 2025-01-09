@@ -168,7 +168,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     override fun onCreate(savedInstanceState: Bundle?) {
         uiSettings = UiSettings(this, "https://NOT_IN_USE")
         cameraSettings = CameraSettings(this)
-        customSettings = CustomSettings(this)
+        // Instance required to access settings before capturing. ExternalCameraController also
+        // needs access and we can't inject it (not parcelable right now). We use a singleton as
+        // suggested by the docs, as only one instance is allowed per process. [LEIP-294]
+        customSettings = CustomSettings.getInstance(this)
 
         // Start DataCapturingService and CameraService
         // With async call the app crashes as late-init `capturing` is not initialized yet.

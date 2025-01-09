@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -37,14 +37,14 @@ import kotlinx.parcelize.Parcelize
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 2.0.0
  * @since 4.2.0
  * @constructor Create a new controller from the world wide unique device identifier of this device.
  * @property deviceId The unique identifier of the device which calls the trigger.
  */
 @Parcelize
 class ExternalCameraController(
-    private val deviceId: String
+    private val deviceId: String,
 ) : ParcelableCapturingProcessListener {
 
     @IgnoredOnParcel
@@ -56,7 +56,10 @@ class ExternalCameraController(
 
     override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
         this.scope = scope
-        val customSettings = CustomSettings(context) // may only be initialized once per process
+        // Instance required to get current digural URL. MainActivity also needs access to settings
+        // before capturing. Can't inject it (not parcelable right now). We use a singleton as
+        // suggested by the docs, as only one instance is allowed per process. [LEIP-294]
+        val customSettings = CustomSettings.getInstance(context)
         val address = runBlocking { customSettings.diguralUrlFlow.first() }
         DiguralApi.baseUrl = address
         DiguralApi.setToUseWifi(context)

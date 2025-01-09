@@ -25,11 +25,13 @@ import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.persistence.DefaultPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.SyncAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * The synchronisation `Service` used to bind the synchronisation adapter to the Android framework.
@@ -51,17 +53,16 @@ class WebdavSyncService : Service() {
                 val deviceId = persistence.restoreOrCreateDeviceId()
                 val auth = WebdavAuth(applicationContext, WebdavAuthenticator.settings)
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    val collectorApi = WebdavAuthenticator.settings.collectorUrlFlow.first()
+                // `onBind()` is called directly after `onCreate()` and requires `syncAdapter` (sync)
+                val collectorApi = runBlocking { collectorApi() }
 
-                    val account = auth.getAccount()
-                    syncAdapter = SyncAdapter(
-                        applicationContext,
-                        true,
-                        auth,
-                        WebdavUploader(collectorApi, deviceId, account.name, auth.getPassword(account)),
-                    )
-                }
+                val account = auth.getAccount()
+                syncAdapter = SyncAdapter(
+                    applicationContext,
+                    true,
+                    auth,
+                    WebdavUploader(collectorApi, deviceId, account.name, auth.getPassword(account)),
+                )
             }
         }
     }
@@ -70,12 +71,21 @@ class WebdavSyncService : Service() {
         return syncAdapter!!.syncAdapterBinder
     }
 
+    /**
+     * Reads the Collector API URL from the preferences.
+     *
+     * @return The URL as string
+     */
+    private suspend fun collectorApi(): String {
+        return WebdavAuthenticator.settings.collectorUrlFlow.first()
+    }
+
     companion object {
         /**
          * The synchronisation adapter this service is supposed to call.
          *
-         * Singleton isn't what they call a beauty. Nevertheless this is how it is specified in the documentation. Maybe try
-         * to change this after it runs.
+         * Singleton isn't what they call a beauty. Nevertheless this is how it is specified in
+         * the documentation. Maybe try to change this after it runs.
          */
         private var syncAdapter: SyncAdapter? = null
 
