@@ -45,7 +45,10 @@ class UploadSwitchHandler(
 
         // Also update WifiSurveyor's synchronizationEnabled
         capturingService.wiFiSurveyor.isSyncEnabled = isChecked
-        viewModel.setUpload(isChecked)
+
+        viewModel.viewModelScope.launch {
+            viewModel.setUpload(isChecked)
+        }
 
         if (!isChecked) {
             Toast.makeText(

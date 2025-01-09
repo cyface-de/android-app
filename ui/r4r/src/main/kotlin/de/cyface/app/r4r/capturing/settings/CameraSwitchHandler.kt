@@ -63,12 +63,16 @@ class CameraSwitchHandler(
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
             if (permissionsGranted) {
-                viewModel.setCameraEnabled(true, context)
+                viewModel.viewModelScope.launch {
+                    viewModel.setCameraEnabled(true) // No CameraModeDialog needed in r4f
+                }
             } else {
                 fragment.permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
             }
         } else {
-            viewModel.setCameraEnabled(false, context)
+            viewModel.viewModelScope.launch {
+                viewModel.setCameraEnabled(false)
+            }
             return
         }
     }

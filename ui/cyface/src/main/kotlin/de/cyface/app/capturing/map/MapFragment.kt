@@ -37,7 +37,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.MapsInitializer
 import de.cyface.app.capturing.CapturingViewModel
 import de.cyface.app.capturing.CapturingViewModelFactory
@@ -111,7 +110,15 @@ class MapFragment : Fragment() {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private lateinit var capturingViewModel: CapturingViewModel
+    private val capturingViewModel: CapturingViewModel by activityViewModels {
+        // Synchronously to ensure viewModel is available when needed.
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        CapturingViewModelFactory(
+            persistence.measurementRepository!!,
+            persistence.eventRepository!!,
+            reportErrors
+        )
+    }
 
     /**
      * The `Runnable` triggered when the `Map` is loaded and ready.
@@ -162,16 +169,6 @@ class MapFragment : Fragment() {
             persistence = capturing.persistenceLayer
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
-        }
-
-        lifecycleScope.launch {
-            // Initialize capturingViewModel asynchronously
-            val reportErrors = appSettings.reportErrorsFlow.first()
-            capturingViewModel = CapturingViewModelFactory(
-                capturing.persistenceLayer.measurementRepository!!,
-                capturing.persistenceLayer.eventRepository!!,
-                reportErrors
-            ).create(CapturingViewModel::class.java)
         }
 
         // Location permissions are requested by CapturingFragment/Map to react to results.

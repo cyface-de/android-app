@@ -35,7 +35,9 @@ class StaticExposureValueSlideHandler(
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
         if (viewModel.staticExposureValue.value!!.toFloat() != newValue) {
             val value = newValue.toInt()
-            viewModel.setStaticExposureValue(value)
+            viewModel.viewModelScope.launch {
+                viewModel.setStaticExposureValue(value)
+            }
         }
     }
 }

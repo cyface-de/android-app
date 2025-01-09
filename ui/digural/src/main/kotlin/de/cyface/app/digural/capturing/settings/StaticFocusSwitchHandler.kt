@@ -51,7 +51,9 @@ class StaticFocusSwitchHandler(
             return
         }
 
-        viewModel.setStaticFocus(isChecked)
+        viewModel.viewModelScope.launch {
+            viewModel.setStaticFocus(isChecked)
+        }
 
         if (isChecked) {
             Toast.makeText(

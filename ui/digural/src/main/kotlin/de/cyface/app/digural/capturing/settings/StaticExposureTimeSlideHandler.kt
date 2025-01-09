@@ -36,7 +36,9 @@ class StaticExposureTimeSlideHandler(
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
         if (viewModel.staticExposureTime.value!!.toFloat() != newValue) {
             val value = newValue.toLong()
-            viewModel.setStaticExposureTime(value)
+            viewModel.viewModelScope.launch {
+                viewModel.setStaticExposureTime(value)
+            }
         }
     }
 }

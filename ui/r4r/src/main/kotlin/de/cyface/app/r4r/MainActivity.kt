@@ -371,18 +371,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
                     Validate.notNull(account)
 
-                    lifecycleScope.launch {
-                        // Set synchronizationEnabled to the current user preferences
-                        val syncEnabledPreference =
-                            appSettings.uploadEnabledFlow.first()
-                        Log.d(
-                            WiFiSurveyor.TAG,
-                            "Setting syncEnabled for new account to preference: $syncEnabledPreference"
-                        )
-                        capturing.wiFiSurveyor.makeAccountSyncable(
-                            account, syncEnabledPreference
-                        )
-                    }
+                    // Set synchronizationEnabled to the current user preferences
+                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
+                    Log.d(
+                        WiFiSurveyor.TAG,
+                        "Setting syncEnabled for new account to preference: $uploadEnabled"
+                    )
+                    capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

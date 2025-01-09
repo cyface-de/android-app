@@ -42,7 +42,9 @@ class DistanceBasedSwitchHandler(
             return
         }
 
-        viewModel.setDistanceBasedTriggering(isChecked)
+        viewModel.viewModelScope.launch {
+            viewModel.setDistanceBasedTriggering(isChecked)
+        }
 
         if (isChecked) {
             Toast.makeText(

@@ -83,21 +83,19 @@ class SettingsViewModel(
     }
 
     /** app settings **/
-    fun setCenterMap(centerMap: Boolean) {
-        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
+    suspend fun setCenterMap(centerMap: Boolean) {
+        appSettings.setCenterMap(centerMap)
         _centerMap.postValue(centerMap)
     }
 
-    fun setUpload(upload: Boolean) {
-        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
+    suspend fun setUpload(upload: Boolean) {
+        appSettings.setUploadEnabled(upload)
         _upload.postValue(upload)
     }
 
     /** camera settings **/
-    fun setCameraEnabled(cameraEnabled: Boolean, context: Context) {
-        viewModelScope.launch {
-            cameraSettings.setCameraEnabled(cameraEnabled)
-        }
+    suspend fun setCameraEnabled(cameraEnabled: Boolean) {
+        cameraSettings.setCameraEnabled(cameraEnabled)
         _cameraEnabled.postValue(cameraEnabled)
     }
 }

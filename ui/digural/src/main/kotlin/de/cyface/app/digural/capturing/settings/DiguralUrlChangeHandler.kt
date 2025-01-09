@@ -60,11 +60,14 @@ class DiguralUrlChangeHandler(
             // - should end with `/`
             // For simplicity, all IP addresses like 999.999.999.999 are accepted.
             // For simplicity, only hostnames of the format [a-ZA-Z0-9\-\.]+ are accepted.
-            val regex = """^(http://|https://)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9\-\.]+)(:\d+)?/$""".toRegex()
+            val regex =
+                """^(http://|https://)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9\-\.]+)(:\d+)?/$""".toRegex()
             if (!newValue.matches(regex)) {
                 throw MalformedURLException("Unexpected URL format: $newValue")
             }
-            viewModel.setDiguralServerUrl(URL(newValue))
+            viewModel.viewModelScope.launch {
+                viewModel.setDiguralServerUrl(URL(newValue))
+            }
         } catch (e: MalformedURLException) {
             Toast.makeText(context, R.string.url_malformed_toast, Toast.LENGTH_LONG)
                 .show()

@@ -38,7 +38,9 @@ class StaticFocusDistanceSlideHandler(
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
         val roundedDistance = (newValue * 100).roundToInt() / 100f
         if (viewModel.staticFocusDistance.value != roundedDistance) {
-            viewModel.setStaticFocusDistance(roundedDistance)
+            viewModel.viewModelScope.launch {
+                viewModel.setStaticFocusDistance(roundedDistance)
+            }
         }
     }
 }

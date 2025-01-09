@@ -35,7 +35,9 @@ class SensorFrequencySlideHandler(
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
         val newSensorFrequency = newValue.toInt()
         if (viewModel.sensorFrequency.value != newSensorFrequency) {
-            viewModel.setSensorFrequency(newSensorFrequency)
+            viewModel.viewModelScope.launch {
+                viewModel.setSensorFrequency(newSensorFrequency)
+            }
         }
     }
 }

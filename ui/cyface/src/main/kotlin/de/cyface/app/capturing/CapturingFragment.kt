@@ -38,6 +38,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
@@ -164,7 +165,15 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private lateinit var viewModel: CapturingViewModel
+    private val viewModel: CapturingViewModel by activityViewModels {
+        // With async in onCreate the app crashes as late-init `capturing` is not initialized yet.
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        CapturingViewModelFactory(
+            persistence.measurementRepository!!,
+            persistence.eventRepository!!,
+            reportErrors
+        )
+    }
 
     /**
      * Handler for [startResumeButton] clicks.
@@ -197,14 +206,6 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
         }
-
-        // With async call the app crashes as late-init `viewModel` is not initialized yet.
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        viewModel = CapturingViewModelFactory(
-            capturing.persistenceLayer.measurementRepository!!,
-            capturing.persistenceLayer.eventRepository!!,
-            reportErrors
-        ).create(CapturingViewModel::class.java)
     }
 
     /**
@@ -410,7 +411,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         4 -> newModality[0] = Modality.TRAIN
                         else -> throw IllegalArgumentException("Unknown tab selected: " + tab.position)
                     }
-                    lifecycleScope.launch { appSettings.setModality(newModality[0]!!.databaseIdentifier) }
+                    appSettings.setModality(newModality[0]!!.databaseIdentifier)
                     if (oldModality == newModality[0]) {
                         Log.d(
                             TAG,

@@ -36,7 +36,9 @@ class TriggerDistanceSlideHandler(
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
         val roundedDistance = (newValue * 100).roundToInt() / 100f
         if (viewModel.triggeringDistance.value != roundedDistance) {
-            viewModel.setTriggeringDistance(roundedDistance)
+            viewModel.viewModelScope.launch {
+                viewModel.setTriggeringDistance(roundedDistance)
+            }
         }
     }
 }

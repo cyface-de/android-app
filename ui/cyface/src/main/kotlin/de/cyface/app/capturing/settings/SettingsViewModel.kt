@@ -60,13 +60,13 @@ class SettingsViewModel(private val appSettings: AppSettings) : ViewModel() {
     val centerMap: LiveData<Boolean> = _centerMap
     val upload: LiveData<Boolean> = _upload
 
-    fun setCenterMap(centerMap: Boolean) {
-        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
+    suspend fun setCenterMap(centerMap: Boolean) {
+        appSettings.setCenterMap(centerMap)
         _centerMap.postValue(centerMap)
     }
 
-    fun setUpload(upload: Boolean) {
-        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
+    suspend fun setUpload(upload: Boolean) {
+        appSettings.setUploadEnabled(upload)
         _upload.postValue(upload)
     }
 }

@@ -42,7 +42,9 @@ class CenterMapSwitchHandler(
             return
         }
 
-        viewModel.setCenterMap(isChecked)
+        viewModel.viewModelScope.launch {
+            viewModel.setCenterMap(isChecked)
+        }
 
         if (isChecked) {
             Toast.makeText(

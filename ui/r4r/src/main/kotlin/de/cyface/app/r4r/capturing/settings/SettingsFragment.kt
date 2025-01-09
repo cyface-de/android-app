@@ -95,17 +95,23 @@ class SettingsFragment : Fragment() {
             if (result.isNotEmpty()) {
                 val allGranted = result.values.none { !it }
                 if (allGranted) {
-                    //showCameraModeDialog(this)
-                    viewModel.setCameraEnabled(true, requireContext())
+                    //showCameraModeDialog(this) - no Dialog needed in r4r
+                    viewModel.viewModelScope.launch {
+                        viewModel.setCameraEnabled(true)
+                    }
                 } else {
                     Toast.makeText(
                         context,
-                        requireContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
+                        requireContext().getString(
+                            de.cyface.camera_service.R.string.camera_service_off_missing_permissions
+                        ),
                         Toast.LENGTH_LONG
                     ).show()
                     // Workaround to ensure it's updated back to false on permission denial
-                    viewModel.setCameraEnabled(true, requireContext())
-                    viewModel.setCameraEnabled(false, requireContext())
+                    viewModel.viewModelScope.launch {
+                        viewModel.setCameraEnabled(true)
+                        viewModel.setCameraEnabled(false)
+                    }
                 }
             }
         }

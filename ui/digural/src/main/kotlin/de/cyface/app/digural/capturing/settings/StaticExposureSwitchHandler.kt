@@ -53,7 +53,9 @@ class StaticExposureSwitchHandler(
             return
         }
 
-        viewModel.setStaticExposure(isChecked)
+        viewModel.viewModelScope.launch {
+            viewModel.setStaticExposure(isChecked)
+        }
 
         if (isChecked) {
             Toast.makeText(

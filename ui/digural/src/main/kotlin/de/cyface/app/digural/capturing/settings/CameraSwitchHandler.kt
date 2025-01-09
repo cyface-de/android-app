@@ -68,7 +68,9 @@ class CameraSwitchHandler(
                 fragment.permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
             }
         } else {
-            viewModel.setCameraEnabled(false)
+            viewModel.viewModelScope.launch {
+                viewModel.setCameraEnabled(false)
+            }
             return
         }
     }

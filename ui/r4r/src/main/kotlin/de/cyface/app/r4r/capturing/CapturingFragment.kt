@@ -167,7 +167,15 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private lateinit var viewModel: CapturingViewModel
+    private val viewModel: CapturingViewModel by activityViewModels {
+        // With async in onCreate the app crashes as late-init `capturing` is not initialized yet.
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        CapturingViewModelFactory(
+            persistence.measurementRepository!!,
+            persistence.eventRepository!!,
+            reportErrors
+        )
+    }
 
     /**
      * Handler for [startResumeButton] clicks.
@@ -199,17 +207,6 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             cameraSettings = (activity as CameraServiceProvider).cameraSettings
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
-        }
-
-        // With async call the app crashes as late-init `capturing` is not initialized yet.
-        runBlocking {
-            // Initialize capturingViewModel asynchronously
-            val reportErrors = appSettings.reportErrorsFlow.first()
-            viewModel = CapturingViewModelFactory(
-                capturing.persistenceLayer.measurementRepository!!,
-                capturing.persistenceLayer.eventRepository!!,
-                reportErrors
-            ).create(CapturingViewModel::class.java)
         }
     }
 
