@@ -30,6 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * The TermsOfUserActivity is the first [Activity] started on app launch.
@@ -73,14 +74,14 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
         appSettings = Application.appSettings
         callMainActivityIntent = Intent(this, MainActivity::class.java)
 
-        setContentView(R.layout.activity_terms_of_use)
-
-        lifecycleScope.launch {
-            if (currentTermsHadBeenAccepted()) {
-                startActivity(callMainActivityIntent)
-                finish()
-            }
+        // Check synchronously, or else the terms will pop up randomly until checked.
+        if (runBlocking { currentTermsHadBeenAccepted() }) {
+            startActivity(callMainActivityIntent)
+            finish()
+            return
         }
+
+        setContentView(R.layout.activity_terms_of_use)
     }
 
     /**
