@@ -114,7 +114,7 @@ class CapturingEventHandler : EventHandlingStrategy {
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
-            .setSmallIcon(R.drawable.ic_logo_only_c)
+            .setSmallIcon(R.drawable.ic_logo_white)
             .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
             .setContentText(context.getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space))
             .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2)
@@ -160,7 +160,7 @@ class CapturingEventHandler : EventHandlingStrategy {
         // What works is: use a png to replace the icon on API < 21 or to reuse the same vector icon
         // The most elegant solution seems to be to have PNGs for the icons and the vector xml in drawable-anydpi-v21,
         // see https://stackoverflow.com/a/37334176/5815054
-        builder.setSmallIcon(R.drawable.ic_logo_only_c)
+        builder.setSmallIcon(R.drawable.ic_logo_white)
         return builder.build()
     }
 
