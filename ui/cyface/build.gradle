@@ -203,8 +203,6 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
-    // Progress bar used to display upload progress
-    implementation "com.github.lzyzsd:circleprogress:$rootProject.ext.circelProgressVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
@@ -215,7 +213,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugaringVersion"
     // Http Requests (can't use Volley lib as it does not return status code in failure-/handler)
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
 
