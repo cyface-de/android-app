@@ -45,6 +45,8 @@ import java.net.URL
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
+ * @version 3.0.0
+ * @since 3.4.0
  * @property appSettings The settings used by both, UIs and libraries.
  * @property cameraSettings The settings used by the camera library.
  * @property customSettings The UI-specific settings.

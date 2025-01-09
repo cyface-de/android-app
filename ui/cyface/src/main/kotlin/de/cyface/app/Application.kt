@@ -20,7 +20,6 @@ package de.cyface.app
 
 import android.app.Application
 import android.content.IntentFilter
-import android.os.StrictMode
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.auth.LoginActivity
@@ -111,8 +110,9 @@ class Application : Application() {
         )
         errorHandler!!.addListener(errorListener)
 
-        // Use strict mode in dev environment to crash e.g. when a resource failed to call close
-        if (BuildConfig.DEBUG) {
+        // Use strict mode in dev environment to crash when a resource failed to call close.
+        // Cannot be enabled due to an open issue in the sardine library and probably DataStore.
+        /*if (BuildConfig.DEBUG) {
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectLeakedClosableObjects()
@@ -120,7 +120,7 @@ class Application : Application() {
                     .penaltyDeath()
                     .build()
             )
-        }
+        }*/
     }
 
     override fun onTerminate() {

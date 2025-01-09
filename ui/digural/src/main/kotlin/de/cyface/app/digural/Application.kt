@@ -110,8 +110,9 @@ class Application : Application() {
         )
         errorHandler!!.addListener(errorListener)
 
-        // Use strict mode in dev environment to crash e.g. when a resource failed to call close
-        /*if (BuildConfig.DEBUG) { // Cannot be enabled due to an open issue in the sardine library
+        // Use strict mode in dev environment to crash when a resource failed to call close.
+        // Cannot be enabled due to an open issue in the sardine library and probably DataStore.
+        /*if (BuildConfig.DEBUG) {
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder()
                     .detectLeakedClosableObjects()
