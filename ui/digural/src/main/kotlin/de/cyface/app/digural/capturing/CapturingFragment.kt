@@ -53,10 +53,10 @@ import de.cyface.app.digural.MainActivity
 import de.cyface.app.digural.R
 import de.cyface.app.digural.capturing.map.MapFragment
 import de.cyface.app.digural.databinding.FragmentCapturingBinding
+import de.cyface.app.digural.utils.Constants
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
-import de.cyface.camera_service.Constants
 import de.cyface.camera_service.UIListener
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
@@ -559,7 +559,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     private fun reconnect() {
         capturing.addDataCapturingListener(this)
-        // cameraService.addCameraListener(this)
+        cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
@@ -577,13 +577,10 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 updateCachedTrack(id)
 
                 // Also try to reconnect to CameraService if it's alive
-                /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+                if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                     // It does not matter whether isCameraServiceRequested() as this can change all the time
-                    Log.d(
-                        TAG,
-                        "onResume: reconnecting CameraService succeeded"
-                    )
-                }*/
+                    Log.d(TAG, "onResume: reconnecting CameraService succeeded")
+                }
                 return@launch
             }
 
@@ -600,10 +597,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // Check if there is a zombie CameraService running
             // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
             // can be used by other apps again
-            /* if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.w(
-                    de.cyface.camera_service.Constants.TAG, "Zombie CameraService is running and it's "
-                            + (if (isCameraServiceRequested()) "" else "*not*") + " requested"
+                    Constants.TAG,
+                    "Zombie CameraService is running and it's "
+                            + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
+                            + " requested"
                 )
                 cameraService.stop(
                     object :
@@ -618,7 +617,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 throw java.lang.IllegalStateException(
                     "Camera stopped manually as the camera was not released. This should not happen!"
                 )
-            }*/
+            }
         }
     }
 
@@ -742,7 +741,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 }
 
                 override fun timedOut() {
-                    Log.d(Constants.TAG, "pauseCapturing: no CameraService running, nothing to do")
+                    Log.d(TAG, "pauseCapturing: no CameraService running, nothing to do")
                 }
             })
     }
@@ -902,8 +901,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     @Throws(DataCapturingException::class, MissingPermissionException::class)
     private fun startCameraService(measurementId: Long) {
-        /*val rawModeSelected = cameraSettings.getRawModeBlocking()
         val videoModeSelected = cameraSettings.getVideoModeBlocking()
+        val rawModeSelected = cameraSettings.getRawModeBlocking()
         // We need to load and pass the preferences for the camera focus here as the preferences
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
         val staticFocusSelected = cameraSettings.getStaticFocusBlocking()
@@ -912,31 +911,23 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val triggeringDistance = cameraSettings.getTriggeringDistanceBlocking()
         val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
         val staticExposureTime = cameraSettings.getStaticExposureTimeBlocking()
-        val exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking()*/
+        val exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking()
 
-        // Set default setting as this UI does not allow the user to change it.
-        val cameraInfo = CameraInfo(requireContext())
-        val minFocusDistance = if (cameraInfo.hyperFocalDistance != null) {
-            cameraInfo.hyperFocalDistance!!
-        } else {
-            null
-        }
         // Usual cycling velocity in cities should be around 15-20 km/h, but outside the
         // city it can be up to 50 km/h. So we set the distance to 15m to ensure we stay
         // below the max image capturing frequency of 1 Hz for now.
-        val triggeringDistance = 15.0f
         cameraService.start(
             measurementId,
-            false,
-            false,
-            minFocusDistance != null,
-            minFocusDistance ?: 0.0f,
-            false,
-            0L,
-            0,
-            true, // For testing, switch this to false to capture w/1 Hz
+            videoModeSelected,
+            rawModeSelected,
+            staticFocusSelected,
+            staticFocusDistance,
+            staticExposureTimeSelected,
+            staticExposureTime,
+            exposureValueIso100,
+            distanceBasedTriggeringSelected,
             triggeringDistance,
-            false,
+            true,
             object :
                 StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                 override fun startUpFinished(measurementIdentifier: Long) {

@@ -54,11 +54,11 @@ import de.cyface.app.r4r.capturing.map.MapFragment
 import de.cyface.app.r4r.capturing.marker.MarkerFragment
 import de.cyface.app.r4r.capturing.speed.SpeedFragment
 import de.cyface.app.r4r.databinding.FragmentCapturingBinding
+import de.cyface.app.r4r.utils.Constants
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
-import de.cyface.camera_service.Constants
 import de.cyface.camera_service.UIListener
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
@@ -447,7 +447,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     private fun reconnect() {
         capturing.addDataCapturingListener(this)
-        // cameraService.addCameraListener(this)
+        cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
@@ -465,13 +465,13 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 updateCachedTrack(id)
 
                 // Also try to reconnect to CameraService if it's alive
-                /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+                if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                     // It does not matter whether isCameraServiceRequested() as this can change all the time
                     Log.d(
                         TAG,
                         "onResume: reconnecting CameraService succeeded"
                     )
-                }*/
+                }
                 return@launch
             }
 
@@ -488,10 +488,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // Check if there is a zombie CameraService running
             // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
             // can be used by other apps again
-            /* if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.w(
-                    de.cyface.camera_service.Constants.TAG, "Zombie CameraService is running and it's "
-                            + (if (isCameraServiceRequested()) "" else "*not*") + " requested"
+                    Constants.TAG,
+                    "Zombie CameraService is running and it's "
+                            + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
+                            + " requested"
                 )
                 cameraService.stop(
                     object :
@@ -506,7 +508,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 throw java.lang.IllegalStateException(
                     "Camera stopped manually as the camera was not released. This should not happen!"
                 )
-            }*/
+            }
         }
     }
 
@@ -630,7 +632,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 }
 
                 override fun timedOut() {
-                    Log.d(Constants.TAG, "pauseCapturing: no CameraService running, nothing to do")
+                    Log.d(TAG, "pauseCapturing: no CameraService running, nothing to do")
                 }
             })
     }
@@ -672,7 +674,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
                 override fun timedOut() {
                     Log.d(
-                        Constants.TAG,
+                        TAG,
                         "stopCapturing: no CameraService running, nothing to do"
                     )
                 }
@@ -1112,7 +1114,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {
-        Log.d(Constants.TAG, "onNewPictureAcquired")
+        Log.d(TAG, "onNewPictureAcquired")
         /*val text =
             context!!.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured
         cameraInfoTextView.setText(text)
@@ -1120,10 +1122,10 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     override fun onNewVideoStarted() {
-        Log.d(Constants.TAG, "onNewVideoStarted")
+        Log.d(TAG, "onNewVideoStarted")
     }
 
     override fun onVideoStopped() {
-        Log.d(Constants.TAG, "onVideoStopped")
+        Log.d(TAG, "onVideoStopped")
     }
 }
