@@ -43,18 +43,13 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.auth.LoginActivity
-import de.cyface.app.capturing.UnInterestedListener
 import de.cyface.app.databinding.ActivityMainBinding
-import de.cyface.app.notification.CameraEventHandler
 import de.cyface.app.notification.CapturingEventHandler
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiSettings
-import de.cyface.camera_service.background.camera.CameraListener
-import de.cyface.camera_service.foreground.CameraService
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.model.CapturedData
@@ -99,7 +94,7 @@ import kotlin.system.exitProcess
  * @version 5.0.0
  * @since 1.0.0
  */
-class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvider*/ {
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -114,7 +109,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The `CameraService` which collects camera data if the user did activate this feature.
      */
-    override lateinit var cameraService: CameraService
+    //override lateinit var cameraService: CameraService
 
     /**
      * The controller which allows to navigate through the navigation graph.
@@ -135,7 +130,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The settings used to store the user preferences for the camera.
      */
-    override lateinit var cameraSettings: CameraSettings
+    //override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -161,7 +156,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onCapturingStopped() {}
     }
 
-    private val unInterestedCameraListener: CameraListener = object :
+    /*private val unInterestedCameraListener: CameraListener = object :
         CameraListener {
         override fun onNewPictureAcquired(picturesCaptured: Int) {}
         override fun onNewVideoStarted() {}
@@ -173,11 +168,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         override fun onCapturingStopped() {}
-    }
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         uiSettings = UiSettings(this, BuildConfig.incentivesServer)
-        cameraSettings = CameraSettings(this)
+        //cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
         // With async call the app crashes as late-init `capturing` is not initialized yet.
@@ -196,12 +191,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             // startSynchronization() // This is done in onAuthorized() instead
             // TODO: dataCapturingService!!.addConnectionStatusListener(this)
-            cameraService = CameraService(
+            /*cameraService = CameraService(
                 applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
                 UnInterestedListener()
-            )
+            )*/
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }

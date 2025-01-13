@@ -232,7 +232,7 @@ dependencies {
     implementation project(':synchronization')
     implementation project(':persistence')
     implementation project(':energy_settings')
-    implementation project(':camera_service')
+    //implementation project(':camera_service')
     implementation project(':utils')
 
     // Dependencies for instrumentation tests

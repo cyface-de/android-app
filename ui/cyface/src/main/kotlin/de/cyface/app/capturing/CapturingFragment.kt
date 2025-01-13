@@ -48,19 +48,12 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import de.cyface.app.CameraServiceProvider
 import de.cyface.app.MainActivity
 import de.cyface.app.R
 import de.cyface.app.capturing.map.MapFragment
 import de.cyface.app.databinding.FragmentCapturingBinding
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraInfo
-import de.cyface.camera_service.Constants
-import de.cyface.camera_service.UIListener
-import de.cyface.camera_service.background.camera.CameraListener
-import de.cyface.camera_service.foreground.CameraService
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -105,7 +98,7 @@ import java.util.concurrent.TimeUnit
  * @version 2.0.0
  * @since 1.0.0
  */
-class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
+class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ {
 
     /**
      * This property is only valid between onCreateView and onDestroyView.
@@ -125,7 +118,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * The [CameraService] required to control and check the visual capturing process.
      */
-    private lateinit var cameraService: CameraService
+    //private lateinit var cameraService: CameraService
 
     /**
      * The settings used by both, UIs and libraries.
@@ -135,7 +128,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * The settings used by the camera service.
      */
-    private lateinit var cameraSettings: CameraSettings
+    //private lateinit var cameraSettings: CameraSettings
 
     /**
      * An implementation of the persistence layer which caches some data during capturing.
@@ -200,12 +193,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
         }
-        if (activity is CameraServiceProvider) {
+        /*if (activity is CameraServiceProvider) {
             cameraService = (activity as CameraServiceProvider).cameraService
             cameraSettings = (activity as CameraServiceProvider).cameraSettings
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
-        }
+        }*/
     }
 
     /**
@@ -601,8 +594,10 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // can be used by other apps again
             /* if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 Log.w(
-                    de.cyface.camera_service.Constants.TAG, "Zombie CameraService is running and it's "
-                            + (if (isCameraServiceRequested()) "" else "*not*") + " requested"
+                    Constants.TAG,
+                    "Zombie CameraService is running and it's "
+                            + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
+                            + " requested"
                 )
                 cameraService.stop(
                     object :
@@ -626,7 +621,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     private fun disconnect() {
         capturing.removeDataCapturingListener(this)
-        cameraService.removeCameraListener(this)
+        //cameraService.removeCameraListener(this)
 
         try {
             capturing.disconnect()
@@ -634,12 +629,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // This just tells us there is no running capturing in the background, see [MOV-588]
             Log.d(TAG, "No need to unbind as the background service was not running.")
         }
-        try {
+        /*try {
             cameraService.disconnect()
         } catch (e: DataCapturingException) {
             // This just tells us there is no running capturing in the background, see [MOV-588]
             Log.d(TAG, "No need to unbind as the camera background service was not running.")
-        }
+        }*/
 
         viewModel.setMeasurementId(null) // Experimental, might influence other Fragments
         //setCapturingStatus(null) // Seems not necessary right not, but is called in `reconnect`
@@ -727,7 +722,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
         // Pause camera capturing if it is running (even is DCS is not running)
         // TODO: this way we don't notice when the camera was stopped unexpectedly
-        cameraService.isRunning(
+        /*cameraService.isRunning(
             DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS,
             object : IsRunningCallback {
                 override fun isRunning() {
@@ -743,7 +738,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 override fun timedOut() {
                     Log.d(Constants.TAG, "pauseCapturing: no CameraService running, nothing to do")
                 }
-            })
+            })*/
     }
 
     /**
@@ -767,7 +762,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
         // Stop camera capturing if it is running (even is DCS is not running)
         // TODO: this way we don't notice when the camera was stopped unexpectedly
-        cameraService.isRunning(
+        /*cameraService.isRunning(
             DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
             TimeUnit.MILLISECONDS,
             object : IsRunningCallback {
@@ -787,7 +782,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         "stopCapturing: no CameraService running, nothing to do"
                     )
                 }
-            })
+            })*/
     }
 
     /**
@@ -827,7 +822,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         setCapturingStatus(MeasurementStatus.OPEN)
 
                         // Start CameraService
-                        if (cameraSettings.getCameraEnabledBlocking()) {
+                        /*if (cameraSettings.getCameraEnabledBlocking()) {
                             Log.d(TAG, "CameraServiceRequested")
                             try {
                                 startCameraService(measurementIdentifier)
@@ -836,7 +831,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             } catch (e: MissingPermissionException) {
                                 throw IllegalStateException(e)
                             }
-                        }
+                        }*/
                     }
                 })
         } catch (e: DataCapturingException) {
@@ -868,7 +863,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         setCapturingStatus(MeasurementStatus.OPEN)
 
                         // Start CameraService
-                        if (cameraSettings.getCameraEnabledBlocking()) {
+                        /*if (cameraSettings.getCameraEnabledBlocking()) {
                             Log.d(Constants.TAG, "CameraServiceRequested")
                             try {
                                 startCameraService(measurementIdentifier)
@@ -877,7 +872,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             } catch (e: MissingPermissionException) {
                                 throw java.lang.IllegalStateException(e)
                             }
-                        }
+                        }*/
                     }
                 })
         } catch (e: NoSuchMeasurementException) {
@@ -898,7 +893,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * @throws MissingPermissionException If no Android `ACCESS_FINE_LOCATION` has been granted. You may
      * register a [UIListener] to ask the user for this permission and prevent the
      * `Exception`. If the `Exception` was thrown the service does not start.
-     */
+     * /
     @Throws(DataCapturingException::class, MissingPermissionException::class)
     private fun startCameraService(measurementId: Long) {
         /*val rawModeSelected = cameraSettings.getRawModeBlocking()
@@ -942,7 +937,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished")
                 }
             })
-    }
+    }*/
 
     private fun isRestrictionActive(): Boolean {
         if (context == null) {
@@ -1004,7 +999,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             // nothing to do
                         }
                     })
-                if (cameraSettings.getCameraEnabledBlocking()) {
+                /*if (cameraSettings.getCameraEnabledBlocking()) {
                     cameraService.stop(object : ShutDownFinishedHandler(
                         de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED
                     ) {
@@ -1012,7 +1007,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             // nothing to do
                         }
                     })
-                }
+                }*/
             } catch (e: NoSuchMeasurementException) {
                 throw java.lang.IllegalStateException(e)
             }
@@ -1216,7 +1211,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         }
     }
 
-    override fun onNewPictureAcquired(picturesCaptured: Int) {
+    /*override fun onNewPictureAcquired(picturesCaptured: Int) {
         Log.d(Constants.TAG, "onNewPictureAcquired")
         /*val text =
             context!!.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured
@@ -1230,7 +1225,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
     override fun onVideoStopped() {
         Log.d(Constants.TAG, "onVideoStopped")
-    }
+    }*/
 
     companion object {
         /**
