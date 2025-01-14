@@ -62,6 +62,7 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.app.digural.upload.WebdavSyncService
+import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.settings.AppSettings
@@ -168,8 +169,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        uiSettings = UiSettings(this, "https://NOT_IN_USE")
-        cameraSettings = CameraSettings(this)
+        uiSettings = UiSettings.getInstance(this, UiConfig("https://NOT_IN_USE"))
+        cameraSettings = CameraSettings.getInstance(this)
         // Instance required to access settings before capturing. ExternalCameraController also
         // needs access and we can't inject it (not parcelable right now). We use a singleton as
         // suggested by the docs, as only one instance is allowed per process. [LEIP-294]

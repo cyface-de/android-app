@@ -53,6 +53,7 @@ import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
@@ -178,8 +179,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        uiSettings = UiSettings(this, BuildConfig.incentivesServer)
-        cameraSettings = CameraSettings(this)
+        uiSettings = UiSettings.getInstance(this, UiConfig(BuildConfig.incentivesServer))
+        cameraSettings = CameraSettings.getInstance(this)
 
         // Start DataCapturingService and CameraService
         // With async call the app crashes as late-init `capturing` is not initialized yet.

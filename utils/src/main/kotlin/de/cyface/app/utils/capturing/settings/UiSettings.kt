@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.map
 import java.io.File
 import java.net.URL
 
+data class UiConfig(val incentivesUrl: String)
+
 /**
  * Settings used by multiple uis.
  *
@@ -36,10 +38,37 @@ import java.net.URL
  * If this changes, consider using the standard Android Architecture, see `MeasurementRepository`.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 3.0.0
  * @since 3.4.0
  */
-class UiSettings(context: Context, incentivesUrl: String) {
+class UiSettings private constructor(context: Context, private val config: UiConfig) {
+
+    /**
+     * Use Singleton to ensure only one instance per process is created. [LEIP-294]
+     *
+     * It should be okay to use a Singleton as this is also suggested in the documentation:
+     * https://developer.android.com/topic/libraries/architecture/datastore#multiprocess
+     */
+    companion object {
+        @Volatile
+        private var instance: UiSettings? = null
+
+        fun getInstance(context: Context, config: UiConfig):
+                UiSettings {
+            return instance ?: synchronized(this) {
+                instance ?: UiSettings(
+                    context.applicationContext,
+                    config
+                ).also {
+                    instance = it
+                }
+            }.also {
+                if (it.config != config) {
+                    throw IllegalStateException("Already initialized with different configuration.")
+                }
+            }
+        }
+    }
 
     /**
      * This avoids leaking the context when this object outlives the Activity of Fragment.
@@ -65,13 +94,13 @@ class UiSettings(context: Context, incentivesUrl: String) {
             File("${appContext.filesDir.path}/app_utils.pb")
         },
         migrations = listOf(
-            PreferencesMigrationFactory.create(appContext, incentivesUrl),
-            StoreMigration(incentivesUrl)
+            PreferencesMigrationFactory.create(appContext, config.incentivesUrl),
+            StoreMigration(config.incentivesUrl)
         )
     )
 
     init {
-        if (!incentivesUrl.startsWith("https://") && !incentivesUrl.startsWith("http://")) {
+        if (!config.incentivesUrl.startsWith("https://") && !config.incentivesUrl.startsWith("http://")) {
             throw SetupException("Invalid URL protocol")
         }
     }

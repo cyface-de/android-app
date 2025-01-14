@@ -28,6 +28,7 @@ import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.synchronization.settings.DefaultSynchronizationSettings
 import de.cyface.synchronization.ErrorHandler
+import de.cyface.synchronization.settings.SyncConfig
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
@@ -51,10 +52,10 @@ class Application : Application() {
     /**
      * The settings used by both, UIs and libraries.
      *
-     * Lazy initialization to ensure context is available by then.
+     * Lazy initialization to ensure it's available when needed, e.g. in errorListener init below.
      */
     private val lazyAppSettings by lazy { // android-utils
-        AppSettings(this)
+        AppSettings.getInstance(this)
     }
 
     /**
@@ -93,10 +94,12 @@ class Application : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        WebdavAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
+        WebdavAuthenticator.settings = DefaultSynchronizationSettings.getInstance( // synchronization
             this,
-            BuildConfig.collectorApi,
-            WebdavAuth.dummyAuthConfig()
+            SyncConfig(
+                BuildConfig.collectorApi,
+                WebdavAuth.dummyAuthConfig()
+            ),
         )
 
         // Register the activity to be called by the authenticator to request credentials from the user.

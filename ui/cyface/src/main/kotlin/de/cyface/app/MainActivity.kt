@@ -49,6 +49,7 @@ import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
@@ -171,7 +172,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
     }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        uiSettings = UiSettings(this, BuildConfig.incentivesServer)
+        uiSettings = UiSettings.getInstance(this, UiConfig(BuildConfig.incentivesServer))
         //cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService

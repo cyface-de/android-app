@@ -28,6 +28,7 @@ import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.settings.DefaultSynchronizationSettings
+import de.cyface.synchronization.settings.SyncConfig
 import de.cyface.utils.settings.AppSettings;
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
@@ -51,10 +52,10 @@ class Application : Application() {
     /**
      * The settings used by both, UIs and libraries.
      *
-     * Lazy initialization to ensure context is available by then.
+     * Lazy initialization to ensure it's available when needed, e.g. in errorListener init below.
      */
     private val lazyAppSettings by lazy { // android-utils
-        AppSettings(this)
+        AppSettings.getInstance(this)
     }
 
     /**
@@ -93,10 +94,12 @@ class Application : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        CyfaceAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
+        CyfaceAuthenticator.settings = DefaultSynchronizationSettings.getInstance( // synchronization
             this,
-            BuildConfig.cyfaceServer,
-            OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+            SyncConfig(
+                BuildConfig.cyfaceServer,
+                OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+            ),
         )
 
         // Register the activity to be called by the authenticator to request credentials from the user.
@@ -138,6 +141,7 @@ class Application : Application() {
         @JvmStatic
         var errorHandler: ErrorHandler? = null
             private set
+
         /**
          * The settings used by both, UIs and libraries.
          */
