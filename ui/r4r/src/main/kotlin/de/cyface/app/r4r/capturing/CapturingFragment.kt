@@ -421,11 +421,19 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // Nothing to do here - handled by [CapturingEventHandler]
     }
 
+    override fun onCameraLowDiskSpace(allocation: DiskConsumption) {
+        // Nothing to do here - handled by [CapturingEventHandler]
+    }
+
     override fun onSynchronizationSuccessful() {
         // Nothing to do here
     }
 
     override fun onErrorState(e: Exception) {
+        throw java.lang.IllegalStateException(e)
+    }
+
+    override fun onCameraErrorState(e: Exception) {
         throw java.lang.IllegalStateException(e)
     }
 
@@ -436,10 +444,26 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         return false
     }
 
+    override fun onCameraRequiresPermission(permission: String, reason: Reason): Boolean {
+        return false
+    }
+
     override fun onCapturingStopped() {
-        setCapturingStatus(MeasurementStatus.FINISHED)
-        viewModel.setLocation(null)
-        viewModel.setMeasurementId(null)
+        // Between roughly SDK 6.4.2 and 7.12.11 we used local broadcasts, which broke the
+        // ShutdownFinishedHandler [LEIP-299]. As we didn't find the issue at first, we used
+        // onCapturingStopped() as a workaround to update the buttons to "FINISHED".
+        // After fixing this bug the SDK now only calls onCapturingStopped() when the capturing
+        // stopped itself, e.g. because of low space, but not when the user asks it to stop.
+        // This way we can set the UI to "FINISHED" here without interfering with the
+        // ShutdownFinishedHandler, as this would "hide" a broken handler without intention.
+
+        Log.d(TAG, "onCapturingStopped")
+        checkAndStopCameraCapturing(capturingStopped = true, updateUi = true, pause = false)
+    }
+
+    override fun onCameraCapturingStopped() {
+        Log.d(TAG, "onCameraCapturingStopped")
+        checkAndStopCapturing(crashAsyncUI = false, pause = false)
     }
 
     /**
@@ -481,6 +505,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 setCapturingStatus(MeasurementStatus.PAUSED)
                 viewModel.setMeasurementId(null)
             } else {
+                Log.d(TAG, "reconnect ")
                 setCapturingStatus(MeasurementStatus.FINISHED)
                 viewModel.setMeasurementId(null)
             }
@@ -497,7 +522,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 )
                 cameraService.stop(
                     object :
-                        ShutDownFinishedHandler(de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
+                        ShutDownFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
                         override fun shutDownFinished(measurementIdentifier: Long) {
                             Log.d(
                                 TAG,
@@ -599,93 +624,35 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     /**
-     * Pause capturing
-     */
-    private fun pauseCapturing() {
-        try {
-            capturing.pause(
-                object : ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
-                    override fun shutDownFinished(measurementIdentifier: Long) {
-                        // The measurement id should always be set [STAD-333]
-                        Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                        setCapturingStatus(MeasurementStatus.PAUSED)
-                        viewModel.setMeasurementId(null)
-                    }
-                })
-        } catch (e: NoSuchMeasurementException) {
-            throw IllegalStateException(e)
-        }
-
-        // Pause camera capturing if it is running (even is DCS is not running)
-        // TODO: this way we don't notice when the camera was stopped unexpectedly
-        cameraService.isRunning(
-            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT, TimeUnit.MILLISECONDS,
-            object : IsRunningCallback {
-                override fun isRunning() {
-                    cameraService.pause(object : ShutDownFinishedHandler(
-                        de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED
-                    ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            Log.d(TAG, "pauseCapturing: CameraService stopped")
-                        }
-                    })
-                }
-
-                override fun timedOut() {
-                    Log.d(TAG, "pauseCapturing: no CameraService running, nothing to do")
-                }
-            })
-    }
-
-    /**
      * Stop capturing
      */
-    private fun stopCapturing() {
+    private fun stopCapturing(pause: Boolean) {
         try {
-            capturing.stop(
-                object : ShutDownFinishedHandler(MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED) {
-                    override fun shutDownFinished(measurementIdentifier: Long) {
-                        // The measurement id should always be set [STAD-333]
-                        Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
-                        viewModel.setTracks(null)
-                        setCapturingStatus(MeasurementStatus.FINISHED)
-                        viewModel.setMeasurementId(null)
-                    }
-                })
+            val finishedHandler = object : ShutDownFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
+                override fun shutDownFinished(measurementIdentifier: Long) {
+                    // The measurement id should always be set [STAD-333]
+                    require(measurementIdentifier != -1L) { "Missing measurement id" }
+
+                    // Ensures both services stopped to avoid btn out of sync [LEIP-299]
+                    val target = if (pause) "pause" else "stop"
+                    Log.d(TAG, "stopCapturing: $target finished")
+                    checkAndStopCameraCapturing(true, true, pause)
+                }
+            }
+            if (pause) {
+                capturing.pause(finishedHandler)
+            } else {
+                capturing.stop(finishedHandler)
+            }
         } catch (e: NoSuchMeasurementException) {
             throw IllegalStateException(e)
         }
-
-        // Stop camera capturing if it is running (even is DCS is not running)
-        // TODO: this way we don't notice when the camera was stopped unexpectedly
-        cameraService.isRunning(
-            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
-            TimeUnit.MILLISECONDS,
-            object : IsRunningCallback {
-                override fun isRunning() {
-                    cameraService.stop(object : ShutDownFinishedHandler(
-                        de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED
-                    ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            Log.d(TAG, "stopCapturing: CameraService stopped")
-                        }
-                    })
-                }
-
-                override fun timedOut() {
-                    Log.d(
-                        TAG,
-                        "stopCapturing: no CameraService running, nothing to do"
-                    )
-                }
-            })
     }
 
     /**
      * Starts capturing
      */
     private fun startCapturing() {
-
         // Measurement is stopped, so we start a new measurement
         if (persistence.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
             showToastOnMainThread(
@@ -889,7 +856,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             try {
                 capturing
                     .stop(object : ShutDownFinishedHandler(
-                        MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED
+                        MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
                     ) {
                         override fun shutDownFinished(l: Long) {
                             // nothing to do
@@ -897,7 +864,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     })
                 if (cameraSettings.getCameraEnabledBlocking()) {
                     cameraService.stop(object : ShutDownFinishedHandler(
-                        de.cyface.camera_service.MessageCodes.LOCAL_BROADCAST_SERVICE_STOPPED
+                        de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
                     ) {
                         override fun shutDownFinished(l: Long) {
                             // nothing to do
@@ -1052,28 +1019,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
     class OnPauseListener(private val capturingFragment: CapturingFragment) : View.OnClickListener {
         override fun onClick(v: View?) {
-
             // Disables the button. This is used to avoid a duplicate pause/stop command which crashes the SDK
             // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
             capturingFragment.pauseButton.isEnabled = false
             capturingFragment.stopButton.isEnabled = false
-
-            capturingFragment.capturing.isRunning(
-                DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
-                TimeUnit.MILLISECONDS,
-                object : IsRunningCallback {
-                    override fun isRunning() {
-                        Validate.isTrue(
-                            capturingFragment.viewModel.capturing.value === MeasurementStatus.OPEN,
-                            "DataCapturingButton is out of sync."
-                        )
-                        capturingFragment.pauseCapturing()
-                    }
-
-                    override fun timedOut() {
-                        throw java.lang.IllegalStateException("No Measurement is running")
-                    }
-                })
+            Log.d(TAG, "OnPauseListener")
+            capturingFragment.checkAndStopCapturing(crashAsyncUI = true, pause = true)
         }
     }
 
@@ -1084,33 +1035,93 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // until CY-4098 is implemented. It's automatically re-enabled as soon as the callback arrives.
             capturingFragment.stopButton.isEnabled = false
             capturingFragment.pauseButton.isEnabled = false
-
-            capturingFragment.capturing.isRunning(
-                DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
-                TimeUnit.MILLISECONDS,
-                object : IsRunningCallback {
-                    override fun isRunning() {
-                        Validate.isTrue(
-                            capturingFragment.viewModel.capturing.value === MeasurementStatus.OPEN,
-                            "DataCapturingButton is out of sync."
-                        )
-                        capturingFragment.stopCapturing()
-                    }
-
-                    override fun timedOut() {
-                        // If Measurement is paused, stop the measurement
-                        if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                            Validate.isTrue(
-                                capturingFragment.viewModel.capturing.value === MeasurementStatus.PAUSED,
-                                "DataCapturingButton is out of sync."
-                            )
-                            capturingFragment.stopCapturing()
-                            return
-                        }
-                        throw java.lang.IllegalStateException("No measurement is running")
-                    }
-                })
+            Log.d(TAG, "OnStopListener")
+            capturingFragment.checkAndStopCapturing(crashAsyncUI = true, pause = false)
         }
+    }
+
+    private fun checkAndStopCapturing(crashAsyncUI: Boolean, pause: Boolean) {
+        capturing.isRunning(
+            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
+            TimeUnit.MILLISECONDS,
+            object : IsRunningCallback {
+                override fun isRunning() {
+                    if (crashAsyncUI) {
+                        require(viewModel.capturing.value === MeasurementStatus.OPEN) {
+                            "DataCapturingButton is out of sync."
+                        }
+                    }
+                    stopCapturing(pause)
+                }
+
+                override fun timedOut() {
+                    // If Measurement is paused, stop the measurement
+                    if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+                        if (crashAsyncUI) {
+                            require(!pause) { "Measurement is already paused." }
+                            require(viewModel.capturing.value === MeasurementStatus.PAUSED) {
+                                "DataCapturingButton is out of sync."
+                            }
+                        }
+                        stopCapturing(pause)
+                        return
+                    } else {
+                        error("No measurement is running")
+                    }
+                }
+            })
+    }
+
+    private fun checkAndStopCameraCapturing(capturingStopped: Boolean, updateUi: Boolean, pause: Boolean) {
+        cameraService.isRunning(
+            DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
+            TimeUnit.MILLISECONDS,
+            object : IsRunningCallback {
+                override fun isRunning() {
+                    cameraService.stop(
+                        object : ShutDownFinishedHandler(
+                            de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                        ) {
+                            override fun shutDownFinished(measurementIdentifier: Long) {
+                                Log.d(TAG, "stopCapturing: CameraService stopped")
+                                if (capturingStopped) {
+                                    Log.d(TAG, "DCS + CS stopped")
+                                } else {
+                                    Log.d(TAG, "CS only stopped")
+                                }
+                                if (updateUi) {
+                                    if (pause) {
+                                        setCapturingStatus(MeasurementStatus.PAUSED)
+                                    } else {
+                                        viewModel.setTracks(null)
+                                        setCapturingStatus(MeasurementStatus.FINISHED)
+                                    }
+                                    viewModel.setLocation(null)
+                                    viewModel.setMeasurementId(null)
+                                }
+                            }
+                        }
+                    )
+                }
+
+                override fun timedOut() {
+                    Log.d(TAG, "stopCapturing: No CameraService running")
+                    if (capturingStopped) {
+                        Log.d(TAG, "DCS only stopped")
+                    }
+                    if (updateUi) {
+                        if (pause) {
+                            setCapturingStatus(MeasurementStatus.PAUSED)
+                        } else {
+                            viewModel.setTracks(null)
+                            setCapturingStatus(MeasurementStatus.FINISHED)
+                        }
+                        viewModel.setLocation(null)
+                        viewModel.setMeasurementId(null)
+                    }
+                }
+            }
+        )
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {

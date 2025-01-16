@@ -159,13 +159,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onNewPictureAcquired(picturesCaptured: Int) {}
         override fun onNewVideoStarted() {}
         override fun onVideoStopped() {}
-        override fun onLowDiskSpace(allocation: DiskConsumption) {}
-        override fun onErrorState(e: Exception) {}
-        override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
+        override fun onCameraLowDiskSpace(allocation: DiskConsumption) {}
+        override fun onCameraErrorState(e: Exception) {}
+        override fun onCameraRequiresPermission(permission: String, reason: Reason): Boolean {
             return false
         }
 
-        override fun onCapturingStopped() {}
+        override fun onCameraCapturingStopped() {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

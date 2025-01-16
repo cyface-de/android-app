@@ -107,6 +107,7 @@ class Application : Application() {
 
         // Register error listener
         errorHandler = ErrorHandler()
+        // Other than ShutdownFinishedHandler, this seem to work with local broadcast
         LocalBroadcastManager.getInstance(this).registerReceiver(
             errorHandler!!,
             IntentFilter(ErrorHandler.ERROR_INTENT)
@@ -128,6 +129,7 @@ class Application : Application() {
 
     override fun onTerminate() {
         errorHandler!!.removeListener(errorListener)
+        // Other than ShutdownFinishedHandler, this seem to work with local broadcast
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
             errorHandler!!
         )
