@@ -132,17 +132,17 @@ jobs:
       - name: Make Digural app available
         uses: actions/upload-artifact@v4
         with:
-          name: Signed App Bundle
+          name: Signed Digural Bundle
           path: ${{ steps.sign_app_digural.outputs.signedReleaseFile }}
       - name: Make R4R app available
         uses: actions/upload-artifact@v4
         with:
-          name: Signed App Bundle
+          name: Signed R4R Bundle
           path: ${{ steps.sign_app_r4r.outputs.signedReleaseFile }}
       - name: Make Cyface app available
         uses: actions/upload-artifact@v4
         with:
-          name: Signed App Bundle
+          name: Signed Cyface Bundle
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}
 
       # Automatically mark this tag as release on Github
