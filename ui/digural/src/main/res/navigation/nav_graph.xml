@@ -10,7 +10,7 @@
     app:startDestination="@id/navigation_capturing">
     <fragment
       android:id="@+id/navigation_capturing"
-      android:name="de.cyface.app.digural.CapturingFragment"
+      android:name="de.cyface.app.digural.capturing.CapturingFragment"
       android:label="@string/app_name"
       tools:layout="@layout/fragment_capturing">
       <action

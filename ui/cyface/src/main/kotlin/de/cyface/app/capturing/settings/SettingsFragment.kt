@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -28,7 +28,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.cyface.app.BuildConfig
-import de.cyface.app.MeasuringClient
+import de.cyface.app.Application
 import de.cyface.app.R
 import de.cyface.app.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
@@ -49,6 +49,8 @@ import java.io.IOException
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
+ * @version 2.0.1
+ * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
 
@@ -92,7 +94,7 @@ class SettingsFragment : Fragment() {
         // Initialize ViewModel
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(MeasuringClient.appSettings)
+            SettingsViewModelFactory(Application.appSettings)
         )[SettingsViewModel::class.java]
     }
 
@@ -230,55 +232,3 @@ class SettingsFragment : Fragment() {
         _binding = null
     }
 }
-
-// final SwitchCompat connectToExternalSpeedSensorToggle = (SwitchCompat)view.getMenu()
-// .findItem(R.id.drawer_setting_speed_sensor).getActionView();
-/*
-final boolean bluetoothIsConfigured = preferences.getString(BLUETOOTHLE_DEVICE_MAC_KEY, null) != null
-&& preferences.getFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE, 0.0F) > 0.0F;
-connectToExternalSpeedSensorToggle.setChecked(bluetoothIsConfigured);
-// connectToExternalSpeedSensorToggle.setOnClickListener(new ConnectToExternalSpeedSensorToggleListener());
-/*
- * A listener which is called when the external bluetooth sensor toggle in the {@link NavDrawer} is clicked.
- * /
- * private class ConnectToExternalSpeedSensorToggleListener implements CompoundButton.OnCheckedChangeListener {
- *
- * @Override
- * public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
- * final CompoundButton compoundButton = (CompoundButton)view;
- * final Context applicationContext = view.getContext().getApplicationContext();
- * if (compoundButton.isChecked()) {
- * final BluetoothLeSetup bluetoothLeSetup = new BluetoothLeSetup(new BluetoothLeSetupListener() {
- *
- * @Override
- * public void onDeviceSelected(final BluetoothDevice device, final double wheelCircumference) {
- * final SharedPreferences.Editor editor = preferences.edit();
- * editor.putString(BLUETOOTHLE_DEVICE_MAC_KEY, device.getAddress());
- * editor.putFloat(BLUETOOTHLE_WHEEL_CIRCUMFERENCE,
- * Double.valueOf(wheelCircumference).floatValue());
- * editor.apply();
- * }
- *
- * @Override
- * public void onSetupProcessFailed(final Reason reason) {
- * compoundButton.setChecked(false);
- * if (reason.equals(Reason.NOT_SUPPORTED)) {
- * Toast.makeText(applicationContext, R.string.ble_not_supported, Toast.LENGTH_SHORT)
- * .show();
- * } else {
- * Log.e(TAG, "Setup process of bluetooth failed: " + reason);
- * Toast.makeText(applicationContext, R.string.bluetooth_setup_failed, Toast.LENGTH_SHORT)
- * .show();
- * }
- * }
- * });
- * bluetoothLeSetup.setup(mainActivity);
- * } else {
- * final SharedPreferences.Editor editor = preferences.edit();
- * editor.remove(BLUETOOTHLE_DEVICE_MAC_KEY);
- * editor.remove(BLUETOOTHLE_WHEEL_CIRCUMFERENCE);
- * editor.apply();
- * }
- * }
- * }
- */

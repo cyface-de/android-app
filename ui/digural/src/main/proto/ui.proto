@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -29,8 +29,6 @@ option java_multiple_files = true;
  * Attention: The classes are generated from the file at compile time. Don't forget to rebuild.
  *
  * @author: Armin Schnabel
- * @since: 3.7.0
- * @version: 1.0.0
  */
 message Settings {
   // Version of this datastore. It helps to support default values and to migrate data. When the

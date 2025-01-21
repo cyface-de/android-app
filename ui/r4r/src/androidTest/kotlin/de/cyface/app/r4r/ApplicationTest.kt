@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -20,11 +20,10 @@ package de.cyface.app.r4r
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -32,8 +31,6 @@ import org.junit.Assert.*
  * See [testing documentation](http://d.android.com/tools/testing).
  *
  * @author Armin Schnabel
- * @version 1.0.0
- * @since 3.2.0
  */
 @RunWith(AndroidJUnit4::class)
 class ApplicationTest {

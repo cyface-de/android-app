@@ -34,10 +34,10 @@
 
   <!-- Settings -->
   <string name="drawer_setting_speed_sensor">External sensor</string>
-  <string name="bluetooth_setup_failed">Error starting the bluetooth component.</string>
   <string name="settings_sensor_frequency">Sensor frequency</string>
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
-  <!-- Digural -->
+
+  <!-- Digural Settings-->
   <string name="settings_digural_server_address">Digural server address</string>
   <string name="url_malformed_toast">Invalid address format. The change was ignored.</string>
 </resources>

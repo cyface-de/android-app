@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -28,7 +28,6 @@ import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
@@ -45,6 +44,8 @@ import kotlinx.coroutines.runBlocking
  *   https://developer.android.com/topic/libraries/architecture/viewmodel-savedstate
  *
  * @author Armin Schnabel
+ * @version 3.0.0
+ * @since 3.4.0
  * @property appSettings The settings used by both, UIs and libraries.
  */
 class SettingsViewModel(
@@ -72,7 +73,7 @@ class SettingsViewModel(
     val upload: LiveData<Boolean> = _upload
 
     init {
-        runBlocking {
+        viewModelScope.launch {
             /** app settings **/
             _centerMap.value = appSettings.centerMapFlow.first()
             _upload.value = appSettings.uploadEnabledFlow.first()
@@ -82,21 +83,19 @@ class SettingsViewModel(
     }
 
     /** app settings **/
-    fun setCenterMap(centerMap: Boolean) {
-        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
+    suspend fun setCenterMap(centerMap: Boolean) {
+        appSettings.setCenterMap(centerMap)
         _centerMap.postValue(centerMap)
     }
 
-    fun setUpload(upload: Boolean) {
-        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
+    suspend fun setUpload(upload: Boolean) {
+        appSettings.setUploadEnabled(upload)
         _upload.postValue(upload)
     }
 
     /** camera settings **/
-    fun setCameraEnabled(cameraEnabled: Boolean, context: Context) {
-        viewModelScope.launch {
-            cameraSettings.setCameraEnabled(cameraEnabled)
-        }
+    suspend fun setCameraEnabled(cameraEnabled: Boolean) {
+        cameraSettings.setCameraEnabled(cameraEnabled)
         _cameraEnabled.postValue(cameraEnabled)
     }
 }

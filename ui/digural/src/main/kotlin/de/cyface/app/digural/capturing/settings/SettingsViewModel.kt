@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -27,7 +27,6 @@ import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.net.URL
 
 /**
@@ -46,6 +45,8 @@ import java.net.URL
  *
  * @author Armin Schnabel
  * @author Klemens Muthmann
+ * @version 3.0.0
+ * @since 3.4.0
  * @property appSettings The settings used by both, UIs and libraries.
  * @property cameraSettings The settings used by the camera library.
  * @property customSettings The UI-specific settings.
@@ -103,7 +104,7 @@ class SettingsViewModel(
     val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
 
     init {
-        runBlocking {
+        viewModelScope.launch {
             /** app settings **/
             _centerMap.value = appSettings.centerMapFlow.first()
             _upload.value = appSettings.uploadEnabledFlow.first()
@@ -125,62 +126,62 @@ class SettingsViewModel(
     }
 
     /** app settings **/
-    fun setCenterMap(centerMap: Boolean) {
-        viewModelScope.launch { appSettings.setCenterMap(centerMap) }
+    suspend fun setCenterMap(centerMap: Boolean) {
+        appSettings.setCenterMap(centerMap)
     }
 
-    fun setUpload(upload: Boolean) {
-        viewModelScope.launch { appSettings.setUploadEnabled(upload) }
+    suspend fun setUpload(upload: Boolean) {
+        appSettings.setUploadEnabled(upload)
     }
 
-    fun setSensorFrequency(sensorFrequency: Int) {
-        viewModelScope.launch { appSettings.setSensorFrequency(sensorFrequency) }
+    suspend fun setSensorFrequency(sensorFrequency: Int) {
+        appSettings.setSensorFrequency(sensorFrequency)
     }
 
-    /** camera settings  **/
-    fun setCameraEnabled(cameraEnabled: Boolean) {
-        viewModelScope.launch { cameraSettings.setCameraEnabled(cameraEnabled) }
+    /** camera settings **/
+    suspend fun setCameraEnabled(cameraEnabled: Boolean) {
+        cameraSettings.setCameraEnabled(cameraEnabled)
     }
 
-    fun setVideoMode(videoMode: Boolean) {
-        viewModelScope.launch { cameraSettings.setVideoMode(videoMode) }
+    suspend fun setVideoMode(videoMode: Boolean) {
+        cameraSettings.setVideoMode(videoMode)
     }
 
-    fun setRawMode(rawMode: Boolean) {
-        viewModelScope.launch { cameraSettings.setRawMode(rawMode) }
+    suspend fun setRawMode(rawMode: Boolean) {
+        cameraSettings.setRawMode(rawMode)
     }
 
-    fun setDistanceBasedTriggering(distanceBasedTriggering: Boolean) {
-        viewModelScope.launch { cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering) }
+    suspend fun setDistanceBasedTriggering(distanceBasedTriggering: Boolean) {
+        cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering)
     }
 
-    fun setTriggeringDistance(triggeringDistance: Float) {
-        viewModelScope.launch { cameraSettings.setTriggeringDistance(triggeringDistance) }
+    suspend fun setTriggeringDistance(triggeringDistance: Float) {
+        cameraSettings.setTriggeringDistance(triggeringDistance)
     }
 
-    fun setStaticFocus(staticFocus: Boolean) {
-        viewModelScope.launch { cameraSettings.setStaticFocus(staticFocus) }
+    suspend fun setStaticFocus(staticFocus: Boolean) {
+        cameraSettings.setStaticFocus(staticFocus)
     }
 
-    fun setStaticFocusDistance(staticFocusDistance: Float) {
-        viewModelScope.launch { cameraSettings.setStaticFocusDistance(staticFocusDistance) }
+    suspend fun setStaticFocusDistance(staticFocusDistance: Float) {
+        cameraSettings.setStaticFocusDistance(staticFocusDistance)
     }
 
-    fun setStaticExposure(staticExposure: Boolean) {
-        viewModelScope.launch { cameraSettings.setStaticExposure(staticExposure) }
+    suspend fun setStaticExposure(staticExposure: Boolean) {
+        cameraSettings.setStaticExposure(staticExposure)
     }
 
-    fun setStaticExposureTime(staticExposureTime: Long) {
-        viewModelScope.launch { cameraSettings.setStaticExposureTime(staticExposureTime) }
+    suspend fun setStaticExposureTime(staticExposureTime: Long) {
+        cameraSettings.setStaticExposureTime(staticExposureTime)
     }
 
-    fun setStaticExposureValue(staticExposureValue: Int) {
-        viewModelScope.launch { cameraSettings.setStaticExposureValue(staticExposureValue) }
+    suspend fun setStaticExposureValue(staticExposureValue: Int) {
+        cameraSettings.setStaticExposureValue(staticExposureValue)
     }
 
     /** custom settings **/
-    fun setDiguralServerUrl(address: URL) {
-        viewModelScope.launch { customSettings.setDiguralUrl(address) }
+    suspend fun setDiguralServerUrl(address: URL) {
+        customSettings.setDiguralUrl(address)
     }
 }
 

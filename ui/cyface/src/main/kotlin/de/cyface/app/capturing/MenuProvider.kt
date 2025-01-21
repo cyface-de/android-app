@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -25,7 +25,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import de.cyface.app.CapturingFragmentDirections
 import de.cyface.app.MainActivity
 import de.cyface.app.R
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
@@ -37,6 +36,8 @@ import de.cyface.uploader.exception.SynchronisationException
  * options are shown in the action bar at the top right.
  *
  * @author Armin Schnabel
+ * @version 2.0.2
+ * @since 3.2.0
  */
 class MenuProvider(
     private val activity: MainActivity,

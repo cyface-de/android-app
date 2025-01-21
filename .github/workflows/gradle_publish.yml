@@ -1,6 +1,25 @@
+# Copyright 2023-2025 Cyface GmbH
+#
+# This file is part of the Cyface App for Android.
+#
+# The Cyface App for Android is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# The Cyface App for Android is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+
 # This workflow creates a signed Android Bundle which can be uploaded to Play Store Console
 #
 # @author Armin Schnabel
+# @version 1.0.0
+# @since 3.1.4
 name: Gradle Publish
 
 on:
@@ -111,17 +130,17 @@ jobs:
       # We currently upload the app manually to Play Store, but we could automate this using a
       # Google Service Account and the Github Action `r0adkll/upload-google-play`.
       - name: Make Digural app available
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Signed App Bundle
           path: ${{ steps.sign_app_digural.outputs.signedReleaseFile }}
       - name: Make R4R app available
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Signed App Bundle
           path: ${{ steps.sign_app_r4r.outputs.signedReleaseFile }}
       - name: Make Cyface app available
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Signed App Bundle
           path: ${{ steps.sign_app.outputs.signedReleaseFile }}

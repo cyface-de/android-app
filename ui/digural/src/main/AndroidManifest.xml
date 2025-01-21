@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright 2017-2025 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Klemens Muthmann
+ * @author Armin Schnabel
+ * @version 2.0.0
+ * @since 1.0.0
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -50,9 +73,9 @@
     <!-- tools:ignore = UnusedAttribute required to ignore Lint warning (usesCleartextTraffic) -->
     <!-- tools:replace="android:usesCleartextTraffic" required when testing against local collector -->
     <application
-        android:name=".MeasuringClient"
+        android:name=".Application"
         android:allowBackup="false"
-        android:icon="@mipmap/ic_logo"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
@@ -64,17 +87,8 @@
 
         <!-- Google Maps for Android requirements -->
         <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}" />
-
-        <!-- This workaround is required to use GoogleMaps with API 28.
-        From https://issuetracker.google.com/issues/79478779 -->
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false" />
 
         <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
         <!-- `exported="true"` or else the app cannot be launched after installation! -->
@@ -136,5 +150,4 @@
                 android:resource="@xml/sync_adapter" />
         </service>
     </application>
-
 </manifest>

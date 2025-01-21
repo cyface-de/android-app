@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -22,8 +22,10 @@ import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.textfield.TextInputEditText
 import de.cyface.app.digural.R
+import kotlinx.coroutines.launch
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -31,7 +33,7 @@ import java.net.URL
  * Handles when the user changes the Digural Server Url.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.2.0
  */
 class DiguralUrlChangeHandler(
@@ -58,11 +60,14 @@ class DiguralUrlChangeHandler(
             // - should end with `/`
             // For simplicity, all IP addresses like 999.999.999.999 are accepted.
             // For simplicity, only hostnames of the format [a-ZA-Z0-9\-\.]+ are accepted.
-            val regex = """^(http://|https://)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9\-\.]+)(:\d+)?/$""".toRegex()
+            val regex =
+                """^(http://|https://)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|[a-zA-Z0-9\-\.]+)(:\d+)?/$""".toRegex()
             if (!newValue.matches(regex)) {
                 throw MalformedURLException("Unexpected URL format: $newValue")
             }
-            viewModel.setDiguralServerUrl(URL(newValue))
+            viewModel.viewModelScope.launch {
+                viewModel.setDiguralServerUrl(URL(newValue))
+            }
         } catch (e: MalformedURLException) {
             Toast.makeText(context, R.string.url_malformed_toast, Toast.LENGTH_LONG)
                 .show()

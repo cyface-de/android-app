@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -28,10 +28,13 @@ import de.cyface.synchronization.settings.DefaultSynchronizationSettings
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.OAuth2
+import de.cyface.synchronization.settings.SyncConfig
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
@@ -41,14 +44,18 @@ import java.util.Locale
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @version 5.0.0
+ * @since 1.0.0
  */
 class Application : Application() {
 
     /**
      * The settings used by both, UIs and libraries.
+     *
+     * Lazy initialization to ensure it's available when needed, e.g. in errorListener init below.
      */
     private val lazyAppSettings by lazy { // android-utils
-        AppSettings(this)
+        AppSettings.getInstance(this)
     }
 
     /**
@@ -72,9 +79,12 @@ class Application : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            val reportErrors = runBlocking { lazyAppSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureMessage(errorCode.name + ": " + errorMessage)
+            CoroutineScope(Dispatchers.Default).launch {
+                lazyAppSettings.reportErrorsFlow.firstOrNull()?.let { reportErrors ->
+                    if (reportErrors) {
+                        Sentry.captureMessage(errorCode.name + ": " + errorMessage)
+                    }
+                }
             }
         }
 
@@ -84,10 +94,12 @@ class Application : Application() {
         // Initialize DataStore once for all settings
         appSettings = lazyAppSettings
         TrackingSettings.initialize(this) // energy_settings
-        CyfaceAuthenticator.settings = DefaultSynchronizationSettings( // synchronization
+        CyfaceAuthenticator.settings = DefaultSynchronizationSettings.getInstance( // synchronization
             this,
-            BuildConfig.cyfaceServer,
-            OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+            SyncConfig(
+                BuildConfig.cyfaceServer,
+                OAuth2.oauthConfig(BuildConfig.oauthRedirect, BuildConfig.oauthDiscovery)
+            ),
         )
 
         // Register the activity to be called by the authenticator to request credentials from the user.
@@ -95,15 +107,29 @@ class Application : Application() {
 
         // Register error listener
         errorHandler = ErrorHandler()
+        // Other than ShutdownFinishedHandler, this seem to work with local broadcast
         LocalBroadcastManager.getInstance(this).registerReceiver(
             errorHandler!!,
             IntentFilter(ErrorHandler.ERROR_INTENT)
         )
         errorHandler!!.addListener(errorListener)
+
+        // Use strict mode in dev environment to crash when a resource failed to call close.
+        // Cannot be enabled due to an open issue in the sardine library and probably DataStore.
+        /*if (BuildConfig.DEBUG) {
+            StrictMode.setVmPolicy(
+                StrictMode.VmPolicy.Builder()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build()
+            )
+        }*/
     }
 
     override fun onTerminate() {
         errorHandler!!.removeListener(errorListener)
+        // Other than ShutdownFinishedHandler, this seem to work with local broadcast
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
             errorHandler!!
         )

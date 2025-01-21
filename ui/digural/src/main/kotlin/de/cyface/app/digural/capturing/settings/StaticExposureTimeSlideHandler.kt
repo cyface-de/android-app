@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -18,13 +18,16 @@
  */
 package de.cyface.app.digural.capturing.settings
 
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.slider.Slider
+import kotlinx.coroutines.launch
 
 /**
  * Handles UI changes of the 'slider' used to adjust the 'exposure time' setting.
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
+ * @since 3.2.0
  */
 class StaticExposureTimeSlideHandler(
     private val viewModel: SettingsViewModel
@@ -33,7 +36,9 @@ class StaticExposureTimeSlideHandler(
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
         if (viewModel.staticExposureTime.value!!.toFloat() != newValue) {
             val value = newValue.toLong()
-            viewModel.setStaticExposureTime(value)
+            viewModel.viewModelScope.launch {
+                viewModel.setStaticExposureTime(value)
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -58,7 +58,7 @@ import kotlinx.coroutines.runBlocking
  * The [Fragment] which shows a map to the user.
  *
  * @author Armin Schnabel
- * @version 1.0.1
+ * @version 1.0.2
  * @since 3.2.0
  */
 class MapFragment : Fragment() {
@@ -112,6 +112,7 @@ class MapFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
+        // Synchronously to ensure viewModel is available when needed.
         val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
@@ -204,7 +205,7 @@ class MapFragment : Fragment() {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, permissionLauncher)
+        map = Map(binding.mapView, savedInstanceState, onMapReadyRunnable, viewLifecycleOwner, permissionLauncher)
 
         return root
     }

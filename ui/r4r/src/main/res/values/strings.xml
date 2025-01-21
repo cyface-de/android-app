@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Ready4Robots</string>
 
@@ -7,9 +8,6 @@
 
     <!-- Speed -->
     <string name="capturing_inactive">capturing inactive</string>
-
-    <!-- Auth -->
-    <string name="custom_tab_label" translatable="false">"%1$s (custom tab)"</string>
 
     <!-- Setting -->
     <string name="delete_account">Delete account</string>

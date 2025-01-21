@@ -37,7 +37,7 @@ buildscript {
     dependencies {
         // Exception tracking when using proguard
         classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$rootProject.ext.androidNavigationPluginVersion"
     }
 }
 
@@ -211,7 +211,7 @@ dependencies {
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     // Allows to select list entries in the recycler view list
-    implementation "androidx.recyclerview:recyclerview-selection:1.1.0"
+    implementation "androidx.recyclerview:recyclerview-selection:$rootProject.ext.androidxRecyclerViewSelectionVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
@@ -222,7 +222,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugaringVersion"
     // Http Requests (can't use Volley lib as it does not return status code in failure-/handler)
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
 
@@ -231,7 +231,7 @@ dependencies {
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
 
     // OAuth 2.0 with OpenID Connect
-    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion"
+    implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
 
     // Cyface dependencies
     implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
@@ -248,6 +248,7 @@ dependencies {
     //androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     //androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
+    //androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     // UiAutomator Testing
     //androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"

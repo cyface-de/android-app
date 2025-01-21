@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -42,7 +42,7 @@ import de.cyface.app.digural.capturing.settings.SettingsProvider
 import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.app.digural.databinding.ActivityMainBinding
 import de.cyface.app.digural.notification.CameraEventHandler
-import de.cyface.app.digural.notification.DataCapturingEventHandler
+import de.cyface.app.digural.notification.CapturingEventHandler
 import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
@@ -62,6 +62,7 @@ import de.cyface.energy_settings.TrackingSettings.showProblematicManufacturerDia
 import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProcessingWarningDialog
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.app.digural.upload.WebdavSyncService
+import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.settings.AppSettings
@@ -69,6 +70,7 @@ import de.cyface.utils.DiskConsumption
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
 import java.lang.ref.WeakReference
@@ -82,6 +84,8 @@ import java.lang.ref.WeakReference
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @version 5.0.0
+ * @since 1.0.0
  */
 class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider, SettingsProvider {
 
@@ -109,7 +113,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
      * The settings used by both, UIs and libraries.
      */
     override val appSettings: AppSettings
-        get() = MeasuringClient.appSettings
+        get() = Application.appSettings
 
     /**
      * The settings used by multiple UIs.
@@ -155,31 +159,35 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onNewPictureAcquired(picturesCaptured: Int) {}
         override fun onNewVideoStarted() {}
         override fun onVideoStopped() {}
-        override fun onLowDiskSpace(allocation: DiskConsumption) {}
-        override fun onErrorState(e: Exception) {}
-        override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
+        override fun onCameraLowDiskSpace(allocation: DiskConsumption) {}
+        override fun onCameraErrorState(e: Exception) {}
+        override fun onCameraRequiresPermission(permission: String, reason: Reason): Boolean {
             return false
         }
 
-        override fun onCapturingStopped() {}
+        override fun onCameraCapturingStopped() {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        uiSettings = UiSettings(this, "https://NOT_IN_USE")
-        cameraSettings = CameraSettings(this)
-        customSettings = CustomSettings(this)
+        uiSettings = UiSettings.getInstance(this, UiConfig("https://NOT_IN_USE"))
+        cameraSettings = CameraSettings.getInstance(this)
+        // Instance required to access settings before capturing. ExternalCameraController also
+        // needs access and we can't inject it (not parcelable right now). We use a singleton as
+        // suggested by the docs, as only one instance is allowed per process. [LEIP-294]
+        customSettings = CustomSettings.getInstance(this)
 
         // Start DataCapturingService and CameraService
+        // With async call the app crashes as late-init `capturing` is not initialized yet.
         val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
-                this.applicationContext,
+                applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                DataCapturingEventHandler(),
+                CapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
-                WebdavAuthenticator(this)
+                WebdavAuthenticator(this@MainActivity)
             )
             val deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
@@ -187,7 +195,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             startSynchronization()
             // TODO: dataCapturingService!!.addConnectionStatusListener(this)
             cameraService = CameraService(
-                this.applicationContext,
+                applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
                 ExternalCameraController(deviceIdentifier)
@@ -256,9 +264,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureException(e)
+            lifecycleScope.launch {
+                val reportErrors = appSettings.reportErrorsFlow.first()
+                if (reportErrors) {
+                    Sentry.captureException(e)
+                }
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
@@ -309,10 +319,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                         WiFiSurveyor.TAG,
                         "Setting syncEnabled for new account to preference: $uploadEnabled"
                     )
-                    capturing.wiFiSurveyor.makeAccountSyncable(
-                        account,
-                        uploadEnabled
-                    )
+                    capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

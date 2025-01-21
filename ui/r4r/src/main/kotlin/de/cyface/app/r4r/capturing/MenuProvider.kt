@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -28,17 +28,16 @@ import androidx.navigation.NavController
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
-import de.cyface.datacapturing.backend.DataCapturingBackgroundService
 import de.cyface.energy_settings.TrackingSettings
-import de.cyface.synchronization.CyfaceSyncService
 import de.cyface.uploader.exception.SynchronisationException
-import net.openid.appauth.AuthorizationService
 
 /**
  * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
  * shown in the action bar at the top right.
  *
  * @author Armin Schnabel
+ * @version 2.0.2
+ * @since 3.2.0
  */
 class MenuProvider(
     private val activity: MainActivity,

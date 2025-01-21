@@ -89,7 +89,7 @@ class CameraEventHandler :
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
-            .setSmallIcon(R.drawable.ic_logo_only_c)
+            .setSmallIcon(R.drawable.ic_logo_white)
             .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
             .setContentText(reason)
             .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2)
@@ -137,7 +137,7 @@ class CameraEventHandler :
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
-            .setSmallIcon(R.drawable.ic_logo_only_c)
+            .setSmallIcon(R.drawable.ic_logo_white)
             .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
             .setContentText(
                 context.getString(de.cyface.camera_service.R.string.notification_text_capturing_stopped_camera_disconnected)
@@ -188,7 +188,7 @@ class CameraEventHandler :
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
-            .setSmallIcon(R.drawable.ic_logo_only_c)
+            .setSmallIcon(R.drawable.ic_logo_white)
             .setContentTitle(context.getString(de.cyface.camera_service.R.string.notification_title_picture_capturing_decreased))
             .setContentText(
                 context.getString(de.cyface.camera_service.R.string.notification_text_picture_capturing_decreased)

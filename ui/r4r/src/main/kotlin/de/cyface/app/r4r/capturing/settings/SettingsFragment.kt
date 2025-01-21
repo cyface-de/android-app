@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import de.cyface.app.r4r.Application
 import de.cyface.app.r4r.BuildConfig
 import de.cyface.app.r4r.CameraServiceProvider
@@ -41,6 +42,7 @@ import de.cyface.camera_service.CameraInfo
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.Auth
 import io.sentry.Sentry
+import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationException
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -53,6 +55,8 @@ import java.io.IOException
  * The [Fragment] which shows the settings to the user.
  *
  * @author Armin Schnabel
+ * @version 2.0.1
+ * @since 3.2.0
  */
 class SettingsFragment : Fragment() {
 
@@ -91,17 +95,23 @@ class SettingsFragment : Fragment() {
             if (result.isNotEmpty()) {
                 val allGranted = result.values.none { !it }
                 if (allGranted) {
-                    //showCameraModeDialog(this)
-                    viewModel.setCameraEnabled(true, requireContext())
+                    //showCameraModeDialog(this) - no Dialog needed in r4r
+                    viewModel.viewModelScope.launch {
+                        viewModel.setCameraEnabled(true)
+                    }
                 } else {
                     Toast.makeText(
                         context,
-                        requireContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
+                        requireContext().getString(
+                            de.cyface.camera_service.R.string.camera_service_off_missing_permissions
+                        ),
                         Toast.LENGTH_LONG
                     ).show()
                     // Workaround to ensure it's updated back to false on permission denial
-                    viewModel.setCameraEnabled(true, requireContext())
-                    viewModel.setCameraEnabled(false, requireContext())
+                    viewModel.viewModelScope.launch {
+                        viewModel.setCameraEnabled(true)
+                        viewModel.setCameraEnabled(false)
+                    }
                 }
             }
         }

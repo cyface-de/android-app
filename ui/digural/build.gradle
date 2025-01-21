@@ -23,7 +23,6 @@
  * @author Klemens Muthmann
  */
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.android.gms.strict-version-matcher-plugin'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
@@ -39,7 +38,7 @@ buildscript {
     dependencies {
         // Exception tracking when using proguard
         classpath "io.sentry:sentry-android-gradle-plugin:$rootProject.ext.sentryAndroidGradlePluginVersion"
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$rootProject.ext.androidNavigationPluginVersion"
     }
 }
 
@@ -56,12 +55,6 @@ android {
         versionName rootProject.ext.versionName
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
-
-        vectorDrawables.useSupportLibrary = true
-
-        buildConfigField("String", "localHostIp", '"10.0.2.2"')
-        // we don't describe this provider build variable in the README so it's probably deprecated
-        // buildConfigField("String", "provider", '"de.cyface.app.provider"')
 
         // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
         buildConfigField "int", "currentTerms", "5"
@@ -108,16 +101,6 @@ android {
         abortOnError false
     }
 
-    packagingOptions {
-        resources {
-            // Avoids error when importing jackson
-            pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/license.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/LICENSE', 'META-INF/NOTICE']
-            // To resolve the conflict warning after adding google-api-client dependency
-            excludes += ['META-INF/DEPENDENCIES']
-            excludes += ['META-INF/INDEX.LIST']
-        }
-    }
-
     // Enabling desugaring to support Java 8 and Java 11 features
     compileOptions {
         sourceCompatibility rootProject.ext.sourceCompatibility
@@ -128,6 +111,15 @@ android {
 
     kotlinOptions {
         jvmTarget = rootProject.ext.kotlinTargetJavaVersion
+    }
+
+    // Avoid `2 files found with path ...` error
+    packagingOptions {
+        resources {
+            // To resolve the conflict warning after adding google-api-client dependency
+            excludes += ['META-INF/DEPENDENCIES']
+            excludes += ['META-INF/INDEX.LIST']
+        }
     }
 
     buildFeatures {
@@ -175,10 +167,6 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
-    // To use the nav drawer
-    implementation "androidx.recyclerview:recyclerview:$rootProject.ext.androidxRecyclerViewVersion"
-    // Progress bar used to display upload progress
-    implementation "com.github.lzyzsd:circleprogress:$rootProject.ext.circelProgressVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
@@ -189,9 +177,11 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
-    implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
-    implementation "androidx.preference:preference:$rootProject.ext.androidPreferencesVersion"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugaringVersion"
+
+    // Kotlin components
+    //api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
+    //api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
 
     // Used for WebDAV Communication
     implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
@@ -201,7 +191,6 @@ dependencies {
     implementation project(':datacapturing')
     implementation project(':synchronization')
     implementation project(':persistence')
-    implementation project(':bluetooth-le')
     implementation project(':energy_settings')
     implementation project(':camera_service')
     implementation project(':utils')
@@ -217,14 +206,15 @@ dependencies {
 
     // Dependencies for instrumentation tests
     // Resolve conflicts between main and test APK (which is used in the integration-test module):
-    androidTestImplementation "androidx.annotation:annotation:$rootProject.ext.androidxAnnotationVersion"
-    androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
+    //androidTestImplementation "androidx.annotation:annotation:$rootProject.ext.androidxAnnotationVersion"
+    //androidTestImplementation "androidx.test:core:$rootProject.ext.androidxTestCoreVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
-    androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
+    //androidTestImplementation "androidx.test:runner:$rootProject.ext.runnerVersion"
+    //androidTestImplementation "androidx.test:rules:$rootProject.ext.rulesVersion"
+    //androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     // UiAutomator Testing
-    androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"
-    androidTestImplementation "org.hamcrest:hamcrest-integration:$rootProject.ext.hamcrestVersion"
+    //androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"
+    //androidTestImplementation "org.hamcrest:hamcrest-integration:$rootProject.ext.hamcrestVersion"
 
     // Dependencies for local unit tests
     // - If Junit symbols are not resolvable in IntelliJ, make sure Build Variant is set to debug
@@ -232,7 +222,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
     // Optional - For better debuggable asserts
-    testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
+    //testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
 }
 
 // Required for Proto DataStore

@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
@@ -34,6 +35,7 @@ import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -73,14 +75,7 @@ class SpeedFragment : Fragment() {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private val capturingViewModel: CapturingViewModel by activityViewModels {
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        CapturingViewModelFactory(
-            persistence.measurementRepository!!,
-            persistence.eventRepository!!,
-            reportErrors
-        )
-    }
+    private lateinit var capturingViewModel: CapturingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +86,16 @@ class SpeedFragment : Fragment() {
             persistence = capturing.persistenceLayer
         } else {
             throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
+        }
+
+        lifecycleScope.launch {
+            // Initialize capturingViewModel asynchronously
+            val reportErrors = appSettings.reportErrorsFlow.first()
+            capturingViewModel = CapturingViewModelFactory(
+                capturing.persistenceLayer.measurementRepository!!,
+                capturing.persistenceLayer.eventRepository!!,
+                reportErrors
+            ).create(CapturingViewModel::class.java)
         }
     }
 

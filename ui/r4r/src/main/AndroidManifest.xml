@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright 2017-2025 Cyface GmbH
+ *
+ * This file is part of the Cyface App for Android.
+ *
+ * The Cyface App for Android is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The Cyface App for Android is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Klemens Muthmann
+ * @author Armin Schnabel
+ * @version 2.0.0
+ * @since 1.0.0
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools">
 
@@ -57,7 +80,6 @@
     tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
     tools:replace="android:usesCleartextTraffic"
     android:usesCleartextTraffic="${usesCleartextTraffic}">
-    <!--tools:targetApi="31"> targetApi 31 was added by the generated code, not sure why -->
 
     <!-- Sentry DSN. This ids the account but is not a secret. -->
     <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
@@ -129,5 +151,4 @@
           android:resource="@xml/sync_adapter" />
     </service>
   </application>
-
 </manifest>

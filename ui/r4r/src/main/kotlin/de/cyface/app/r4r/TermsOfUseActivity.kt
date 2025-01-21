@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -40,7 +40,7 @@ import kotlinx.coroutines.runBlocking
  * When the current terms are accepted or have been before, the [MainActivity] is launched.
  *
  * @author Armin Schnabel
- * @version 2.0.0
+ * @version 2.0.1
  * @since 1.0.0
  */
 class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
@@ -72,20 +72,22 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         appSettings = Application.appSettings
         callMainActivityIntent = Intent(this, MainActivity::class.java)
-        if (currentTermsHadBeenAccepted()) {
+
+        // Check synchronously, or else the terms will pop up randomly until checked.
+        if (runBlocking { currentTermsHadBeenAccepted() }) {
             startActivity(callMainActivityIntent)
             finish()
             return
         }
+
         setContentView(R.layout.activity_terms_of_use)
     }
 
     /**
      * @return `True` if the latest privacy policy was accepted by the user.
      */
-    private fun currentTermsHadBeenAccepted(): Boolean {
-        val acceptedTerms = runBlocking { appSettings.acceptedTermsFlow.first() }
-        return acceptedTerms == BuildConfig.currentTerms
+    private suspend fun currentTermsHadBeenAccepted(): Boolean {
+        return appSettings.acceptedTermsFlow.first() == BuildConfig.currentTerms
     }
 
     /**

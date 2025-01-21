@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -29,6 +29,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -54,6 +56,7 @@ import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.lang.ref.WeakReference
 
@@ -61,7 +64,7 @@ import java.lang.ref.WeakReference
  * The Map class handles everything around the GoogleMap view.
  *
  * @author Armin Schnabel
- * @version 4.1.1
+ * @version 4.1.2
  * @since 1.0.0
  * @property view The `MapView` element of the `GoogleMap`.
  * @property onMapReadyRunnable The `Runnable` triggered when the `GoogleMap` is loaded and ready.
@@ -72,6 +75,7 @@ class Map(
     private val view: MapView,
     savedInstanceState: Bundle?,
     onMapReadyRunnable: Runnable,
+    private val lifecycleOwner: LifecycleOwner,
     private var permissionLauncher: ActivityResultLauncher<Array<String>>?,
     private val ignoreAutoZoom: Boolean = false
 ) : OnMapReadyCallback, LocationListener {
@@ -141,13 +145,12 @@ class Map(
             LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000).build()
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
-                val centerMap = runBlocking { appSettings.centerMapFlow.first() }
-                if (locationResult.locations.size > 0 && centerMap && !ignoreAutoZoom) {
-                    moveToLocation(
-                        true,
-                        locationResult.locations[locationResult.locations.size - 1]
-                    )
+                lifecycleOwner.lifecycleScope.launch {
+                    // The GMap location does not work on emulator, see bug report: https://issuetracker.google.com/issues/242438611
+                    val centerMap = appSettings.centerMapFlow.first()
+                    if (locationResult.locations.size > 0 && centerMap && !ignoreAutoZoom) {
+                        moveToLocation(true, locationResult.locations[locationResult.locations.size - 1])
+                    }
                 }
             }
         }
@@ -376,11 +379,13 @@ class Map(
                 googleMap!!.isMyLocationEnabled = true
             }
         } catch (e: SecurityException) {
-            if (permissionWereJustGranted) {
-                Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
-                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-                if (reportErrors) {
-                    Sentry.captureException(e)
+            lifecycleOwner.lifecycleScope.launch {
+                if (permissionWereJustGranted) {
+                    Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
+                    val reportErrors = appSettings.reportErrorsFlow.first()
+                    if (reportErrors) {
+                        Sentry.captureException(e)
+                    }
                 }
             }
         }
@@ -409,18 +414,22 @@ class Map(
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera")
-                val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-                if (!highFrequentRequest && reportErrors) {
-                    Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
+                lifecycleOwner.lifecycleScope.launch {
+                    val reportErrors = appSettings.reportErrorsFlow.first()
+                    if (!highFrequentRequest && reportErrors) {
+                        Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
+                    }
                 }
                 return
             }
             googleMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?")
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-            if (!highFrequentRequest && reportErrors) {
-                Sentry.captureException(e)
+            lifecycleOwner.lifecycleScope.launch {
+                val reportErrors = appSettings.reportErrorsFlow.first()
+                if (!highFrequentRequest && reportErrors) {
+                    Sentry.captureException(e)
+                }
             }
         }
     }
@@ -444,9 +453,11 @@ class Map(
 
     override fun onLocationChanged(location: Location) {
         // This is used by `ui/cyface`, the `ui/r4r` uses `onLocationResult`
-        val centerMap = runBlocking { appSettings.centerMapFlow.first() }
-        if (centerMap && !ignoreAutoZoom) {
-            moveToLocation(true, location)
+        lifecycleOwner.lifecycleScope.launch {
+            val centerMap = appSettings.centerMapFlow.first()
+            if (centerMap && !ignoreAutoZoom) {
+                moveToLocation(true, location)
+            }
         }
     }
 

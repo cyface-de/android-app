@@ -1,12 +1,9 @@
 <resources>
   <!-- Base application theme. -->
   <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-
-    <!-- Material Design -->
-    <!--   app branding color for the app bar, e.g used for the tool bar -->
+    <!-- Primary brand color. E.g. used for tool bar -->
     <item name="colorPrimary">@color/green_700</item>
-    <!--   darker variant of the branding color, e.g. used for the status bar & contextual app bars -->
+    <!-- Darker brand color. E.g. used for the status bar & contextual app bars -->
     <item name="colorPrimaryVariant">@color/green_900</item>
     <item name="colorOnPrimary">@color/white</item>
 

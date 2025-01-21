@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -38,7 +38,28 @@ import java.net.URL
  * @version 2.0.0
  * @since 3.4.0
  */
-class CustomSettings(context: Context) {
+class CustomSettings private constructor(context: Context) {
+
+    /**
+     * Use Singleton to ensure only one instance per process is created. [LEIP-294]
+     *
+     * Multiple instances would be created when starting and stopping camera capturing multiple
+     * times in a row and/or the app paused and resumed. The cause seem to be that the
+     * `ExternalCameraController` does not always instantly release old [CustomSettings] instances.
+     *
+     * It should be okay to use a Singleton as this is also suggested in the documentation:
+     * https://developer.android.com/topic/libraries/architecture/datastore#multiprocess
+     */
+    companion object {
+        @Volatile
+        private var instance: CustomSettings? = null
+
+        fun getInstance(context: Context): CustomSettings {
+            return instance ?: synchronized(this) {
+                instance ?: CustomSettings(context.applicationContext).also { instance = it }
+            }
+        }
+    }
 
     /**
      * This avoids leaking the context when this object outlives the Activity of Fragment.
@@ -61,7 +82,8 @@ class CustomSettings(context: Context) {
     private val dataStore: DataStore<Settings> = MultiProcessDataStoreFactory.create(
         serializer = SettingsSerializer,
         produceFile = {
-            File("${appContext.cacheDir.path}/ui.pb")
+            // With cacheDir the settings are lost on app restart [RFR-799]
+            File("${appContext.filesDir.path}/ui.pb")
         },
         migrations = listOf(
             PreferencesMigrationFactory.create(appContext),

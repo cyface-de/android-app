@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -24,11 +24,15 @@ import android.content.pm.PackageManager
 import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 /**
  * Handles when the user toggles the camera switch.
  *
  * @author Armin Schnabel
+ * @version 2.0.2
+ * @since 2.0.0
  */
 class CameraSwitchHandler(
     private val viewModel: SettingsViewModel,
@@ -59,12 +63,16 @@ class CameraSwitchHandler(
                 Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
             if (permissionsGranted) {
-                viewModel.setCameraEnabled(true, context)
+                viewModel.viewModelScope.launch {
+                    viewModel.setCameraEnabled(true) // No CameraModeDialog needed in r4f
+                }
             } else {
                 fragment.permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
             }
         } else {
-            viewModel.setCameraEnabled(false, context)
+            viewModel.viewModelScope.launch {
+                viewModel.setCameraEnabled(false)
+            }
             return
         }
     }

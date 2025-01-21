@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -42,7 +42,6 @@ import de.cyface.app.utils.R
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.app.utils.databinding.FragmentTripsBinding
-import de.cyface.app.utils.trips.incentives.AuthExceptionListener
 import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
@@ -55,12 +54,8 @@ import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Response
 import okio.IOException
 import org.json.JSONException
 import org.json.JSONObject
@@ -83,7 +78,7 @@ import kotlin.math.sqrt
  * The [Fragment] which shows all finished measurements to the user.
  *
  * @author Armin Schnabel
- * @version 1.1.0
+ * @version 1.1.2
  * @since 3.2.0
  */
 class TripsFragment : Fragment() {
@@ -195,9 +190,13 @@ class TripsFragment : Fragment() {
             // Load incentivesUrl - only send requests in RFR app
             val rfr = requireContext().packageName.equals("de.cyface.app.r4r")
             if (rfr) {
-                val incentivesApi =
-                    runBlocking { uiSettings.incentivesUrlFlow.first() }
-                this.incentives = Incentives(requireContext(), incentivesApi, serviceProvider.auth)
+                lifecycleScope.launch {
+                    // Retrieve incentives API URL asynchronously
+                    val incentivesApi = uiSettings.incentivesUrlFlow.first()
+
+                    // Initialize the Incentives instance with the retrieved URL
+                    incentives = Incentives(incentivesApi, serviceProvider.auth)
+                }
             }
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
@@ -242,7 +241,9 @@ class TripsFragment : Fragment() {
 
             // Show achievements progress
             if (incentives != null) {
-                showAchievements(measurements)
+                lifecycleScope.launch {
+                    showAchievements(measurements)
+                }
             }
         }
 
@@ -266,7 +267,7 @@ class TripsFragment : Fragment() {
      *
      * @param measurements The measurements to check for achievements.
      */
-    private fun showAchievements(measurements: List<Measurement>) {
+    private suspend fun showAchievements(measurements: List<Measurement>) {
 
         // Check for active events
         val activeEvent = findActiveEvent(events)
@@ -278,11 +279,7 @@ class TripsFragment : Fragment() {
 
         // Check voucher availability (or participating municipality => 0 vouchers [RFR-997])
         // TODO: Fix this race-condition with the next checks
-        lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                showVouchersLeft()
-            }
-        }
+        showVouchersLeft()
 
         // Check achievement unlock conditions
         val eventMeasurements = measurements.filter {
@@ -315,7 +312,12 @@ class TripsFragment : Fragment() {
         }
     }
 
-    private fun handleException(e: Exception) {
+    private suspend fun handleException(e: Exception) {
+        // This should not happen, thus, reporting to Sentry
+        val reportErrors = appSettings.reportErrorsFlow.first()
+        if (reportErrors) {
+            Sentry.captureException(e)
+        }
         Handler(Looper.getMainLooper()).post {
             _binding?.achievementsErrorMessage?.text =
                 getString(R.string.error_message_request_failed)
@@ -325,14 +327,14 @@ class TripsFragment : Fragment() {
             _binding?.achievementsError?.visibility = VISIBLE
             _binding?.achievements?.visibility = VISIBLE
         }
-        // This should not happen, thus, reporting to Sentry
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        if (reportErrors) {
-            Sentry.captureException(e)
-        }
     }
 
-    private fun handleAuthorizationException(it: AuthorizationException) {
+    private suspend fun handleAuthorizationException(it: AuthorizationException) {
+        // This should not happen, thus, reporting to Sentry
+        val reportErrors = appSettings.reportErrorsFlow.first()
+        if (reportErrors && it.cause !is UnknownHostException && it.cause !is ConnectException) {
+            Sentry.captureException(it)
+        }
         if (it.cause is UnknownHostException || it.cause is ConnectException) {
             // e.g. device is offline
             _binding?.achievementsErrorMessage?.text =
@@ -340,11 +342,6 @@ class TripsFragment : Fragment() {
         } else {
             _binding?.achievementsErrorMessage?.text =
                 getString(R.string.error_message_authentication_failed)
-            // This should not happen, thus, reporting to Sentry
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureException(it)
-            }
         }
         _binding?.achievementsProgress?.visibility = GONE
         _binding?.achievementsUnlocked?.visibility = GONE
@@ -353,7 +350,12 @@ class TripsFragment : Fragment() {
         _binding?.achievements?.visibility = VISIBLE
     }
 
-    private fun handleError(it: IOException) {
+    private suspend fun handleError(it: IOException) {
+        // This should not happen, thus, reporting to Sentry
+        val reportErrors = appSettings.reportErrorsFlow.first()
+        if (reportErrors) {
+            Sentry.captureException(it)
+        }
         Handler(Looper.getMainLooper()).post {
             // This could also be another problem than "offline"
             _binding?.achievementsErrorMessage?.text =
@@ -364,15 +366,11 @@ class TripsFragment : Fragment() {
             _binding?.achievementsError?.visibility = VISIBLE
             _binding?.achievements?.visibility = VISIBLE
         }
-        // This should not happen, thus, reporting to Sentry
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-        if (reportErrors) {
-            Sentry.captureException(it)
-        }
     }
 
-    private fun handleUnknownResponse(responseCode: Int) {
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+    private suspend fun handleUnknownResponse(responseCode: Int) {
+        // This should not happen, thus, reporting to Sentry
+        val reportErrors = appSettings.reportErrorsFlow.first()
         if (reportErrors) {
             Sentry.captureMessage("Unknown response code: $responseCode")
         }
@@ -380,11 +378,11 @@ class TripsFragment : Fragment() {
     }
 
     @Suppress("SpellCheckingInspection")
-    private fun handleJsonException(e: JSONException) {
+    private suspend fun handleJsonException(e: JSONException) {
         // If parsing crashes the server probably returned a 302 which forwards to
         // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
         // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        val reportErrors = appSettings.reportErrorsFlow.first()
         if (reportErrors) {
             Sentry.captureMessage("Forwarded? Forgot Auth header?")
         }
@@ -519,141 +517,143 @@ class TripsFragment : Fragment() {
 
     }
 
-    private fun showVouchersLeft() {
+    private suspend fun showVouchersLeft() {
         try {
-            incentives!!.availableVouchers(
-                object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        handleError(e)
-                    }
+            val response = incentives!!.availableVouchers()
 
-                    override fun onResponse(call: Call, response: Response) {
-                        if (response.code == 200) {
-                            try {
-                                val json = JSONObject(response.body!!.string())
-                                val availableVouchers = json.getInt("vouchers")
-                                if (availableVouchers > 0) {
-                                    Handler(Looper.getMainLooper()).post {
-                                        // Can be null when switching tab before response returns
-                                        // We don't want to show number of raffle tickets left
-                                        /*_binding?.numberOfVouchersLeft?.text =
-                                            getString(R.string.voucher_left, availableVouchers)*/
-                                        _binding?.achievementsError?.visibility = GONE
-                                        _binding?.achievements?.visibility = VISIBLE
-                                    }
-                                } else {
-                                    showNoVouchersLeft()
-                                }
-                            } catch (e: JSONException) {
-                                handleJsonException(e)
-                            }
-                        } else {
-                            handleUnknownResponse(response.code)
+            if (response.code == 200) {
+                try {
+                    val json = JSONObject(response.body!!.string())
+                    val availableVouchers = json.getInt("vouchers")
+                    if (availableVouchers > 0) {
+                        // Update UI on the main thread
+                        withContext(Dispatchers.Main) {
+                            // Can be null when switching tab before response returns
+                            // We don't want to show number of raffle tickets left
+                            /*_binding?.numberOfVouchersLeft?.text =
+                                getString(R.string.voucher_left, availableVouchers)*/
+                            _binding?.achievementsError?.visibility = GONE
+                            _binding?.achievements?.visibility = VISIBLE
                         }
+                    } else {
+                        showNoVouchersLeft()
                     }
-
-                },
-                object : AuthExceptionListener {
-                    override fun onException(e: AuthorizationException) {
-                        handleAuthorizationException(e)
-                    }
-                })
+                } catch (e: JSONException) {
+                    handleJsonException(e)
+                } finally {
+                    response.close()
+                }
+            } else {
+                handleUnknownResponse(response.code)
+            }
+        } catch (e: AuthorizationException) {
+            handleAuthorizationException(e)
+        } catch (e: IOException) {
+            handleError(e)
         } catch (e: Exception) {
             handleException(e)
         }
     }
 
-    private fun showVoucher(activeUntil: Date) {
+    private suspend fun showVoucher(activeUntil: Date) {
         try {
-            incentives!!.voucher(
-                object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        handleError(e)
+            val response = incentives!!.voucher()
+
+            // Capture all responses, also non-successful response codes
+            when (response.code) {
+                428 -> {
+                    // User from the wrong municipality tried to request a voucher [RFR-605]
+                    // Or API does not agree with client that achievement was unlocked.
+                    throw IllegalStateException("Voucher not allowed for this user")
+                }
+
+                204 -> {
+                    // The last voucher just got assigned or the server forgot to send JSON content
+                    showNoVouchersLeft()
+                    // This should hardly ever happen, thus, reporting to Sentry
+                    val reportErrors = appSettings.reportErrorsFlow.first()
+                    if (reportErrors) {
+                        Sentry.captureMessage("Last voucher just got assigned?")
                     }
+                }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        // Capture all responses, also non-successful response codes
-                        if (response.code == 428) {
-                            // User from wrong municipality tried to request a voucher [RFR-605]
-                            // Or API does not agree with client that achievement was unlocked.
-                            throw IllegalStateException("Voucher not allowed for this user")
-                        } else if (response.code == 204) {
-                            // if this is in face 204: The last voucher just got assigned
-                            // else the server forgot to send a JSON content
-                            showNoVouchersLeft()
-                            // This should hardly ever happen, thus, reporting to Sentry
-                            val reportErrors =
-                                runBlocking { appSettings.reportErrorsFlow.first() }
-                            if (reportErrors) {
-                                Sentry.captureMessage("Last voucher just got assigned?")
+                200 -> {
+                    try {
+                        // Parse JSON response for the voucher code
+                        val json = JSONObject(response.body!!.string())
+                        val code = json.getString("code")
+
+                        //val until = json.getString("until")
+
+                        // UI updates on the main thread
+                        withContext(Dispatchers.Main) {
+                            binding.achievementsError.visibility = GONE
+                            binding.achievementsUnlocked.visibility = GONE
+                            binding.achievementsProgress.visibility = GONE
+                            binding.achievementsReceived.visibility = VISIBLE
+                            binding.achievementsReceivedContent.text =
+                                getString(R.string.voucher_code_is, code)
+
+                            // Format and display the validity date
+                            @Suppress("SpellCheckingInspection")
+                            //val format =
+                            // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
+                            //val validUntil = format.parse(until)
+                            val calendar = Calendar.getInstance().apply {
+                                time = activeUntil
+                                add(Calendar.HOUR_OF_DAY, -2) // Adjust for time zone
                             }
-                        } else if (response.code == 200) {
-                            try {
-                                val json = JSONObject(response.body!!.string())
-                                val code = json.getString("code")
-                                //val until = json.getString("until")
-                                Handler(Looper.getMainLooper()).post {
-                                    binding.achievementsError.visibility = GONE
-                                    binding.achievementsUnlocked.visibility = GONE
-                                    binding.achievementsProgress.visibility = GONE
-                                    binding.achievementsReceived.visibility = VISIBLE
-                                    binding.achievementsReceivedContent.text =
-                                        getString(R.string.voucher_code_is, code)
-                                    @Suppress("SpellCheckingInspection")
-                                    //val format =
-                                    // SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.GERMANY)
-                                    //val validUntil = format.parse(until)
-                                    val calendar = Calendar.getInstance().apply {
-                                        time = activeUntil
-                                        add(Calendar.HOUR_OF_DAY, -2) // remove time zone
-                                    }
-                                    val displayFormat = SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY)
-                                    val untilText = displayFormat.format(calendar.time)
-                                    binding.achievementValidUntil.text =
-                                        getString(R.string.valid_until, untilText)
+                            val displayFormat = SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY)
+                            val untilText = displayFormat.format(calendar.time)
+                            binding.achievementValidUntil.text =
+                                getString(R.string.valid_until, untilText)
 
-                                    binding.achievementsReceivedButton.setOnClickListener {
-                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                            data = Uri.parse("mailto:")
-                                            putExtra(
-                                                Intent.EXTRA_EMAIL,
-                                                arrayOf("gewinnspiel@ready-for-robots.de")
-                                            )
-                                            putExtra(
-                                                Intent.EXTRA_SUBJECT,
-                                                getString(R.string.email_subject, code)
-                                            )
-                                        }
-                                        startActivity(intent)
-
-                                        // Copy to clipboard
-                                        /*val clipboard =
-                                            getSystemService(
-                                                requireContext(),
-                                                ClipboardManager::class.java
-                                            )
-                                        val clip =
-                                            ClipData.newPlainText(
-                                                getString(R.string.voucher_code),
-                                                code
-                                            )
-                                        clipboard!!.setPrimaryClip(clip)*/
-                                    }
+                            // Setup the button click listener to send an email
+                            binding.achievementsReceivedButton.setOnClickListener {
+                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                    data = Uri.parse("mailto:")
+                                    putExtra(
+                                        Intent.EXTRA_EMAIL,
+                                        arrayOf("gewinnspiel@ready-for-robots.de")
+                                    )
+                                    putExtra(
+                                        Intent.EXTRA_SUBJECT,
+                                        getString(R.string.email_subject, code)
+                                    )
                                 }
-                            } catch (e: JSONException) {
-                                handleJsonException(e)
+                                startActivity(intent)
+
+                                // Copy to clipboard
+                                /*val clipboard =
+                                    getSystemService(
+                                        requireContext(),
+                                        ClipboardManager::class.java
+                                    )
+                                val clip =
+                                    ClipData.newPlainText(
+                                        getString(R.string.voucher_code),
+                                        code
+                                    )
+                                clipboard!!.setPrimaryClip(clip)*/
                             }
-                        } else {
-                            handleUnknownResponse(response.code)
                         }
+                    } catch (e: JSONException) {
+                        handleJsonException(e)
                     }
-                },
-                object : AuthExceptionListener {
-                    override fun onException(e: AuthorizationException) {
-                        handleAuthorizationException(e)
-                    }
-                })
+                }
+
+                else -> {
+                    handleUnknownResponse(response.code)
+                }
+            }
+        } catch (e: AuthorizationException) {
+            // Handle authorization exceptions
+            handleAuthorizationException(e)
+        } catch (e: IOException) {
+            // Handle IO errors
+            handleError(e)
         } catch (e: Exception) {
+            // Handle any other exceptions
             handleException(e)
         }
     }

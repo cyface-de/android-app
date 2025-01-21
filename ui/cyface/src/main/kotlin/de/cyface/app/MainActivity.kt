@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 Cyface GmbH
+ * Copyright 2017-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -43,18 +43,14 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.auth.LoginActivity
-import de.cyface.app.capturing.UnInterestedListener
 import de.cyface.app.databinding.ActivityMainBinding
-import de.cyface.app.notification.CameraEventHandler
-import de.cyface.app.notification.DataCapturingEventHandler
+import de.cyface.app.notification.CapturingEventHandler
 import de.cyface.app.utils.Constants
 import de.cyface.app.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.utils.Constants.AUTHORITY
 import de.cyface.app.utils.ServiceProvider
+import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.app.utils.capturing.settings.UiSettings
-import de.cyface.camera_service.background.camera.CameraListener
-import de.cyface.camera_service.foreground.CameraService
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.model.CapturedData
@@ -76,6 +72,7 @@ import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
@@ -95,8 +92,10 @@ import kotlin.system.exitProcess
  *
  * @author Klemens Muthmann
  * @author Armin Schnabel
+ * @version 5.0.0
+ * @since 1.0.0
  */
-class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvider*/ {
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -111,7 +110,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The `CameraService` which collects camera data if the user did activate this feature.
      */
-    override lateinit var cameraService: CameraService
+    //override lateinit var cameraService: CameraService
 
     /**
      * The controller which allows to navigate through the navigation graph.
@@ -122,7 +121,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
      * The settings used by both, UIs and libraries.
      */
     override val appSettings: AppSettings
-        get() = MeasuringClient.appSettings
+        get() = Application.appSettings
 
     /**
      * The settings used by multiple UIs.
@@ -132,7 +131,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The settings used to store the user preferences for the camera.
      */
-    override lateinit var cameraSettings: CameraSettings
+    //override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -158,7 +157,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onCapturingStopped() {}
     }
 
-    private val unInterestedCameraListener: CameraListener = object :
+    /*private val unInterestedCameraListener: CameraListener = object :
         CameraListener {
         override fun onNewPictureAcquired(picturesCaptured: Int) {}
         override fun onNewVideoStarted() {}
@@ -170,34 +169,35 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         override fun onCapturingStopped() {}
-    }
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        uiSettings = UiSettings(this, BuildConfig.incentivesServer)
-        cameraSettings = CameraSettings(this)
+        uiSettings = UiSettings.getInstance(this, UiConfig(BuildConfig.incentivesServer))
+        //cameraSettings = CameraSettings(this)
 
         // Start DataCapturingService and CameraService
+        // With async call the app crashes as late-init `capturing` is not initialized yet.
         val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
-                this.applicationContext,
+                applicationContext,
                 AUTHORITY,
                 ACCOUNT_TYPE,
-                DataCapturingEventHandler(),
+                CapturingEventHandler(),
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
-                CyfaceAuthenticator(this)
+                CyfaceAuthenticator(this@MainActivity)
             )
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             // startSynchronization() // This is done in onAuthorized() instead
             // TODO: dataCapturingService!!.addConnectionStatusListener(this)
-            cameraService = CameraService(
-                this.applicationContext,
+            /*cameraService = CameraService(
+                applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
                 UnInterestedListener()
-            )
+            )*/
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }
@@ -313,9 +313,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
-            if (reportErrors) {
-                Sentry.captureException(e)
+            lifecycleScope.launch {
+                val reportErrors = appSettings.reportErrorsFlow.first()
+                if (reportErrors) {
+                    Sentry.captureException(e)
+                }
             }
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
@@ -364,16 +366,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     Validate.notNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val syncEnabledPreference =
-                        runBlocking { appSettings.uploadEnabledFlow.first() }
+                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
                     Log.d(
                         WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $syncEnabledPreference"
+                        "Setting syncEnabled for new account to preference: $uploadEnabled"
                     )
-                    capturing.wiFiSurveyor.makeAccountSyncable(
-                        account,
-                        syncEnabledPreference
-                    )
+                    capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

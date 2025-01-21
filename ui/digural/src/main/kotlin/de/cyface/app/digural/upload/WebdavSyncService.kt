@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Cyface GmbH
+ * Copyright 2024-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -25,21 +25,24 @@ import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.persistence.DefaultPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.SyncAdapter
-import de.cyface.utils.Validate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
  * The synchronisation `Service` used to bind the synchronisation adapter to the Android framework.
  *
- * Further details are described in the [Android
- * documentation](https://developer.android.com/training/sync-adapters/creating-sync-adapter.html#CreateSyncAdapterService).
+ * Further details are described in the [Android documentation]
+ * (https://developer.android.com/training/sync-adapters/creating-sync-adapter.html#CreateSyncAdapterService).
  *
  * This is a custom implementation of the [de.cyface.synchronization.CyfaceSyncService].
  *
  * @author Armin Schnabel
- * @version 1.0.0
+ * @version 1.0.1
  * @since 3.8.0
  */
 class WebdavSyncService : Service() {
@@ -48,8 +51,11 @@ class WebdavSyncService : Service() {
             if (syncAdapter == null) {
                 val persistence = DefaultPersistenceLayer(this, DefaultPersistenceBehaviour())
                 val deviceId = persistence.restoreOrCreateDeviceId()
-                val collectorApi = collectorApi()
                 val auth = WebdavAuth(applicationContext, WebdavAuthenticator.settings)
+
+                // `onBind()` is called directly after `onCreate()` and requires `syncAdapter` (sync)
+                val collectorApi = runBlocking { collectorApi() }
+
                 val account = auth.getAccount()
                 syncAdapter = SyncAdapter(
                     applicationContext,
@@ -70,23 +76,16 @@ class WebdavSyncService : Service() {
      *
      * @return The URL as string
      */
-    private fun collectorApi(): String {
-        // The `collectorApi` stands for the webdav API which collects the data from us.
-        val apiEndpoint =
-            runBlocking { WebdavAuthenticator.settings.collectorUrlFlow.first() }
-        Validate.notNull(
-            apiEndpoint,
-            "Sync canceled: Server url not available. Please set the applications server url preference."
-        )
-        return apiEndpoint
+    private suspend fun collectorApi(): String {
+        return WebdavAuthenticator.settings.collectorUrlFlow.first()
     }
 
     companion object {
         /**
          * The synchronisation adapter this service is supposed to call.
          *
-         * Singleton isn't what they call a beauty. Nevertheless this is how it is specified in the documentation. Maybe try
-         * to change this after it runs.
+         * Singleton isn't what they call a beauty. Nevertheless this is how it is specified in
+         * the documentation. Maybe try to change this after it runs.
          */
         private var syncAdapter: SyncAdapter? = null
 
