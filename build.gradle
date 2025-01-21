@@ -79,7 +79,7 @@ ext {
     buildToolsVersion = '34.0.0' // optional, if defined, use latest (SDK Manager > SDK Tools)
 
     // Android dependencies
-    desugaringVersion = "2.1.4"
+    desugaringVersion = "2.0.4" // 2.1.0-2.1.4 break `:ui:cyface:mergeExtDexDebug`
     androidxAnnotationVersion = '1.6.0'
     androidxAppCompatVersion = "1.7.0"
     localbroadcastmanagerVersion = '1.1.0'
