@@ -794,6 +794,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             true, // For testing, switch this to false to capture w/1 Hz
             triggeringDistance,
             false,
+            0, // Use LegacyAnonymization(0) until V8NAnonymization(1) works
             object :
                 StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                 override fun startUpFinished(measurementIdentifier: Long) {

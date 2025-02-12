@@ -68,9 +68,9 @@ ext {
     cyfaceUploaderVersion = "1.5.1"
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.12.11"
+    cyfaceAndroidBackendVersion = "7.12.12"
     cyfaceEnergySettingsVersion = "4.2.0"
-    cyfaceCameraServiceVersion = "4.7.6"
+    cyfaceCameraServiceVersion = "4.8.0"
 
     // Android SDK versions
     minSdkVersion = 21 // device support
