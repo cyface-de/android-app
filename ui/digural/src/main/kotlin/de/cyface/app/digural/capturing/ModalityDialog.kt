@@ -24,6 +24,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import de.cyface.app.digural.Application
 import de.cyface.app.digural.R
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.BundlesExtrasCodes
@@ -44,6 +45,9 @@ import kotlinx.coroutines.runBlocking
  * @since 1.0.0
  */
 class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
+
+    constructor() : this(Application.appSettings)
+
     /**
      * The id if the `Measurement` if this dialog is called for a specific Measurement.
      */

@@ -4,13 +4,15 @@ image:https://github.com/cyface-de/android-app/actions/workflows/gradle_build.ym
 image:https://github.com/cyface-de/android-app/actions/workflows/gradle_connected-tests.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_connected-tests.yml"]
 image:https://github.com/cyface-de/android-app/actions/workflows/gradle_publish.yml/badge.svg[link="https://github.com/cyface-de/android-app/actions/workflows/gradle_publish.yml"]
 
-This project contains the Cyface Android Client.
+This project contains the Android Apps based on the Cyface SDK.
 
 This app uses
 
 * the Cyface SDK to capture sensor and location data on Android devices
 * the Cyface Energy Settings to check phone settings required for location capturing in background
 * the Cyface Camera Service to capture visual footage
+
+These three projects are included as Git submodules and are developed in their own repository.
 
 == Table of Contents
 
@@ -46,7 +48,7 @@ The credentials are usually injected by the CI:
 
 ==== Sentry
 
-Create a file `sentry.properties` with the following credentials,
+Create a file `sentry.properties` at the root of a UI project with the following credentials,
 the `auth.token` can be found on `Sentry > Settings > Account > API > Auth Tokens`.
 
 ....
@@ -65,6 +67,7 @@ google.maps_api_key.r4f=SECRET_KEY
 
 ==== Authentication and Data Collection APIs
 
+TODO: This seems to be deprecated. There are much more settings there at the moment.
 Add the following to your `gradle.properties` file:
 
 ....
@@ -136,7 +139,7 @@ See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Col
 * The tag is automatically marked as a 'new Release' on https://github.com/cyface-de/android-app/releases[Github]
 
 
-[[known-issues]]]
+[[known-issues]]
 == Known Issues
 
 The AVD Cache leads to `Install_failed_Update_Incompatible` after a few builds.

@@ -879,6 +879,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
         val staticExposureTime = cameraSettings.getStaticExposureTimeBlocking()
         val exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking()
+        val anonymizationModel = cameraSettings.getAnonModel()
 
         // Usual cycling velocity in cities should be around 15-20 km/h, but outside the
         // city it can be up to 50 km/h. So we set the distance to 15m to ensure we stay
@@ -895,6 +896,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             distanceBasedTriggeringSelected,
             triggeringDistance,
             true,
+            anonymizationModel,
             object :
                 StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                 override fun startUpFinished(measurementIdentifier: Long) {
