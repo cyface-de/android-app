@@ -232,6 +232,7 @@ class SettingsFragment : Fragment() {
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             binding.anonModelSelectionSpinner.adapter = adapter
+            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
         binding.anonModelSelectionSpinner.onItemSelectedListener = AnonModelSelectionListener(viewModel)
 

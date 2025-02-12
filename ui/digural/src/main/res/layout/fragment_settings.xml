@@ -559,7 +559,7 @@
             android:paddingLeft="4pt"
             android:paddingEnd="4pt"
             android:paddingRight="4pt"
-            android:minHeight="16pt"
+            android:minHeight="48dp"
             android:background="#FFFFFF"
             />
       </LinearLayout>
