@@ -195,6 +195,7 @@ sentry {
     // you don't need to do it manually.
     // Default is disabled.
     includeNativeSources = false
+
 }
 
 dependencies {
