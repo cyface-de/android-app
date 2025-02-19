@@ -27,8 +27,9 @@
 
 buildscript {
     ext.gradle_version = '8.2.2'
-    ext.kotlin_version = "1.9.22"
+    ext.kotlin_version = "2.0.21" // Upgrade together with `com.google.devtools.ksp`
     ext.matcher_version = "1.2.4"
+    ext.room_version = "2.6.1" // Keep in Sync with version in `plugins` section below
 
     repositories {
         google()
@@ -40,12 +41,15 @@ buildscript {
         // Required for versioning Google play services.
         classpath "com.google.android.gms:strict-version-matcher-plugin:$matcher_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "androidx.room:room-gradle-plugin:$room_version"
     }
 }
 
 plugins {
     // To generate Proto DataStores for settings in ui/digural and utils/
     id 'com.google.protobuf' version '0.9.4' apply false // Maybe keep in sync with other usages
+
+    id 'com.google.devtools.ksp' version '2.0.21-1.0.28' // Upgrade together with `kotlin_version`
 }
 
 ext {
@@ -112,8 +116,8 @@ ext {
 
     // Testing
     junitVersion = "1.2.1"
-    mockitoVersion = '5.7.0'
-    mockitoKotlinVersion = '5.2.1'
+    mockitoVersion = '5.15.2'
+    mockitoKotlinVersion = '5.4.0'
     hamcrestVersion = "1.3"
     rulesVersion = "1.6.1"
     robolectricVersion = "4.10.2"
