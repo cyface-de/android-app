@@ -29,10 +29,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- On Android 12+ we must request both FINE and COARSE, but add a handle to explicitly request FINE -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Until API 22 we need this permission to delete the deprecated generic pro account -->
-    <uses-permission
-        android:name="android.permission.MANAGE_ACCOUNTS"
-        android:maxSdkVersion="22" />
+
+    <!-- Until API 22 we need this permission to delete the deprecated generic "pro" account -->
+    <!-- Removed: MANAGE_ACCOUNTS was restricted to system apps since API 23 -->
+    <!-- <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" android:maxSdkVersion="22" /> -->
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -47,19 +47,23 @@
     <!-- The accounts permissions are the reason why "contacts" permissions are requested -->
     <!-- Allows the app to create accounts and getting / setting their passwords. -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+
     <!-- Apps need "GET_ACCOUNTS" permission to read information about accounts. -->
-    <uses-permission
-      android:name="android.permission.GET_ACCOUNTS" />
+    <!-- Removed: GET_ACCOUNTS is restricted since API 26 -->
+    <!-- <uses-permission android:name="android.permission.GET_ACCOUNTS" /> -->
+
     <!-- Allows applications to write & read the sync settings. -->
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <!-- sync stats permissions are needed to check if the data sync is currently active -->
-    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
 
+    <!-- sync stats permissions are needed to check if the data sync is currently active -->
+    <!-- Removed: READ_SYNC_STATS is system-only since API 23 -->
+    <!-- <uses-permission android:name="android.permission.READ_SYNC_STATS" /> -->
+
+    <!-- READ/WRITE_EXTERNAL_STORAGE can be removed after upgrading minSdkVersion to 28 -->
     <!-- Android 10+: No longer required see https://developer.android.com/training/data-storage/shared/media -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
       android:maxSdkVersion="28"/>
-
     <!-- Android 10+: Permission no longer provides write access -->
     <!-- Android 10+: Write to MediaStore.Download without permissions -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
