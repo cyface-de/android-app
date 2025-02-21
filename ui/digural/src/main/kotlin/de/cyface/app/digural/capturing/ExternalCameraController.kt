@@ -24,7 +24,6 @@ import android.util.Log
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.app.digural.capturing.settings.CustomSettings
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
-import de.cyface.utils.Validate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -51,7 +50,7 @@ class ExternalCameraController(
     private lateinit var scope: CoroutineScope
 
     init {
-        Validate.notEmpty(deviceId)
+        require(deviceId.isNotEmpty())
     }
 
     override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
@@ -73,7 +72,7 @@ class ExternalCameraController(
     override fun onCameraError(reason: String) {}
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "On About to Capture $location")
-        Validate.notNull(this.scope)
+        requireNotNull(this.scope)
         if (location == null) {
             return
         }

@@ -44,7 +44,6 @@ import de.cyface.app.digural.utils.Constants.TAG
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.ErrorHandler.ErrorCode
-import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
@@ -153,8 +152,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
         loginButton!!.isEnabled = false
 
         // Check for valid credentials
-        Validate.notNull(loginInput!!.text)
-        Validate.notNull(passwordInput!!.text)
+        requireNotNull(loginInput!!.text)
+        requireNotNull(passwordInput!!.text)
         val login = loginInput!!.text.toString()
         val password = passwordInput!!.text.toString()
         if (!credentialsAreValid(login, password, LOGIN_MUST_BE_AN_EMAIL_ADDRESS)) {
@@ -187,7 +186,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
                         null
                     ).getString(AccountManager.KEY_AUTHTOKEN)!!
 
-                Validate.notNull(authToken)
                 Log.d(TAG, "Setting auth token to: **" + authToken.substring(authToken.length - 7))
                 val accountManager = AccountManager.get(context.get())
                 accountManager.setAuthToken(
@@ -271,8 +269,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private fun getAccount(context: Context): Account {
         val accountManager = AccountManager.get(context)
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
-        Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
-        Validate.isTrue(existingAccounts.isNotEmpty(), "No account exists.")
+        require(existingAccounts.size < 2) { "More than one account exists." }
+        require(existingAccounts.isNotEmpty()) { "No account exists." }
         return existingAccounts[0]
     }
 
@@ -337,8 +335,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
          * @param password The password of the account
          */
         private fun updateAccount(context: Context, login: String, password: String) {
-            Validate.notEmpty(login)
-            Validate.notEmpty(password)
+            require(login.isNotEmpty())
+            require(password.isNotEmpty())
             val accountManager = AccountManager.get(context)
             val account = Account(login, ACCOUNT_TYPE)
 
@@ -363,7 +361,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 }
                 createAccount(context, login, password)
             }
-            Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
+            require(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
         }
 
         /**
@@ -384,8 +382,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
         ) {
             val accountManager = AccountManager.get(context)
             val newAccount = Account(username, ACCOUNT_TYPE)
-            Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
-            Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
+            require(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
+            require(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
             Log.v(de.cyface.synchronization.Constants.TAG, "New account added")
             ContentResolver.setSyncAutomatically(newAccount, AUTHORITY, false)
             // Synchronization can be disabled via {@link CyfaceDataCapturingService#setSyncEnabled}

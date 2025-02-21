@@ -20,7 +20,6 @@ package de.cyface.app.digural
 
 import com.google.android.material.textfield.TextInputEditText
 import de.cyface.app.digural.auth.LoginActivity
-import de.cyface.utils.Validate.isTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,12 +75,12 @@ class LoginActivityTest {
         // null email
         val invalidInputResult5 = oocut!!.credentialsAreValid(null, "test", true)
 
-        isTrue(validInputResult)
-        isTrue(!invalidInputResult1)
-        isTrue(!invalidInputResult2)
-        isTrue(!invalidInputResult3)
-        isTrue(!invalidInputResult4)
-        isTrue(!invalidInputResult5)
+        require(validInputResult)
+        require(!invalidInputResult1)
+        require(!invalidInputResult2)
+        require(!invalidInputResult3)
+        require(!invalidInputResult4)
+        require(!invalidInputResult5)
     }
 
     companion object {

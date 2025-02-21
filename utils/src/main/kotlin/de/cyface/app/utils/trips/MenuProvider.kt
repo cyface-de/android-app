@@ -41,7 +41,6 @@ import de.cyface.persistence.model.Measurement
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.utils.Constants
 import de.cyface.utils.Utils
-import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -262,8 +261,8 @@ class MenuProvider(
         Log.d(TAG, "deleteRecursively: " + fileOrFolder.path)
         if (fileOrFolder.isDirectory) {
             val files = fileOrFolder.listFiles()
-            Validate.notNull(files)
-            for (child in files!!) {
+            requireNotNull(files)
+            for (child in files) {
                 deleteRecursively(context, child)
             }
         }

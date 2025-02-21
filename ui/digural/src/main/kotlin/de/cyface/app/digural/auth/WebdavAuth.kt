@@ -33,7 +33,6 @@ import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.synchronization.Auth
 import de.cyface.synchronization.Constants
 import de.cyface.synchronization.settings.SynchronizationSettings
-import de.cyface.utils.Validate
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 
@@ -119,7 +118,7 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
                 authority
             )
         }
-        Validate.isTrue(accountManager.getAccountsByType(accountType).size == 1)
+        require(accountManager.getAccountsByType(accountType).size == 1)
     }
 
     /**
@@ -144,13 +143,13 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
         val accountManager = AccountManager.get(context)
         val newAccount = Account(username, accountType)
         val userData = Bundle()
-        Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, userData))
+        require(accountManager.addAccountExplicitly(newAccount, password, userData))
         accountManager.setAuthToken(
             newAccount,
             WebdavSyncService.AUTH_TOKEN_TYPE,
             WebdavAuthenticator.DUMMY_TOKEN
         )
-        Validate.isTrue(accountManager.getAccountsByType(accountType).size == 1)
+        require(accountManager.getAccountsByType(accountType).size == 1)
         Log.v(Constants.TAG, "New account added")
         ContentResolver.setSyncAutomatically(newAccount, authority, false)
         // Synchronization can be disabled via {@link CyfaceDataCapturingService#setSyncEnabled}

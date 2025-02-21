@@ -38,7 +38,6 @@ import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.SPACE_WARNING_NOTIFICATION_ID
 import de.cyface.datacapturing.EventHandlingStrategy
 import de.cyface.datacapturing.backend.DataCapturingBackgroundService
-import de.cyface.utils.Validate
 
 /**
  * A [EventHandlingStrategy] to respond to specified events triggered by the
@@ -92,7 +91,6 @@ class CapturingEventHandler : EventHandlingStrategy {
             )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        Validate.notNull(notificationManager)
         createNotificationChannelIfNotExists(
             context, NOTIFICATION_CHANNEL_ID_WARNING,
             context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
@@ -114,7 +112,6 @@ class CapturingEventHandler : EventHandlingStrategy {
     }
 
     override fun buildCapturingNotification(context: DataCapturingBackgroundService): Notification {
-        Validate.notNull(context, "No context provided!")
         val channelId: String = NOTIFICATION_CHANNEL_ID_RUNNING
 
         // Open Activity when the notification is clicked
@@ -180,7 +177,6 @@ class CapturingEventHandler : EventHandlingStrategy {
         ) {
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            Validate.notNull(manager, "Manager for service notifications not available.")
             if (manager.getNotificationChannel(channelId) == null) {
                 val channel = NotificationChannel(channelId, channelName, importance)
                 channel.description = description

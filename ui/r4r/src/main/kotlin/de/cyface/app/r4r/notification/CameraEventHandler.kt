@@ -35,7 +35,6 @@ import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID
 import de.cyface.camera_service.background.BackgroundService
 import de.cyface.camera_service.foreground.NotificationStrategy
-import de.cyface.utils.Validate
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -65,7 +64,6 @@ class CameraEventHandler : NotificationStrategy {
             )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        Validate.notNull(notificationManager)
         createNotificationChannelIfNotExists(
             context, NOTIFICATION_CHANNEL_ID_WARNING,
             context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
@@ -105,7 +103,6 @@ class CameraEventHandler : NotificationStrategy {
             )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        Validate.notNull(notificationManager)
         createNotificationChannelIfNotExists(
             context, NOTIFICATION_CHANNEL_ID_WARNING,
             context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
@@ -153,7 +150,6 @@ class CameraEventHandler : NotificationStrategy {
             )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        Validate.notNull(notificationManager)
         createNotificationChannelIfNotExists(
             context,
             NOTIFICATION_CHANNEL_ID_WARNING,
@@ -189,7 +185,6 @@ class CameraEventHandler : NotificationStrategy {
         context: BackgroundService,
         isVideoModeRequested: Boolean
     ): Notification {
-        Validate.notNull(context, "No context provided!")
         val channelId: String = NOTIFICATION_CHANNEL_ID_RUNNING
 
         // Open Activity when the notification is clicked
@@ -236,7 +231,6 @@ class CameraEventHandler : NotificationStrategy {
         ) {
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            Validate.notNull(manager, "Manager for service notifications not available.")
             if (manager.getNotificationChannel(channelId) == null) {
                 val channel = NotificationChannel(channelId, channelName, importance)
                 channel.description = description

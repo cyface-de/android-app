@@ -21,7 +21,6 @@ package de.cyface.app.digural.capturing.settings
 import android.view.View
 import androidx.fragment.app.FragmentManager
 import de.cyface.app.digural.capturing.settings.SettingsFragment.Companion.DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE
-import de.cyface.utils.Validate
 
 /**
  * Handles UI clicks on the exposure time used to adjust the 'exposure time' setting.
@@ -34,13 +33,13 @@ class StaticExposureTimeClickHandler(
     private val settingsFragment: SettingsFragment
 ) : View.OnClickListener {
     override fun onClick(v: View) {
-        Validate.notNull(fragmentManager)
+        requireNotNull(fragmentManager)
         val dialog = ExposureTimeDialog(settingsFragment.viewModel.cameraSettings)
         dialog.setTargetFragment(
             settingsFragment,
             DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE
         )
         dialog.isCancelable = true
-        dialog.show(fragmentManager!!, "EXPOSURE_TIME_DIALOG")
+        dialog.show(fragmentManager, "EXPOSURE_TIME_DIALOG")
     }
 }

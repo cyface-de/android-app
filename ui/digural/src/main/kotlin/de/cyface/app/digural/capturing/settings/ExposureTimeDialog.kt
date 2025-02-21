@@ -28,7 +28,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import de.cyface.camera_service.Constants
 import de.cyface.camera_service.settings.CameraSettings
-import de.cyface.utils.Validate
 import kotlinx.coroutines.launch
 import kotlin.math.round
 
@@ -46,7 +45,7 @@ class ExposureTimeDialog(private val cameraSettings: CameraSettings) : DialogFra
             itemsDescriptions
         ) { _: DialogInterface?, which: Int ->
             val fragmentActivity = activity
-            Validate.notNull(fragmentActivity)
+            requireNotNull(fragmentActivity)
             // Pixel 3a reference device: EV100 10, f/1.8, 1/125s (2ms) => iso 40 (55 used, minimum)
             val exposureTimeNanos: Long = when (which) {
                 0 -> round(1000000000.0 / 125).toLong()
@@ -75,8 +74,8 @@ class ExposureTimeDialog(private val cameraSettings: CameraSettings) : DialogFra
                 throw IllegalArgumentException("Unknown request code: $requestCode")
             }
             val targetFragment = targetFragment
-            Validate.notNull(targetFragment)
-            targetFragment!!.onActivityResult(requestCode, resultCode, intent)
+            requireNotNull(targetFragment)
+            targetFragment.onActivityResult(requestCode, resultCode, intent)
         }
         return builder.create()
     }

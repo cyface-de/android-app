@@ -53,7 +53,6 @@ import de.cyface.persistence.model.GeoLocation
 import de.cyface.persistence.model.Modality
 import de.cyface.persistence.model.Track
 import de.cyface.utils.settings.AppSettings
-import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -194,7 +193,6 @@ class Map(
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        Validate.notNull(googleMap)
         this.googleMap = googleMap
         onMapReady()
     }
@@ -325,7 +323,7 @@ class Map(
             }
 
             // No nextLocation for Event found
-            Validate.isTrue(!locationIterator.hasNext())
+            require(!locationIterator.hasNext())
 
             // Use previousLocation to show last
             if (previousLocation != null) {
