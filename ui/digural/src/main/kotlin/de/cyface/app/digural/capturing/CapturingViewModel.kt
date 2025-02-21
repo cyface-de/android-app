@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import de.cyface.app.digural.utils.Constants.TAG
+import de.cyface.persistence.model.GeoLocation
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
 import de.cyface.persistence.model.ParcelableGeoLocation
@@ -138,7 +139,9 @@ class CapturingViewModel(
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
     fun setTracks(tracks: List<Track>?) {
-        _tracks.postValue(if (tracks == null) null else if (tracks.isEmpty()) arrayListOf() else tracks as ArrayList<Track>)
+        _tracks.postValue(
+            if (tracks == null) null else if (tracks.isEmpty()) arrayListOf() else tracks as ArrayList<Track>
+        )
     }
 
     /**
@@ -166,10 +169,22 @@ class CapturingViewModel(
         }
         if (_tracks.value!!.isEmpty()) {
             Log.d(TAG, "addToTrack: Loaded track is empty, adding empty sub track")
-            _tracks.postValue(arrayListOf(Track(mutableListOf(location), mutableListOf())))
+            _tracks.postValue(
+                arrayListOf(
+                    Track(
+                        mutableListOf(GeoLocation(location, measurementId.value!!)),
+                        mutableListOf()
+                    )
+                )
+            )
         } else {
             val tracks = _tracks.value
-            tracks!![_tracks.value!!.size - 1].addLocation(location)
+            tracks!![_tracks.value!!.size - 1].addLocation(
+                GeoLocation(
+                    location,
+                    measurementId.value!!
+                )
+            )
             _tracks.postValue(tracks)
         }
     }

@@ -38,7 +38,6 @@ import de.cyface.app.digural.Application
 import de.cyface.app.digural.Application.Companion.errorHandler
 import de.cyface.app.digural.R
 import de.cyface.app.digural.upload.WebdavSyncService
-import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
 import de.cyface.app.digural.utils.Constants.TAG
@@ -100,12 +99,18 @@ class LoginActivity : AccountAuthenticatorActivity() {
     @JvmField
     var eMailPattern: Pattern? = Patterns.EMAIL_ADDRESS
 
-    private val errorListener = ErrorHandler.ErrorListener { errorCode, errorMessage, _ ->
-        if (errorCode == ErrorCode.UNAUTHORIZED) {
-            passwordInput!!.error = errorMessage
-            passwordInput!!.requestFocus()
+    private val errorListener = object : ErrorHandler.ErrorListener {
+        override fun onErrorReceive(
+            errorCode: ErrorCode,
+            errorMessage: String?,
+            fromBackground: Boolean
+        ) {
+            if (errorCode == ErrorCode.UNAUTHORIZED) {
+                passwordInput!!.error = errorMessage
+                passwordInput!!.requestFocus()
 
-            // All other errors are shown as toast by the MeasuringClient
+                // All other errors are shown as toast by the MeasuringClient
+            }
         }
     }
 
@@ -353,11 +358,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
                 // Delete unused Cyface accounts
                 for (existingAccount in existingAccounts) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                        accountManager.removeAccountExplicitly(existingAccount)
-                    } else {
-                        accountManager.removeAccount(account, null, null)
-                    }
+                    accountManager.removeAccountExplicitly(existingAccount)
                     Log.d(TAG, "Removed existing account: $existingAccount")
                 }
                 createAccount(context, login, password)
@@ -386,9 +387,9 @@ class LoginActivity : AccountAuthenticatorActivity() {
             Validate.isTrue(accountManager.addAccountExplicitly(newAccount, password, Bundle.EMPTY))
             Validate.isTrue(accountManager.getAccountsByType(ACCOUNT_TYPE).size == 1)
             Log.v(de.cyface.synchronization.Constants.TAG, "New account added")
-            ContentResolver.setSyncAutomatically(newAccount, Constants.AUTHORITY, false)
+            ContentResolver.setSyncAutomatically(newAccount, AUTHORITY, false)
             // Synchronization can be disabled via {@link CyfaceDataCapturingService#setSyncEnabled}
-            ContentResolver.setIsSyncable(newAccount, Constants.AUTHORITY, 1)
+            ContentResolver.setIsSyncable(newAccount, AUTHORITY, 1)
             // Do not use validateAccountFlags in production code as periodicSync flags are set async
 
             // PeriodicSync and syncAutomatically is set dynamically by the {@link WifiSurveyor}
@@ -405,12 +406,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
          * @param account the `Account` to be removed
          */
         private fun deleteAccount(context: Context, account: Account) {
-            ContentResolver.removePeriodicSync(account, Constants.AUTHORITY, Bundle.EMPTY)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
-                AccountManager.get(context).removeAccount(account, null, null)
-            } else {
-                AccountManager.get(context).removeAccountExplicitly(account)
-            }
+            ContentResolver.removePeriodicSync(account, AUTHORITY, Bundle.EMPTY)
+            AccountManager.get(context).removeAccountExplicitly(account)
         }
     }
 }

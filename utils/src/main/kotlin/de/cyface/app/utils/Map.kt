@@ -49,15 +49,14 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import de.cyface.app.utils.SharedConstants.TAG
 import de.cyface.persistence.model.Event
+import de.cyface.persistence.model.GeoLocation
 import de.cyface.persistence.model.Modality
-import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.Validate
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.lang.ref.WeakReference
 
 /**
@@ -250,7 +249,7 @@ class Map(
         var positions = 0
 
         // Iterate through the sub tracks and their points
-        val allLocations = ArrayList<ParcelableGeoLocation?>()
+        val allLocations = ArrayList<GeoLocation?>()
         for ((geoLocations) in tracks) {
             val subTrack = PolylineOptions()
             for (location in geoLocations) {
@@ -283,14 +282,13 @@ class Map(
     }
 
     private fun renderEvents(
-        allLocations: List<ParcelableGeoLocation?>,
+        allLocations: List<GeoLocation?>,
         events: List<Event>
     ) {
-
         // Iterate through the events and select GeoLocations for each event to be rendered on the map
         val locationIterator = allLocations.iterator()
-        var previousLocation: ParcelableGeoLocation? = null
-        var nextLocation: ParcelableGeoLocation? = null
+        var previousLocation: GeoLocation? = null
+        var nextLocation: GeoLocation? = null
         for ((id, timestamp, _, value) in events) {
             var markerOptions: MarkerOptions? = null
             val modalityKey = applicationContext.getString(R.string.modality_type)
