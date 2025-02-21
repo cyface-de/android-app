@@ -90,7 +90,7 @@ ext {
     exifinterfaceVersion = "1.3.7" // Required by Camera Service submodule
     roomVersion = "2.6.1"
     lifecycleVersion = "2.8.7"
-    navigationVersion = "2.8.5"
+    navigationVersion = "2.8.7"
     okHttpVersion = "4.12.0"
     datastoreVersion = "1.1.1"
 
@@ -135,7 +135,7 @@ ext {
     sentryAndroidVersion = '7.6.0'
     sentryAndroidGradlePluginVersion = "4.3.1"
     androidNavigationPluginVersion = "2.8.5"
-    mapPlayServicesVersion = '19.0.0'
+    mapPlayServicesVersion = '19.1.0'
     locationPlayServicesVersion = '21.3.0'
     materialVersion = '1.12.0'
     androidxRecyclerViewSelectionVersion = "1.1.0"
