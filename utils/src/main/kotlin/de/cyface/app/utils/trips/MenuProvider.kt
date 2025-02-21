@@ -83,9 +83,7 @@ class MenuProvider(
 
             R.id.export -> {
                 // Permission requirements: https://developer.android.com/training/data-storage
-                val requiresWritePermission =
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                            Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                val requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
                 if (requiresWritePermission) {
                     if (ContextCompat.checkSelfPermission(
                             context.get()!!,

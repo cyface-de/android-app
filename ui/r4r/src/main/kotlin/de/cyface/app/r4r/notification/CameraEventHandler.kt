@@ -26,7 +26,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
@@ -46,9 +45,7 @@ import kotlinx.parcelize.Parcelize
  * @author Armin Schnabel
  */
 @Parcelize
-class CameraEventHandler :
-    NotificationStrategy {
-
+class CameraEventHandler : NotificationStrategy {
     /**
      * A [Notification] shown when the [BackgroundService] triggered the 'camera error' event.
      *
@@ -60,29 +57,21 @@ class CameraEventHandler :
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
         val onClickPendingIntent: PendingIntent =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            } else {
-                // Ignore warning: immutable flag only available in API >= 23, see above
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            PendingIntent.getActivity(
+                context,
+                0,
+                onClickIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createNotificationChannelIfNotExists(
-                context, NOTIFICATION_CHANNEL_ID_WARNING,
-                context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
-                context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
-                NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true
-            )
-        }
+        createNotificationChannelIfNotExists(
+            context, NOTIFICATION_CHANNEL_ID_WARNING,
+            context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+            context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
+            NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true
+        )
         val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
@@ -108,29 +97,24 @@ class CameraEventHandler :
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
         val onClickPendingIntent: PendingIntent =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            } else {
-                // Ignore warning: immutable flag only available in API >= 23, see above
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            PendingIntent.getActivity(
+                context,
+                0,
+                onClickIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createNotificationChannelIfNotExists(
-                context, NOTIFICATION_CHANNEL_ID_WARNING,
-                context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
-                context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
-                NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true
-            )
-        }
+        createNotificationChannelIfNotExists(
+            context, NOTIFICATION_CHANNEL_ID_WARNING,
+            context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+            context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
+            NotificationManager.IMPORTANCE_HIGH,
+            true,
+            Color.RED,
+            true,
+        )
         val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
@@ -138,7 +122,9 @@ class CameraEventHandler :
             .setSmallIcon(R.drawable.ic_logo_white)
             .setContentTitle(context.getString(de.cyface.app.utils.R.string.notification_title_capturing_stopped))
             .setContentText(
-                context.getString(de.cyface.camera_service.R.string.notification_text_capturing_stopped_camera_disconnected)
+                context.getString(
+                    de.cyface.camera_service.R.string.notification_text_capturing_stopped_camera_disconnected
+                )
             )
             .setOngoing(false).setWhen(System.currentTimeMillis()).setPriority(2)
             .setAutoCancel(true)
@@ -159,35 +145,33 @@ class CameraEventHandler :
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
         val onClickPendingIntent: PendingIntent =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            } else {
-                // Ignore warning: immutable flag only available in API >= 23, see above
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            PendingIntent.getActivity(
+                context,
+                0,
+                onClickIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         Validate.notNull(notificationManager)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createNotificationChannelIfNotExists(
-                context, NOTIFICATION_CHANNEL_ID_WARNING,
-                context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
-                context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
-                NotificationManager.IMPORTANCE_HIGH, true, Color.RED, true
-            )
-        }
+        createNotificationChannelIfNotExists(
+            context,
+            NOTIFICATION_CHANNEL_ID_WARNING,
+            context.getString(de.cyface.app.utils.R.string.notification_channel_name_warning),
+            context.getString(de.cyface.app.utils.R.string.notification_channel_description_warning),
+            NotificationManager.IMPORTANCE_HIGH,
+            true,
+            Color.RED,
+            true,
+        )
         val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
             context,
             NOTIFICATION_CHANNEL_ID_WARNING
         ).setContentIntent(onClickPendingIntent)
             .setSmallIcon(R.drawable.ic_logo_white)
-            .setContentTitle(context.getString(de.cyface.camera_service.R.string.notification_title_picture_capturing_decreased))
+            .setContentTitle(
+                context.getString(de.cyface.camera_service.R.string.notification_title_picture_capturing_decreased)
+            )
             .setContentText(
                 context.getString(de.cyface.camera_service.R.string.notification_text_picture_capturing_decreased)
             )
@@ -211,25 +195,15 @@ class CameraEventHandler :
         // Open Activity when the notification is clicked
         val onClickIntent = Intent(context, MainActivity::class.java)
         val onClickPendingIntent: PendingIntent =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            } else {
-                // Ignore warning: immutable flag only available in API >= 23, see above
-                PendingIntent.getActivity(
-                    context, 0, onClickIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createNotificationChannelIfNotExists(
-                context, channelId, "Cyface",
-                context.getString(de.cyface.datacapturing.R.string.notification_channel_description_running),
-                NotificationManager.IMPORTANCE_LOW, false, Color.GREEN, false
+            PendingIntent.getActivity(
+                context, 0, onClickIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-        }
+        createNotificationChannelIfNotExists(
+            context, channelId, "Cyface",
+            context.getString(de.cyface.datacapturing.R.string.notification_channel_description_running),
+            NotificationManager.IMPORTANCE_LOW, false, Color.GREEN, false
+        )
         val builder = NotificationCompat.Builder(context, channelId)
             .setContentTitle(context.getText(de.cyface.camera_service.R.string.camera_capturing_active))
             .setContentIntent(onClickPendingIntent).setWhen(System.currentTimeMillis())
@@ -243,20 +217,23 @@ class CameraEventHandler :
     companion object {
 
         /**
-         * Since Android 8 it is necessary to create a new notification channel for a foreground service notification. To
-         * save system resources this should only happen if the channel does not exist. This method does just that.
+         * Since Android 8 it is necessary to create a new notification channel for a foreground
+         * service notification. To save system resources this should only happen if the channel
+         * does not exist. This method does just that.
          *
          * @param context The Android `Context` to use to create the notification channel.
          * @param channelId The identifier of the created or existing channel.
          */
         private fun createNotificationChannelIfNotExists(
             context: Context,
-            channelId: String, channelName: String, description: String,
-            importance: Int, enableLights: Boolean, lightColor: Int, enableVibration: Boolean
+            channelId: String,
+            channelName: String,
+            description: String,
+            importance: Int,
+            enableLights: Boolean,
+            lightColor: Int,
+            enableVibration: Boolean,
         ) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                return
-            }
             val manager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             Validate.notNull(manager, "Manager for service notifications not available.")

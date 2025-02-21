@@ -22,7 +22,6 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.ContentResolver
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
@@ -109,11 +108,7 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
 
             // Delete unused Cyface accounts
             for (existingAccount in existingAccounts) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    accountManager.removeAccountExplicitly(existingAccount)
-                } else {
-                    accountManager.removeAccount(account, null, null)
-                }
+                accountManager.removeAccountExplicitly(existingAccount)
                 Log.d(Constants.TAG, "Removed existing account: $existingAccount")
             }
             createAccount(

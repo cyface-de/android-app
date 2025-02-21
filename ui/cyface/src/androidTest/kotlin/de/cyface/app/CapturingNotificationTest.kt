@@ -207,7 +207,6 @@ class CapturingNotificationTest {
     }
 
     private fun allowLocationPermissionsIfNeeded(device: UiDevice?) {
-
         // On Android 10+ the location permission screen changed.
         // We now request "Allow app to access location only while in foreground"
         val allowButtonSelector =
@@ -218,14 +217,11 @@ class CapturingNotificationTest {
                 By.res("com.android.packageinstaller:id/permission_allow_button")
             }
 
-        // Location permission added in Android M
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            device!!.wait(Until.hasObject(allowButtonSelector), DEFAULT_TIMEOUT.toLong())
-            if (device.hasObject(allowButtonSelector)) {
-                Log.i(TAG, "Click allow permissions and waiting up to  $DEFAULT_TIMEOUT ms")
-                device.findObject(allowButtonSelector)
-                    .clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
-            }
+        device!!.wait(Until.hasObject(allowButtonSelector), DEFAULT_TIMEOUT.toLong())
+        if (device.hasObject(allowButtonSelector)) {
+            Log.i(TAG, "Click allow permissions and waiting up to  $DEFAULT_TIMEOUT ms")
+            device.findObject(allowButtonSelector)
+                .clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
         }
     }
 
