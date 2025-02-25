@@ -96,13 +96,13 @@ class CapturingViewModel(
      */
     val location: LiveData<ParcelableGeoLocation?> = _location
 
-    private val _tracks = MutableLiveData<ArrayList<Track>?>()
+    private val _tracks = MutableLiveData<MutableList<Track>?>()
 
     /**
      * The cached [Track]s of the current [Measurement], so we do not need to ask the database each time
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
-    val tracks: LiveData<ArrayList<Track>?> = _tracks
+    val tracks: LiveData<MutableList<Track>?> = _tracks
 
     /**
      * @param status The cached capturing status or `null` until the status is retrieved asynchronously.
@@ -140,7 +140,7 @@ class CapturingViewModel(
      */
     fun setTracks(tracks: List<Track>?) {
         _tracks.postValue(
-            if (tracks == null) null else if (tracks.isEmpty()) arrayListOf() else tracks as ArrayList<Track>
+            if (tracks == null) null else if (tracks.isEmpty()) mutableListOf() else tracks as MutableList<Track>
         )
     }
 
@@ -170,7 +170,7 @@ class CapturingViewModel(
         if (_tracks.value!!.isEmpty()) {
             Log.d(TAG, "addToTrack: Loaded track is empty, adding empty sub track")
             _tracks.postValue(
-                arrayListOf(
+                mutableListOf(
                     Track(
                         mutableListOf(GeoLocation(location, measurementId.value!!)),
                         mutableListOf()
