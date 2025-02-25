@@ -112,7 +112,7 @@ ext {
     appAuthVersion = "0.11.1" // Can't move to uploader lib because of dependency issues
     retrofitVersion = "2.9.0" // Used by digural UI
     protobufVersion = '3.22.2' // For Proto Datastore. Maybe keep in sync with other versions.
-    littertVersion = "1.1.2" // Used by camera_service
+    liteRtVersion = "1.1.2" // Used by camera_service for anonymization
 
     // Testing
     junitVersion = "1.2.1"
