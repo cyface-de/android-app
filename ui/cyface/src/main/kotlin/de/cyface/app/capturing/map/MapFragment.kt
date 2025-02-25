@@ -139,7 +139,8 @@ class MapFragment : Fragment() {
             capturingViewModel.setTracks(tracks.toMutableList())
         } catch (e: NoSuchMeasurementException) {
             Log.d(
-                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
+                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement().",
+                e,
             )
         }
     }
@@ -168,7 +169,7 @@ class MapFragment : Fragment() {
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+            error("Context does not support the Fragment, implement ServiceProvider")
         }
 
         // Location permissions are requested by CapturingFragment/Map to react to results.

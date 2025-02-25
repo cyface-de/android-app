@@ -169,7 +169,7 @@ class MapFragment : Fragment() {
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+            error("Context does not support the Fragment, implement ServiceProvider")
         }
 
         // Location permissions are requested by CapturingFragment/Map to react to results.
