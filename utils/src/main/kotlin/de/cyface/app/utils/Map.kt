@@ -247,7 +247,7 @@ class Map(
         var positions = 0
 
         // Iterate through the sub tracks and their points
-        val allLocations = ArrayList<GeoLocation?>()
+        val allLocations = mutableListOf<GeoLocation?>()
         for ((geoLocations) in tracks) {
             val subTrack = PolylineOptions()
             for (location in geoLocations) {

@@ -781,7 +781,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            viewModel.setTracks(arrayListOf(Track()))
+            viewModel.setTracks(mutableListOf(Track()))
             capturing.start(Modality.BICYCLE,
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
@@ -1037,7 +1037,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             )
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
-            viewModel.setTracks(ArrayList(loadedList))
+            viewModel.setTracks(loadedList.toMutableList())
         } catch (e: NoSuchMeasurementException) {
             throw java.lang.RuntimeException(e)
         }

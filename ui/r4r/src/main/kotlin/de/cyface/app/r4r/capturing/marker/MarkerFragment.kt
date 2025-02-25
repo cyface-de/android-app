@@ -145,7 +145,7 @@ class MarkerFragment : Fragment() {
         fun markers(): List<MarkerOptions> {
             val defaultIcon = BitmapDescriptorFactory.defaultMarker(152.0F) // #299463
             val startIcon = BitmapDescriptorFactory.defaultMarker()
-            return if (eventPassed()) emptyList() else arrayListOf(
+            return if (eventPassed()) emptyList() else mutableListOf(
                 // Schkeuditz
                 MarkerOptions()
                     .position(LatLng(51.39554154202172, 12.223122188347885)).title("Start und Ziel: Stand am Stadtfest")

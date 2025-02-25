@@ -149,10 +149,10 @@ class MapFragment : Fragment() {
      * Observes the tracks of the currently captured measurement and renders the tracks on the map.
      */
     private fun observeTracks() {
-        val observer = Observer<ArrayList<Track>?> {
+        val observer = Observer<MutableList<Track>?> {
             if (it != null) {
                 //val events: List<Event> = loadCurrentMeasurementsEvents()
-                map!!.render(it, ArrayList()/* events */, false, MarkerFragment.markers())
+                map!!.render(it, mutableListOf()/* events */, false, MarkerFragment.markers())
             } else {
                 map!!.clearMap()
                 map!!.renderMarkers(MarkerFragment.markers())

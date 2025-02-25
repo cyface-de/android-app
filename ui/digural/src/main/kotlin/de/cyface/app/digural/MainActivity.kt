@@ -54,7 +54,6 @@ import de.cyface.camera_service.foreground.CameraService
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.persistence.SetupException
-import de.cyface.datacapturing.model.CapturedData
 import de.cyface.datacapturing.ui.Reason
 import de.cyface.energy_settings.TrackingSettings.showEnergySaferWarningDialog
 import de.cyface.energy_settings.TrackingSettings.showGnssWarningDialog
@@ -63,6 +62,7 @@ import de.cyface.energy_settings.TrackingSettings.showRestrictedBackgroundProces
 import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.app.digural.upload.WebdavSyncService
 import de.cyface.app.utils.capturing.settings.UiConfig
+import de.cyface.datacapturing.model.CapturedData
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.settings.AppSettings

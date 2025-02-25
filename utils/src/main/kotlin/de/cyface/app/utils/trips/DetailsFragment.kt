@@ -142,11 +142,11 @@ class DetailsFragment : Fragment() {
             chart.visibility = GONE
         } else {
             // We could also show the relative elevation profile (starting at elevation 0)
-            val allEntries = ArrayList<List<Entry>>()
+            val allEntries = mutableListOf<List<Entry>>()
             var x = 1
             val values = altitudes.sumOf { trackAltitudes -> trackAltitudes.count() }
             altitudes.forEach { trackAltitudes ->
-                val entries = ArrayList<Entry>()
+                val entries = mutableListOf<Entry>()
                 trackAltitudes.forEach {
                     entries.add(Entry(x.toFloat(), it.toFloat()))
                     x++
@@ -158,7 +158,7 @@ class DetailsFragment : Fragment() {
             }
             val textColor = resources.getColor(R.color.text)
             val resources = requireContext().resources
-            val datasets: List<LineDataSet> = ArrayList()
+            val datasets: List<LineDataSet> = mutableListOf()
             allEntries.forEach {
                 val dataSet = LineDataSet(it, "sub-track")
                 dataSet.color = resources.getColor(R.color.text)
