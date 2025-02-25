@@ -44,7 +44,7 @@ buildscript {
 
 android {
     namespace 'de.cyface.app.digural'
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion

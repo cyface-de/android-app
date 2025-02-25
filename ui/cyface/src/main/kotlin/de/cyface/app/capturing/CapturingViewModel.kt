@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import de.cyface.app.utils.Constants.TAG
+import de.cyface.persistence.model.GeoLocation
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
 import de.cyface.persistence.model.ParcelableGeoLocation
@@ -95,13 +96,13 @@ class CapturingViewModel(
      */
     val location: LiveData<ParcelableGeoLocation?> = _location
 
-    private val _tracks = MutableLiveData<ArrayList<Track>?>()
+    private val _tracks = MutableLiveData<MutableList<Track>?>()
 
     /**
      * The cached [Track]s of the current [Measurement], so we do not need to ask the database each time
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
-    val tracks: LiveData<ArrayList<Track>?> = _tracks
+    val tracks: LiveData<MutableList<Track>?> = _tracks
 
     /**
      * @param status The cached capturing status or `null` until the status is retrieved asynchronously.
@@ -137,8 +138,10 @@ class CapturingViewModel(
      * @param tracks The cached [Track]s of the current [Measurement], so we do not need to ask the database each time
      * the updated track is requested. This is `null` if there is no unfinished measurement.
      */
-    fun setTracks(tracks: List<Track>?) {
-        _tracks.postValue(if (tracks == null) null else if (tracks.isEmpty()) arrayListOf() else tracks as ArrayList<Track>)
+    fun setTracks(tracks: MutableList<Track>?) {
+        _tracks.postValue(
+            if (tracks == null) null else if (tracks.isEmpty()) mutableListOf() else tracks
+        )
     }
 
     /**
@@ -166,10 +169,22 @@ class CapturingViewModel(
         }
         if (_tracks.value!!.isEmpty()) {
             Log.d(TAG, "addToTrack: Loaded track is empty, adding empty sub track")
-            _tracks.postValue(arrayListOf(Track(mutableListOf(location), mutableListOf())))
+            _tracks.postValue(
+                mutableListOf(
+                    Track(
+                        mutableListOf(GeoLocation(location, measurementId.value!!)),
+                        mutableListOf()
+                    )
+                )
+            )
         } else {
             val tracks = _tracks.value
-            tracks!![_tracks.value!!.size - 1].addLocation(location)
+            tracks!![_tracks.value!!.size - 1].addLocation(
+                GeoLocation(
+                    location,
+                    measurementId.value!!
+                )
+            )
             _tracks.postValue(tracks)
         }
     }

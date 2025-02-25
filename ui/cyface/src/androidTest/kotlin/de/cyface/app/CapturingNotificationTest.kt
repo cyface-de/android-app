@@ -29,7 +29,6 @@ import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import de.cyface.utils.Validate
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
@@ -88,8 +87,8 @@ class CapturingNotificationTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = context.packageManager.getLaunchIntentForPackage(CYFACE_APP_PACKAGE)
         // Clear out any previous instances
-        Validate.notNull(intent)
-        intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        requireNotNull(intent)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         context.startActivity(intent)
 
         // Wait for the app to appear
@@ -207,7 +206,6 @@ class CapturingNotificationTest {
     }
 
     private fun allowLocationPermissionsIfNeeded(device: UiDevice?) {
-
         // On Android 10+ the location permission screen changed.
         // We now request "Allow app to access location only while in foreground"
         val allowButtonSelector =
@@ -218,14 +216,11 @@ class CapturingNotificationTest {
                 By.res("com.android.packageinstaller:id/permission_allow_button")
             }
 
-        // Location permission added in Android M
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            device!!.wait(Until.hasObject(allowButtonSelector), DEFAULT_TIMEOUT.toLong())
-            if (device.hasObject(allowButtonSelector)) {
-                Log.i(TAG, "Click allow permissions and waiting up to  $DEFAULT_TIMEOUT ms")
-                device.findObject(allowButtonSelector)
-                    .clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
-            }
+        device!!.wait(Until.hasObject(allowButtonSelector), DEFAULT_TIMEOUT.toLong())
+        if (device.hasObject(allowButtonSelector)) {
+            Log.i(TAG, "Click allow permissions and waiting up to  $DEFAULT_TIMEOUT ms")
+            device.findObject(allowButtonSelector)
+                .clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
         }
     }
 

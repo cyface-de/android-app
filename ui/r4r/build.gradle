@@ -43,7 +43,7 @@ buildscript {
 
 android {
     namespace 'de.cyface.app.r4r'
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion

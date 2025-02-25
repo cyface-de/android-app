@@ -68,7 +68,6 @@ import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
-import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
@@ -143,18 +142,18 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
      * just registers and unregisters itself.
      */
     private val unInterestedListener: DataCapturingListener = object : DataCapturingListener {
-        override fun onFixAcquired() {}
-        override fun onFixLost() {}
-        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation) {}
-        override fun onNewSensorDataAcquired(data: CapturedData) {}
-        override fun onLowDiskSpace(allocation: DiskConsumption) {}
-        override fun onSynchronizationSuccessful() {}
-        override fun onErrorState(e: Exception) {}
+        override fun onFixAcquired() = Unit
+        override fun onFixLost() = Unit
+        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation) = Unit
+        override fun onNewSensorDataAcquired(data: CapturedData) = Unit
+        override fun onLowDiskSpace(allocation: DiskConsumption) = Unit
+        override fun onSynchronizationSuccessful() = Unit
+        override fun onErrorState(e: Exception) = Unit
         override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
             return false
         }
 
-        override fun onCapturingStopped() {}
+        override fun onCapturingStopped() = Unit
     }
 
     /*private val unInterestedCameraListener: CameraListener = object :
@@ -363,7 +362,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
                     // The LoginActivity created a temporary account which cannot be used for synchronization.
                     // As the login was successful we now register the account correctly:
                     val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
-                    Validate.notNull(account)
+                    requireNotNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
                     val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
@@ -554,7 +553,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
         @JvmStatic
         fun accountWithTokenExists(accountManager: AccountManager): Boolean {
             val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
-            Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
+            require(existingAccounts.size < 2) { "More than one account exists." }
             return existingAccounts.isNotEmpty()
         }
     }

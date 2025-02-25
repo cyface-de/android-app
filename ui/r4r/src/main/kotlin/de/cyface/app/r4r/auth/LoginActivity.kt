@@ -68,7 +68,6 @@ import java.util.concurrent.atomic.AtomicReference
  * @since 1.0.0
  */
 class LoginActivity : AppCompatActivity() {
-
     private val TAG = "de.cyface.app.r4r.login"
     private val EXTRA_FAILED = "failed"
     private val RC_AUTH = 100
@@ -402,13 +401,8 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     private fun getColorCompat(@ColorRes color: Int): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getColor(color)
-        } else {
-            resources.getColor(color)
-        }
+        return getColor(color)
     }
 
     companion object {

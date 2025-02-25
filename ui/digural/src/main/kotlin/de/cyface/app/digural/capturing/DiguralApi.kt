@@ -28,7 +28,6 @@ import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.app.digural.capturing.DiguralApi.baseUrl
 import de.cyface.app.digural.capturing.DiguralApi.diguralService
 import de.cyface.app.digural.capturing.DiguralApi.retrofit
-import de.cyface.synchronization.NetworkCallback
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

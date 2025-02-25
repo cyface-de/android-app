@@ -42,8 +42,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.r4r.auth.LoginActivity
-import de.cyface.app.r4r.capturing.CapturingViewModel
-import de.cyface.app.r4r.capturing.CapturingViewModelFactory
 import de.cyface.app.r4r.capturing.UnInterestedListener
 import de.cyface.app.r4r.databinding.ActivityMainBinding
 import de.cyface.app.r4r.notification.CameraEventHandler
@@ -75,7 +73,6 @@ import de.cyface.synchronization.OAuth2.Companion.END_SESSION_REQUEST_CODE
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.DiskConsumption
-import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.first
@@ -370,7 +367,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     // The LoginActivity created a temporary account which cannot be used for synchronization.
                     // As the login was successful we now register the account correctly:
                     val account = accountManager1.getAccountsByType(ACCOUNT_TYPE)[0]
-                    Validate.notNull(account)
+                    requireNotNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
                     val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
@@ -411,7 +408,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
      */
     private fun accountWithTokenExists(accountManager: AccountManager): Boolean {
         val existingAccounts = accountManager.getAccountsByType(ACCOUNT_TYPE)
-        Validate.isTrue(existingAccounts.size < 2, "More than one account exists.")
+        require(existingAccounts.size < 2) { "More than one account exists." }
         return existingAccounts.isNotEmpty()
     }
 

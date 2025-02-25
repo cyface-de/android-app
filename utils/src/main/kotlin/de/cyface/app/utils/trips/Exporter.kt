@@ -33,7 +33,6 @@ import de.cyface.app.utils.SharedConstants.DATABASE_NAME
 import de.cyface.persistence.io.DefaultFileIOHandler
 import de.cyface.persistence.serialization.Point3DFile
 import de.cyface.utils.Utils
-import de.cyface.utils.Validate
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -60,14 +59,8 @@ import kotlin.math.pow
  * @since 1.0.0
  */
 class Exporter(context: Context) {
-    private val contextReference: WeakReference<Context>
-    private var targetPathTimestamp: String
-
-    init {
-        contextReference = WeakReference(context)
-        targetPathTimestamp =
-            "_" + SimpleDateFormat("yyyy-MM-dd_H-m", Locale.GERMANY).format(Date())
-    }
+    private val contextReference: WeakReference<Context> = WeakReference(context)
+    private var targetPathTimestamp: String = "_" + SimpleDateFormat("yyyy-MM-dd_H-m", Locale.GERMANY).format(Date())
 
     /**
      * Copies the persistence layer files to a compressed archive into `Downloads` folder.
@@ -100,7 +93,6 @@ class Exporter(context: Context) {
 
             // Export all database files - including "wal" which contains recent unmerged database changes
             val parent = context.getDatabasePath(DATABASE_NAME).parentFile!!
-            Validate.notNull(parent)
             bytesTransferred += exportFolder(
                 context, parent,
                 exportIdentifier
@@ -118,7 +110,7 @@ class Exporter(context: Context) {
                 Toast.makeText(context, text, Toast.LENGTH_LONG).show()
             }
         } catch (e: NullPointerException) {
-            Log.d(SharedConstants.TAG, "Dialog (export successful) not shown: Activity not active.")
+            Log.d(SharedConstants.TAG, "Dialog (export successful) not shown: Activity not active.", e)
             // We don't need to report this to Sentry as it's ok if this happens (app is closed)
         }
     }
@@ -146,8 +138,8 @@ class Exporter(context: Context) {
         exportIdentifier: UUID
     ): Long {
         val files = sourceFolder.listFiles()
-        Validate.notNull(files)
-        if (!sourceFolder.exists() || files!!.isEmpty()) {
+        requireNotNull(files)
+        if (!sourceFolder.exists() || files.isEmpty()) {
             return 0L
         }
 
@@ -174,8 +166,8 @@ class Exporter(context: Context) {
                 )
                 val outputUri =
                     resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                Validate.notNull(outputUri)
-                targetOutputStream = resolver.openOutputStream(outputUri!!)
+                requireNotNull(outputUri)
+                targetOutputStream = resolver.openOutputStream(outputUri)
                 bytesTransferred = zipFolder(sourceFolder, targetOutputStream)
             } else {
                 // Create target directory
@@ -213,12 +205,12 @@ class Exporter(context: Context) {
         require(source.isDirectory) { "Source file is no folder." }
         ZipOutputStream(BufferedOutputStream(targetOutputStream)).use { outputStream ->
             val subFolders = source.listFiles()
-            Validate.notNull(subFolders)
-            for (file in subFolders!!) {
+            requireNotNull(subFolders)
+            for (file in subFolders) {
                 bytesTransferred += if (file.isDirectory) {
                     val parent = file.parent
-                    Validate.notNull(parent)
-                    zipSubFolder(outputStream, file, parent!!.length)
+                    requireNotNull(parent)
+                    zipSubFolder(outputStream, file, parent.length)
                 } else {
                     zipFile(
                         file, outputStream,
@@ -247,9 +239,9 @@ class Exporter(context: Context) {
     ): Long {
         Log.d(SharedConstants.TAG, "Zipping folder " + folder.name)
         val folderContent = folder.listFiles()
-        Validate.notNull(folderContent)
+        requireNotNull(folderContent)
         var bytesTransferred = 0L
-        for (file in folderContent!!) {
+        for (file in folderContent) {
             if (file.isDirectory) {
                 bytesTransferred += zipSubFolder(outputStream, file, basePathLength)
                 continue

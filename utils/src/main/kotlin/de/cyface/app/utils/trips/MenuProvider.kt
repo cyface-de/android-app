@@ -41,7 +41,6 @@ import de.cyface.persistence.model.Measurement
 import de.cyface.synchronization.WiFiSurveyor
 import de.cyface.utils.Constants
 import de.cyface.utils.Utils
-import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -83,9 +82,7 @@ class MenuProvider(
 
             R.id.export -> {
                 // Permission requirements: https://developer.android.com/training/data-storage
-                val requiresWritePermission =
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                            Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                val requiresWritePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
                 if (requiresWritePermission) {
                     if (ContextCompat.checkSelfPermission(
                             context.get()!!,
@@ -264,8 +261,8 @@ class MenuProvider(
         Log.d(TAG, "deleteRecursively: " + fileOrFolder.path)
         if (fileOrFolder.isDirectory) {
             val files = fileOrFolder.listFiles()
-            Validate.notNull(files)
-            for (child in files!!) {
+            requireNotNull(files)
+            for (child in files) {
                 deleteRecursively(context, child)
             }
         }

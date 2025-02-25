@@ -27,8 +27,9 @@
 
 buildscript {
     ext.gradle_version = '8.2.2'
-    ext.kotlin_version = "1.9.22"
+    ext.kotlin_version = "2.0.21" // Upgrade together with `com.google.devtools.ksp`
     ext.matcher_version = "1.2.4"
+    ext.room_version = "2.6.1" // Keep in Sync with version in `plugins` section below
 
     repositories {
         google()
@@ -40,12 +41,15 @@ buildscript {
         // Required for versioning Google play services.
         classpath "com.google.android.gms:strict-version-matcher-plugin:$matcher_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "androidx.room:room-gradle-plugin:$room_version"
     }
 }
 
 plugins {
     // To generate Proto DataStores for settings in ui/digural and utils/
     id 'com.google.protobuf' version '0.9.4' apply false // Maybe keep in sync with other usages
+
+    id 'com.google.devtools.ksp' version '2.0.21-1.0.28' // Upgrade together with `kotlin_version`
 }
 
 ext {
@@ -60,7 +64,7 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceUtilsVersion = "4.1.0"
+    cyfaceUtilsVersion = "4.2.0"
     // (!) Match versions `android-app`, `SDK` and `camera-service`.
     // When `android-app` is checkout out, `rootProject.uploaderVersion` in the submodules will point
     // to `android-app/build.gradle` instead of `submodule/build.gradle`.
@@ -68,12 +72,12 @@ ext {
     cyfaceUploaderVersion = "1.5.1"
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.12.12"
-    cyfaceEnergySettingsVersion = "4.2.0"
-    cyfaceCameraServiceVersion = "4.8.0"
+    cyfaceAndroidBackendVersion = "7.13.0"
+    cyfaceEnergySettingsVersion = "4.3.2"
+    cyfaceCameraServiceVersion = "4.8.1"
 
     // Android SDK versions
-    minSdkVersion = 21 // device support
+    minSdkVersion = 26 // device support
     targetSdkVersion = 34 // behavioral changes, follow migration guide & test the app against this
     compileSdkVersion = 34 // allows newest APIs to be used and to see deprecations, use latest
     buildToolsVersion = '34.0.0' // optional, if defined, use latest (SDK Manager > SDK Tools)
@@ -86,7 +90,7 @@ ext {
     exifinterfaceVersion = "1.3.7" // Required by Camera Service submodule
     roomVersion = "2.6.1"
     lifecycleVersion = "2.8.7"
-    navigationVersion = "2.8.5"
+    navigationVersion = "2.8.7"
     okHttpVersion = "4.12.0"
     datastoreVersion = "1.1.1"
 
@@ -108,15 +112,15 @@ ext {
     appAuthVersion = "0.11.1" // Can't move to uploader lib because of dependency issues
     retrofitVersion = "2.9.0" // Used by digural UI
     protobufVersion = '3.22.2' // For Proto Datastore. Maybe keep in sync with other versions.
-
+    liteRtVersion = "1.1.2" // Used by camera_service for anonymization
 
     // Testing
     junitVersion = "1.2.1"
-    mockitoVersion = '5.7.0'
-    mockitoKotlinVersion = '5.2.1'
+    mockitoVersion = '5.15.2'
+    mockitoKotlinVersion = '5.4.0'
     hamcrestVersion = "1.3"
     rulesVersion = "1.6.1"
-    robolectricVersion = "4.10.2"
+    robolectricVersion = "4.14.1"
     androidxTestCoreVersion = '1.4.0'
     uiAutomatorVersion = "2.3.0"
     espressoVersion = "3.6.1"
@@ -131,7 +135,7 @@ ext {
     sentryAndroidVersion = '7.6.0'
     sentryAndroidGradlePluginVersion = "4.3.1"
     androidNavigationPluginVersion = "2.8.5"
-    mapPlayServicesVersion = '19.0.0'
+    mapPlayServicesVersion = '19.1.0'
     locationPlayServicesVersion = '21.3.0'
     materialVersion = '1.12.0'
     androidxRecyclerViewSelectionVersion = "1.1.0"

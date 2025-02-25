@@ -46,9 +46,9 @@ import de.cyface.app.utils.trips.incentives.Incentives
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import de.cyface.persistence.model.GeoLocation
 import de.cyface.persistence.model.Measurement
 import de.cyface.persistence.model.MeasurementStatus
-import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -199,7 +199,7 @@ class TripsFragment : Fragment() {
                 }
             }
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+            error("Context does not support the Fragment, implement ServiceProvider")
         }
     }
 
@@ -564,7 +564,7 @@ class TripsFragment : Fragment() {
                 428 -> {
                     // User from the wrong municipality tried to request a voucher [RFR-605]
                     // Or API does not agree with client that achievement was unlocked.
-                    throw IllegalStateException("Voucher not allowed for this user")
+                    error("Voucher not allowed for this user")
                 }
 
                 204 -> {
@@ -731,7 +731,7 @@ class TripsFragment : Fragment() {
          * @param location The location to check.
          * @return `true` if the location is within.
          */
-        fun isWithin(location: ParcelableGeoLocation): Boolean {
+        fun isWithin(location: GeoLocation): Boolean {
             val earthRadiusMeters = 6371000.0 // average earth radius in meters
             val dLat = Math.toRadians(centerLat - location.lat)
             val dLon = Math.toRadians(centerLon - location.lon)
