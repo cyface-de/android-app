@@ -44,3 +44,6 @@
     public static *** d(...);
     public static *** i(...);
 }
+
+# Try to fix assemble error
+-keep class androidx.window.** { *; }

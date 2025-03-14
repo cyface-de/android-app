@@ -174,7 +174,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugaringVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs_nio:$rootProject.ext.desugaringVersion"
 
     // Kotlin components
     //api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
@@ -185,8 +185,6 @@ dependencies {
 
     // Cyface dependencies
     implementation project(':datacapturing')
-    implementation project(':synchronization')
-    implementation project(':persistence')
     implementation project(':energy_settings')
     implementation project(':camera_service')
     implementation project(':utils')
