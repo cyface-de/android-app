@@ -89,7 +89,7 @@ ext {
     exifinterfaceVersion = "1.4.0" // Required by Camera Service submodule
     roomVersion = "2.6.1"
     lifecycleVersion = "2.8.7"
-    navigationVersion = "2.8.7"
+    navigationVersion = "2.8.9"
     okHttpVersion = "4.12.0"
 
     // Kotlin components
@@ -107,7 +107,7 @@ ext {
     chartVersion = "v3.1.0"
     // Can't be a SDK dependency as `appAuthRedirectScheme` needs to be defined at build-time
     appAuthVersion = "0.11.1" // Can't move to uploader lib because of dependency issues
-    retrofitVersion = "2.9.0" // Used by digural UI
+    retrofitVersion = "2.11.0" // Used by digural UI
     protobufVersion = '4.30.0' // For Proto Datastore. Maybe keep in sync with other versions.
 
     // Testing
@@ -128,9 +128,9 @@ ext {
     kotlinTargetJavaVersion = "21"
 
     // Android-frontend
-    sentryAndroidVersion = '7.6.0'
-    sentryAndroidGradlePluginVersion = "4.3.1"
-    androidNavigationPluginVersion = "2.8.5"
+    sentryAndroidVersion = '7.9.0'
+    sentryAndroidGradlePluginVersion = "5.3.0"
+    androidNavigationPluginVersion = "2.8.8"
     mapPlayServicesVersion = '19.1.0'
     locationPlayServicesVersion = '21.3.0'
     materialVersion = '1.12.0'
