@@ -374,7 +374,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
          * @param context The current Android context (i.e. Activity or Service).
          * @param username The username of the account to be created.
          * @param password The password of the account to be created. May be null if a custom [CyfaceAuthenticator] is
-         * used instead of a LoginActivity to return tokens as in `MovebisDataCapturingService`.
+         * used instead of a LoginActivity to return tokens as in `SRDataCapturingService`.
          */
         private fun createAccount(
             context: Context, username: String,
