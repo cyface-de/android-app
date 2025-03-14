@@ -145,6 +145,8 @@ dependencies {
 
     // Cyface dependencies
     implementation project(':datacapturing')
+    implementation project(':synchronization')
+    implementation project(':persistence')
 
     // Dependencies for instrumentation tests
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
