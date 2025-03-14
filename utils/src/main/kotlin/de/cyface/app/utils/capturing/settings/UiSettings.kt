@@ -64,7 +64,7 @@ class UiSettings private constructor(context: Context, private val config: UiCon
                 }
             }.also {
                 if (it.config != config) {
-                    throw IllegalStateException("Already initialized with different configuration.")
+                    error("Already initialized with different configuration.")
                 }
             }
         }

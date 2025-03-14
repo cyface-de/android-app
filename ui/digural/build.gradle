@@ -160,11 +160,8 @@ dependencies {
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
     // Proto DataStore with MultiProcess support to store settings
-    implementation "androidx.datastore:datastore:${datastoreVersion}"
     implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
 
-    // To change the material design
-    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     // To use Google Map
@@ -177,7 +174,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugaringVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs_nio:$rootProject.ext.desugaringVersion"
 
     // Kotlin components
     //api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
@@ -187,10 +184,7 @@ dependencies {
     implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
 
     // Cyface dependencies
-    implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
     implementation project(':datacapturing')
-    implementation project(':synchronization')
-    implementation project(':persistence')
     implementation project(':energy_settings')
     implementation project(':camera_service')
     implementation project(':utils')
@@ -222,7 +216,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
     // Optional - For better debuggable asserts
-    //testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
+    //testImplementation "org.hamcrest:hamcrest:$rootProject.ext.hamcrestVersion"
 }
 
 // Required for Proto DataStore

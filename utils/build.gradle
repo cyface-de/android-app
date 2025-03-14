@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Cyface GmbH
+ * Copyright 2023-2025 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -121,11 +121,8 @@ dependencies {
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
     // Proto DataStore with MultiProcess support to store settings
-    implementation "androidx.datastore:datastore:${datastoreVersion}"
     implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
 
-    // To change the material design
-    //implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     // Allows to select list entries in the recycler view list
@@ -147,11 +144,7 @@ dependencies {
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion"
 
     // Cyface dependencies
-    implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
     implementation project(':datacapturing')
-    implementation project(':synchronization')
-    implementation project(':persistence')
-    //implementation project(':energy_settings')
 
     // Dependencies for instrumentation tests
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
