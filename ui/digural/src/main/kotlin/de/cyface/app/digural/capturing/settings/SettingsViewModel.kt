@@ -124,6 +124,7 @@ class SettingsViewModel(
             _staticExposureValue.value = cameraSettings.staticExposureValueFlow.first()
             /** custom settings **/
             _diguralServerUrl.value = customSettings.diguralUrlFlow.first()
+            _anonModel.value = cameraSettings.anonModelFlow.first()
         }
     }
 

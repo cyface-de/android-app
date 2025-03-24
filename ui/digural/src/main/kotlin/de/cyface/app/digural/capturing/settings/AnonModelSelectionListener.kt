@@ -16,6 +16,7 @@ class AnonModelSelectionListener(private val viewModel: SettingsViewModel) : OnI
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
+        // Default: No Anonymization, see resources.string.anon_models BackendService
         (parent as Spinner).setSelection(0)
     }
 }
