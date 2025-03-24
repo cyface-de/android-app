@@ -28,7 +28,6 @@ import de.cyface.app.R
 import de.cyface.persistence.model.Modality
 import de.cyface.synchronization.BundlesExtrasCodes
 import de.cyface.utils.settings.AppSettings
-import de.cyface.utils.Validate
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -54,7 +53,7 @@ class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
             R.array.dialog_modality
         ) { _: DialogInterface?, which: Int ->
             val fragmentActivity = activity
-            Validate.notNull(fragmentActivity)
+            requireNotNull(fragmentActivity)
             val modality: Modality = when (which) {
                 0 -> Modality.valueOf(Modality.CAR.name)
                 1 -> Modality.valueOf(Modality.BICYCLE.name)
@@ -74,15 +73,15 @@ class ModalityDialog(private val appSettings: AppSettings) : DialogFragment() {
                 DIALOG_ADD_EVENT_MODALITY_SELECTION_REQUEST_CODE -> {
                     resultCode = DIALOG_ADD_EVENT_MODALITY_SELECTION_RESULT_CODE
                     intent.putExtra(DIALOG_MODALITY_KEY, modality.databaseIdentifier)
-                    Validate.notNull(measurementId)
+                    requireNotNull(measurementId)
                     intent.putExtra(BundlesExtrasCodes.MEASUREMENT_ID, measurementId)
                 }
 
                 else -> throw IllegalArgumentException("Unknown request code: $requestCode")
             }
             val targetFragment = targetFragment
-            Validate.notNull(targetFragment)
-            targetFragment!!.onActivityResult(requestCode, resultCode, intent)
+            requireNotNull(targetFragment)
+            targetFragment.onActivityResult(requestCode, resultCode, intent)
         }
         return builder.create()
     }

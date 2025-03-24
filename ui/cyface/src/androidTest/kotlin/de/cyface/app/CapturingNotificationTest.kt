@@ -29,10 +29,9 @@ import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import de.cyface.utils.Validate
 import org.hamcrest.CoreMatchers
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert
-import org.hamcrest.Matchers
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -88,8 +87,8 @@ class CapturingNotificationTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = context.packageManager.getLaunchIntentForPackage(CYFACE_APP_PACKAGE)
         // Clear out any previous instances
-        Validate.notNull(intent)
-        intent!!.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        requireNotNull(intent)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         context.startActivity(intent)
 
         // Wait for the app to appear
@@ -125,11 +124,11 @@ class CapturingNotificationTest {
         // If flakiness comes back, migrate the UI-test dependencies and check again
         val mainButtonSelector = By.res("de.cyface.app:id/capture_data_main_button")
         device!!.wait(Until.hasObject(mainButtonSelector), DEFAULT_TIMEOUT.toLong())
-        MatcherAssert.assertThat(device!!.hasObject(mainButtonSelector), Matchers.`is`(true))
+        MatcherAssert.assertThat(device!!.hasObject(mainButtonSelector), `is`(true))
 
         // Act - Click capturing button
         val mainButton = device!!.findObject(mainButtonSelector)
-        MatcherAssert.assertThat(mainButton.isEnabled, Matchers.`is`(true))
+        MatcherAssert.assertThat(mainButton.isEnabled, `is`(true))
         mainButton.click()
         device!!.waitForIdle()
 
@@ -149,7 +148,7 @@ class CapturingNotificationTest {
         device!!.wait(Until.hasObject(notificationTextSelector), waitLonger)
         MatcherAssert.assertThat(
             notificationArea.hasObject(notificationTextSelector),
-            Matchers.`is`(true)
+            `is`(true)
         )
 
         // Cleanup
@@ -157,8 +156,8 @@ class CapturingNotificationTest {
         device!!.pressBack()
         // Click Stop Button
         mainButton.wait(Until.hasObject(mainButtonSelector), DEFAULT_TIMEOUT.toLong())
-        MatcherAssert.assertThat(device!!.hasObject(mainButtonSelector), Matchers.`is`(true))
-        MatcherAssert.assertThat(mainButton.isEnabled, Matchers.`is`(true))
+        MatcherAssert.assertThat(device!!.hasObject(mainButtonSelector), `is`(true))
+        MatcherAssert.assertThat(mainButton.isEnabled, `is`(true))
         mainButton.click()
         // Close App
         device!!.pressHome()
@@ -181,8 +180,8 @@ class CapturingNotificationTest {
         ) {
             val acceptTermsButtonSelector = By.res(CYFACE_APP_PACKAGE, "accept_terms_button")
             val acceptTermsButton = device.findObject(acceptTermsButtonSelector)
-            MatcherAssert.assertThat(acceptTermsButton.isClickable, Matchers.`is`(true))
-            MatcherAssert.assertThat(acceptTermsButton.isEnabled, Matchers.`is`(true))
+            MatcherAssert.assertThat(acceptTermsButton.isClickable, `is`(true))
+            MatcherAssert.assertThat(acceptTermsButton.isEnabled, `is`(true))
             Log.i(TAG, "Clicking accept terms button and waiting up to $DEFAULT_TIMEOUT ms")
             acceptTermsButton.clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
         }
@@ -207,7 +206,6 @@ class CapturingNotificationTest {
     }
 
     private fun allowLocationPermissionsIfNeeded(device: UiDevice?) {
-
         // On Android 10+ the location permission screen changed.
         // We now request "Allow app to access location only while in foreground"
         val allowButtonSelector =
@@ -218,14 +216,11 @@ class CapturingNotificationTest {
                 By.res("com.android.packageinstaller:id/permission_allow_button")
             }
 
-        // Location permission added in Android M
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            device!!.wait(Until.hasObject(allowButtonSelector), DEFAULT_TIMEOUT.toLong())
-            if (device.hasObject(allowButtonSelector)) {
-                Log.i(TAG, "Click allow permissions and waiting up to  $DEFAULT_TIMEOUT ms")
-                device.findObject(allowButtonSelector)
-                    .clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
-            }
+        device!!.wait(Until.hasObject(allowButtonSelector), DEFAULT_TIMEOUT.toLong())
+        if (device.hasObject(allowButtonSelector)) {
+            Log.i(TAG, "Click allow permissions and waiting up to  $DEFAULT_TIMEOUT ms")
+            device.findObject(allowButtonSelector)
+                .clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
         }
     }
 

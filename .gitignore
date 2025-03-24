@@ -9,6 +9,7 @@
 local.properties
 **/local.properties
 **/sentry.properties
+**/.kotlin
 
 # git backup files
 *.orig

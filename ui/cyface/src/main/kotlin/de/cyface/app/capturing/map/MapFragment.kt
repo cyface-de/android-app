@@ -136,10 +136,11 @@ class MapFragment : Fragment() {
         try {
             val measurement = persistence.loadCurrentlyCapturedMeasurement()
             val tracks: List<Track> = persistence.loadTracks(measurement.id)
-            capturingViewModel.setTracks(tracks)
+            capturingViewModel.setTracks(tracks.toMutableList())
         } catch (e: NoSuchMeasurementException) {
             Log.d(
-                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
+                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement().",
+                e,
             )
         }
     }
@@ -148,10 +149,10 @@ class MapFragment : Fragment() {
      * Observes the tracks of the currently captured measurement and renders the tracks on the map.
      */
     private fun observeTracks() {
-        val observer = Observer<ArrayList<Track>?> {
+        val observer = Observer<MutableList<Track>?> {
             if (it != null) {
                 //val events: List<Event> = loadCurrentMeasurementsEvents()
-                map!!.render(it, ArrayList()/* events */, false, emptyList() /* TODO */)
+                map!!.render(it, mutableListOf()/* events */, false, emptyList() /* TODO */)
             } else {
                 map!!.clearMap()
                 map!!.renderMarkers(emptyList() /* TODO */)
@@ -168,7 +169,7 @@ class MapFragment : Fragment() {
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+            error("Context does not support the Fragment, implement ServiceProvider")
         }
 
         // Location permissions are requested by CapturingFragment/Map to react to results.

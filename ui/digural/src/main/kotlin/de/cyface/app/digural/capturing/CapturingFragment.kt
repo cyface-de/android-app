@@ -87,7 +87,6 @@ import de.cyface.persistence.model.ParcelableGeoLocation
 import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
 import de.cyface.utils.DiskConsumption
-import de.cyface.utils.Validate
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -198,13 +197,13 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
-            throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
+            error("Context doesn't support the Fragment, implement `ServiceProvider`")
         }
         if (activity is CameraServiceProvider) {
             cameraService = (activity as CameraServiceProvider).cameraService
             cameraSettings = (activity as CameraServiceProvider).cameraSettings
         } else {
-            throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
+            error("Context doesn't support the Fragment, implement `CameraServiceProvider`")
         }
     }
 
@@ -302,7 +301,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 binding.ascendView.text = if (speedKmPh == null) "" else ascendText
             } catch (e: NoSuchMeasurementException) {
                 // Happen when locations arrive late
-                Log.d(TAG, "Position changed while no capturing is active, ignoring.")
+                Log.d(TAG, "Position changed while no capturing is active, ignoring.", e)
             }
         }
 
@@ -340,11 +339,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             return
         }
         val fragmentManager = fragmentManager
-        Validate.notNull(fragmentManager)
+        requireNotNull(fragmentManager)
         val dialog = ModalityDialog(appSettings)
         dialog.setTargetFragment(this, DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE)
         dialog.isCancelable = false
-        dialog.show(fragmentManager!!, "MODALITY_DIALOG")
+        dialog.show(fragmentManager, "MODALITY_DIALOG")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -463,7 +462,6 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     private suspend fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
         val modality = appSettings.modalityFlow.first()
-        Validate.notNull(modality, "Modality should already be set but isn't.")
 
         // Select the Modality tab
         val tab: TabLayout.Tab? = when (modality) {
@@ -491,8 +489,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 throw IllegalArgumentException("Unknown Modality id: $modality")
             }
         }
-        Validate.notNull(tab)
-        tab!!.select()
+        requireNotNull(tab)
+        tab.select()
     }
 
     override fun onPause() {
@@ -631,7 +629,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 )
                 cameraService.stop(
                     object :
-                        ShutDownFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
+                        ShutDownFinishedHandler(
+                            de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                        ) {
                         override fun shutDownFinished(measurementIdentifier: Long) {
                             Log.d(
                                 TAG,
@@ -639,7 +639,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             )
                         }
                     })
-                throw java.lang.IllegalStateException(
+                error(
                     "Camera stopped manually as the camera was not released. This should not happen!"
                 )
             }
@@ -657,13 +657,13 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             capturing.disconnect()
         } catch (e: DataCapturingException) {
             // This just tells us there is no running capturing in the background, see [MOV-588]
-            Log.d(TAG, "No need to unbind as the background service was not running.")
+            Log.d(TAG, "No need to unbind as the background service was not running.", e)
         }
         try {
             cameraService.disconnect()
         } catch (e: DataCapturingException) {
             // This just tells us there is no running capturing in the background, see [MOV-588]
-            Log.d(TAG, "No need to unbind as the camera background service was not running.")
+            Log.d(TAG, "No need to unbind as the camera background service was not running.", e)
         }
 
         viewModel.setMeasurementId(null) // Experimental, might influence other Fragments
@@ -781,12 +781,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
         // TODO [CY-3855]: we have to provide a listener for the button (<- ???)
         try {
-            viewModel.setTracks(arrayListOf(Track()))
+            viewModel.setTracks(mutableListOf(Track()))
             capturing.start(Modality.BICYCLE,
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
                         // The measurement id should always be set [STAD-333]
-                        Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
+                        require(measurementIdentifier != -1L) { "Missing measurement id" }
                         Log.v(TAG, "startUpFinished")
                         viewModel.setMeasurementId(measurementIdentifier)
                         // TODO: Status should also be in ViewModel (maybe via currMId and observed M)
@@ -829,7 +829,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 object : StartUpFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                     override fun startUpFinished(measurementIdentifier: Long) {
                         // The measurement id should always be set [STAD-333]
-                        Validate.isTrue(measurementIdentifier != -1L, "Missing measurement id")
+                        require(measurementIdentifier != -1L) { "Missing measurement id" }
                         Log.v(TAG, "resumeCapturing: startUpFinished")
                         viewModel.setMeasurementId(measurementIdentifier)
                         setCapturingStatus(MeasurementStatus.OPEN)
@@ -961,7 +961,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     .stop(object : ShutDownFinishedHandler(
                         MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
                     ) {
-                        override fun shutDownFinished(l: Long) {
+                        override fun shutDownFinished(measurementIdentifier: Long) {
                             // nothing to do
                         }
                     })
@@ -969,7 +969,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     cameraService.stop(object : ShutDownFinishedHandler(
                         de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
                     ) {
-                        override fun shutDownFinished(l: Long) {
+                        override fun shutDownFinished(measurementIdentifier: Long) {
                             // nothing to do
                         }
                     })
@@ -1037,7 +1037,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             )
             // We need to make sure we return a list which supports "add" even when an empty list is returned
             // or else the onHostResume method cannot add a new sub track to a loaded empty list
-            viewModel.setTracks(ArrayList(loadedList))
+            viewModel.setTracks(loadedList.toMutableList())
         } catch (e: NoSuchMeasurementException) {
             throw java.lang.RuntimeException(e)
         }
@@ -1085,7 +1085,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // The MaterialDialog implementation of the EnergySettings dialogs are not shown when called
             // from inside the IsRunningCallback. Thus, we call it here for now instead of in startCapturing()
             val capturingStatus = capturingFragment.viewModel.capturing.value
-            if ((capturingStatus == MeasurementStatus.FINISHED || capturingStatus == MeasurementStatus.PAUSED) && capturingFragment.isRestrictionActive()) {
+            if ((capturingStatus == MeasurementStatus.FINISHED ||
+                        capturingStatus == MeasurementStatus.PAUSED) && capturingFragment.isRestrictionActive()) {
                 return
             }
 
@@ -1093,15 +1094,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
                 TimeUnit.MILLISECONDS,
                 object : IsRunningCallback {
-                    override fun isRunning() {
-                        throw java.lang.IllegalStateException("Measurement is already running")
-                    }
+                    override fun isRunning() { error("Measurement is already running") }
 
                     override fun timedOut() {
-                        Validate.isTrue(
-                            capturingStatus !== MeasurementStatus.OPEN,
+                        require(capturingStatus !== MeasurementStatus.OPEN) {
                             "DataCapturingButton is out of sync."
-                        )
+                        }
 
                         // If Measurement is paused, resume the measurement
                         if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {

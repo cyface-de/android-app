@@ -45,7 +45,7 @@ buildscript {
 
 android {
     namespace 'de.cyface.app'
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -202,8 +202,6 @@ dependencies {
     // Exception tracking
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
-    // To change the material design
-    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     // To use Google Map
@@ -216,7 +214,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.ext.navigationVersion"
     // For the action bar (at the bottom of the screen)
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.desugaringVersion"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs_nio:$rootProject.ext.desugaringVersion"
     // Http Requests (can't use Volley lib as it does not return status code in failure-/handler)
     implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okHttpVersion"
 
@@ -228,7 +226,6 @@ dependencies {
     implementation "net.openid:appauth:$rootProject.ext.appAuthVersion" // Move to uploader [RFR-581]
 
     // Cyface dependencies
-    implementation "de.cyface:android-utils:$rootProject.ext.cyfaceUtilsVersion"
     implementation project(':datacapturing')
     implementation project(':synchronization')
     implementation project(':persistence')
@@ -246,7 +243,6 @@ dependencies {
     //androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     // UiAutomator Testing
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$rootProject.ext.uiAutomatorVersion"
-    androidTestImplementation "org.hamcrest:hamcrest-integration:$rootProject.ext.hamcrestVersion"
 
     // Dependencies for local unit tests
     // - If Junit symbols are not resolvable in IntelliJ, make sure Build Variant is set to debug
@@ -254,5 +250,5 @@ dependencies {
     testImplementation "androidx.test.ext:junit:$rootProject.ext.junitVersion"
     //testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
     // Optional - For better debuggable asserts
-    //testImplementation "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
+    //testImplementation "org.hamcrest:hamcrest:$rootProject.ext.hamcrestVersion"
 }

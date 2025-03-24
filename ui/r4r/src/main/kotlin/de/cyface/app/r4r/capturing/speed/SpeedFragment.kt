@@ -75,7 +75,15 @@ class SpeedFragment : Fragment() {
     /**
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
-    private lateinit var capturingViewModel: CapturingViewModel
+    private val capturingViewModel: CapturingViewModel by activityViewModels {
+        // Synchronously to ensure viewModel is available when needed.
+        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
+        CapturingViewModelFactory(
+            persistence.measurementRepository!!,
+            persistence.eventRepository!!,
+            reportErrors
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,17 +93,7 @@ class SpeedFragment : Fragment() {
             appSettings = (activity as ServiceProvider).appSettings
             persistence = capturing.persistenceLayer
         } else {
-            throw RuntimeException("Context doesn't support the Fragment, implement `ServiceProvider`")
-        }
-
-        lifecycleScope.launch {
-            // Initialize capturingViewModel asynchronously
-            val reportErrors = appSettings.reportErrorsFlow.first()
-            capturingViewModel = CapturingViewModelFactory(
-                capturing.persistenceLayer.measurementRepository!!,
-                capturing.persistenceLayer.eventRepository!!,
-                reportErrors
-            ).create(CapturingViewModel::class.java)
+            error("Context doesn't support the Fragment, implement `ServiceProvider`")
         }
     }
 

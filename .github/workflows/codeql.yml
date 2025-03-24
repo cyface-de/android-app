@@ -1,44 +1,36 @@
-# Copyright 2023-2025 Cyface GmbH
-#
-# This file is part of the Cyface App for Android.
-#
-# The Cyface App for Android is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# The Cyface App for Android is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with the Cyface App for Android. If not, see <http://www.gnu.org/licenses/>.
-
-# This workflow ensures the building step works
+# This workflow configures CodeQL as the auto-configuration fails for Java/Kotlin.
 #
 # @author Armin Schnabel
 # @version 1.0.0
-# @since 3.1.4
-name: Gradle Build
+# @since 3.15.0
+name: "CodeQL Analysis"
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
-
-permissions:
-  contents: read
+    branches: [ main ]
+  schedule:
+    - cron: '20 16 * * 1'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+
+    permissions:
+      # required for all workflows
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual # autobuild fails (gradle.properties required)
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         # Does not work out of the box with a private repository
         # see https://github.com/actions/checkout/issues/287
@@ -53,6 +45,13 @@ jobs:
             ${{ secrets.SSH_DEPLOY_KEY_CAMERA_SERVICE }}
       - name: Checkout submodules
         run: git submodule update --init --recursive
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          # 'java-kotlin' to analyze code written in Java, Kotlin or both
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -93,3 +92,8 @@ jobs:
         run: ./gradlew :ui:cyface:assembleDebug :ui:r4r:assembleDebug :ui:digural:assembleDebug
       - name: Test with Gradle
         run: ./gradlew :ui:cyface:testDebugUnitTest :ui:r4r:testDebugUnitTest :ui:digural:testDebugUnitTest
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"

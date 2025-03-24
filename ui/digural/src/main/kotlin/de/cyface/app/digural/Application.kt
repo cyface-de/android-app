@@ -61,8 +61,12 @@ class Application : Application() {
     /**
      * Reports error events to the user via UI and to Sentry, if opted-in.
      */
-    private val errorListener =
-        ErrorHandler.ErrorListener { errorCode, errorMessage, fromBackground ->
+    private val errorListener = object : ErrorHandler.ErrorListener {
+        override fun onErrorReceive(
+            errorCode: ErrorHandler.ErrorCode,
+            errorMessage: String?,
+            fromBackground: Boolean
+        ) {
             val appName = applicationContext.getString(R.string.app_name)
             if (!fromBackground) { // RFR-772
                 Toast.makeText(
@@ -87,6 +91,7 @@ class Application : Application() {
                 }
             }
         }
+    }
 
     override fun onCreate() {
         super.onCreate()

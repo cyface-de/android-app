@@ -45,7 +45,6 @@ import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
-import de.cyface.utils.Validate
 import java.util.TreeMap
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -452,7 +451,7 @@ class SettingsFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_EXPOSURE_TIME_SELECTION_REQUEST_CODE) {
             val nanos = data!!.getLongExtra(CAMERA_STATIC_EXPOSURE_TIME_KEY, -1L)
-            Validate.isTrue(nanos != -1L)
+            require(nanos != -1L)
             val fraction = Utils.getExposureTimeFraction(nanos)
             Log.d(TAG, "Update view -> exposure time to $nanos ns - fraction: $fraction s")
             binding.staticExposureTime.text = fraction
