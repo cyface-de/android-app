@@ -76,6 +76,7 @@ class SettingsViewModel(
 
     /** custom settings **/
     private val _diguralServerUrl = MutableLiveData<URL>()
+    private val _anonModel = MutableLiveData<Int>()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -102,6 +103,7 @@ class SettingsViewModel(
 
     /** custom settings **/
     val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
+    val diguralAnonModel: LiveData<Int> = cameraSettings.anonModelFlow.asLiveData()
 
     init {
         viewModelScope.launch {
@@ -122,6 +124,7 @@ class SettingsViewModel(
             _staticExposureValue.value = cameraSettings.staticExposureValueFlow.first()
             /** custom settings **/
             _diguralServerUrl.value = customSettings.diguralUrlFlow.first()
+            _anonModel.value = cameraSettings.anonModelFlow.first()
         }
     }
 
@@ -177,6 +180,10 @@ class SettingsViewModel(
 
     suspend fun setStaticExposureValue(staticExposureValue: Int) {
         cameraSettings.setStaticExposureValue(staticExposureValue)
+    }
+
+    suspend fun setAnonModel(anonModel: Int) {
+        cameraSettings.setAnonModel(anonModel)
     }
 
     /** custom settings **/

@@ -176,10 +176,6 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.ext.navigationVersion"
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs_nio:$rootProject.ext.desugaringVersion"
 
-    // Kotlin components
-    //api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.ext.coroutinesVersion"
-    //api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.ext.coroutinesVersion"
-
     // Used for WebDAV Communication
     implementation "com.github.thegrizzlylabs:sardine-android:$rootProject.ext.sardineVersion"
 
@@ -198,7 +194,6 @@ dependencies {
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android'
-
 
     // Dependencies for instrumentation tests
     // Resolve conflicts between main and test APK (which is used in the integration-test module):

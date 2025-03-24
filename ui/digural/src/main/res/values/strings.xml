@@ -38,6 +38,12 @@
   <string name="settings_sensor_frequency_unit" translatable="false">Hz</string>
 
   <!-- Digural Settings-->
+  <string name="anon_model_selection_header_text">Please Select Model for Image Anonymization</string>
   <string name="settings_digural_server_address">Digural server address</string>
   <string name="url_malformed_toast">Invalid address format. The change was ignored.</string>
+  <string-array name="anon_models">
+    <item>No Anonymization</item>
+    <item>Model 1</item>
+    <item>Model 2</item>
+  </string-array>
 </resources>

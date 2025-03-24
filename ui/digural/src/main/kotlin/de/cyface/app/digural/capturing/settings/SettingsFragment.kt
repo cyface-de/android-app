@@ -28,6 +28,7 @@ import android.view.View.GONE
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,6 +37,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.Application
+import de.cyface.app.digural.R
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.capturing.settings.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
 import de.cyface.app.utils.ServiceProvider
@@ -223,6 +225,15 @@ class SettingsFragment : Fragment() {
                 binding.diguralServerAddress
             )
         )
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.anon_models,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            binding.anonModelSelectionSpinner.adapter = adapter
+            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        }
+        binding.anonModelSelectionSpinner.onItemSelectedListener = AnonModelSelectionListener(viewModel)
 
         // Observe view model, update UI
         /** app settings **/
@@ -349,6 +360,11 @@ class SettingsFragment : Fragment() {
         viewModel.diguralServerUrl.observe(viewLifecycleOwner) { serverAddress ->
             run {
                 binding.diguralServerAddress.setText(serverAddress.toExternalForm())
+            }
+        }
+        viewModel.diguralAnonModel.observe(viewLifecycleOwner) { anonModel ->
+            run {
+                binding.anonModelSelectionSpinner.setSelection(anonModel)
             }
         }
 
