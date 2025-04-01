@@ -73,7 +73,7 @@ ext {
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
     cyfaceAndroidBackendVersion = "7.13.7" // FIXME - changed
-    cyfaceEnergySettingsVersion = "4.3.3"
+    cyfaceEnergySettingsVersion = "4.3.4"
     cyfaceCameraServiceVersion = "4.9.3" // FIXME - changed
 
     // Android SDK versions

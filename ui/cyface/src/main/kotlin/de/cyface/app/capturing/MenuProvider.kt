@@ -30,10 +30,13 @@ import de.cyface.app.R
 import de.cyface.app.utils.Constants.SUPPORT_EMAIL
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.uploader.exception.SynchronisationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
- * The [androidx.core.view.MenuProvider] for the [de.cyface.app.CapturingFragment] which defines which
- * options are shown in the action bar at the top right.
+ * The [androidx.core.view.MenuProvider] for the [de.cyface.app.capturing.CapturingFragment] which
+ * defines which options are shown in the action bar at the top right.
  *
  * @author Armin Schnabel
  * @version 2.0.2
@@ -63,17 +66,23 @@ class MenuProvider(
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         return when (menuItem.itemId) {
             R.id.guide_item -> {
-                if (!TrackingSettings.showGnssWarningDialog(activity) &&
-                    !TrackingSettings.showEnergySaferWarningDialog(activity) &&
-                    !TrackingSettings.showRestrictedBackgroundProcessingWarningDialog(activity) &&
-                    !TrackingSettings.showProblematicManufacturerDialog(
-                        activity,
-                        true,
-                        SUPPORT_EMAIL,
-                        activity.lifecycleScope
-                    )
-                ) {
-                    TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)
+                activity.lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        if (!TrackingSettings.showGnssWarningDialog(activity) &&
+                            !TrackingSettings.showEnergySaferWarningDialog(activity) &&
+                            !TrackingSettings.showRestrictedBackgroundProcessingWarningDialog(
+                                activity
+                            ) &&
+                            !TrackingSettings.showProblematicManufacturerDialog(
+                                activity,
+                                true,
+                                SUPPORT_EMAIL,
+                                activity.lifecycleScope
+                            )
+                        ) {
+                            TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)
+                        }
+                    }
                 }
                 true
             }

@@ -68,9 +68,11 @@ import de.cyface.uploader.exception.SynchronisationException
 import de.cyface.utils.settings.AppSettings
 import de.cyface.utils.DiskConsumption
 import io.sentry.Sentry
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.lang.ref.WeakReference
 
@@ -237,7 +239,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         )
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
-        showProblematicManufacturerDialog(this, false, Constants.SUPPORT_EMAIL, lifecycleScope)
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                showProblematicManufacturerDialog(this@MainActivity, false, Constants.SUPPORT_EMAIL, lifecycleScope)
+            }
+        }
     }
 
     /**

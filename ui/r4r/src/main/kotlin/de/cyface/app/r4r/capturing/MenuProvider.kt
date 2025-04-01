@@ -30,6 +30,9 @@ import de.cyface.app.r4r.R
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.uploader.exception.SynchronisationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * The [androidx.core.view.MenuProvider] for the [CapturingFragment] which defines which options are
@@ -63,17 +66,23 @@ class MenuProvider(
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         return when (menuItem.itemId) {
             R.id.guide_item -> {
-                if (!TrackingSettings.showGnssWarningDialog(activity) &&
-                    !TrackingSettings.showEnergySaferWarningDialog(activity) &&
-                    !TrackingSettings.showRestrictedBackgroundProcessingWarningDialog(activity) &&
-                    !TrackingSettings.showProblematicManufacturerDialog(
-                        activity,
-                        true,
-                        SUPPORT_EMAIL,
-                        activity.lifecycleScope
-                    )
-                ) {
-                    TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)
+                activity.lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        if (!TrackingSettings.showGnssWarningDialog(activity) &&
+                            !TrackingSettings.showEnergySaferWarningDialog(activity) &&
+                            !TrackingSettings.showRestrictedBackgroundProcessingWarningDialog(
+                                activity
+                            ) &&
+                            !TrackingSettings.showProblematicManufacturerDialog(
+                                activity,
+                                true,
+                                SUPPORT_EMAIL,
+                                activity.lifecycleScope
+                            )
+                        ) {
+                            TrackingSettings.showNoGuidanceNeededDialog(activity, SUPPORT_EMAIL)
+                        }
+                    }
                 }
                 true
             }
