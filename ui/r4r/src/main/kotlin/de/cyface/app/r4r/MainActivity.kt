@@ -193,7 +193,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 unInterestedListener,
                 sensorFrequency,
                 CyfaceAuthenticator(this@MainActivity)
-            )
+            ).apply { lifecycleScope.launch { withContext(Dispatchers.IO) { initialize() } } }
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             //startSynchronization() // We do this in displayAuthorized() instead!

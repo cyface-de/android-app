@@ -40,6 +40,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -91,9 +92,11 @@ import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 /**
@@ -259,47 +262,56 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             binding.co2View.text =
                 if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)
 
-            val millis = if (it == null) null else persistence.loadDuration(it.id)
-            val seconds = millis?.div(1000)
-            val minutes = seconds?.div(60)
-            val hours = minutes?.div(60)
-            val hoursText =
-                if (hours == null || hours == 0L) "" else getString(
-                    de.cyface.app.utils.R.string.hours,
-                    hours
+            lifecycleScope.launch {
+                val millis = if (it == null) null else withContext(Dispatchers.IO) {
+                    persistence.loadDuration(it.id)
+                }
+                val seconds = millis?.div(1000)
+                val minutes = seconds?.div(60)
+                val hours = minutes?.div(60)
+                val hoursText =
+                    if (hours == null || hours == 0L) "" else getString(
+                        de.cyface.app.utils.R.string.hours,
+                        hours
+                    ) + " "
+                val minutesText = if (minutes == null || minutes == 0L) "" else getString(
+                    de.cyface.app.utils.R.string.minutes,
+                    minutes % 60
                 ) + " "
-            val minutesText = if (minutes == null || minutes == 0L) "" else getString(
-                de.cyface.app.utils.R.string.minutes,
-                minutes % 60
-            ) + " "
-            val secondsText = if (seconds == null) "" else getString(
-                de.cyface.app.utils.R.string.seconds,
-                seconds % 60
-            )
-            val durationText = hoursText + minutesText + secondsText
-            binding.durationView.text = durationText
+                val secondsText = if (seconds == null) "" else getString(
+                    de.cyface.app.utils.R.string.seconds,
+                    seconds % 60
+                )
+                val durationText = hoursText + minutesText + secondsText
+                binding.durationView.text = durationText
+            }
         }
         viewModel.location.observe(viewLifecycleOwner) {
-            val ascendText: String?
             try {
-                val measurement = persistence.loadCurrentlyCapturedMeasurement()
-                val averageSpeedKmh =
-                    persistence.loadAverageSpeed(
-                        measurement.id,
-                        DefaultLocationCleaning()
-                    ) * 3.6
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        val measurement = persistence.loadCurrentlyCapturedMeasurement()
+                        val averageSpeedKmh =
+                            persistence.loadAverageSpeed(
+                                measurement.id,
+                                DefaultLocationCleaning()
+                            ) * 3.6
 
-                val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
-                val ascend = if (ongoingCapturing) persistence.loadAscend(measurement.id) else null
-                ascendText = getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
+                        val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
+                        val ascend =
+                            if (ongoingCapturing) persistence.loadAscend(measurement.id) else null
+                        val ascendText =
+                            getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
 
-                val speedKmPh = it?.speed?.times(3.6)
-                binding.speedView.text = if (speedKmPh == null) "" else getString(
-                    de.cyface.app.utils.R.string.speedKphWithAverage,
-                    speedKmPh,
-                    averageSpeedKmh
-                )
-                binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+                        val speedKmPh = it?.speed?.times(3.6)
+                        binding.speedView.text = if (speedKmPh == null) "" else getString(
+                            de.cyface.app.utils.R.string.speedKphWithAverage,
+                            speedKmPh,
+                            averageSpeedKmh
+                        )
+                        binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+                    }
+                }
             } catch (e: NoSuchMeasurementException) {
                 // Happen when locations arrive late
                 Log.d(TAG, "Position changed while no capturing is active, ignoring.")
@@ -516,7 +528,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 Log.w(
                     TAG,
                     "Zombie CameraService is running and it's "
-                            + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
+                            + (if (cameraSettings.cameraEnabledFlow.first()) "" else "*not*")
                             + " requested"
                 )
                 cameraService.stop(
@@ -626,7 +638,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Stop capturing
      */
-    private fun stopCapturing(pause: Boolean) {
+    private suspend fun stopCapturing(pause: Boolean) {
         try {
             val finishedHandler = object : ShutDownFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
                 override fun shutDownFinished(measurementIdentifier: Long) {
@@ -652,7 +664,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Starts capturing
      */
-    private fun startCapturing() {
+    private suspend fun startCapturing() {
         // Measurement is stopped, so we start a new measurement
         if (persistence.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
             showToastOnMainThread(
@@ -685,14 +697,18 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         setCapturingStatus(MeasurementStatus.OPEN)
 
                         // Start CameraService
-                        if (cameraSettings.getCameraEnabledBlocking()) {
-                            Log.d(TAG, "CameraServiceRequested")
-                            try {
-                                startCameraService(measurementIdentifier)
-                            } catch (e: DataCapturingException) {
-                                throw IllegalStateException(e)
-                            } catch (e: MissingPermissionException) {
-                                throw IllegalStateException(e)
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO) {
+                                if (cameraSettings.cameraEnabledFlow.first()) {
+                                    Log.d(TAG, "CameraServiceRequested")
+                                    try {
+                                        startCameraService(measurementIdentifier)
+                                    } catch (e: DataCapturingException) {
+                                        throw IllegalStateException(e)
+                                    } catch (e: MissingPermissionException) {
+                                        throw IllegalStateException(e)
+                                    }
+                                }
                             }
                         }
                     }
@@ -712,7 +728,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Resumes capturing
      */
-    private fun resumeCapturing() {
+    private suspend fun resumeCapturing() {
         Log.d(TAG, "resumeCachedTrack: Adding new sub track to existing cached track")
         viewModel.addTrack(Track())
         try {
@@ -726,14 +742,18 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         setCapturingStatus(MeasurementStatus.OPEN)
 
                         // Start CameraService
-                        if (cameraSettings.getCameraEnabledBlocking()) {
-                            Log.d(Constants.TAG, "CameraServiceRequested")
-                            try {
-                                startCameraService(measurementIdentifier)
-                            } catch (e: DataCapturingException) {
-                                throw java.lang.IllegalStateException(e)
-                            } catch (e: MissingPermissionException) {
-                                throw java.lang.IllegalStateException(e)
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.IO) {
+                                if (cameraSettings.cameraEnabledFlow.first()) {
+                                    Log.d(Constants.TAG, "CameraServiceRequested")
+                                    try {
+                                        startCameraService(measurementIdentifier)
+                                    } catch (e: DataCapturingException) {
+                                        throw java.lang.IllegalStateException(e)
+                                    } catch (e: MissingPermissionException) {
+                                        throw java.lang.IllegalStateException(e)
+                                    }
+                                }
                             }
                         }
                     }
@@ -758,7 +778,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * `Exception`. If the `Exception` was thrown the service does not start.
      */
     @Throws(DataCapturingException::class, MissingPermissionException::class)
-    private fun startCameraService(measurementId: Long) {
+    private suspend fun startCameraService(measurementId: Long) {
         /*val rawModeSelected = cameraSettings.getRawModeBlocking()
         val videoModeSelected = cameraSettings.getVideoModeBlocking()
         // We need to load and pass the preferences for the camera focus here as the preferences
@@ -854,26 +874,30 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             true,
             false
         ) {
-            try {
-                capturing
-                    .stop(object : ShutDownFinishedHandler(
-                        MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                    ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            // nothing to do
+            lifecycle.coroutineScope.launch {
+                withContext(Dispatchers.IO) {
+                    try {
+                        capturing
+                            .stop(object : ShutDownFinishedHandler(
+                                MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                            ) {
+                                override fun shutDownFinished(measurementIdentifier: Long) {
+                                    // nothing to do
+                                }
+                            })
+                        if (cameraSettings.cameraEnabledFlow.first()) {
+                            cameraService.stop(object : ShutDownFinishedHandler(
+                                de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                            ) {
+                                override fun shutDownFinished(measurementIdentifier: Long) {
+                                    // nothing to do
+                                }
+                            })
                         }
-                    })
-                if (cameraSettings.getCameraEnabledBlocking()) {
-                    cameraService.stop(object : ShutDownFinishedHandler(
-                        de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                    ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            // nothing to do
-                        }
-                    })
+                    } catch (e: NoSuchMeasurementException) {
+                        throw java.lang.IllegalStateException(e)
+                    }
                 }
-            } catch (e: NoSuchMeasurementException) {
-                throw java.lang.IllegalStateException(e)
             }
         }
     }
@@ -916,7 +940,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      *
      * @param measurementId The id of the currently active measurement.
      */
-    private fun updateCachedTrack(measurementId: Long) {
+    private suspend fun updateCachedTrack(measurementId: Long) {
         try {
             if (!persistence.hasMeasurement(MeasurementStatus.OPEN)
                 && !persistence.hasMeasurement(MeasurementStatus.PAUSED)
@@ -1008,11 +1032,15 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         }
 
                         // If Measurement is paused, resume the measurement
-                        if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                            capturingFragment.resumeCapturing()
-                            return
+                        capturingFragment.lifecycleScope.launch {
+                            withContext(Dispatchers.IO) {
+                                if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+                                    capturingFragment.resumeCapturing()
+                                    return@withContext
+                                }
+                                capturingFragment.startCapturing()
+                            }
                         }
-                        capturingFragment.startCapturing()
                     }
                 })
         }
@@ -1052,22 +1080,30 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             "DataCapturingButton is out of sync."
                         }
                     }
-                    stopCapturing(pause)
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            stopCapturing(pause)
+                        }
+                    }
                 }
 
                 override fun timedOut() {
                     // If Measurement is paused, stop the measurement
-                    if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                        if (crashAsyncUI) {
-                            require(!pause) { "Measurement is already paused." }
-                            require(viewModel.capturing.value === MeasurementStatus.PAUSED) {
-                                "DataCapturingButton is out of sync."
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+                                if (crashAsyncUI) {
+                                    require(!pause) { "Measurement is already paused." }
+                                    require(viewModel.capturing.value === MeasurementStatus.PAUSED) {
+                                        "DataCapturingButton is out of sync."
+                                    }
+                                }
+                                stopCapturing(pause)
+                                return@withContext
+                            } else {
+                                error("No measurement is running")
                             }
                         }
-                        stopCapturing(pause)
-                        return
-                    } else {
-                        error("No measurement is running")
                     }
                 }
             })
