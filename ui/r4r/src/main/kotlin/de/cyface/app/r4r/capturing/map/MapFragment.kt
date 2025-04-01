@@ -37,6 +37,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.MapsInitializer
 import de.cyface.app.r4r.capturing.CapturingViewModel
 import de.cyface.app.r4r.capturing.CapturingViewModelFactory
@@ -51,8 +52,11 @@ import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
 import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 /**
  * The [Fragment] which shows a map to the user.
@@ -135,9 +139,12 @@ class MapFragment : Fragment() {
 
         // Only load track if there is an ongoing measurement
         try {
-            val measurement = persistence.loadCurrentlyCapturedMeasurement()
-            val tracks: List<Track> = persistence.loadTracks(measurement.id)
-            capturingViewModel.setTracks(tracks)
+            lifecycleScope.launch {
+                val measurement =
+                    withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
+                val tracks = withContext(Dispatchers.IO) { persistence.loadTracks(measurement.id) }
+                capturingViewModel.setTracks(tracks)
+            }
         } catch (e: NoSuchMeasurementException) {
             Log.d(
                 TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."

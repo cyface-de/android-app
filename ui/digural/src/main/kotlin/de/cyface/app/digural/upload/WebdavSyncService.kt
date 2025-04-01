@@ -25,12 +25,8 @@ import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
 import de.cyface.persistence.DefaultPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
-import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.SyncAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -50,7 +46,7 @@ class WebdavSyncService : Service() {
         synchronized(LOCK) {
             if (syncAdapter == null) {
                 val persistence = DefaultPersistenceLayer(this, DefaultPersistenceBehaviour())
-                val deviceId = persistence.restoreOrCreateDeviceId()
+                val deviceId = runBlocking { persistence.restoreOrCreateDeviceId() }
                 val auth = WebdavAuth(applicationContext, WebdavAuthenticator.settings)
 
                 // `onBind()` is called directly after `onCreate()` and requires `syncAdapter` (sync)
