@@ -47,7 +47,6 @@ import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
-import de.cyface.persistence.Constants
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
@@ -140,7 +139,6 @@ class MapFragment : Fragment() {
         // Only load track if there is an ongoing measurement
         lifecycleScope.launch {
             try {
-                    Log.d(Constants.TAG, "loadCurrentlyCapturedMeasurement")
                     val measurement = withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
                     val tracks = withContext(Dispatchers.IO) { persistence.loadTracks(measurement.id) }
                     capturingViewModel.setTracks(tracks.toMutableList())
