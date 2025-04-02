@@ -506,7 +506,11 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume: reconnecting ...")
-        reconnect()
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                reconnect()
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -566,71 +570,71 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
     /**
      * Checks the current capturing state and refreshes the UI elements accordingly.
      */
-    private fun reconnect() {
+    private suspend fun reconnect() {
         capturing.addDataCapturingListener(this)
         // cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
-        startResumeButton.isEnabled = false
-        pauseButton.isEnabled = false
-        stopButton.isEnabled = false
-        lifecycleScope.launch {
-            // OPEN: running capturing
-            if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                Log.d(TAG, "onResume: reconnecting DCS succeeded")
-                val (id) = capturing.loadCurrentlyCapturedMeasurement()
-                viewModel.setMeasurementId(id)
-                // We re-sync the button here as the data capturing can be canceled while the app is closed
-                setCapturingStatus(MeasurementStatus.OPEN)
-                updateCachedTrack(id)
+        runOnUiThread {
+            startResumeButton.isEnabled = false
+            pauseButton.isEnabled = false
+            stopButton.isEnabled = false
+        }
+        // OPEN: running capturing
+        if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            Log.d(TAG, "onResume: reconnecting DCS succeeded")
+            val (id) = capturing.loadCurrentlyCapturedMeasurement()
+            viewModel.setMeasurementId(id)
+            // We re-sync the button here as the data capturing can be canceled while the app is closed
+            setCapturingStatus(MeasurementStatus.OPEN)
+            updateCachedTrack(id)
 
-                // Also try to reconnect to CameraService if it's alive
-                /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                    // It does not matter whether isCameraServiceRequested() as this can change all the time
-                    Log.d(
-                        TAG,
-                        "onResume: reconnecting CameraService succeeded"
-                    )
-                }*/
-                return@launch
-            }
-
-            // PAUSED or FINISHED capturing
-            Log.d(TAG, "onResume: reconnecting timed out")
-            if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                setCapturingStatus(MeasurementStatus.PAUSED)
-                viewModel.setMeasurementId(null)
-            } else {
-                setCapturingStatus(MeasurementStatus.FINISHED)
-                viewModel.setMeasurementId(null)
-            }
-
-            // Check if there is a zombie CameraService running
-            // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
-            // can be used by other apps again
-            /* if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                Log.w(
-                    Constants.TAG,
-                    "Zombie CameraService is running and it's "
-                            + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
-                            + " requested"
-                )
-                cameraService.stop(
-                    object :
-                        ShutDownFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            Log.d(
-                                TAG,
-                                "onResume: zombie CameraService stopped"
-                            )
-                        }
-                    })
-                throw java.lang.IllegalStateException(
-                    "Camera stopped manually as the camera was not released. This should not happen!"
+            // Also try to reconnect to CameraService if it's alive
+            /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+                // It does not matter whether isCameraServiceRequested() as this can change all the time
+                Log.d(
+                    TAG,
+                    "onResume: reconnecting CameraService succeeded"
                 )
             }*/
+            return
         }
+
+        // PAUSED or FINISHED capturing
+        Log.d(TAG, "onResume: reconnecting timed out")
+        if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+            setCapturingStatus(MeasurementStatus.PAUSED)
+            viewModel.setMeasurementId(null)
+        } else {
+            setCapturingStatus(MeasurementStatus.FINISHED)
+            viewModel.setMeasurementId(null)
+        }
+
+        // Check if there is a zombie CameraService running
+        // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
+        // can be used by other apps again
+        /* if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            Log.w(
+                Constants.TAG,
+                "Zombie CameraService is running and it's "
+                        + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
+                        + " requested"
+            )
+            cameraService.stop(
+                object :
+                    ShutDownFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
+                    override fun shutDownFinished(measurementIdentifier: Long) {
+                        Log.d(
+                            TAG,
+                            "onResume: zombie CameraService stopped"
+                        )
+                    }
+                })
+            throw java.lang.IllegalStateException(
+                "Camera stopped manually as the camera was not released. This should not happen!"
+            )
+        }*/
     }
 
     /**

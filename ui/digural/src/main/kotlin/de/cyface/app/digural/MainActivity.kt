@@ -190,22 +190,18 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 sensorFrequency,
                 WebdavAuthenticator(this@MainActivity)
             ).apply { lifecycleScope.launch { withContext(Dispatchers.IO) { initialize() } } }
-            lifecycleScope.launch {
-                val deviceIdentifier = withContext(Dispatchers.IO) {
-                    capturing.persistenceLayer.restoreOrCreateDeviceId()
-                }
-
-                // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
-                // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-                startSynchronization()
-                // TODO: dataCapturingService!!.addConnectionStatusListener(this)
-                cameraService = CameraService(
-                    applicationContext,
-                    CameraEventHandler(),
-                    unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                    ExternalCameraController(deviceIdentifier)
-                )
-            }
+            // Cannot do this asynchronously, as the cameraService lateinit will not be initialized
+            val deviceIdentifier = runBlocking { capturing.persistenceLayer.restoreOrCreateDeviceId() }
+            // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
+            // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
+            startSynchronization()
+            // TODO: dataCapturingService!!.addConnectionStatusListener(this)
+            cameraService = CameraService(
+                applicationContext,
+                CameraEventHandler(),
+                unInterestedCameraListener, // here was the capturing button but it registers itself, too
+                ExternalCameraController(deviceIdentifier)
+            )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }

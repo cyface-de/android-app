@@ -604,9 +604,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
-        startResumeButton.isEnabled = false
-        pauseButton.isEnabled = false
-        stopButton.isEnabled = false
+        runOnUiThread {
+            startResumeButton.isEnabled = false
+            pauseButton.isEnabled = false
+            stopButton.isEnabled = false
+        }
         // OPEN: running capturing
         if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
             Log.d(TAG, "onResume: reconnecting DCS succeeded")
