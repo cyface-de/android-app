@@ -138,17 +138,18 @@ class MapFragment : Fragment() {
         observeTracks()
 
         // Only load track if there is an ongoing measurement
-        try {
-            lifecycleScope.launch {
+        lifecycleScope.launch {
+            try {
                 val measurement =
                     withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
                 val tracks = withContext(Dispatchers.IO) { persistence.loadTracks(measurement.id) }
                 capturingViewModel.setTracks(tracks)
+            } catch (e: NoSuchMeasurementException) {
+                Log.d(
+                    TAG,
+                    "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
+                )
             }
-        } catch (e: NoSuchMeasurementException) {
-            Log.d(
-                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement()."
-            )
         }
     }
 

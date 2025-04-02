@@ -600,7 +600,6 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
                 setCapturingStatus(MeasurementStatus.PAUSED)
                 viewModel.setMeasurementId(null)
             } else {
-                Log.d(TAG, "reconnect ")
                 setCapturingStatus(MeasurementStatus.FINISHED)
                 viewModel.setMeasurementId(null)
             }
