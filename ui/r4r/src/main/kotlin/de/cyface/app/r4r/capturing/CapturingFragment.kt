@@ -287,8 +287,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             }
         }
         viewModel.location.observe(viewLifecycleOwner) {
-            try {
-                lifecycleScope.launch {
+            lifecycleScope.launch {
+                try {
                     withContext(Dispatchers.IO) {
                         val measurement = persistence.loadCurrentlyCapturedMeasurement()
                         val averageSpeedKmh =
@@ -304,17 +304,19 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
 
                         val speedKmPh = it?.speed?.times(3.6)
-                        binding.speedView.text = if (speedKmPh == null) "" else getString(
-                            de.cyface.app.utils.R.string.speedKphWithAverage,
-                            speedKmPh,
-                            averageSpeedKmh
-                        )
-                        binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+                        withContext(Dispatchers.Main) {
+                            binding.speedView.text = if (speedKmPh == null) "" else getString(
+                                de.cyface.app.utils.R.string.speedKphWithAverage,
+                                speedKmPh,
+                                averageSpeedKmh
+                            )
+                            binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+                        }
                     }
+                } catch (e: NoSuchMeasurementException) {
+                    // Happen when locations arrive late
+                    Log.d(TAG, "Position changed while no capturing is active, ignoring.")
                 }
-            } catch (e: NoSuchMeasurementException) {
-                // Happen when locations arrive late
-                Log.d(TAG, "Position changed while no capturing is active, ignoring.")
             }
         }
 
