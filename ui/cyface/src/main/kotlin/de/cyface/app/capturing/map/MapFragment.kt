@@ -47,6 +47,7 @@ import de.cyface.app.utils.Map
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
+import de.cyface.persistence.Constants
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
@@ -137,17 +138,18 @@ class MapFragment : Fragment() {
         observeTracks()
 
         // Only load track if there is an ongoing measurement
-        try {
-            lifecycleScope.launch {
-                val measurement = withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
-                val tracks = withContext(Dispatchers.IO) { persistence.loadTracks(measurement.id) }
-                capturingViewModel.setTracks(tracks.toMutableList())
+        lifecycleScope.launch {
+            try {
+                    Log.d(Constants.TAG, "loadCurrentlyCapturedMeasurement")
+                    val measurement = withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
+                    val tracks = withContext(Dispatchers.IO) { persistence.loadTracks(measurement.id) }
+                    capturingViewModel.setTracks(tracks.toMutableList())
+            } catch (e: NoSuchMeasurementException) {
+                Log.d(
+                    TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement().",
+                    e,
+                )
             }
-        } catch (e: NoSuchMeasurementException) {
-            Log.d(
-                TAG, "onMapReadyRunnable: no measurement found, skipping map.renderMeasurement().",
-                e,
-            )
         }
     }
 

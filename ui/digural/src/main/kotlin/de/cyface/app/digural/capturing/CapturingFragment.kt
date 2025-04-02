@@ -626,7 +626,6 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             setCapturingStatus(MeasurementStatus.PAUSED)
             viewModel.setMeasurementId(null)
         } else {
-            Log.d(TAG, "reconnect ")
             setCapturingStatus(MeasurementStatus.FINISHED)
             viewModel.setMeasurementId(null)
         }
@@ -1217,30 +1216,34 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             TimeUnit.MILLISECONDS,
             object : IsRunningCallback {
                 override fun isRunning() {
-                    cameraService.stop(
-                        object : ShutDownFinishedHandler(
-                            de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                        ) {
-                            override fun shutDownFinished(measurementIdentifier: Long) {
-                                Log.d(TAG, "stopCapturing: CameraService stopped")
-                                if (capturingStopped) {
-                                    Log.d(TAG, "DCS + CS stopped")
-                                } else {
-                                    Log.d(TAG, "CS only stopped")
-                                }
-                                if (updateUi) {
-                                    if (pause) {
-                                        setCapturingStatus(MeasurementStatus.PAUSED)
-                                    } else {
-                                        viewModel.setTracks(null)
-                                        setCapturingStatus(MeasurementStatus.FINISHED)
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            cameraService.stop(
+                                object : ShutDownFinishedHandler(
+                                    de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                                ) {
+                                    override fun shutDownFinished(measurementIdentifier: Long) {
+                                        Log.d(TAG, "stopCapturing: CameraService stopped")
+                                        if (capturingStopped) {
+                                            Log.d(TAG, "DCS + CS stopped")
+                                        } else {
+                                            Log.d(TAG, "CS only stopped")
+                                        }
+                                        if (updateUi) {
+                                            if (pause) {
+                                                setCapturingStatus(MeasurementStatus.PAUSED)
+                                            } else {
+                                                viewModel.setTracks(null)
+                                                setCapturingStatus(MeasurementStatus.FINISHED)
+                                            }
+                                            viewModel.setLocation(null)
+                                            viewModel.setMeasurementId(null)
+                                        }
                                     }
-                                    viewModel.setLocation(null)
-                                    viewModel.setMeasurementId(null)
                                 }
-                            }
+                            )
                         }
-                    )
+                    }
                 }
 
                 override fun timedOut() {
