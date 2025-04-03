@@ -189,8 +189,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
                 WebdavAuthenticator(this@MainActivity)
-            )
-            val deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
+            ).apply { lifecycleScope.launch { withContext(Dispatchers.IO) { initialize() } } }
+            // Cannot do this asynchronously, as the cameraService lateinit will not be initialized
+            val deviceIdentifier = runBlocking { capturing.persistenceLayer.restoreOrCreateDeviceId() }
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             startSynchronization()

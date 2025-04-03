@@ -230,16 +230,19 @@ class MenuProvider(
             mutableSelection.forEach { position ->
                 run {
                     // Ignoring the ongoing measurement
-                    val measurementId = adapter.getItem(position.toInt()).id
-                    if (unFinishedMeasurement == null || measurementId != unFinishedMeasurement.id) {
-                        // Delete files linked to measurement (e.g. image data)
-                        val attachmentsFolder = findMeasurementAttachmentsFolder(measurementId)
-                        if (attachmentsFolder != null) {
-                            deleteRecursively(context.get()!!, attachmentsFolder)
+                    val index = position.toInt()
+                    if (index < adapter.itemCount) {
+                        val measurementId = adapter.getItem(index).id
+                        if (unFinishedMeasurement == null || measurementId != unFinishedMeasurement.id) {
+                            // Delete files linked to measurement (e.g. image data)
+                            val attachmentsFolder = findMeasurementAttachmentsFolder(measurementId)
+                            if (attachmentsFolder != null) {
+                                deleteRecursively(context.get()!!, attachmentsFolder)
+                            }
+                            persistence.delete(measurementId)
                         }
-                        persistence.delete(measurementId)
+                        adapter.tracker!!.deselect(position)
                     }
-                    adapter.tracker!!.deselect(position)
                 }
             }
         }

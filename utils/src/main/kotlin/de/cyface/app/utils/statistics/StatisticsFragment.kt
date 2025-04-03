@@ -23,11 +23,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.databinding.FragmentStatisticsBinding
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.max
 
 /**
@@ -78,57 +82,63 @@ class StatisticsFragment : Fragment() {
         _binding = FragmentStatisticsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val measurements = persistence.loadCompletedMeasurements()
+        lifecycleScope.launch {
+            val measurements =
+                withContext(Dispatchers.IO) { persistence.loadCompletedMeasurements() }
 
-        // Statistics calculation
-        var totalDistanceKm = 0.0
-        var maxDistanceKm = 0.0
-        var totalDurationMillis = 0L
-        var maxDurationMillis = 0L
-        var maxAscend = 0.0
-        var totalAscend = 0.0
-        measurements.forEach { measurement ->
-            val distanceKm = measurement.distance.div(1000.0)
-            val durationMillis = persistence.loadDuration(measurement.id)
-            totalDistanceKm += distanceKm
-            maxDistanceKm = max(distanceKm, maxDistanceKm)
-            maxDurationMillis = max(durationMillis, maxDurationMillis)
-            totalDurationMillis += durationMillis
-            val ascend = persistence.loadAscend(measurement.id)
-            totalAscend += if (ascend !== null) ascend else 0.0
-            maxAscend = if (ascend !== null) max(ascend, maxAscend) else maxAscend
+            // Statistics calculation
+            var totalDistanceKm = 0.0
+            var maxDistanceKm = 0.0
+            var totalDurationMillis = 0L
+            var maxDurationMillis = 0L
+            var maxAscend = 0.0
+            var totalAscend = 0.0
+            measurements.forEach { measurement ->
+                val distanceKm = measurement.distance.div(1000.0)
+                val durationMillis =
+                    withContext(Dispatchers.IO) { persistence.loadDuration(measurement.id) }
+                totalDistanceKm += distanceKm
+                maxDistanceKm = max(distanceKm, maxDistanceKm)
+                maxDurationMillis = max(durationMillis, maxDurationMillis)
+                totalDurationMillis += durationMillis
+                val ascend = withContext(Dispatchers.IO) { persistence.loadAscend(measurement.id) }
+                totalAscend += if (ascend !== null) ascend else 0.0
+                maxAscend = if (ascend !== null) max(ascend, maxAscend) else maxAscend
+            }
+
+            // UI binding
+            val averageDistanceKm =
+                if (measurements.isNotEmpty()) totalDistanceKm / measurements.size else 0.0
+            binding.distanceView.text =
+                getString(
+                    de.cyface.app.utils.R.string.distanceKmWithAverage,
+                    maxDistanceKm,
+                    averageDistanceKm
+                )
+            val averageDuration =
+                if (measurements.isNotEmpty()) duration(totalDurationMillis / measurements.size) else 0L
+            binding.durationView.text =
+                getString(
+                    de.cyface.app.utils.R.string.durationWithAverage,
+                    duration(maxDurationMillis),
+                    averageDuration
+                )
+            val averageAscend =
+                if (measurements.isNotEmpty()) totalAscend / measurements.size else 0.0
+            binding.ascendView.text =
+                getString(
+                    de.cyface.app.utils.R.string.ascendMetersWithAverage,
+                    maxAscend,
+                    averageAscend
+                )
+            val totalCo2Kg = totalDistanceKm.times(95).div(1000)
+            val maxCo2Kg = maxDistanceKm.times(95).div(1000)
+            val averageCo2Kg =
+                if (measurements.isNotEmpty()) totalCo2Kg / measurements.size else 0.0
+            binding.totalCo2View.text = getString(de.cyface.app.utils.R.string.co2kg, totalCo2Kg)
+            binding.maxCo2View.text =
+                getString(de.cyface.app.utils.R.string.co2kgWithAverage, maxCo2Kg, averageCo2Kg)
         }
-
-        // UI binding
-        val averageDistanceKm =
-            if (measurements.isNotEmpty()) totalDistanceKm / measurements.size else 0.0
-        binding.distanceView.text =
-            getString(
-                de.cyface.app.utils.R.string.distanceKmWithAverage,
-                maxDistanceKm,
-                averageDistanceKm
-            )
-        val averageDuration =
-            if (measurements.isNotEmpty()) duration(totalDurationMillis / measurements.size) else 0L
-        binding.durationView.text =
-            getString(
-                de.cyface.app.utils.R.string.durationWithAverage,
-                duration(maxDurationMillis),
-                averageDuration
-            )
-        val averageAscend = if (measurements.isNotEmpty()) totalAscend / measurements.size else 0.0
-        binding.ascendView.text =
-            getString(
-                de.cyface.app.utils.R.string.ascendMetersWithAverage,
-                maxAscend,
-                averageAscend
-            )
-        val totalCo2Kg = totalDistanceKm.times(95).div(1000)
-        val maxCo2Kg = maxDistanceKm.times(95).div(1000)
-        val averageCo2Kg = if (measurements.isNotEmpty()) totalCo2Kg / measurements.size else 0.0
-        binding.totalCo2View.text = getString(de.cyface.app.utils.R.string.co2kg, totalCo2Kg)
-        binding.maxCo2View.text =
-            getString(de.cyface.app.utils.R.string.co2kgWithAverage, maxCo2Kg, averageCo2Kg)
 
         return root
     }

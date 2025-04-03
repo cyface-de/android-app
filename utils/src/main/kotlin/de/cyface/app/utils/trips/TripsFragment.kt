@@ -422,7 +422,7 @@ class TripsFragment : Fragment() {
      * @param geoFence The [GeoFence] which [requiredDaysWithinGeoFence] measurements need to pass.
      * @return A `Future` which resolves to `true` if all conditions are passed.
      */
-    private fun checkMeasurements(
+    private suspend fun checkMeasurements(
         measurements: List<Measurement>,
         @Suppress("SameParameterValue") requiredDaysWithinGeoFence: Int,
         @Suppress("SameParameterValue") requiredLocationsWithinGeoFence: Int,
@@ -448,7 +448,7 @@ class TripsFragment : Fragment() {
 
                 tracks.forEach trackLoop@{ track ->
                     val locationsWithinGeoFenceCount = track.geoLocations.count { location ->
-                        geoFence.isWithin(location!!)
+                        geoFence.isWithin(location)
                     }
                     if (locationsWithinGeoFenceCount >= requiredLocationsWithinGeoFence) {
                         daysWithinGeoFence.add(measurementDay)
