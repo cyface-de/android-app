@@ -283,7 +283,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     seconds % 60
                 )
                 val durationText = hoursText + minutesText + secondsText
-                binding.durationView.text = durationText
+                withContext(Dispatchers.Main) {
+                    binding.durationView.text = durationText
+                }
             }
         }
         viewModel.location.observe(viewLifecycleOwner) {

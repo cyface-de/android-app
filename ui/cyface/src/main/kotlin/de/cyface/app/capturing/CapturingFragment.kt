@@ -24,7 +24,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -95,6 +94,8 @@ import java.util.concurrent.TimeUnit
  *
  * It holds the `Observer` objects which control what happens when the `LiveData` changes.
  * The [ViewModel]s are responsible for holding the `LiveData` data.
+ *
+ * FIXME: Apply all changes to RFR/DIGURAL UIs, too !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
  *
  * @author Armin Schnabel
  * @version 2.0.0
@@ -218,7 +219,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
         startResumeButton = binding.startResumeButton
         stopButton = binding.stopButton
         pauseButton = binding.pauseButton
-        lifecycleScope.launch { showModalitySelectionDialogIfNeeded() }
+        lifecycleScope.launch { withContext(Dispatchers.IO) { showModalitySelectionDialogIfNeeded() } }
 
         // Update UI elements with the updates from the ViewModel
         viewModel.measurementId.observe(viewLifecycleOwner) {
@@ -254,60 +255,10 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
             binding.co2View.text =
                 if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)*/
 
-            lifecycleScope.launch {
-                val millis = if (it == null) null else withContext(Dispatchers.IO) { persistence.loadDuration(it.id) }
-                val seconds = millis?.div(1000)
-                val minutes = seconds?.div(60)
-                val hours = minutes?.div(60)
-                val hoursText =
-                    if (hours == null || hours == 0L) "" else getString(
-                        de.cyface.app.utils.R.string.hours,
-                        hours
-                    ) + " "
-                val minutesText = if (minutes == null || minutes == 0L) "" else getString(
-                    de.cyface.app.utils.R.string.minutes,
-                    minutes % 60
-                ) + " "
-                val secondsText = if (seconds == null) "" else getString(
-                    de.cyface.app.utils.R.string.seconds,
-                    seconds % 60
-                )
-                val durationText = hoursText + minutesText + secondsText
-                binding.durationView.text = durationText
-            }
+            lifecycleScope.launch { updateDurationView(it?.id) }
         }
         viewModel.location.observe(viewLifecycleOwner) {
-            lifecycleScope.launch {
-                try {
-                    withContext(Dispatchers.IO) {
-                        val measurement = persistence.loadCurrentlyCapturedMeasurement()
-                        val averageSpeedKmh =
-                            persistence.loadAverageSpeed(
-                                measurement.id,
-                                DefaultLocationCleaning()
-                            ) * 3.6
-
-                        val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
-                        val ascend =
-                            if (ongoingCapturing) persistence.loadAscend(measurement.id) else null
-                        val ascendText =
-                            getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
-
-                        val speedKmPh = it?.speed?.times(3.6)
-                        withContext(Dispatchers.Main) {
-                            binding.speedView.text = if (speedKmPh == null) "" else getString(
-                                de.cyface.app.utils.R.string.speedKphWithAverage,
-                                speedKmPh,
-                                averageSpeedKmh
-                            )
-                            binding.ascendView.text = if (speedKmPh == null) "" else ascendText
-                        }
-                    }
-                } catch (e: NoSuchMeasurementException) {
-                    // Happen when locations arrive late
-                    Log.d(TAG, "Position changed while no capturing is active, ignoring.")
-                }
-            }
+            lifecycleScope.launch { updateLocationViews(it) }
         }
 
         startResumeButton.setOnClickListener(onStartResume)
@@ -334,6 +285,52 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
         tabLayout.addTab(tabLayout.newTab())
 
         return root
+    }
+
+    private suspend fun updateDurationView(measurementId: Long?) {
+        if (measurementId == null) return
+        val millis = withContext(Dispatchers.IO) { persistence.loadDuration(measurementId) }
+        val seconds = millis / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+
+        val durationText = buildString {
+            if (hours > 0) append(getString(de.cyface.app.utils.R.string.hours, hours)).append(" ")
+            if (minutes > 0) append(getString(de.cyface.app.utils.R.string.minutes, minutes % 60)).append(" ")
+            append(getString(de.cyface.app.utils.R.string.seconds, seconds % 60))
+        }
+
+        withContext(Dispatchers.Main) {
+            binding.durationView.text = durationText
+        }
+    }
+
+    private suspend fun updateLocationViews(location: ParcelableGeoLocation?) {
+        try {
+            val measurement = withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
+            val averageSpeedKmh = withContext(Dispatchers.IO) {
+                persistence.loadAverageSpeed(measurement.id, DefaultLocationCleaning()) * 3.6
+            }
+
+            val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
+            val ascend = if (ongoingCapturing) {
+                withContext(Dispatchers.IO) { persistence.loadAscend(measurement.id) }
+            } else null
+            val ascendText = getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
+            val speedKmPh = location?.speed?.times(3.6)
+
+            withContext(Dispatchers.Main) {
+                binding.speedView.text = if (speedKmPh == null) "" else getString(
+                    de.cyface.app.utils.R.string.speedKphWithAverage,
+                    speedKmPh,
+                    averageSpeedKmh
+                )
+                binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+            }
+        } catch (e: NoSuchMeasurementException) {
+            // Happen when locations arrive late
+            Log.d(TAG, "Position changed while no capturing is active, ignoring.")
+        }
     }
 
     private suspend fun showModalitySelectionDialogIfNeeded() {
@@ -453,7 +450,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE) {
-            lifecycleScope.launch { selectModalityTab() }
+            lifecycleScope.launch { withContext(Dispatchers.IO) { selectModalityTab() } }
         }
     }
 
@@ -466,10 +463,9 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
      */
     private suspend fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
-        val modality = appSettings.modalityFlow.first()
 
         // Select the Modality tab
-        val tab: TabLayout.Tab? = when (modality) {
+        val tab: TabLayout.Tab? = when (val modality = appSettings.modalityFlow.first()) {
             Modality.CAR.name -> {
                 tabLayout.getTabAt(0)
             }
@@ -576,7 +572,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
-        runOnUiThread {
+        withContext(Dispatchers.Main) {
             startResumeButton.isEnabled = false
             pauseButton.isEnabled = false
             stopButton.isEnabled = false
@@ -663,19 +659,12 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
     }
 
     /**
-     * This method helps to access the button via UI thread from a handler thread.
-     */
-    private fun runOnUiThread(runnable: Runnable) {
-        Handler(Looper.getMainLooper()).post(runnable)
-    }
-
-    /**
      * Updates the "is enabled" state of the button on the ui thread.
      *
      * @param button The [Button] to access the [Activity] to run code on the UI thread
      */
-    private fun setButtonEnabled(button: ImageButton) {
-        runOnUiThread { button.isEnabled = true }
+    private suspend fun setButtonEnabled(button: ImageButton) {
+        withContext(Dispatchers.Main) { button.isEnabled = true }
     }
 
     /**
@@ -683,9 +672,9 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
      *
      * @param newStatus the new status of the measurement
      */
-    private fun setCapturingStatus(newStatus: MeasurementStatus) {
+    private suspend fun setCapturingStatus(newStatus: MeasurementStatus) {
         viewModel.setCapturing(newStatus)
-        runOnUiThread {
+        withContext(Dispatchers.Main) {
             updateButtonView(newStatus)
         }
     }
@@ -762,7 +751,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
         }
 
         // We use a handler to run the UI Code on the main thread as it is supposed to be
-        runOnUiThread {
+        withContext(Dispatchers.Main) {
             val calibrationProgressDialog = createAndShowCalibrationDialog()
             scheduleProgressDialogDismissal(
                 calibrationProgressDialog!!,
@@ -782,7 +771,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
                         viewModel.setMeasurementId(measurementIdentifier)
                         // TODO: Status should also be in ViewModel (maybe via currMId & observed M)
                         // the button should then just change on itself based on the live data measurement
-                        setCapturingStatus(MeasurementStatus.OPEN)
+                        lifecycleScope.launch { setCapturingStatus(MeasurementStatus.OPEN) }
 
                         // Start CameraService
                         /*if (cameraSettings.getCameraEnabledBlocking()) {
@@ -823,7 +812,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
                         require(measurementIdentifier != -1L) { "Missing measurement id" }
                         Log.v(TAG, "resumeCapturing: startUpFinished")
                         viewModel.setMeasurementId(measurementIdentifier)
-                        setCapturingStatus(MeasurementStatus.OPEN)
+                        lifecycleScope.launch { setCapturingStatus(MeasurementStatus.OPEN) }
 
                         // Start CameraService
                         /*if (cameraSettings.getCameraEnabledBlocking()) {
@@ -902,7 +891,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
             })
     }*/
 
-    private fun isRestrictionActive(): Boolean {
+    private suspend fun isRestrictionActive(): Boolean {
         if (context == null) {
             Log.w(TAG, "Context is null, restrictions cannot be checked")
             return false
@@ -1050,8 +1039,8 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
      * @param toastMessage The message to show
      * @param longDuration `True` if the toast should be shown for a longer time
      */
-    private fun showToastOnMainThread(toastMessage: String, longDuration: Boolean) {
-        Handler(Looper.getMainLooper()).post {
+    private suspend fun showToastOnMainThread(toastMessage: String, longDuration: Boolean) {
+        withContext(Dispatchers.Main) {
             Toast
                 .makeText(
                     context,
@@ -1086,10 +1075,11 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
             // The MaterialDialog implementation of the EnergySettings dialogs are not shown when called
             // from inside the IsRunningCallback. Thus, we call it here for now instead of in startCapturing()
             val capturingStatus = capturingFragment.viewModel.capturing.value
-            if ((capturingStatus == MeasurementStatus.FINISHED ||
-                        capturingStatus == MeasurementStatus.PAUSED) &&
-                capturingFragment.isRestrictionActive()) {
-                return
+                capturingFragment.lifecycleScope.launch { if ((capturingStatus == MeasurementStatus.FINISHED ||
+                            capturingStatus == MeasurementStatus.PAUSED) &&
+                    capturingFragment.isRestrictionActive()) {
+                    return@launch
+                }
             }
 
             capturingFragment.capturing.isRunning(
@@ -1221,11 +1211,13 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
                         Log.d(TAG, "DCS only stopped")
                     }
                     if (updateUi) {
-                        if (pause) {
-                            setCapturingStatus(MeasurementStatus.PAUSED)
-                        } else {
-                            viewModel.setTracks(null)
-                            setCapturingStatus(MeasurementStatus.FINISHED)
+                        lifecycleScope.launch {
+                            if (pause) {
+                                setCapturingStatus(MeasurementStatus.PAUSED)
+                            } else {
+                                viewModel.setTracks(null)
+                                setCapturingStatus(MeasurementStatus.FINISHED)
+                            }
                         }
                         viewModel.setLocation(null)
                         viewModel.setMeasurementId(null)

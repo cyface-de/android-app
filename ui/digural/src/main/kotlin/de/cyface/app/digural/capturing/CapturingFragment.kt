@@ -225,7 +225,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         startResumeButton = binding.startResumeButton
         stopButton = binding.stopButton
         pauseButton = binding.pauseButton
-        lifecycleScope.launch { showModalitySelectionDialogIfNeeded() }
+        lifecycleScope.launch { withContext(Dispatchers.IO) { showModalitySelectionDialogIfNeeded() } }
 
         // Update UI elements with the updates from the ViewModel
         viewModel.measurementId.observe(viewLifecycleOwner) {
@@ -280,7 +280,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     seconds % 60
                 )
                 val durationText = hoursText + minutesText + secondsText
-                binding.durationView.text = durationText
+                withContext(Dispatchers.Main) {
+                    binding.durationView.text = durationText
+                }
             }
         }
         viewModel.location.observe(viewLifecycleOwner) {
@@ -347,7 +349,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         registerModalityTabSelectionListener()
         val modality = Modality.valueOf(appSettings.modalityFlow.first())
         if (modality != Modality.UNKNOWN) {
-            lifecycleScope.launch { selectModalityTab() }
+            selectModalityTab()
             return
         }
         val fragmentManager = fragmentManager
@@ -463,7 +465,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE) {
-            lifecycleScope.launch { selectModalityTab() }
+            lifecycleScope.launch { withContext(Dispatchers.IO) { selectModalityTab() } }
         }
     }
 
