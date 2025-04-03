@@ -67,7 +67,7 @@ class MenuProvider(
         return when (menuItem.itemId) {
             R.id.guide_item -> {
                 activity.lifecycleScope.launch {
-                    withContext(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
                         if (!TrackingSettings.showGnssWarningDialog(activity) &&
                             !TrackingSettings.showEnergySaferWarningDialog(activity) &&
                             !TrackingSettings.showRestrictedBackgroundProcessingWarningDialog(

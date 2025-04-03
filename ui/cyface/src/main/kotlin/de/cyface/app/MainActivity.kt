@@ -238,7 +238,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
 
         // Not showing manufacturer warning on each resume to increase likelihood that it's read
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
                 showProblematicManufacturerDialog(this@MainActivity, false, Constants.SUPPORT_EMAIL, lifecycleScope)
             }
         }
