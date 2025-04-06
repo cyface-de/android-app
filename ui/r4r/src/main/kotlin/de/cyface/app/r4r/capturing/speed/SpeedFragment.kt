@@ -34,9 +34,11 @@ import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 /**
  * The [Fragment] which shows the live speed of the currently captured measurement.
@@ -103,8 +105,12 @@ class SpeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSpeedBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
+        observeLocation()
+        return binding.root
+    }
+
+    private fun observeLocation() {
         capturingViewModel.location.observe(viewLifecycleOwner) {
             val speedKmPh = it?.speed?.times(3.6)
             val speedText = if (speedKmPh == null) null else getString(
@@ -113,7 +119,6 @@ class SpeedFragment : Fragment() {
             )
             binding.liveSpeedView.text = speedText ?: getString(R.string.capturing_inactive)
         }
-        return root
     }
 
     override fun onDestroyView() {

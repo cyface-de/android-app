@@ -27,7 +27,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 class UnInterestedListener : ParcelableCapturingProcessListener {
 
-    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
+    override suspend fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
         // Nothing to do
     }
     override fun onCameraAccessLost() {

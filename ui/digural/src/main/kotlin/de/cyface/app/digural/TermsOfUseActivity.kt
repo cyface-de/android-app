@@ -28,9 +28,10 @@ import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 /**
  * The TermsOfUserActivity is the first [Activity] started on app launch.
@@ -75,10 +76,12 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
         callMainActivityIntent = Intent(this, MainActivity::class.java)
 
         // Check synchronously, or else the terms will pop up randomly until checked.
-        if (runBlocking { currentTermsHadBeenAccepted() }) {
-            startActivity(callMainActivityIntent)
-            finish()
-            return
+        lifecycleScope.launch {
+            if (withContext(Dispatchers.IO) { currentTermsHadBeenAccepted() }) {
+                startActivity(callMainActivityIntent)
+                finish()
+                return@launch
+            }
         }
 
         setContentView(R.layout.activity_terms_of_use)

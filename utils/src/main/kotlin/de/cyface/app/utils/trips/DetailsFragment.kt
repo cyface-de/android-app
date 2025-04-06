@@ -24,6 +24,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -35,6 +36,9 @@ import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.persistence.CapturingPersistenceBehaviour
 import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.strategy.DefaultLocationCleaning
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.round
 import kotlin.math.roundToInt
 
@@ -93,87 +97,103 @@ class DetailsFragment : Fragment() {
         val measurementId = requireArguments().getLong("measurementId")
         binding.tripTitle.text = requireContext().getString(R.string.trip_id, measurementId)
 
-        val measurement = persistence.loadMeasurement(measurementId)
+        lifecycleScope.launch {
 
-        // Statistics
-        val distanceKm = measurement?.distance?.div(1000.0)
-        binding.distanceView.text =
-            if (distanceKm == null) "" else getString(R.string.distanceKm, distanceKm)
+            val measurement =
+                withContext(Dispatchers.IO) { persistence.loadMeasurement(measurementId) }
 
-        val co2Kg = distanceKm?.times(95)?.div(1000)
-        binding.co2View.text = if (co2Kg == null) "" else getString(R.string.co2kg, co2Kg)
+            // Statistics
+            val distanceKm = measurement?.distance?.div(1000.0)
+            binding.distanceView.text =
+                if (distanceKm == null) "" else getString(R.string.distanceKm, distanceKm)
 
-        val millis = if (measurement == null) null else persistence.loadDuration(measurement.id)
-        val seconds = millis?.div(1000)
-        val minutes = seconds?.div(60)
-        val hours = minutes?.div(60)
-        val hoursText =
-            if (hours == null || hours == 0L) "" else getString(R.string.hours, hours) + " "
-        val minutesText = if (minutes == null || minutes == 0L) "" else getString(
-            R.string.minutes,
-            minutes % 60
-        ) + " "
-        val secondsText = if (seconds == null) "" else getString(R.string.seconds, seconds % 60)
-        val durationText = hoursText + minutesText + secondsText
-        binding.durationView.text = durationText
+            val co2Kg = distanceKm?.times(95)?.div(1000)
+            binding.co2View.text = if (co2Kg == null) "" else getString(R.string.co2kg, co2Kg)
 
-        val ascendText: String?
-        val averageSpeedKmh =
-            persistence.loadAverageSpeed(
-                measurementId,
-                DefaultLocationCleaning()
-            ) * 3.6
-
-        val ongoingCapturing = measurement != null
-        val ascend = if (ongoingCapturing) persistence.loadAscend(measurementId) else null
-        ascendText = getString(R.string.ascendMeters, ascend ?: 0.0)
-
-        val maxSpeedMps = persistence.loadMaxSpeed(measurementId, DefaultLocationCleaning())
-        val maxSpeedKmPh = maxSpeedMps.times(3.6)
-        binding.speedView.text =
-            getString(R.string.speedKphWithAverage, maxSpeedKmPh, averageSpeedKmh)
-        binding.ascendView.text = ascendText
-
-        // Chart
-        val chart = root.findViewById(R.id.chart) as LineChart
-        val altitudes = persistence.loadAltitudes(measurementId)
-        if (altitudes.isNullOrEmpty()) {
-            binding.elevationProfileTitle.text = getString(R.string.elevation_profile_no_data)
-            chart.visibility = GONE
-        } else {
-            // We could also show the relative elevation profile (starting at elevation 0)
-            val allEntries = mutableListOf<List<Entry>>()
-            var x = 1
-            val values = altitudes.sumOf { trackAltitudes -> trackAltitudes.count() }
-            altitudes.forEach { trackAltitudes ->
-                val entries = mutableListOf<Entry>()
-                trackAltitudes.forEach {
-                    entries.add(Entry(x.toFloat(), it.toFloat()))
-                    x++
-                }
-                x += round(values * 0.05).roundToInt() // 5 % gap between sub-tracks
-                if (entries.isNotEmpty()) {
-                    allEntries.add(entries)
-                }
+            val millis = if (measurement == null) null else withContext(Dispatchers.IO) {
+                persistence.loadDuration(measurement.id)
             }
-            val textColor = resources.getColor(R.color.text)
-            val resources = requireContext().resources
-            val datasets: List<LineDataSet> = mutableListOf()
-            allEntries.forEach {
-                val dataSet = LineDataSet(it, "sub-track")
-                dataSet.color = resources.getColor(R.color.text)
-                dataSet.setDrawCircles(false)
-                (datasets as ArrayList<LineDataSet>).add(dataSet)
+            val seconds = millis?.div(1000)
+            val minutes = seconds?.div(60)
+            val hours = minutes?.div(60)
+            val hoursText =
+                if (hours == null || hours == 0L) "" else getString(R.string.hours, hours) + " "
+            val minutesText = if (minutes == null || minutes == 0L) "" else getString(
+                R.string.minutes,
+                minutes % 60
+            ) + " "
+            val secondsText = if (seconds == null) "" else getString(R.string.seconds, seconds % 60)
+            val durationText = hoursText + minutesText + secondsText
+            binding.durationView.text = durationText
+
+            val ascendText: String?
+            val averageSpeedKmh = withContext(Dispatchers.IO) {
+                persistence.loadAverageSpeed(
+                    measurementId,
+                    DefaultLocationCleaning()
+                ) * 3.6
             }
-            val data = LineData(datasets)
-            data.setValueTextColor(textColor)
-            chart.data = data
-            chart.axisLeft.textColor = textColor
-            chart.axisRight.textColor = textColor
-            chart.description.text = resources.getString(R.string.chart_label)
-            chart.description.textColor = textColor
-            chart.legend.isEnabled = false
-            chart.xAxis.isEnabled = false
+
+            val ongoingCapturing = measurement != null
+            val ascend = if (ongoingCapturing) withContext(Dispatchers.IO) {
+                persistence.loadAscend(measurementId)
+            } else null
+            ascendText = getString(R.string.ascendMeters, ascend ?: 0.0)
+
+            val maxSpeedMps = withContext(Dispatchers.IO) {
+                persistence.loadMaxSpeed(
+                    measurementId,
+                    DefaultLocationCleaning()
+                )
+            }
+            val maxSpeedKmPh = maxSpeedMps.times(3.6)
+            binding.speedView.text =
+                getString(R.string.speedKphWithAverage, maxSpeedKmPh, averageSpeedKmh)
+            binding.ascendView.text = ascendText
+
+            // Chart
+            val chart = root.findViewById(R.id.chart) as LineChart
+            val altitudes = withContext(Dispatchers.IO) { persistence.loadAltitudes(measurementId) }
+            if (altitudes.isNullOrEmpty()) {
+                binding.elevationProfileTitle.text = getString(R.string.elevation_profile_no_data)
+                chart.visibility = GONE
+            } else {
+                // We could also show the relative elevation profile (starting at elevation 0)
+                val allEntries = mutableListOf<List<Entry>>()
+                var x = 1
+                val values = altitudes.sumOf { trackAltitudes -> trackAltitudes.count() }
+                altitudes.forEach { trackAltitudes ->
+                    val entries = mutableListOf<Entry>()
+                    trackAltitudes.forEach {
+                        entries.add(Entry(x.toFloat(), it.toFloat()))
+                        x++
+                    }
+                    x += round(values * 0.05).roundToInt() // 5 % gap between sub-tracks
+                    if (entries.isNotEmpty()) {
+                        allEntries.add(entries)
+                    }
+                }
+                val textColor = resources.getColor(R.color.text)
+                val resources = requireContext().resources
+                val datasets: List<LineDataSet> = mutableListOf()
+                allEntries.forEach {
+                    val dataSet = LineDataSet(it, "sub-track")
+                    dataSet.color = resources.getColor(R.color.text)
+                    dataSet.setDrawCircles(false)
+                    (datasets as ArrayList<LineDataSet>).add(dataSet)
+                }
+                val data = LineData(datasets)
+                data.setValueTextColor(textColor)
+                chart.data = data
+                chart.axisLeft.textColor = textColor
+                chart.axisRight.textColor = textColor
+                chart.description.text = resources.getString(R.string.chart_label)
+                chart.description.textColor = textColor
+                chart.legend.isEnabled = false
+                chart.xAxis.isEnabled = false
+
+                chart.invalidate() // ensures chart is re-rendered else "no chart data" until touch
+            }
         }
 
         return root

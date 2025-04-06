@@ -178,7 +178,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
 
         // Start DataCapturingService and CameraService
         // With async call the app crashes as late-init `capturing` is not initialized yet.
-        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
+        // `runBlocking` is required here as `capturing` as to be initialized synchronously.
+        val sensorFrequency = runBlocking(Dispatchers.IO) { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
                 applicationContext,
@@ -188,17 +189,17 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
                 CyfaceAuthenticator(this@MainActivity)
-            )
+            ).apply { lifecycleScope.launch(Dispatchers.IO) { initialize() } }
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             // startSynchronization() // This is done in onAuthorized() instead
             // TODO: dataCapturingService!!.addConnectionStatusListener(this)
             /*cameraService = CameraService(
-                applicationContext,
-                CameraEventHandler(),
-                unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                UnInterestedListener()
-            )*/
+            applicationContext,
+            CameraEventHandler(),
+            unInterestedCameraListener, // here was the capturing button but it registers itself, too
+            UnInterestedListener()
+        )*/
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }
@@ -371,12 +372,15 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
                     requireNotNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
-                    Log.d(
-                        WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $uploadEnabled"
-                    )
-                    capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
+                    lifecycleScope.launch {
+                        val uploadEnabled =
+                            withContext(Dispatchers.IO) { appSettings.uploadEnabledFlow.first() }
+                        Log.d(
+                            WiFiSurveyor.TAG,
+                            "Setting syncEnabled for new account to preference: $uploadEnabled"
+                        )
+                        capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
+                    }
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

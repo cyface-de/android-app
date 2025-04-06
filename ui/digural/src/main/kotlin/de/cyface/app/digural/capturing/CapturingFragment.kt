@@ -24,7 +24,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +40,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -88,9 +88,11 @@ import de.cyface.persistence.model.Track
 import de.cyface.persistence.strategy.DefaultLocationCleaning
 import de.cyface.utils.DiskConsumption
 import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 
@@ -222,7 +224,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         startResumeButton = binding.startResumeButton
         stopButton = binding.stopButton
         pauseButton = binding.pauseButton
-        lifecycleScope.launch { showModalitySelectionDialogIfNeeded() }
+        lifecycleScope.launch { withContext(Dispatchers.IO) { showModalitySelectionDialogIfNeeded() } }
 
         // Update UI elements with the updates from the ViewModel
         viewModel.measurementId.observe(viewLifecycleOwner) {
@@ -258,51 +260,10 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             binding.co2View.text =
                 if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)*/
 
-            val millis = if (it == null) null else persistence.loadDuration(it.id)
-            val seconds = millis?.div(1000)
-            val minutes = seconds?.div(60)
-            val hours = minutes?.div(60)
-            val hoursText =
-                if (hours == null || hours == 0L) "" else getString(
-                    de.cyface.app.utils.R.string.hours,
-                    hours
-                ) + " "
-            val minutesText = if (minutes == null || minutes == 0L) "" else getString(
-                de.cyface.app.utils.R.string.minutes,
-                minutes % 60
-            ) + " "
-            val secondsText = if (seconds == null) "" else getString(
-                de.cyface.app.utils.R.string.seconds,
-                seconds % 60
-            )
-            val durationText = hoursText + minutesText + secondsText
-            binding.durationView.text = durationText
+            lifecycleScope.launch { updateDurationView(it?.id) }
         }
         viewModel.location.observe(viewLifecycleOwner) {
-            val ascendText: String?
-            try {
-                val measurement = persistence.loadCurrentlyCapturedMeasurement()
-                val averageSpeedKmh =
-                    persistence.loadAverageSpeed(
-                        measurement.id,
-                        DefaultLocationCleaning()
-                    ) * 3.6
-
-                val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
-                val ascend = if (ongoingCapturing) persistence.loadAscend(measurement.id) else null
-                ascendText = getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
-
-                val speedKmPh = it?.speed?.times(3.6)
-                binding.speedView.text = if (speedKmPh == null) "" else getString(
-                    de.cyface.app.utils.R.string.speedKphWithAverage,
-                    speedKmPh,
-                    averageSpeedKmh
-                )
-                binding.ascendView.text = if (speedKmPh == null) "" else ascendText
-            } catch (e: NoSuchMeasurementException) {
-                // Happen when locations arrive late
-                Log.d(TAG, "Position changed while no capturing is active, ignoring.", e)
-            }
+            lifecycleScope.launch { updateLocationViews(it) }
         }
 
         startResumeButton.setOnClickListener(onStartResume)
@@ -331,11 +292,57 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         return root
     }
 
+    private suspend fun updateDurationView(measurementId: Long?) {
+        if (measurementId == null) return
+        val millis = withContext(Dispatchers.IO) { persistence.loadDuration(measurementId) }
+        val seconds = millis / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+
+        val durationText = buildString {
+            if (hours > 0) append(getString(de.cyface.app.utils.R.string.hours, hours)).append(" ")
+            if (minutes > 0) append(getString(de.cyface.app.utils.R.string.minutes, minutes % 60)).append(" ")
+            append(getString(de.cyface.app.utils.R.string.seconds, seconds % 60))
+        }
+
+        withContext(Dispatchers.Main) {
+            binding.durationView.text = durationText
+        }
+    }
+
+    private suspend fun updateLocationViews(location: ParcelableGeoLocation?) {
+        try {
+            val measurement = withContext(Dispatchers.IO) { persistence.loadCurrentlyCapturedMeasurement() }
+            val averageSpeedKmh = withContext(Dispatchers.IO) {
+                persistence.loadAverageSpeed(measurement.id, DefaultLocationCleaning()) * 3.6
+            }
+
+            val ongoingCapturing = measurement.status == MeasurementStatus.OPEN
+            val ascend = if (ongoingCapturing) {
+                withContext(Dispatchers.IO) { persistence.loadAscend(measurement.id) }
+            } else null
+            val ascendText = getString(de.cyface.app.utils.R.string.ascendMeters, ascend ?: 0.0)
+            val speedKmPh = location?.speed?.times(3.6)
+
+            withContext(Dispatchers.Main) {
+                binding.speedView.text = if (speedKmPh == null) "" else getString(
+                    de.cyface.app.utils.R.string.speedKphWithAverage,
+                    speedKmPh,
+                    averageSpeedKmh
+                )
+                binding.ascendView.text = if (speedKmPh == null) "" else ascendText
+            }
+        } catch (e: NoSuchMeasurementException) {
+            // Happen when locations arrive late
+            Log.d(TAG, "Position changed while no capturing is active, ignoring.")
+        }
+    }
+
     private suspend fun showModalitySelectionDialogIfNeeded() {
         registerModalityTabSelectionListener()
         val modality = Modality.valueOf(appSettings.modalityFlow.first())
         if (modality != Modality.UNKNOWN) {
-            lifecycleScope.launch { selectModalityTab() }
+            selectModalityTab()
             return
         }
         val fragmentManager = fragmentManager
@@ -385,8 +392,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     viewPager.currentItem = tab.position
                 }
 
-                override fun onTabUnselected(tab: TabLayout.Tab) { /* Nothing to do */ }
-                override fun onTabReselected(tab: TabLayout.Tab) { /* Nothing to do */ }
+                override fun onTabUnselected(tab: TabLayout.Tab) { /* Nothing to do */
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab) { /* Nothing to do */
+                }
             })
         }
 
@@ -448,7 +458,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == DIALOG_INITIAL_MODALITY_SELECTION_REQUEST_CODE) {
-            lifecycleScope.launch { selectModalityTab() }
+            lifecycleScope.launch { withContext(Dispatchers.IO) { selectModalityTab() } }
         }
     }
 
@@ -461,10 +471,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     private suspend fun selectModalityTab() {
         val tabLayout = binding.modalityTabs
-        val modality = appSettings.modalityFlow.first()
 
         // Select the Modality tab
-        val tab: TabLayout.Tab? = when (modality) {
+        val tab: TabLayout.Tab? = when (val modality = appSettings.modalityFlow.first()) {
             Modality.CAR.name -> {
                 tabLayout.getTabAt(0)
             }
@@ -501,7 +510,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume: reconnecting ...")
-        reconnect()
+        lifecycleScope.launch(Dispatchers.IO) { reconnect() }
     }
 
     override fun onDestroyView() {
@@ -579,70 +588,69 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Checks the current capturing state and refreshes the UI elements accordingly.
      */
-    private fun reconnect() {
+    private suspend fun reconnect() {
         capturing.addDataCapturingListener(this)
         cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
-        startResumeButton.isEnabled = false
-        pauseButton.isEnabled = false
-        stopButton.isEnabled = false
-        lifecycleScope.launch {
-            // OPEN: running capturing
-            if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                Log.d(TAG, "onResume: reconnecting DCS succeeded")
-                val (id) = capturing.loadCurrentlyCapturedMeasurement()
-                viewModel.setMeasurementId(id)
-                // We re-sync the button here as the data capturing can be canceled while the app is closed
-                setCapturingStatus(MeasurementStatus.OPEN)
-                updateCachedTrack(id)
+        withContext(Dispatchers.Main) {
+            startResumeButton.isEnabled = false
+            pauseButton.isEnabled = false
+            stopButton.isEnabled = false
+        }
+        // OPEN: running capturing
+        if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            Log.d(TAG, "onResume: reconnecting DCS succeeded")
+            val (id) = capturing.loadCurrentlyCapturedMeasurement()
+            viewModel.setMeasurementId(id)
+            // We re-sync the button here as the data capturing can be canceled while the app is closed
+            setCapturingStatus(MeasurementStatus.OPEN)
+            updateCachedTrack(id)
 
-                // Also try to reconnect to CameraService if it's alive
-                if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                    // It does not matter whether isCameraServiceRequested() as this can change all the time
-                    Log.d(TAG, "onResume: reconnecting CameraService succeeded")
-                }
-                return@launch
-            }
-
-            // PAUSED or FINISHED capturing
-            Log.d(TAG, "onResume: reconnecting timed out")
-            if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                setCapturingStatus(MeasurementStatus.PAUSED)
-                viewModel.setMeasurementId(null)
-            } else {
-                Log.d(TAG, "reconnect ")
-                setCapturingStatus(MeasurementStatus.FINISHED)
-                viewModel.setMeasurementId(null)
-            }
-
-            // Check if there is a zombie CameraService running
-            // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
-            // can be used by other apps again
+            // Also try to reconnect to CameraService if it's alive
             if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                Log.w(
-                    Constants.TAG,
-                    "Zombie CameraService is running and it's "
-                            + (if (cameraSettings.getCameraEnabledBlocking()) "" else "*not*")
-                            + " requested"
-                )
-                cameraService.stop(
-                    object :
-                        ShutDownFinishedHandler(
-                            de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                        ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            Log.d(
-                                TAG,
-                                "onResume: zombie CameraService stopped"
-                            )
-                        }
-                    })
-                error(
-                    "Camera stopped manually as the camera was not released. This should not happen!"
-                )
+                // It does not matter whether isCameraServiceRequested() as this can change all the time
+                Log.d(TAG, "onResume: reconnecting CameraService succeeded")
             }
+            return
+        }
+
+        // PAUSED or FINISHED capturing
+        Log.d(TAG, "onResume: reconnecting timed out")
+        if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+            setCapturingStatus(MeasurementStatus.PAUSED)
+            viewModel.setMeasurementId(null)
+        } else {
+            setCapturingStatus(MeasurementStatus.FINISHED)
+            viewModel.setMeasurementId(null)
+        }
+
+        // Check if there is a zombie CameraService running
+        // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
+        // can be used by other apps again
+        if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            Log.w(
+                Constants.TAG,
+                "Zombie CameraService is running and it's "
+                        + (if (cameraSettings.cameraEnabledFlow.first()) "" else "*not*")
+                        + " requested"
+            )
+            cameraService.stop(
+                object :
+                    ShutDownFinishedHandler(
+                        de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                    ) {
+                    override fun shutDownFinished(measurementIdentifier: Long) {
+                        Log.d(
+                            TAG,
+                            "onResume: zombie CameraService stopped"
+                        )
+                    }
+                })
+            error(
+                "Camera stopped manually as the camera was not released. This should not happen!"
+            )
         }
     }
 
@@ -672,19 +680,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     /**
-     * This method helps to access the button via UI thread from a handler thread.
-     */
-    private fun runOnUiThread(runnable: Runnable) {
-        Handler(Looper.getMainLooper()).post(runnable)
-    }
-
-    /**
      * Updates the "is enabled" state of the button on the ui thread.
      *
      * @param button The [Button] to access the [Activity] to run code on the UI thread
      */
     private fun setButtonEnabled(button: ImageButton) {
-        runOnUiThread { button.isEnabled = true }
+        button.isEnabled = true
     }
 
     /**
@@ -692,11 +693,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      *
      * @param newStatus the new status of the measurement
      */
-    private fun setCapturingStatus(newStatus: MeasurementStatus) {
+    private suspend fun setCapturingStatus(newStatus: MeasurementStatus) {
         viewModel.setCapturing(newStatus)
-        runOnUiThread {
-            updateButtonView(newStatus)
-        }
+        withContext(Dispatchers.Main) { updateButtonView(newStatus) }
     }
 
     /**
@@ -735,19 +734,20 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Stop capturing
      */
-    private fun stopCapturing(pause: Boolean) {
+    private suspend fun stopCapturing(pause: Boolean) {
         try {
-            val finishedHandler = object : ShutDownFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
-                override fun shutDownFinished(measurementIdentifier: Long) {
-                    // The measurement id should always be set [STAD-333]
-                    require(measurementIdentifier != -1L) { "Missing measurement id" }
+            val finishedHandler =
+                object : ShutDownFinishedHandler(MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED) {
+                    override fun shutDownFinished(measurementIdentifier: Long) {
+                        // The measurement id should always be set [STAD-333]
+                        require(measurementIdentifier != -1L) { "Missing measurement id" }
 
-                    // Ensures both services stopped to avoid btn out of sync [LEIP-299]
-                    val target = if (pause) "pause" else "stop"
-                    Log.d(TAG, "stopCapturing: $target finished")
-                    checkAndStopCameraCapturing(true, true, pause)
+                        // Ensures both services stopped to avoid btn out of sync [LEIP-299]
+                        val target = if (pause) "pause" else "stop"
+                        Log.d(TAG, "stopCapturing: $target finished")
+                        checkAndStopCameraCapturing(true, true, pause)
+                    }
                 }
-            }
             if (pause) {
                 capturing.pause(finishedHandler)
             } else {
@@ -761,17 +761,19 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Starts capturing
      */
-    private fun startCapturing() {
+    private suspend fun startCapturing() {
         // Measurement is stopped, so we start a new measurement
         if (persistence.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
-            showToastOnMainThread(
-                getString(de.cyface.app.utils.R.string.toast_last_tracking_crashed),
-                true
-            )
+            withContext(Dispatchers.Main) {
+                showToast(
+                    getString(de.cyface.app.utils.R.string.toast_last_tracking_crashed),
+                    true
+                )
+            }
         }
 
         // We use a handler to run the UI Code on the main thread as it is supposed to be
-        runOnUiThread {
+        withContext(Dispatchers.Main) {
             val calibrationProgressDialog = createAndShowCalibrationDialog()
             scheduleProgressDialogDismissal(
                 calibrationProgressDialog!!,
@@ -791,17 +793,19 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         viewModel.setMeasurementId(measurementIdentifier)
                         // TODO: Status should also be in ViewModel (maybe via currMId and observed M)
                         // the button should then just change on itself based on the live data measurement
-                        setCapturingStatus(MeasurementStatus.OPEN)
+                        lifecycleScope.launch(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.OPEN) }
 
                         // Start CameraService
-                        if (cameraSettings.getCameraEnabledBlocking()) {
-                            Log.d(TAG, "CameraServiceRequested")
-                            try {
-                                startCameraService(measurementIdentifier)
-                            } catch (e: DataCapturingException) {
-                                throw IllegalStateException(e)
-                            } catch (e: MissingPermissionException) {
-                                throw IllegalStateException(e)
+                        lifecycleScope.launch {
+                            if (withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }) {
+                                Log.d(TAG, "CameraServiceRequested")
+                                try {
+                                    startCameraService(measurementIdentifier)
+                                } catch (e: DataCapturingException) {
+                                    throw IllegalStateException(e)
+                                } catch (e: MissingPermissionException) {
+                                    throw IllegalStateException(e)
+                                }
                             }
                         }
                     }
@@ -821,7 +825,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * Resumes capturing
      */
-    private fun resumeCapturing() {
+    private suspend fun resumeCapturing() {
         Log.d(TAG, "resumeCachedTrack: Adding new sub track to existing cached track")
         viewModel.addTrack(Track())
         try {
@@ -832,17 +836,19 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         require(measurementIdentifier != -1L) { "Missing measurement id" }
                         Log.v(TAG, "resumeCapturing: startUpFinished")
                         viewModel.setMeasurementId(measurementIdentifier)
-                        setCapturingStatus(MeasurementStatus.OPEN)
+                        lifecycleScope.launch(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.OPEN) }
 
                         // Start CameraService
-                        if (cameraSettings.getCameraEnabledBlocking()) {
-                            Log.d(Constants.TAG, "CameraServiceRequested")
-                            try {
-                                startCameraService(measurementIdentifier)
-                            } catch (e: DataCapturingException) {
-                                throw java.lang.IllegalStateException(e)
-                            } catch (e: MissingPermissionException) {
-                                throw java.lang.IllegalStateException(e)
+                        lifecycleScope.launch {
+                            if (withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }) {
+                                Log.d(Constants.TAG, "CameraServiceRequested")
+                                try {
+                                    startCameraService(measurementIdentifier)
+                                } catch (e: DataCapturingException) {
+                                    throw java.lang.IllegalStateException(e)
+                                } catch (e: MissingPermissionException) {
+                                    throw java.lang.IllegalStateException(e)
+                                }
                             }
                         }
                     }
@@ -867,19 +873,19 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * `Exception`. If the `Exception` was thrown the service does not start.
      */
     @Throws(DataCapturingException::class, MissingPermissionException::class)
-    private fun startCameraService(measurementId: Long) {
-        val videoModeSelected = cameraSettings.getVideoModeBlocking()
-        val rawModeSelected = cameraSettings.getRawModeBlocking()
+    private suspend fun startCameraService(measurementId: Long) {
+        val videoModeSelected = cameraSettings.videoModeFlow.first()
+        val rawModeSelected = cameraSettings.rawModeFlow.first()
         // We need to load and pass the preferences for the camera focus here as the preferences
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
-        val staticFocusSelected = cameraSettings.getStaticFocusBlocking()
-        val staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking()
-        val distanceBasedTriggeringSelected = cameraSettings.getDistanceBasedTriggeringBlocking()
-        val triggeringDistance = cameraSettings.getTriggeringDistanceBlocking()
-        val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
-        val staticExposureTime = cameraSettings.getStaticExposureTimeBlocking()
-        val exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking()
-        val anonymizationModel = cameraSettings.getAnonModel()
+        val staticFocusSelected = cameraSettings.staticFocusFlow.first()
+        val staticFocusDistance = cameraSettings.staticFocusDistanceFlow.first()
+        val distanceBasedTriggeringSelected = cameraSettings.distanceBasedTriggeringFlow.first()
+        val triggeringDistance = cameraSettings.triggeringDistanceFlow.first()
+        val staticExposureTimeSelected = cameraSettings.staticExposureFlow.first()
+        val staticExposureTime = cameraSettings.staticExposureTimeFlow.first()
+        val exposureValueIso100 = cameraSettings.staticExposureValueFlow.first()
+        val anonymizationModel = cameraSettings.anonModelFlow.first()
 
         // Usual cycling velocity in cities should be around 15-20 km/h, but outside the
         // city it can be up to 50 km/h. So we set the distance to 15m to ensure we stay
@@ -914,7 +920,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             Log.w(TAG, "Activity is null. If needed, dialogs wont appear.")
         }
         if (!DiskConsumption.spaceAvailable()) {
-            showToastOnMainThread(
+            showToast(
                 getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space),
                 false
             )
@@ -956,26 +962,28 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             true,
             false
         ) {
-            try {
-                capturing
-                    .stop(object : ShutDownFinishedHandler(
-                        MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                    ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            // nothing to do
-                        }
-                    })
-                if (cameraSettings.getCameraEnabledBlocking()) {
-                    cameraService.stop(object : ShutDownFinishedHandler(
-                        de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                    ) {
-                        override fun shutDownFinished(measurementIdentifier: Long) {
-                            // nothing to do
-                        }
-                    })
+            lifecycle.coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    capturing
+                        .stop(object : ShutDownFinishedHandler(
+                            MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                        ) {
+                            override fun shutDownFinished(measurementIdentifier: Long) {
+                                // nothing to do
+                            }
+                        })
+                    if (cameraSettings.cameraEnabledFlow.first()) {
+                        cameraService.stop(object : ShutDownFinishedHandler(
+                            de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                        ) {
+                            override fun shutDownFinished(measurementIdentifier: Long) {
+                                // nothing to do
+                            }
+                        })
+                    }
+                } catch (e: NoSuchMeasurementException) {
+                    throw java.lang.IllegalStateException(e)
                 }
-            } catch (e: NoSuchMeasurementException) {
-                throw java.lang.IllegalStateException(e)
             }
         }
     }
@@ -1018,7 +1026,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      *
      * @param measurementId The id of the currently active measurement.
      */
-    private fun updateCachedTrack(measurementId: Long) {
+    private suspend fun updateCachedTrack(measurementId: Long) {
         try {
             if (!persistence.hasMeasurement(MeasurementStatus.OPEN)
                 && !persistence.hasMeasurement(MeasurementStatus.PAUSED)
@@ -1044,26 +1052,23 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     /**
-     * Shows a toast message explicitly on the main thread.
+     * Shows a toast message.
      *
      * @param toastMessage The message to show
      * @param longDuration `True` if the toast should be shown for a longer time
      */
-    private fun showToastOnMainThread(toastMessage: String, longDuration: Boolean) {
-        Handler(Looper.getMainLooper()).post {
-            Toast
-                .makeText(
-                    context,
-                    toastMessage,
-                    if (longDuration) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-                ).show()
-        }
+    private fun showToast(toastMessage: String, longDuration: Boolean) {
+        Toast
+            .makeText(
+                context,
+                toastMessage,
+                if (longDuration) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+            ).show()
     }
 
     // Supplies the fragments to the ViewPager
     private class PagerAdapter(fragmentManager: FragmentManager?, lifecycle: Lifecycle?) :
-        FragmentStateAdapter(fragmentManager!!, lifecycle!!)
-    {
+        FragmentStateAdapter(fragmentManager!!, lifecycle!!) {
         override fun createFragment(position: Int): Fragment {
             // Ordered list, make sure titles list match this order
             require(position == 0)
@@ -1086,7 +1091,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // from inside the IsRunningCallback. Thus, we call it here for now instead of in startCapturing()
             val capturingStatus = capturingFragment.viewModel.capturing.value
             if ((capturingStatus == MeasurementStatus.FINISHED ||
-                        capturingStatus == MeasurementStatus.PAUSED) && capturingFragment.isRestrictionActive()) {
+                        capturingStatus == MeasurementStatus.PAUSED) &&
+                capturingFragment.isRestrictionActive()) {
                 return
             }
 
@@ -1094,7 +1100,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
                 TimeUnit.MILLISECONDS,
                 object : IsRunningCallback {
-                    override fun isRunning() { error("Measurement is already running") }
+                    override fun isRunning() {
+                        error("Measurement is already running")
+                    }
 
                     override fun timedOut() {
                         require(capturingStatus !== MeasurementStatus.OPEN) {
@@ -1102,11 +1110,13 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         }
 
                         // If Measurement is paused, resume the measurement
-                        if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                            capturingFragment.resumeCapturing()
-                            return
+                        capturingFragment.lifecycleScope.launch(Dispatchers.IO) {
+                            if (capturingFragment.persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+                                capturingFragment.resumeCapturing()
+                                return@launch
+                            }
+                            capturingFragment.startCapturing()
                         }
-                        capturingFragment.startCapturing()
                     }
                 })
         }
@@ -1146,57 +1156,69 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             "DataCapturingButton is out of sync."
                         }
                     }
-                    stopCapturing(pause)
+                    lifecycleScope.launch(Dispatchers.IO) { stopCapturing(pause) }
                 }
 
                 override fun timedOut() {
                     // If Measurement is paused, stop the measurement
-                    if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
-                        if (crashAsyncUI) {
-                            require(!pause) { "Measurement is already paused." }
-                            require(viewModel.capturing.value === MeasurementStatus.PAUSED) {
-                                "DataCapturingButton is out of sync."
+                    lifecycleScope.launch {
+                        if (withContext(Dispatchers.IO) { persistence.hasMeasurement(MeasurementStatus.PAUSED) }) {
+                            if (crashAsyncUI) {
+                                require(!pause) { "Measurement is already paused." }
+                                require(viewModel.capturing.value === MeasurementStatus.PAUSED) {
+                                    "DataCapturingButton is out of sync."
+                                }
                             }
+                            withContext(Dispatchers.IO) { stopCapturing(pause) }
+                            return@launch
+                        } else {
+                            error("No measurement is running")
                         }
-                        stopCapturing(pause)
-                        return
-                    } else {
-                        error("No measurement is running")
                     }
                 }
             })
     }
 
-    private fun checkAndStopCameraCapturing(capturingStopped: Boolean, updateUi: Boolean, pause: Boolean) {
+    private fun checkAndStopCameraCapturing(
+        @Suppress("SameParameterValue") capturingStopped: Boolean,
+        @Suppress("SameParameterValue") updateUi: Boolean,
+        pause: Boolean
+    ) {
         cameraService.isRunning(
             DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
             TimeUnit.MILLISECONDS,
             object : IsRunningCallback {
                 override fun isRunning() {
-                    cameraService.stop(
-                        object : ShutDownFinishedHandler(
-                            de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                        ) {
-                            override fun shutDownFinished(measurementIdentifier: Long) {
-                                Log.d(TAG, "stopCapturing: CameraService stopped")
-                                if (capturingStopped) {
-                                    Log.d(TAG, "DCS + CS stopped")
-                                } else {
-                                    Log.d(TAG, "CS only stopped")
-                                }
-                                if (updateUi) {
-                                    if (pause) {
-                                        setCapturingStatus(MeasurementStatus.PAUSED)
-                                    } else {
-                                        viewModel.setTracks(null)
-                                        setCapturingStatus(MeasurementStatus.FINISHED)
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            cameraService.stop(
+                                object : ShutDownFinishedHandler(
+                                    de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
+                                ) {
+                                    override fun shutDownFinished(measurementIdentifier: Long) {
+                                        Log.d(TAG, "stopCapturing: CameraService stopped")
+                                        if (capturingStopped) {
+                                            Log.d(TAG, "DCS + CS stopped")
+                                        } else {
+                                            Log.d(TAG, "CS only stopped")
+                                        }
+                                        if (updateUi) {
+                                            lifecycleScope.launch {
+                                                if (pause) {
+                                                    withContext(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.PAUSED) }
+                                                } else {
+                                                    withContext(Dispatchers.Main) { viewModel.setTracks(null) }
+                                                    withContext(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.FINISHED) }
+                                                }
+                                            }
+                                            viewModel.setLocation(null)
+                                            viewModel.setMeasurementId(null)
+                                        }
                                     }
-                                    viewModel.setLocation(null)
-                                    viewModel.setMeasurementId(null)
                                 }
-                            }
+                            )
                         }
-                    )
+                    }
                 }
 
                 override fun timedOut() {
@@ -1205,11 +1227,13 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         Log.d(TAG, "DCS only stopped")
                     }
                     if (updateUi) {
-                        if (pause) {
-                            setCapturingStatus(MeasurementStatus.PAUSED)
-                        } else {
-                            viewModel.setTracks(null)
-                            setCapturingStatus(MeasurementStatus.FINISHED)
+                        lifecycleScope.launch {
+                            if (pause) {
+                                withContext(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.PAUSED) }
+                            } else {
+                                withContext(Dispatchers.Main) { viewModel.setTracks(null) }
+                                withContext(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.FINISHED) }
+                            }
                         }
                         viewModel.setLocation(null)
                         viewModel.setMeasurementId(null)
