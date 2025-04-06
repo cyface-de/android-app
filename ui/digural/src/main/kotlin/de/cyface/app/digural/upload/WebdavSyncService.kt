@@ -46,6 +46,7 @@ class WebdavSyncService : Service() {
         synchronized(LOCK) {
             if (syncAdapter == null) {
                 val persistence = DefaultPersistenceLayer(this, DefaultPersistenceBehaviour())
+                // `runBlocking` is okay here, as create cannot be made suspend
                 val deviceId = runBlocking { persistence.restoreOrCreateDeviceId() }
                 val auth = WebdavAuth(applicationContext, WebdavAuthenticator.settings)
 

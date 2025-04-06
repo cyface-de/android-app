@@ -149,32 +149,32 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
      * TODO: Change interface of DCS constructor to not force us to do this.
      */
     private val unInterestedListener = object : DataCapturingListener {
-        override fun onFixAcquired() {}
-        override fun onFixLost() {}
-        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) {}
-        override fun onNewSensorDataAcquired(data: CapturedData?) {}
-        override fun onLowDiskSpace(allocation: DiskConsumption?) {}
-        override fun onSynchronizationSuccessful() {}
-        override fun onErrorState(e: Exception?) {}
+        override fun onFixAcquired() = Unit
+        override fun onFixLost() = Unit
+        override fun onNewGeoLocationAcquired(position: ParcelableGeoLocation?) = Unit
+        override fun onNewSensorDataAcquired(data: CapturedData?) = Unit
+        override fun onLowDiskSpace(allocation: DiskConsumption?) = Unit
+        override fun onSynchronizationSuccessful() = Unit
+        override fun onErrorState(e: Exception?) = Unit
         override fun onRequiresPermission(permission: String, reason: Reason): Boolean {
             return false
         }
 
-        override fun onCapturingStopped() {}
+        override fun onCapturingStopped() = Unit
     }
 
     private val unInterestedCameraListener: CameraListener = object :
         CameraListener {
-        override fun onNewPictureAcquired(picturesCaptured: Int) {}
-        override fun onNewVideoStarted() {}
-        override fun onVideoStopped() {}
-        override fun onCameraLowDiskSpace(allocation: DiskConsumption) {}
-        override fun onCameraErrorState(e: Exception) {}
+        override fun onNewPictureAcquired(picturesCaptured: Int) = Unit
+        override fun onNewVideoStarted() = Unit
+        override fun onVideoStopped() = Unit
+        override fun onCameraLowDiskSpace(allocation: DiskConsumption) = Unit
+        override fun onCameraErrorState(e: Exception) = Unit
         override fun onCameraRequiresPermission(permission: String, reason: Reason): Boolean {
             return false
         }
 
-        override fun onCameraCapturingStopped() {}
+        override fun onCameraCapturingStopped() = Unit
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -183,7 +183,8 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
 
         // Start DataCapturingService and CameraService
         // With async call the app crashes as late-init `capturing` is not initialized yet.
-        val sensorFrequency = runBlocking { appSettings.sensorFrequencyFlow.first() }
+        // `runBlocking` is required here as `capturing` as to be initialized synchronously.
+        val sensorFrequency = runBlocking(Dispatchers.IO) { appSettings.sensorFrequencyFlow.first() }
         try {
             capturing = CyfaceDataCapturingService(
                 applicationContext,
@@ -193,7 +194,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 unInterestedListener,
                 sensorFrequency,
                 CyfaceAuthenticator(this@MainActivity)
-            ).apply { lifecycleScope.launch { withContext(Dispatchers.IO) { initialize() } } }
+            ).apply { lifecycleScope.launch(Dispatchers.IO) { initialize() } }
             // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             //startSynchronization() // We do this in displayAuthorized() instead!
@@ -376,12 +377,14 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     requireNotNull(account)
 
                     // Set synchronizationEnabled to the current user preferences
-                    val uploadEnabled = runBlocking { appSettings.uploadEnabledFlow.first() }
-                    Log.d(
-                        WiFiSurveyor.TAG,
-                        "Setting syncEnabled for new account to preference: $uploadEnabled"
-                    )
-                    capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
+                    lifecycleScope.launch {
+                        val uploadEnabled = withContext(Dispatchers.IO) { appSettings.uploadEnabledFlow.first() }
+                        Log.d(
+                            WiFiSurveyor.TAG,
+                            "Setting syncEnabled for new account to preference: $uploadEnabled"
+                        )
+                        capturing.wiFiSurveyor.makeAccountSyncable(account, uploadEnabled)
+                    }
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
                 } catch (e: OperationCanceledException) {

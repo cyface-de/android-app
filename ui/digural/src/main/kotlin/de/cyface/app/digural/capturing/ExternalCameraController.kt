@@ -27,7 +27,6 @@ import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -53,23 +52,23 @@ class ExternalCameraController(
         require(deviceId.isNotEmpty())
     }
 
-    override fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
+    override suspend fun contextBasedInitialization(context: Context, scope: CoroutineScope) {
         this.scope = scope
         // Instance required to get current digural URL. MainActivity also needs access to settings
         // before capturing. Can't inject it (not parcelable right now). We use a singleton as
         // suggested by the docs, as only one instance is allowed per process. [LEIP-294]
         val customSettings = CustomSettings.getInstance(context)
-        val address = runBlocking { customSettings.diguralUrlFlow.first() }
+        val address = customSettings.diguralUrlFlow.first()
         DiguralApi.baseUrl = address
         DiguralApi.setToUseWifi(context)
         Log.d(TAG, "Setting digural address to: $address")
     }
 
-    override fun onCameraAccessLost() {}
-    override fun onPictureCaptured() {}
-    override fun onRecordingStarted() {}
-    override fun onRecordingStopped() {}
-    override fun onCameraError(reason: String) {}
+    override fun onCameraAccessLost() = Unit
+    override fun onPictureCaptured() = Unit
+    override fun onRecordingStarted() = Unit
+    override fun onRecordingStopped() = Unit
+    override fun onCameraError(reason: String) = Unit
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         Log.d(TAG, "On About to Capture $location")
         requireNotNull(this.scope)
