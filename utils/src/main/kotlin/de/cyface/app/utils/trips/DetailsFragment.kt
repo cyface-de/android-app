@@ -191,6 +191,8 @@ class DetailsFragment : Fragment() {
                 chart.description.textColor = textColor
                 chart.legend.isEnabled = false
                 chart.xAxis.isEnabled = false
+
+                chart.invalidate() // ensures chart is re-rendered else "no chart data" until touch
             }
         }
 

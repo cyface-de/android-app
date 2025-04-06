@@ -1075,7 +1075,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
             // The MaterialDialog implementation of the EnergySettings dialogs are not shown when called
             // from inside the IsRunningCallback. Thus, we call it here for now instead of in startCapturing()
             val capturingStatus = capturingFragment.viewModel.capturing.value
-                capturingFragment.lifecycleScope.launch { if ((capturingStatus == MeasurementStatus.FINISHED ||
+            capturingFragment.lifecycleScope.launch { if ((capturingStatus == MeasurementStatus.FINISHED ||
                             capturingStatus == MeasurementStatus.PAUSED) &&
                     capturingFragment.isRestrictionActive()) {
                     return@launch
