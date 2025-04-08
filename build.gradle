@@ -74,7 +74,7 @@ ext {
     // To upgrade the dependencies you need to update the submodules to a newer commit.
     cyfaceAndroidBackendVersion = "7.13.14"
     cyfaceEnergySettingsVersion = "4.3.4"
-    cyfaceCameraServiceVersion = "4.9.5"
+    cyfaceCameraServiceVersion = "4.9.6"
 
     // Android SDK versions
     minSdkVersion = 26 // device support
