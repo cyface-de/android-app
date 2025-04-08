@@ -90,14 +90,6 @@
         app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- the following item was in the old sidebar -->
-
-    <!--item
-        android:id="@+id/speed_sensor"
-        android:title="@string/drawer_setting_speed_sensor"
-        app:actionLayout="@layout/drawer_list_switch"
-        app:showAsAction="ifRoom"/-->
-
     <!-- Wrapper for camera settings -->
     <LinearLayout
       android:id="@+id/camera_settings_wrapper"
@@ -560,7 +552,7 @@
             android:paddingEnd="4pt"
             android:paddingRight="4pt"
             android:minHeight="48dp"
-            android:background="#FFFFFF"
+            android:background="?attr/selectableItemBackground"
             />
       </LinearLayout>
 
