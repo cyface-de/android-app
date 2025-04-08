@@ -61,8 +61,11 @@ import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.UIListener
 import de.cyface.camera_service.background.camera.CameraListener
+import de.cyface.camera_service.foreground.AnnotationsWriter
 import de.cyface.camera_service.foreground.CameraService
+import de.cyface.camera_service.foreground.NoAnnotationsFound
 import de.cyface.camera_service.settings.CameraSettings
+import de.cyface.camera_service.settings.CameraSettings.Companion.categoryConverterForModel
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -536,6 +539,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             TAG,
                             "onResume: zombie CameraService stopped"
                         )
+
+                        // This needs to be done in on finished handler, or else
+                        // the log files are not yet created (done in `close()`)
+                        lifecycleScope.launch {
+                            mergeAnnotationsJson(measurementIdentifier)
+                        }
                     }
                 })
             error(
@@ -634,7 +643,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     // Ensures both services stopped to avoid btn out of sync [LEIP-299]
                     val target = if (pause) "pause" else "stop"
                     Log.d(TAG, "stopCapturing: $target finished")
-                    checkAndStopCameraCapturing(true, true, pause)
+                    checkAndStopCameraCapturing(capturingStopped = true, updateUi = true, pause)
                 }
             }
             if (pause) {
@@ -873,7 +882,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                             de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
                         ) {
                             override fun shutDownFinished(measurementIdentifier: Long) {
-                                // nothing to do
+                                // This needs to be done in on finished handler, or else
+                                // the log files are not yet created (done in `close()`)
+                                lifecycleScope.launch {
+                                    mergeAnnotationsJson(measurementIdentifier)
+                                }
                             }
                         })
                     }
@@ -1113,6 +1126,14 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                                             viewModel.setLocation(null)
                                             viewModel.setMeasurementId(null)
                                         }
+
+                                        if (!pause) {
+                                            // This needs to be done in on finished handler, or else
+                                            // the log files are not yet created (done in `close()`)
+                                            lifecycleScope.launch {
+                                                mergeAnnotationsJson(measurementIdentifier)
+                                            }
+                                        }
                                     }
                                 }
                             )
@@ -1140,6 +1161,22 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 }
             }
         )
+    }
+
+    private suspend fun mergeAnnotationsJson(measurementId: Long) {
+        withContext(Dispatchers.IO) {
+            val anonModel = cameraSettings.anonModelFlow.first()
+            try {
+                AnnotationsWriter(
+                    measurementId = measurementId,
+                    attachmentDao = persistence.attachmentDao!!,
+                    measurementRepository = persistence.measurementRepository!!,
+                    categoryConverter = categoryConverterForModel(anonModel)
+                ).mergeJsonAndWriteToFile()
+            } catch (e: NoAnnotationsFound) {
+                Log.i(TAG, "Skip merging annotations.json, no annotations found")
+            }
+        }
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {

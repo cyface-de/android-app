@@ -142,6 +142,14 @@ class WebdavUploader(
         }
     }
 
+    override fun onUploadFinished(uploadable: Uploadable) {
+        val completionFilePath = "${deviceMeasurementDirectory(uploadable)}/upload-completed"
+        if (!sardine.exists(completionFilePath)) {
+            sardine.put(completionFilePath, ByteArray(0))
+        }
+        Log.d(TAG, "created: $completionFilePath")
+    }
+
     private fun imuDirectory(uploadable: Uploadable): String {
         return sensorDirectory(uploadable) + "/imu"
     }
