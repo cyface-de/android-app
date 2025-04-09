@@ -58,7 +58,14 @@ class WebdavSyncService : Service() {
                     applicationContext,
                     true,
                     auth,
-                    WebdavUploader(collectorApi, deviceId, account.name, auth.getPassword(account)),
+                    WebdavUploader(
+                        collectorApi,
+                        deviceId,
+                        account.name,
+                        auth.getPassword(account),
+                        persistence.attachmentDao,
+                        persistence.measurementRepository,
+                    ),
                 )
             }
         }

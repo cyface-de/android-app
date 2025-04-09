@@ -22,8 +22,13 @@ import android.util.Log
 import com.thegrizzlylabs.sardineandroid.Sardine
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import de.cyface.app.digural.MainActivity.Companion.TAG
+import de.cyface.app.digural.capturing.CapturingFragment
+import de.cyface.camera_service.foreground.AnnotationsWriter
+import de.cyface.camera_service.foreground.NoAnnotationsFound
 import de.cyface.model.Json
 import de.cyface.model.Json.JsonObject
+import de.cyface.persistence.dao.AttachmentDao
+import de.cyface.persistence.repository.MeasurementRepository
 import de.cyface.synchronization.NoLocationData
 import de.cyface.synchronization.SyncAdapter.Companion.fileNamePrefix
 import de.cyface.uploader.Result
@@ -48,6 +53,8 @@ import de.cyface.uploader.exception.UploadSessionExpired
 import de.cyface.uploader.model.Attachment
 import de.cyface.uploader.model.Measurement
 import de.cyface.uploader.model.Uploadable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -71,7 +78,9 @@ class WebdavUploader(
     private val apiEndpoint: String,
     private val deviceId: String,
     private val login: String,
-    password: String
+    password: String,
+    private val attachmentDao: AttachmentDao?,
+    private val measurementRepository: MeasurementRepository?
 ) : Uploader {
 
     private val sardine = OkHttpSardine()
@@ -95,6 +104,19 @@ class WebdavUploader(
             Log.i(TAG, "Skipping measurement upload without location: ${uploadable.identifier}")
             return Result.UPLOAD_SKIPPED
         }
+        // Create here to support resume and as capturing.stop.finished is unreliable [LEIP-327]
+        runBlocking(Dispatchers.IO) {
+            try {
+                AnnotationsWriter(
+                    measurementId = uploadable.measurementId(),
+                    attachmentDao = attachmentDao!!,
+                    measurementRepository = measurementRepository!!,
+                ).mergeJsonAndWriteToFile()
+            } catch (e: NoAnnotationsFound) {
+                Log.w(TAG, "Skip merging annotations.json, no annotations found", e)
+            }
+        }
+
         val endpoint = URL(imuDirectory(uploadable))
         val result = uploadFile(uploadable, file, MEASUREMENT_FILE_FILENAME, endpoint)
         if (result != Result.UPLOAD_FAILED) {
