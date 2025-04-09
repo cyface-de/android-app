@@ -40,7 +40,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -58,11 +57,8 @@ import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.UIListener
 import de.cyface.camera_service.background.camera.CameraListener
-import de.cyface.camera_service.foreground.AnnotationsWriter
 import de.cyface.camera_service.foreground.CameraService
-import de.cyface.camera_service.foreground.NoAnnotationsFound
 import de.cyface.camera_service.settings.CameraSettings
-import de.cyface.camera_service.settings.CameraSettings.Companion.categoryConverterForModel
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -621,7 +617,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
         // PAUSED or FINISHED capturing
         Log.d(TAG, "onResume: reconnecting timed out")
-        if (persistence.hasMeasurement(MeasurementStatus.PAUSED)) {
+        val paused = persistence.hasMeasurement(MeasurementStatus.PAUSED)
+        if (paused) {
             setCapturingStatus(MeasurementStatus.PAUSED)
             viewModel.setMeasurementId(null)
         } else {
@@ -645,21 +642,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
                     ) {
                     override fun shutDownFinished(measurementIdentifier: Long) {
-                        Log.d(
-                            TAG,
-                            "onResume: zombie CameraService stopped"
-                        )
-
-                        // This needs to be done in on finished handler, or else
-                        // the log files are not yet created (done in `close()`)
-                        lifecycleScope.launch {
-                            mergeAnnotationsJson(measurementIdentifier)
-                        }
+                        Log.d(TAG, "onResume: zombie CameraService stopped" )
                     }
                 })
-            error(
-                "Camera stopped manually as the camera was not released. This should not happen!"
-            )
+            // TODO: This cancels the stop above, we need a onTimedOut [LEIP-327]
+            error("Camera stopped manually as the camera was not released. This should not happen!")
         }
     }
 
@@ -970,36 +957,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             getString(de.cyface.app.utils.R.string.msg_calibrating),
             true,
             false
-        ) {
-            lifecycle.coroutineScope.launch(Dispatchers.IO) {
-                try {
-                    capturing
-                        .stop(object : ShutDownFinishedHandler(
-                            MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                        ) {
-                            override fun shutDownFinished(measurementIdentifier: Long) {
-                                // nothing to do
-                            }
-                        })
-                    if (cameraSettings.cameraEnabledFlow.first()) {
-                        cameraService.stop(
-                            object : ShutDownFinishedHandler(
-                                de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STOPPED
-                            ) {
-                                override fun shutDownFinished(measurementIdentifier: Long) {
-                                    // This needs to be done in on finished handler, or else
-                                    // the log files are not yet created (done in `close()`)
-                                    lifecycleScope.launch {
-                                        mergeAnnotationsJson(measurementIdentifier)
-                                    }
-                                }
-                            })
-                    }
-                } catch (e: NoSuchMeasurementException) {
-                    throw java.lang.IllegalStateException(e)
-                }
-            }
-        }
+        ) { error("Should not happen as dialog is not cancelable") }
     }
 
     /**
@@ -1219,22 +1177,26 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                                         if (updateUi) {
                                             lifecycleScope.launch {
                                                 if (pause) {
-                                                    withContext(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.PAUSED) }
+                                                    withContext(Dispatchers.IO) {
+                                                        setCapturingStatus(
+                                                            MeasurementStatus.PAUSED
+                                                        )
+                                                    }
                                                 } else {
-                                                    withContext(Dispatchers.Main) { viewModel.setTracks(null) }
-                                                    withContext(Dispatchers.IO) { setCapturingStatus(MeasurementStatus.FINISHED) }
+                                                    withContext(Dispatchers.Main) {
+                                                        viewModel.setTracks(
+                                                            null
+                                                        )
+                                                    }
+                                                    withContext(Dispatchers.IO) {
+                                                        setCapturingStatus(
+                                                            MeasurementStatus.FINISHED
+                                                        )
+                                                    }
                                                 }
                                             }
                                             viewModel.setLocation(null)
                                             viewModel.setMeasurementId(null)
-                                        }
-
-                                        if (!pause) {
-                                            // This needs to be done in on finished handler, or else
-                                            // the log files are not yet created (done in `close()`)
-                                            lifecycleScope.launch {
-                                                mergeAnnotationsJson(measurementIdentifier)
-                                            }
                                         }
                                     }
                                 }
@@ -1263,22 +1225,6 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 }
             }
         )
-    }
-
-    private suspend fun mergeAnnotationsJson(measurementId: Long) {
-        withContext(Dispatchers.IO) {
-            val anonModel = cameraSettings.anonModelFlow.first()
-            try {
-                AnnotationsWriter(
-                    measurementId = measurementId,
-                    attachmentDao = persistence.attachmentDao!!,
-                    measurementRepository = persistence.measurementRepository!!,
-                    categoryConverter = categoryConverterForModel(anonModel)
-                ).mergeJsonAndWriteToFile()
-            } catch (e: NoAnnotationsFound) {
-                Log.i(TAG, "Skip merging annotations.json, no annotations found")
-            }
-        }
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {
