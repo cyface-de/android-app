@@ -876,7 +876,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
         val staticFocusSelected = cameraSettings.staticFocusFlow.first()
         val staticFocusDistance = cameraSettings.staticFocusDistanceFlow.first()
-        val distanceBasedTriggeringSelected = cameraSettings.distanceBasedTriggeringFlow.first()
+        val triggerMode = cameraSettings.triggerMode.first()
         val triggeringDistance = cameraSettings.triggeringDistanceFlow.first()
         val staticExposureTimeSelected = cameraSettings.staticExposureFlow.first()
         val staticExposureTime = cameraSettings.staticExposureTimeFlow.first()
@@ -895,7 +895,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             staticExposureTimeSelected,
             staticExposureTime,
             exposureValueIso100,
-            distanceBasedTriggeringSelected,
+            triggerMode,
             triggeringDistance,
             true,
             anonymizationModel,

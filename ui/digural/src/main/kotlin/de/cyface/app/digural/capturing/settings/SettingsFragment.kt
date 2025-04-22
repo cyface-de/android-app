@@ -43,6 +43,7 @@ import de.cyface.app.digural.capturing.settings.ExposureTimeDialog.Companion.CAM
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.Utils
+import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import java.util.TreeMap
@@ -162,16 +163,24 @@ class SettingsFragment : Fragment() {
                 this
             )
         )
-        binding.distanceBasedSwitcher.setOnCheckedChangeListener(
-            DistanceBasedSwitchHandler(
-                requireContext(),
-                viewModel
-            )
+
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.trigger_modes,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            binding.triggerModeSelectionSpinner.adapter = adapter
+            adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        }
+        binding.triggerModeSelectionSpinner.onItemSelectedListener = TriggerModeSelectionListener(viewModel)
+
+        // Distance-based slider
+        binding.staticDistanceSlider.addOnChangeListener(
+            StaticTriggerDistanceSlideHandler(viewModel)
         )
-        binding.distanceBasedSlider.addOnChangeListener(
-            TriggerDistanceSlideHandler(viewModel)
-        )
-        binding.distanceBasedUnit.text = TRIGGER_DISTANCE_UNIT
+        binding.staticDistanceUnit.text = TRIGGER_DISTANCE_UNIT
+        // FIXME: add Time-based slider
+
         binding.staticFocusSwitcher.setOnCheckedChangeListener(
             StaticFocusSwitchHandler(
                 requireContext(),
@@ -294,23 +303,24 @@ class SettingsFragment : Fragment() {
                     getText(de.cyface.camera_service.R.string.compressed_images)
             }
         }
-        viewModel.distanceBasedTriggering.observe(viewLifecycleOwner) { distanceBased ->
+        viewModel.triggerMode.observe(viewLifecycleOwner) { triggerMode ->
             run {
-                binding.distanceBasedSwitcher.isChecked = distanceBased
-                binding.distanceBasedWrapper.visibility = if (distanceBased) VISIBLE else INVISIBLE
+                binding.triggerModeSelectionSpinner.setSelection(triggerMode.toOrdinal())
+                binding.staticDistanceWrapper.visibility =
+                    if (triggerMode == TriggerMode.STATIC_DISTANCE) VISIBLE else INVISIBLE
             }
         }
         viewModel.triggeringDistance.observe(viewLifecycleOwner) { triggeringDistance ->
             run {
                 val roundedDistance = (triggeringDistance * 100).roundToInt() / 100f
                 Log.d(TAG, "updateView -> triggering distance to $roundedDistance")
-                binding.distanceBasedSlider.value = roundedDistance
+                binding.staticDistanceSlider.value = roundedDistance
 
                 val text = StringBuilder(roundedDistance.toString())
                 while (text.length < 4) {
                     text.append("0")
                 }
-                binding.distanceBased.text = text
+                binding.staticDistance.text = text
             }
         }
         viewModel.staticFocus.observe(viewLifecycleOwner) { staticFocus ->

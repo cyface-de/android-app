@@ -59,6 +59,7 @@ import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.UIListener
+import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.camera_service.settings.CameraSettings
@@ -764,7 +765,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
         val staticFocusSelected = cameraSettings.getStaticFocusBlocking()
         val staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking()
-        val distanceBasedTriggeringSelected = cameraSettings.getDistanceBasedTriggeringBlocking()
+        val triggerMode = cameraSettings.getTriggerModeBlocking()
         val triggeringDistance = cameraSettings.getTriggeringDistanceBlocking()
         val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
         val staticExposureTime = cameraSettings.getStaticExposureTimeBlocking()
@@ -790,7 +791,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             false,
             0L,
             0,
-            true, // For testing, switch this to false to capture w/1 Hz
+            TriggerMode.STATIC_DISTANCE,
             triggeringDistance,
             false,
             2, // See camera_service.BackgroundService.anonymizationStrategy()

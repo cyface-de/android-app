@@ -97,6 +97,8 @@ class ExternalCameraController(
         }
     }
 
+    override fun onTriggerNext() = Unit
+
     override fun onStart() {
         scope.launch {
             try {

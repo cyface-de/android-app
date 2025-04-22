@@ -30,7 +30,7 @@ import kotlin.math.roundToInt
  * @version 1.0.1
  * @since 3.2.0
  */
-class TriggerDistanceSlideHandler(
+class StaticTriggerDistanceSlideHandler(
     private val viewModel: SettingsViewModel
 ) : Slider.OnChangeListener {
     override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
