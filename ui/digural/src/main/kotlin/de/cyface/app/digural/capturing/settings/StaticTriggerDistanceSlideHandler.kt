@@ -18,40 +18,27 @@
  */
 package de.cyface.app.digural.capturing.settings
 
-import android.content.Context
-import android.util.Log
-import android.widget.CompoundButton
-import android.widget.Toast
 import androidx.lifecycle.viewModelScope
-import de.cyface.app.digural.capturing.settings.SettingsFragment.Companion.TAG
+import com.google.android.material.slider.Slider
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
- * Handles UI changes of the 'switcher' used to en-/disable 'distance based triggering' feature.
+ * Handles UI changes of the 'slider' used to adjust the 'triggering distance' setting.
  *
  * @author Armin Schnabel
  * @version 1.0.1
  * @since 3.2.0
  */
-class DistanceBasedSwitchHandler(
-    private val context: Context,
+class StaticTriggerDistanceSlideHandler(
     private val viewModel: SettingsViewModel
-) : CompoundButton.OnCheckedChangeListener {
-    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        if (viewModel.distanceBasedTriggering.value == isChecked) {
-            return
-        }
-
-        viewModel.viewModelScope.launch {
-            viewModel.setDistanceBasedTriggering(isChecked)
-        }
-
-        if (isChecked) {
-            Toast.makeText(
-                context,
-                de.cyface.camera_service.R.string.experimental_feature_warning,
-                Toast.LENGTH_LONG
-            ).show()
+) : Slider.OnChangeListener {
+    override fun onValueChange(slider: Slider, newValue: Float, fromUser: Boolean) {
+        val roundedDistance = (newValue * 100).roundToInt() / 100f
+        if (viewModel.triggeringDistance.value != roundedDistance) {
+            viewModel.viewModelScope.launch {
+                viewModel.setTriggeringDistance(roundedDistance)
+            }
         }
     }
 }

@@ -299,16 +299,34 @@
         android:layout_marginBottom="4pt"
         android:text="@string/JPEG_settings" />
 
-      <!-- distance-based capturing mode -->
-      <TextView
-        android:id="@+id/distance_based_capturing_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="4pt"
-        android:paddingLeft="4pt"
-        android:paddingEnd="4pt"
-        android:paddingRight="4pt"
-        android:text="@string/distance_based_capturing" />
+      <!-- Trigger Mode Selection -->
+      <LinearLayout
+          android:id="@+id/trigger_mode_selection_wrapper"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical">
+        <TextView
+            android:id="@+id/trigger_mode_selection_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4pt"
+            android:paddingLeft="4pt"
+            android:paddingEnd="4pt"
+            android:paddingRight="4pt"
+            android:text="@string/camera_trigger_mode" />
+
+        <Spinner
+            android:id="@+id/trigger_mode_selection_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="4pt"
+            android:paddingLeft="4pt"
+            android:paddingEnd="4pt"
+            android:paddingRight="4pt"
+            android:minHeight="48dp"
+            android:background="?attr/selectableItemBackground"
+            />
+      </LinearLayout>
 
       <LinearLayout
         android:layout_width="match_parent"
@@ -321,18 +339,13 @@
         android:paddingEnd="4pt"
         android:paddingRight="4pt">
 
-        <androidx.appcompat.widget.SwitchCompat
-          android:id="@+id/distance_based_switcher"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
-
         <LinearLayout
-          android:id="@+id/distance_based_wrapper"
+          android:id="@+id/static_distance_wrapper"
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
 
           <com.google.android.material.slider.Slider
-            android:id="@+id/distance_based_slider"
+            android:id="@+id/static_distance_slider"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -341,12 +354,12 @@
             android:valueTo="100" />
 
           <TextView
-            android:id="@+id/distance_based"
+            android:id="@+id/static_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
           <TextView
-            android:id="@+id/distance_based_unit"
+            android:id="@+id/static_distance_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="4pt"
@@ -527,7 +540,7 @@
 
       </LinearLayout>
 
-      <!-- Model Selection -->
+      <!-- Anonymization Model Selection -->
       <LinearLayout
           android:id="@+id/anon_model_selection_wrapper"
           android:layout_width="match_parent"

@@ -848,7 +848,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
         // do not work reliably on multi-process access. https://stackoverflow.com/a/27987956/5815054
         val staticFocusSelected = cameraSettings.getStaticFocusBlocking()
         val staticFocusDistance = cameraSettings.getStaticFocusDistanceBlocking()
-        val distanceBasedTriggeringSelected = cameraSettings.getDistanceBasedTriggeringBlocking()
+        val triggerMode = cameraSettings.getTriggerModeBlocking()
         val triggeringDistance = cameraSettings.getTriggeringDistanceBlocking()
         val staticExposureTimeSelected = cameraSettings.getStaticExposureBlocking()
         val staticExposureTime = cameraSettings.getStaticExposureTimeBlocking()

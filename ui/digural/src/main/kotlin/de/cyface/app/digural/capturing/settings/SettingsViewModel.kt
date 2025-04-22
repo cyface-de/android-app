@@ -23,6 +23,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
@@ -66,7 +67,7 @@ class SettingsViewModel(
     private val _cameraEnabled = MutableLiveData<Boolean>()
     private val _videoMode = MutableLiveData<Boolean>()
     private val _rawMode = MutableLiveData<Boolean>()
-    private val _distanceBasedTriggering = MutableLiveData<Boolean>()
+    private val _triggerMode = MutableLiveData<TriggerMode>()
     private val _triggeringDistance = MutableLiveData<Float>()
     private val _staticFocus = MutableLiveData<Boolean>()
     private val _staticFocusDistance = MutableLiveData<Float>()
@@ -92,8 +93,7 @@ class SettingsViewModel(
     val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
     val videoMode: LiveData<Boolean> = cameraSettings.videoModeFlow.asLiveData()
     val rawMode: LiveData<Boolean> = cameraSettings.rawModeFlow.asLiveData()
-    val distanceBasedTriggering: LiveData<Boolean> =
-        cameraSettings.distanceBasedTriggeringFlow.asLiveData()
+    val triggerMode: LiveData<TriggerMode> = cameraSettings.triggerMode.asLiveData()
     val triggeringDistance: LiveData<Float> = cameraSettings.triggeringDistanceFlow.asLiveData()
     val staticFocus: LiveData<Boolean> = cameraSettings.staticFocusFlow.asLiveData()
     val staticFocusDistance: LiveData<Float> = cameraSettings.staticFocusDistanceFlow.asLiveData()
@@ -115,7 +115,7 @@ class SettingsViewModel(
             _cameraEnabled.value = cameraSettings.cameraEnabledFlow.first()
             _videoMode.value = cameraSettings.videoModeFlow.first()
             _rawMode.value = cameraSettings.rawModeFlow.first()
-            _distanceBasedTriggering.value = cameraSettings.distanceBasedTriggeringFlow.first()
+            _triggerMode.value = cameraSettings.triggerMode.first()
             _triggeringDistance.value = cameraSettings.triggeringDistanceFlow.first()
             _staticFocus.value = cameraSettings.staticFocusFlow.first()
             _staticFocusDistance.value = cameraSettings.staticFocusDistanceFlow.first()
@@ -154,8 +154,8 @@ class SettingsViewModel(
         cameraSettings.setRawMode(rawMode)
     }
 
-    suspend fun setDistanceBasedTriggering(distanceBasedTriggering: Boolean) {
-        cameraSettings.setDistanceBasedTriggering(distanceBasedTriggering)
+    suspend fun setTriggerMode(triggerMode: TriggerMode) {
+        cameraSettings.setTriggerMode(triggerMode)
     }
 
     suspend fun setTriggeringDistance(triggeringDistance: Float) {
