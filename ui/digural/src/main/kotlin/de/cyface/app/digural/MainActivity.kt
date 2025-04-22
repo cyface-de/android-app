@@ -190,22 +190,20 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                 unInterestedListener,  // here was the capturing button but it registers itself, too
                 sensorFrequency,
                 WebdavAuthenticator(this@MainActivity)
-            ).apply { lifecycleScope.launch(Dispatchers.IO) {
-                initialize()
+            ).apply { lifecycleScope.launch(Dispatchers.IO) { initialize() } }
+            // Cannot do this asynchronously, as the cameraService lateinit will not be initialized
 
-                // Do this after initialize() created the deviceId else the app crashes (multiple ids)
-                val deviceIdentifier = capturing.persistenceLayer.restoreOrCreateDeviceId()
-                // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
-                // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
-                startSynchronization()
-                // TODO: dataCapturingService!!.addConnectionStatusListener(this)
-                cameraService = CameraService(
-                    applicationContext,
-                    CameraEventHandler(),
-                    unInterestedCameraListener, // here was the capturing button but it registers itself, too
-                    ExternalCameraController(deviceIdentifier)
-                )
-            }}
+            val deviceIdentifier = runBlocking (Dispatchers.IO) { capturing.persistenceLayer.restoreOrCreateDeviceId() }
+            // Needs to be called after new CyfaceDataCapturingService() for the SDK to check and throw
+            // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
+            startSynchronization()
+            // TODO: dataCapturingService!!.addConnectionStatusListener(this)
+            cameraService = CameraService(
+                applicationContext,
+                CameraEventHandler(),
+                unInterestedCameraListener, // here was the capturing button but it registers itself, too
+                ExternalCameraController(deviceIdentifier)
+            )
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }
