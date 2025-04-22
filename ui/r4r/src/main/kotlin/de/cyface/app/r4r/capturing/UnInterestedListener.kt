@@ -48,6 +48,9 @@ class UnInterestedListener : ParcelableCapturingProcessListener {
     override fun onAboutToCapture(measurementId: Long, location: Location?) {
         // Nothing to do
     }
+    override fun onTriggerNext() {
+        // Nothing to do
+    }
     override fun onStart() {
         // Nothing to do
     }
