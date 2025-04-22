@@ -72,7 +72,7 @@ ext {
     cyfaceUploaderVersion = "1.6.2" // required for git sub-modules setup (backend)
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.13.14"
+    cyfaceAndroidBackendVersion = "7.13.15"
     cyfaceEnergySettingsVersion = "4.3.4"
     cyfaceCameraServiceVersion = "4.10.0"
 
