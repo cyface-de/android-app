@@ -371,7 +371,7 @@
 
       <!-- slider for static frequency -->
       <LinearLayout
-          android:id="@+id/static_frequency_wrapper"
+          android:id="@+id/static_time_wrapper"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:clipChildren="false"
@@ -395,7 +395,7 @@
               android:valueTo="3000" />
 
           <TextView
-              android:id="@+id/static_frequency"
+              android:id="@+id/static_time"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content" />
 

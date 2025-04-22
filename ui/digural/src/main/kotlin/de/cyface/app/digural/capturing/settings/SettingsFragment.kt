@@ -313,7 +313,7 @@ class SettingsFragment : Fragment() {
                 binding.triggerModeSelectionSpinner.setSelection(triggerMode.toOrdinal())
                 binding.staticDistanceWrapper.visibility =
                     if (triggerMode == TriggerMode.STATIC_DISTANCE) VISIBLE else INVISIBLE
-                binding.staticFrequencyWrapper.visibility =
+                binding.staticTimeWrapper.visibility =
                     if (triggerMode == TriggerMode.STATIC_TIME) VISIBLE else INVISIBLE
             }
         }
@@ -339,7 +339,7 @@ class SettingsFragment : Fragment() {
                 while (text.length < 4) {
                     text.insert(0, " ")
                 }
-                binding.staticFrequency.text = text
+                binding.staticTime.text = text
             }
         }
         viewModel.staticFocus.observe(viewLifecycleOwner) { staticFocus ->
