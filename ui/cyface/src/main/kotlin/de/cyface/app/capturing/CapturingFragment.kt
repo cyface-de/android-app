@@ -489,7 +489,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
             }
         }
         requireNotNull(tab)
-        tab.select()
+        lifecycleScope.launch(Dispatchers.Main) { tab.select() }
     }
 
     override fun onPause() {

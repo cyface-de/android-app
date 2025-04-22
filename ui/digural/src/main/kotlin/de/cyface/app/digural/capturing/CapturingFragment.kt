@@ -498,7 +498,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             }
         }
         requireNotNull(tab)
-        tab.select()
+        lifecycleScope.launch(Dispatchers.Main) { tab.select() }
     }
 
     override fun onPause() {
@@ -878,6 +878,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val staticFocusDistance = cameraSettings.staticFocusDistanceFlow.first()
         val triggerMode = cameraSettings.triggerMode.first()
         val triggeringDistance = cameraSettings.triggeringDistanceFlow.first()
+        val triggeringTime = cameraSettings.triggeringTimeFlow.first()
         val staticExposureTimeSelected = cameraSettings.staticExposureFlow.first()
         val staticExposureTime = cameraSettings.staticExposureTimeFlow.first()
         val exposureValueIso100 = cameraSettings.staticExposureValueFlow.first()
@@ -897,6 +898,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             exposureValueIso100,
             triggerMode,
             triggeringDistance,
+            triggeringTime,
             true,
             anonymizationModel,
             object :

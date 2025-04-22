@@ -328,7 +328,9 @@
             />
       </LinearLayout>
 
+      <!-- slider for static distance -->
       <LinearLayout
+        android:id="@+id/static_distance_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipChildren="false"
@@ -338,9 +340,7 @@
         android:paddingLeft="4pt"
         android:paddingEnd="4pt"
         android:paddingRight="4pt">
-
         <LinearLayout
-          android:id="@+id/static_distance_wrapper"
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
 
@@ -366,6 +366,47 @@
             android:paddingLeft="4pt"
             android:paddingEnd="4pt"
             android:paddingRight="4pt" />
+        </LinearLayout>
+      </LinearLayout>
+
+      <!-- slider for static frequency -->
+      <LinearLayout
+          android:id="@+id/static_time_wrapper"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:clipChildren="false"
+          android:clipToPadding="false"
+          android:gravity="center_vertical"
+          android:paddingStart="4pt"
+          android:paddingLeft="4pt"
+          android:paddingEnd="4pt"
+          android:paddingRight="4pt">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+          <com.google.android.material.slider.Slider
+              android:id="@+id/static_time_slider"
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:value="1000"
+              android:stepSize="50"
+              android:valueFrom="200"
+              android:valueTo="3000" />
+
+          <TextView
+              android:id="@+id/static_time"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content" />
+
+          <TextView
+              android:id="@+id/static_time_unit"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:paddingStart="4pt"
+              android:paddingLeft="4pt"
+              android:paddingEnd="4pt"
+              android:paddingRight="4pt" />
         </LinearLayout>
       </LinearLayout>
 
