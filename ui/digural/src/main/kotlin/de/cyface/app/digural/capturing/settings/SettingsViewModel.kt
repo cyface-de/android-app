@@ -69,6 +69,7 @@ class SettingsViewModel(
     private val _rawMode = MutableLiveData<Boolean>()
     private val _triggerMode = MutableLiveData<TriggerMode>()
     private val _triggeringDistance = MutableLiveData<Float>()
+    private val _triggeringTime = MutableLiveData<Int>()
     private val _staticFocus = MutableLiveData<Boolean>()
     private val _staticFocusDistance = MutableLiveData<Float>()
     private val _staticExposure = MutableLiveData<Boolean>()
@@ -95,6 +96,7 @@ class SettingsViewModel(
     val rawMode: LiveData<Boolean> = cameraSettings.rawModeFlow.asLiveData()
     val triggerMode: LiveData<TriggerMode> = cameraSettings.triggerMode.asLiveData()
     val triggeringDistance: LiveData<Float> = cameraSettings.triggeringDistanceFlow.asLiveData()
+    val triggeringTime: LiveData<Int> = cameraSettings.triggeringTimeFlow.asLiveData()
     val staticFocus: LiveData<Boolean> = cameraSettings.staticFocusFlow.asLiveData()
     val staticFocusDistance: LiveData<Float> = cameraSettings.staticFocusDistanceFlow.asLiveData()
     val staticExposure: LiveData<Boolean> = cameraSettings.staticExposureFlow.asLiveData()
@@ -117,6 +119,7 @@ class SettingsViewModel(
             _rawMode.value = cameraSettings.rawModeFlow.first()
             _triggerMode.value = cameraSettings.triggerMode.first()
             _triggeringDistance.value = cameraSettings.triggeringDistanceFlow.first()
+            _triggeringTime.value = cameraSettings.triggeringTimeFlow.first()
             _staticFocus.value = cameraSettings.staticFocusFlow.first()
             _staticFocusDistance.value = cameraSettings.staticFocusDistanceFlow.first()
             _staticExposure.value = cameraSettings.staticExposureFlow.first()
@@ -160,6 +163,10 @@ class SettingsViewModel(
 
     suspend fun setTriggeringDistance(triggeringDistance: Float) {
         cameraSettings.setTriggeringDistance(triggeringDistance)
+    }
+
+    suspend fun setTriggeringTime(triggeringTime: Int) {
+        cameraSettings.setTriggeringTime(triggeringTime)
     }
 
     suspend fun setStaticFocus(staticFocus: Boolean) {

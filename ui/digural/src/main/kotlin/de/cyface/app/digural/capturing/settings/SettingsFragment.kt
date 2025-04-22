@@ -179,7 +179,12 @@ class SettingsFragment : Fragment() {
             StaticTriggerDistanceSlideHandler(viewModel)
         )
         binding.staticDistanceUnit.text = TRIGGER_DISTANCE_UNIT
-        // FIXME: add Time-based slider
+
+        // Frequency-based slider
+        binding.staticTimeSlider.addOnChangeListener(
+            StaticTriggerTimeSlideHandler(viewModel)
+        )
+        binding.staticTimeUnit.text = TRIGGER_TIME_UNIT
 
         binding.staticFocusSwitcher.setOnCheckedChangeListener(
             StaticFocusSwitchHandler(
@@ -308,6 +313,8 @@ class SettingsFragment : Fragment() {
                 binding.triggerModeSelectionSpinner.setSelection(triggerMode.toOrdinal())
                 binding.staticDistanceWrapper.visibility =
                     if (triggerMode == TriggerMode.STATIC_DISTANCE) VISIBLE else INVISIBLE
+                binding.staticFrequencyWrapper.visibility =
+                    if (triggerMode == TriggerMode.STATIC_TIME) VISIBLE else INVISIBLE
             }
         }
         viewModel.triggeringDistance.observe(viewLifecycleOwner) { triggeringDistance ->
@@ -321,6 +328,18 @@ class SettingsFragment : Fragment() {
                     text.append("0")
                 }
                 binding.staticDistance.text = text
+            }
+        }
+        viewModel.triggeringTime.observe(viewLifecycleOwner) { triggeringTime ->
+            run {
+                Log.d(TAG, "updateView -> triggering time to $triggeringTime ms")
+                binding.staticTimeSlider.value = triggeringTime.toFloat()
+
+                val text = StringBuilder(triggeringTime.toString())
+                while (text.length < 4) {
+                    text.insert(0, " ")
+                }
+                binding.staticFrequency.text = text
             }
         }
         viewModel.staticFocus.observe(viewLifecycleOwner) { staticFocus ->
@@ -493,6 +512,11 @@ class SettingsFragment : Fragment() {
          * The unit of the [.triggerDistancePreference] value shown in the **UI**.
          */
         private const val TRIGGER_DISTANCE_UNIT = "m"
+
+        /**
+         * The unit of the [.triggerFrequencyPreference] value shown in the **UI**.
+         */
+        private const val TRIGGER_TIME_UNIT = "ms"
 
         /**
          * Exposure value from tabulates values (for iso 100) for outdoor environment light settings

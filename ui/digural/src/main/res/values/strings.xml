@@ -48,7 +48,7 @@
   </string-array>
   <string-array name="trigger_modes">
     <item>Way-based (adjustable)</item>
-    <item>Time-based (1 Hz)</item>
+    <item>Time-based (adjustable)</item>
     <item>High frequency</item>
   </string-array>
 </resources>

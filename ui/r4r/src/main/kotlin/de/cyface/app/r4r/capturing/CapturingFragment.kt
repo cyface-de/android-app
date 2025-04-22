@@ -780,7 +780,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         }
         // Usual cycling velocity in cities should be around 15-20 km/h, but outside the
         // city it can be up to 50 km/h. So we set the distance to 15m to ensure we stay
-        // below the max image capturing frequency of 1 Hz for now.
+        // below the stable image capturing frequency of 1 Hz for now.
         val triggeringDistance = 15.0f
         cameraService.start(
             measurementId,
@@ -793,6 +793,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             0,
             TriggerMode.STATIC_DISTANCE,
             triggeringDistance,
+            1.0f, // irrelevant as there is no UI to change to STATIC_FREQUENCY
             false,
             2, // See camera_service.BackgroundService.anonymizationStrategy()
             object :
