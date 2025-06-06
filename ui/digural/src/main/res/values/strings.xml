@@ -45,6 +45,7 @@
     <item>No Anonymization</item>
     <item>Model 1</item>
     <item>Model 2</item>
+    <item>Select from File System</item>
   </string-array>
   <string-array name="trigger_modes">
     <item>Way-based (adjustable)</item>

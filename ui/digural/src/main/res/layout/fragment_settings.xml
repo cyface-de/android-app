@@ -608,6 +608,39 @@
             android:minHeight="48dp"
             android:background="?attr/selectableItemBackground"
             />
+
+        <!-- This Button is only shown if "anon_model_selection_spinner" is file selector. It is
+        used to select the model file -->
+        <LinearLayout
+            android:id="@+id/anon_model_file_selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+          <Button
+            android:id="@+id/anon_model_file_selector_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4pt"
+            android:paddingLeft="4pt"
+            android:paddingEnd="4pt"
+            android:paddingRight="4pt"
+            android:minHeight="48dp"
+            android:text="Modelldatei auswählen"
+              />
+
+          <TextView
+              android:id="@+id/anon_selected_model_filename"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:text="Nichts gewählt"
+              android:paddingStart="4pt"
+              android:paddingLeft="4pt"
+              android:paddingEnd="4pt"
+              android:paddingRight="4pt"
+              />
+
+        </LinearLayout>
       </LinearLayout>
 
     </LinearLayout>
