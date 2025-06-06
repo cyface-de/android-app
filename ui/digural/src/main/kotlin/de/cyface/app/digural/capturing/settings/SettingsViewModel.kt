@@ -18,16 +18,29 @@
  */
 package de.cyface.app.digural.capturing.settings
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.result.ActivityResult
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import de.cyface.camera_service.background.TriggerMode
+import de.cyface.camera_service.settings.AnonymizationSettings
 import de.cyface.camera_service.settings.CameraSettings
+import de.cyface.camera_service.settings.FileSelection
 import de.cyface.utils.settings.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStreamReader
 import java.net.URL
 
 /**
@@ -78,7 +91,7 @@ class SettingsViewModel(
 
     /** custom settings **/
     private val _diguralServerUrl = MutableLiveData<URL>()
-    private val _anonModel = MutableLiveData<Int>()
+    private val _anonModel = MutableLiveData<AnonymizationSettings>()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -105,7 +118,7 @@ class SettingsViewModel(
 
     /** custom settings **/
     val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
-    val diguralAnonModel: LiveData<Int> = cameraSettings.anonModelFlow.asLiveData()
+    val diguralAnonModel: LiveData<AnonymizationSettings> = cameraSettings.anonModelFlow.asLiveData()
 
     init {
         viewModelScope.launch {
@@ -189,13 +202,40 @@ class SettingsViewModel(
         cameraSettings.setStaticExposureValue(staticExposureValue)
     }
 
-    suspend fun setAnonModel(anonModel: Int) {
+    suspend fun setAnonModel(anonModel: AnonymizationSettings) {
         cameraSettings.setAnonModel(anonModel)
     }
 
     /** custom settings **/
     suspend fun setDiguralServerUrl(address: URL) {
         customSettings.setDiguralUrl(address)
+    }
+
+    fun modelFilePicked(result: ActivityResult, context: Context) {
+        // Check if result is ok
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Get the intent from the result
+            val data: Intent? = result.data
+            // Check if intent did contain data
+            if (data != null) {
+                val uri: Uri? = data.data
+                if (uri != null) {
+                    // Set the selected file as the selected model file.
+                    viewModelScope.launch(Dispatchers.IO) {
+                        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                            FileOutputStream(File(context.getExternalFilesDir(null),"anon_model")).use { outputStream ->
+                                val buffer = ByteArray(1024)
+                                while (inputStream.read(buffer) != -1) {
+                                    outputStream.write(buffer)
+                                }
+                            }
+                        }
+
+                        setAnonModel(FileSelection(uri.getName(context)))
+                    }
+                }
+            }
+        }
     }
 }
 

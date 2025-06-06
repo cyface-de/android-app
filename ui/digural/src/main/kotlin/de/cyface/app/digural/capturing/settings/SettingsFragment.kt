@@ -18,9 +18,13 @@
  */
 package de.cyface.app.digural.capturing.settings
 
+import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.hardware.camera2.CameraCharacteristics
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -35,20 +39,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.Application
+import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.R
-import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.capturing.settings.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
+import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraModeDialog
+import de.cyface.camera_service.settings.FileSelection
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import java.io.FileNotFoundException
 import java.util.TreeMap
 import kotlin.math.floor
 import kotlin.math.roundToInt
+
 
 /**
  * The [Fragment] which shows the settings to the user.
@@ -100,6 +107,11 @@ class SettingsFragment : Fragment() {
             }
         }
 
+    /**
+     * A launcher to open a file selection dialog for selecting model files.
+     */
+    private lateinit var filePickerLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -121,6 +133,11 @@ class SettingsFragment : Fragment() {
             } else {
                 throw RuntimeException("Context doesn't support the Fragment, implement `CustomProvider`")
             }
+        // Initialise file picker launcher.
+        // This lambda is called as soon as a file has been picked.
+        filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            viewModel.modelFilePicked(result, requireContext())
+        }
 
         // Initialize ViewModel
         viewModel = ViewModelProvider(
@@ -173,6 +190,8 @@ class SettingsFragment : Fragment() {
             adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
         binding.triggerModeSelectionSpinner.onItemSelectedListener = TriggerModeSelectionListener(viewModel)
+
+        binding.anonModelFileSelectorButton.setOnClickListener { openFilePicker() }
 
         // Distance-based slider
         binding.staticDistanceSlider.addOnChangeListener(
@@ -239,6 +258,7 @@ class SettingsFragment : Fragment() {
                 binding.diguralServerAddress
             )
         )
+        // Select Model to use for anonymization
         ArrayAdapter.createFromResource(
             requireContext(),
             R.array.anon_models,
@@ -393,7 +413,15 @@ class SettingsFragment : Fragment() {
         }
         viewModel.diguralAnonModel.observe(viewLifecycleOwner) { anonModel ->
             run {
-                binding.anonModelSelectionSpinner.setSelection(anonModel)
+                binding.anonModelSelectionSpinner.setSelection(anonModel.index)
+                // Show file selector only if file selection model was choosen.
+                if (anonModel.index == 3) {
+                    val fileModel = anonModel as FileSelection
+                    binding.anonModelFileSelector.visibility = VISIBLE
+                    binding.anonSelectedModelFilename.text = fileModel.modelName
+                } else {
+                    binding.anonModelFileSelector.visibility = GONE
+                }
             }
         }
 
@@ -487,6 +515,20 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun openFilePicker() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            // Setze den MIME-Typ, um bestimmte Dateitypen zu filtern.
+            // Für alle Dateitypen: "*/*"
+            // Für Bilder: "image/*"
+            // Für Textdateien: "text/plain"
+            type = "*/*"
+        }
+
+        // Starte die Aktivität über den Launcher anstelle von startActivityForResult
+        filePickerLauncher.launch(intent)
+    }
+
     companion object {
         /**
          * The tag used to identify logging from this class.
@@ -533,5 +575,18 @@ class SettingsFragment : Fragment() {
                 put(16, "sunny, snowy/sandy")
             }
         }
+    }
+}
+
+fun Uri.getName(context: Context): String {
+    val returnCursor = context.contentResolver.query(this, null, null, null, null)
+    if(returnCursor!=null) {
+        val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        returnCursor.moveToFirst()
+        val fileName = returnCursor.getString(nameIndex)
+        returnCursor.close()
+        return fileName
+    } else {
+        throw FileNotFoundException(this.toString())
     }
 }
