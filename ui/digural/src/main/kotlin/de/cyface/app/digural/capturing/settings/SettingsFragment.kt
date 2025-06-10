@@ -20,7 +20,6 @@ package de.cyface.app.digural.capturing.settings
 
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.hardware.camera2.CameraCharacteristics
 import android.net.Uri
 import android.os.Bundle
@@ -515,6 +514,9 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    /**
+     * Open the system file picker, to allow the selection of an anonymization model file.
+     */
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -578,6 +580,9 @@ class SettingsFragment : Fragment() {
     }
 }
 
+/**
+ * If this is a file Uri, returns the name of the file.
+ */
 fun Uri.getName(context: Context): String {
     val returnCursor = context.contentResolver.query(this, null, null, null, null)
     if(returnCursor!=null) {

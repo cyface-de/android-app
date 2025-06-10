@@ -22,7 +22,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Environment
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,10 +36,8 @@ import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStreamReader
 import java.net.URL
 
 /**
@@ -211,6 +208,9 @@ class SettingsViewModel(
         customSettings.setDiguralUrl(address)
     }
 
+    /**
+     * Called when the user selects a new model file in the system file picker dialog.
+     */
     fun modelFilePicked(result: ActivityResult, context: Context) {
         // Check if result is ok
         if (result.resultCode == Activity.RESULT_OK) {
