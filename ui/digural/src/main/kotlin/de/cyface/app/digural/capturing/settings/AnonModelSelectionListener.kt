@@ -21,7 +21,14 @@ class AnonModelSelectionListener(private val viewModel: SettingsViewModel) : OnI
                         0 -> NoAnonymization()
                         1 -> EfficientDetLiteV2()
                         2 -> OriginalDigural()
-                        3 -> FileSelection("")
+                        3 -> {
+                            val previousModel = viewModel.diguralAnonModel.value
+                            if (previousModel is FileSelection) {
+                                FileSelection(previousModel.modelName)
+                            } else {
+                                FileSelection("")
+                            }
+                        }
                         else -> throw InvalidSelection()
                     }
                 )
