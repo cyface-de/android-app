@@ -626,14 +626,14 @@
             android:paddingEnd="4pt"
             android:paddingRight="4pt"
             android:minHeight="48dp"
-            android:text="Modelldatei auswählen"
+            android:text="@string/select_model_file"
               />
 
           <TextView
               android:id="@+id/anon_selected_model_filename"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:text="Nichts gewählt"
+              android:text="@string/nothing_selected"
               android:paddingStart="4pt"
               android:paddingLeft="4pt"
               android:paddingEnd="4pt"
