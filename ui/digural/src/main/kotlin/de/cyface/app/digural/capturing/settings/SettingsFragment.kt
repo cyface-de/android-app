@@ -520,14 +520,9 @@ class SettingsFragment : Fragment() {
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            // Setze den MIME-Typ, um bestimmte Dateitypen zu filtern.
-            // Für alle Dateitypen: "*/*"
-            // Für Bilder: "image/*"
-            // Für Textdateien: "text/plain"
             type = "*/*"
         }
 
-        // Starte die Aktivität über den Launcher anstelle von startActivityForResult
         filePickerLauncher.launch(intent)
     }
 
