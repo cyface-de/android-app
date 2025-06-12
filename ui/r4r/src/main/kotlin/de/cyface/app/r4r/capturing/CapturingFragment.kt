@@ -63,6 +63,7 @@ import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.camera_service.settings.CameraSettings
+import de.cyface.camera_service.settings.OriginalDigural
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -795,7 +796,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             triggeringDistance,
             1000, // irrelevant as there is no UI to change to STATIC_TIME
             false,
-            2, // See camera_service.BackgroundService.anonymizationStrategy()
+            OriginalDigural(), // See camera_service.BackgroundService.anonymizationStrategy()
             object :
                 StartUpFinishedHandler(de.cyface.camera_service.MessageCodes.GLOBAL_BROADCAST_SERVICE_STARTED) {
                 override fun startUpFinished(measurementIdentifier: Long) {

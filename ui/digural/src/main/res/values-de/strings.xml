@@ -38,4 +38,6 @@
   <string name="anon_model_selection_header_text">Bitte wählen Sie ein Anonymisierungsmodell</string>
   <string name="settings_digural_server_address">Digural Server Adresse</string>
   <string name="url_malformed_toast">Fehlerhaftes Adress-Format. Änderung wurde verworfen.</string>
+  <string name="select_model_file">Modelldatei auswählen</string>
+  <string name="nothing_selected">Nichts gewählt</string>
 </resources>

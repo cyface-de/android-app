@@ -5,13 +5,34 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.Spinner
 import androidx.lifecycle.viewModelScope
+import de.cyface.camera_service.settings.EfficientDetLiteV2
+import de.cyface.camera_service.settings.FileSelection
+import de.cyface.camera_service.settings.InvalidSelection
+import de.cyface.camera_service.settings.NoAnonymization
+import de.cyface.camera_service.settings.OriginalDigural
 import kotlinx.coroutines.launch
-import java.net.URL
 
 class AnonModelSelectionListener(private val viewModel: SettingsViewModel) : OnItemSelectedListener {
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         viewModel.viewModelScope.launch {
-            viewModel.setAnonModel(position)
+            if (view != null) {
+                viewModel.setAnonModel(
+                    when(position) {
+                        0 -> NoAnonymization()
+                        1 -> EfficientDetLiteV2()
+                        2 -> OriginalDigural()
+                        3 -> {
+                            val previousModel = viewModel.diguralAnonModel.value
+                            if (previousModel is FileSelection) {
+                                FileSelection(previousModel.modelName)
+                            } else {
+                                FileSelection("")
+                            }
+                        }
+                        else -> throw InvalidSelection()
+                    }
+                )
+            }
         }
     }
 
