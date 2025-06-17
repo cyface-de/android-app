@@ -21,6 +21,7 @@ package de.cyface.app.utils.trips
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -125,7 +126,13 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
             tripDetailsView.setTextColor(textColor)
             arrowIcon.setColorFilter(textColor)
             uploadIcon.setColorFilter(textColor)
-            if (measurement.status == MeasurementStatus.SYNCED || measurement.status == MeasurementStatus.SKIPPED || measurement.status == MeasurementStatus.DEPRECATED) {
+            // explicitly set visibility first to avoid reuse bugs [LEIP-358]
+            uploadIcon.visibility = INVISIBLE
+            if (
+                measurement.status == MeasurementStatus.SYNCED ||
+                measurement.status == MeasurementStatus.SKIPPED ||
+                measurement.status == MeasurementStatus.DEPRECATED
+            ) {
                 uploadIcon.visibility = VISIBLE
             }
         }
@@ -175,11 +182,11 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
      */
     class TripsComparator : DiffUtil.ItemCallback<Measurement>() {
         override fun areItemsTheSame(oldItem: Measurement, newItem: Measurement): Boolean {
-            return oldItem === newItem
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Measurement, newItem: Measurement): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem == newItem
         }
     }
 
