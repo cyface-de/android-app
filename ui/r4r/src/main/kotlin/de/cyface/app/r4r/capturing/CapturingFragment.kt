@@ -20,6 +20,7 @@ package de.cyface.app.r4r.capturing
 
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -34,6 +35,9 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
@@ -344,8 +348,23 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         }
     }
 
+    private val Int.dp: Int
+        get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Fix for edge-to-edge introduced in targetSdkVersion 35
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val extraBottomMargin = 8.dp
+
+            view.findViewById<FloatingActionButton>(R.id.startResumeButton)
+                ?.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    bottomMargin = systemBars.bottom + extraBottomMargin
+                }
+
+            insets
+        }
 
         // Allows to change the tabs by swiping horizontally and handles animation
         val viewPager = view.findViewById<ViewPager2>(R.id.pager)

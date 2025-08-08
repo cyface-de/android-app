@@ -117,6 +117,13 @@ class LoginActivity : AccountAuthenticatorActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        // Fix for edge-to-edge introduced in targetSdkVersion 35
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_login)) { view, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
+            insets
+        }
+
         context = WeakReference(this)
 
         // Set up the login form

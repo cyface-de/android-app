@@ -34,6 +34,8 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.synchronization.AuthStateManager
@@ -106,6 +108,13 @@ class LoginActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_login)
+        // Fix for edge-to-edge introduced in targetSdkVersion 35
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.coordinator)) { view, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
+            insets
+        }
+
         findViewById<View>(R.id.retry).setOnClickListener {
             mExecutor.submit { initializeAppAuth() }
         }
