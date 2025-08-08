@@ -36,6 +36,8 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -81,7 +83,6 @@ import net.openid.appauth.TokenResponse
 import java.io.IOException
 import java.lang.ref.WeakReference
 import kotlin.system.exitProcess
-
 
 /**
  * The base `Activity` for the actual Cyface measurement client. It's called by the [TermsOfUseActivity]
@@ -216,6 +217,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
         // `capturingService` has to be initialized before calling `inflate`
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Fix for edge-to-edge introduced in targetSdkVersion 35
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container)) { view, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, systemInsets.top, 0, /*systemInsets.bottom*/ 0)
+            insets
+        }
 
         // Setting up top action bar & bottom menu (no sidebar, see RFR-333]
         // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
