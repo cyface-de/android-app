@@ -18,11 +18,11 @@
  */
 package de.cyface.app.digural.upload
 
+import android.content.Context
 import android.util.Log
 import com.thegrizzlylabs.sardineandroid.Sardine
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import de.cyface.app.digural.MainActivity.Companion.TAG
-import de.cyface.app.digural.capturing.CapturingFragment
 import de.cyface.camera_service.foreground.AnnotationsWriter
 import de.cyface.camera_service.foreground.NoAnnotationsFound
 import de.cyface.model.Json
@@ -80,7 +80,8 @@ class WebdavUploader(
     private val login: String,
     password: String,
     private val attachmentDao: AttachmentDao?,
-    private val measurementRepository: MeasurementRepository?
+    private val measurementRepository: MeasurementRepository?,
+    private val context: Context,
 ) : Uploader {
 
     private val sardine = OkHttpSardine()
@@ -111,7 +112,7 @@ class WebdavUploader(
                     measurementId = uploadable.measurementId(),
                     attachmentDao = attachmentDao!!,
                     measurementRepository = measurementRepository!!,
-                ).mergeJsonAndWriteToFile()
+                ).mergeJsonAndWriteToFile(context)
             } catch (e: NoAnnotationsFound) {
                 Log.w(TAG, "Skip merging annotations.json, no annotations found", e)
             }

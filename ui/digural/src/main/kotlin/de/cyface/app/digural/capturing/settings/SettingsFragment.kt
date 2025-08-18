@@ -50,6 +50,9 @@ import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.camera_service.settings.FileSelection
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.util.TreeMap
 import kotlin.math.floor
@@ -418,6 +421,9 @@ class SettingsFragment : Fragment() {
                     val fileModel = anonModel as FileSelection
                     binding.anonModelFileSelector.visibility = VISIBLE
                     binding.anonSelectedModelFilename.text = fileModel.modelName
+                    CoroutineScope(Dispatchers.Main).launch {
+                        context?.let { viewModel.saveToFile(it, fileModel.modelName) }
+                    }
                 } else {
                     binding.anonModelFileSelector.visibility = GONE
                 }
