@@ -26,6 +26,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +86,12 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         setContentView(R.layout.activity_terms_of_use)
+        // Fix for edge-to-edge introduced in targetSdkVersion 35
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
+            insets
+        }
     }
 
     /**
