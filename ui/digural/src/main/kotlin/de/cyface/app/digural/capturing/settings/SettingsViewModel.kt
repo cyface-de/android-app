@@ -22,12 +22,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import de.cyface.app.digural.MainActivity.Companion.TAG
 import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.settings.AnonymizationSettings
 import de.cyface.camera_service.settings.CameraSettings
@@ -36,8 +38,10 @@ import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.net.URL
 
 /**
@@ -234,6 +238,34 @@ class SettingsViewModel(
                         setAnonModel(FileSelection(uri.getName(context)))
                     }
                 }
+            }
+        }
+    }
+
+    suspend fun saveToFile(context: Context, text: String) {
+        val filename = "model_name.txt" // Same as in AnnotationsWriter
+        return withContext(Dispatchers.IO) { // Führe Datei-I/O im IO-Dispatcher aus
+            try {
+                // context.filesDir liefert den Pfad zum internen 'files'-Verzeichnis deiner App
+                // z.B. /data/user/0/dein.paket.name/files/
+                val file = File(context.filesDir, filename)
+                Log.d(TAG, "Speichere String in: ${file.absolutePath}")
+
+                // FileOutputStream öffnet die Datei zum Schreiben.
+                // Wenn die Datei nicht existiert, wird sie erstellt.
+                // Der zweite Parameter 'false' bedeutet, dass die Datei überschrieben wird,
+                // falls sie bereits existiert. Verwende 'true', um anzuhängen.
+                FileOutputStream(file, false).use { outputStream ->
+                    outputStream.write(text.toByteArray()) // Konvertiere den String in Bytes
+                    outputStream.flush() // Stelle sicher, dass alle Daten geschrieben wurden
+                }
+                true // Erfolg
+            } catch (e: IOException) {
+                Log.e(TAG, "Fehler beim Schreiben des Strings in die Datei '$filename'", e)
+                false // Fehler
+            } catch (e: Exception) {
+                Log.e(TAG, "Unerwarteter Fehler beim Schreiben des Strings in die Datei '$filename'", e)
+                false
             }
         }
     }

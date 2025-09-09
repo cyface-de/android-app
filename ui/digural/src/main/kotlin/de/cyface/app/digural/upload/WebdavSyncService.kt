@@ -65,6 +65,7 @@ class WebdavSyncService : Service() {
                         auth.getPassword(account),
                         persistence.attachmentDao,
                         persistence.measurementRepository,
+                        applicationContext,
                     ),
                 )
             }
