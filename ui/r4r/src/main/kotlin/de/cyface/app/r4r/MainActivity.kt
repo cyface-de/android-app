@@ -44,9 +44,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.cyface.app.r4r.auth.LoginActivity
-import de.cyface.app.r4r.capturing.UnInterestedListener
+//import de.cyface.app.r4r.capturing.UnInterestedListener
 import de.cyface.app.r4r.databinding.ActivityMainBinding
-import de.cyface.app.r4r.notification.CameraEventHandler
+//import de.cyface.app.r4r.notification.CameraEventHandler
 import de.cyface.app.r4r.notification.CapturingEventHandler
 import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
@@ -55,9 +55,6 @@ import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.app.utils.capturing.settings.UiSettings
-import de.cyface.camera_service.background.camera.CameraListener
-import de.cyface.camera_service.foreground.CameraService
-import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.model.CapturedData
@@ -101,7 +98,7 @@ import kotlin.system.exitProcess
  * @version 5.0.0
  * @since 1.0.0
  */
-class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider {
+class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvider*/ {
 
     /**
      * The generated class which holds all bindings from the layout file.
@@ -116,7 +113,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The `CameraService` which collects camera data if the user did activate this feature.
      */
-    override lateinit var cameraService: CameraService
+    // override lateinit var cameraService: CameraService
 
     /**
      * The controller which allows to navigate through the navigation graph.
@@ -137,7 +134,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
     /**
      * The settings used to store the user preferences for the camera.
      */
-    override lateinit var cameraSettings: CameraSettings
+    // override lateinit var cameraSettings: CameraSettings
 
     /**
      * The authorization.
@@ -165,7 +162,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         override fun onCapturingStopped() = Unit
     }
 
-    private val unInterestedCameraListener: CameraListener = object :
+    /*private val unInterestedCameraListener: CameraListener = object :
         CameraListener {
         override fun onNewPictureAcquired(picturesCaptured: Int) = Unit
         override fun onNewVideoStarted() = Unit
@@ -177,11 +174,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         }
 
         override fun onCameraCapturingStopped() = Unit
-    }
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         uiSettings = UiSettings.getInstance(this, UiConfig(BuildConfig.incentivesServer))
-        cameraSettings = CameraSettings.getInstance(this)
+        // cameraSettings = CameraSettings.getInstance(this)
 
         // Start DataCapturingService and CameraService
         // With async call the app crashes as late-init `capturing` is not initialized yet.
@@ -201,12 +198,12 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             // a specific exception when the LOGIN_ACTIVITY was not set from the SDK using app.
             //startSynchronization() // We do this in displayAuthorized() instead!
             // We don't have a sync progress button: `capturingService.addConnectionStatusListener(this)`
-            cameraService = CameraService(
+            /*cameraService = CameraService(
                 applicationContext,
                 CameraEventHandler(),
                 unInterestedCameraListener, // here was the capturing button but it registers itself, too
                 UnInterestedListener()
-            )
+            )*/
         } catch (e: SetupException) {
             throw IllegalStateException(e)
         }

@@ -20,7 +20,7 @@ package de.cyface.app.r4r.capturing.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import de.cyface.camera_service.settings.CameraSettings
+//import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 
 /**
@@ -34,13 +34,13 @@ import de.cyface.utils.settings.AppSettings
  */
 class SettingsViewModelFactory(
     private val appSettings: AppSettings,
-    private val cameraSettings: CameraSettings,
+    //private val cameraSettings: CameraSettings,
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(appSettings, cameraSettings) as T
+            return SettingsViewModel(appSettings/*, cameraSettings*/) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

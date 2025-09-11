@@ -32,13 +32,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.cyface.app.r4r.Application
 import de.cyface.app.r4r.BuildConfig
-import de.cyface.app.r4r.CameraServiceProvider
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.databinding.FragmentSettingsBinding
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
-import de.cyface.camera_service.CameraInfo
+//import de.cyface.camera_service.CameraInfo
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.synchronization.Auth
 import io.sentry.Sentry
@@ -97,10 +96,10 @@ class SettingsFragment : Fragment() {
                 if (allGranted) {
                     //showCameraModeDialog(this) - no Dialog needed in r4r
                     viewModel.viewModelScope.launch {
-                        viewModel.setCameraEnabled(true)
+                        //viewModel.setCameraEnabled(true)
                     }
                 } else {
-                    Toast.makeText(
+                    /*Toast.makeText(
                         context,
                         requireContext().getString(
                             de.cyface.camera_service.R.string.camera_service_off_missing_permissions
@@ -111,7 +110,7 @@ class SettingsFragment : Fragment() {
                     viewModel.viewModelScope.launch {
                         viewModel.setCameraEnabled(true)
                         viewModel.setCameraEnabled(false)
-                    }
+                    }*/
                 }
             }
         }
@@ -127,17 +126,17 @@ class SettingsFragment : Fragment() {
         } else {
             throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
         }
-        val cameraSettings =
+        /*val cameraSettings =
             if (activity is CameraServiceProvider) {
                 (activity as CameraServiceProvider).cameraSettings
             } else {
                 throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
-            }
+            }*/
 
         // Initialize ViewModel
         viewModel = ViewModelProvider(
             this,
-            SettingsViewModelFactory(Application.appSettings, cameraSettings)
+            SettingsViewModelFactory(Application.appSettings/*, cameraSettings*/)
         )[SettingsViewModel::class.java]
     }
 
@@ -167,12 +166,12 @@ class SettingsFragment : Fragment() {
             showDeleteAccountConfirmationDialog()
         }
         /** camera settings **/
-        binding.cameraEnabledSwitch.setOnCheckedChangeListener(
+        /*binding.cameraEnabledSwitch.setOnCheckedChangeListener(
             CameraSwitchHandler(
                 viewModel,
                 this
             )
-        )
+        )*/
 
         // Observe view model and update UI
         /** app settings **/
@@ -187,7 +186,7 @@ class SettingsFragment : Fragment() {
             }
         }
         /** camera settings **/
-        viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabled ->
+        /*viewModel.cameraEnabled.observe(viewLifecycleOwner) { cameraEnabled ->
             run {
                 binding.cameraEnabledSwitch.isChecked = cameraEnabled
                 //binding.cameraSettingsWrapper.visibility = if (cameraEnabled) View.VISIBLE else View.GONE
@@ -211,7 +210,7 @@ class SettingsFragment : Fragment() {
                     */
                 }
             }
-        }
+        }*/
 
         return binding.root
     }

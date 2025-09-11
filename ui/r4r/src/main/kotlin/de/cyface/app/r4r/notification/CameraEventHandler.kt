@@ -33,9 +33,9 @@ import de.cyface.app.utils.SharedConstants.CAMERA_ACCESS_LOST_NOTIFICATION_ID
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_RUNNING
 import de.cyface.app.utils.SharedConstants.NOTIFICATION_CHANNEL_ID_WARNING
 import de.cyface.app.utils.SharedConstants.PICTURE_CAPTURING_DECREASED_NOTIFICATION_ID
-import de.cyface.camera_service.background.BackgroundService
-import de.cyface.camera_service.foreground.NotificationStrategy
-import kotlinx.parcelize.Parcelize
+//import de.cyface.camera_service.background.BackgroundService
+//import de.cyface.camera_service.foreground.NotificationStrategy
+//import kotlinx.parcelize.Parcelize
 
 /**
  * A [NotificationStrategy] to respond to specified events triggered by the
@@ -43,8 +43,8 @@ import kotlinx.parcelize.Parcelize
  *
  * @author Armin Schnabel
  */
-@Parcelize
-class CameraEventHandler : NotificationStrategy {
+//@Parcelize
+/*class CameraEventHandler : NotificationStrategy {
     /**
      * A [Notification] shown when the [BackgroundService] triggered the 'camera error' event.
      *
@@ -241,4 +241,4 @@ class CameraEventHandler : NotificationStrategy {
             }
         }
     }
-}
+}*/

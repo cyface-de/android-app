@@ -34,14 +34,14 @@ import kotlinx.coroutines.launch
  * @version 2.0.2
  * @since 2.0.0
  */
-class CameraSwitchHandler(
+/*class CameraSwitchHandler(
     private val viewModel: SettingsViewModel,
     private val fragment: SettingsFragment
 ) : CompoundButton.OnCheckedChangeListener {
     override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        if (viewModel.cameraEnabled.value == isChecked) {
+        /*if (viewModel.cameraEnabled.value == isChecked) {
             return
-        }
+        }*/
 
         // No rear camera found
         val context = fragment.requireContext()
@@ -76,4 +76,4 @@ class CameraSwitchHandler(
             return
         }
     }
-}
+}*/
