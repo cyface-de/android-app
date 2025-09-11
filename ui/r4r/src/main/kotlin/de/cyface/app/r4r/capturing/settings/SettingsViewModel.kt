@@ -24,7 +24,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import de.cyface.camera_service.settings.CameraSettings
+//import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     private val appSettings: AppSettings,
-    private val cameraSettings: CameraSettings,
+    //private val cameraSettings: CameraSettings,
 ) : ViewModel() {
 
     /** app settings **/
@@ -61,7 +61,7 @@ class SettingsViewModel(
     private val _cameraEnabled = MutableLiveData<Boolean>()
 
     /** camera settings  **/
-    val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
+    //val cameraEnabled: LiveData<Boolean> = cameraSettings.cameraEnabledFlow.asLiveData()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -78,7 +78,7 @@ class SettingsViewModel(
             _centerMap.value = appSettings.centerMapFlow.first()
             _upload.value = appSettings.uploadEnabledFlow.first()
             /** camera settings  **/
-            _cameraEnabled.value = cameraSettings.cameraEnabledFlow.first()
+            //_cameraEnabled.value = cameraSettings.cameraEnabledFlow.first()
         }
     }
 
@@ -94,8 +94,8 @@ class SettingsViewModel(
     }
 
     /** camera settings **/
-    suspend fun setCameraEnabled(cameraEnabled: Boolean) {
+    /*suspend fun setCameraEnabled(cameraEnabled: Boolean) {
         cameraSettings.setCameraEnabled(cameraEnabled)
         _cameraEnabled.postValue(cameraEnabled)
-    }
+    }*/
 }

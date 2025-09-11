@@ -18,8 +18,8 @@
  */
 package de.cyface.app.r4r
 
-import de.cyface.camera_service.settings.CameraSettings
-import de.cyface.camera_service.foreground.CameraService
+//import de.cyface.camera_service.settings.CameraSettings
+//import de.cyface.camera_service.foreground.CameraService
 
 /**
  * Interface which defines the dependencies implemented by the `MainActivity` to be accessible from
@@ -28,6 +28,6 @@ import de.cyface.camera_service.foreground.CameraService
  * @author Armin Schnabel
  */
 interface CameraServiceProvider {
-    val cameraService: CameraService
-    val cameraSettings: CameraSettings
+    //val cameraService: CameraService
+    //val cameraSettings: CameraSettings
 }
