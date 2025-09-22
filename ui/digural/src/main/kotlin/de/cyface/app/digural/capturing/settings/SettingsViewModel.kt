@@ -42,6 +42,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.net.URL
 
 /**
@@ -219,26 +220,21 @@ class SettingsViewModel(
         // Check if result is ok
         if (result.resultCode == Activity.RESULT_OK) {
             // Get the intent from the result
-            val data: Intent? = result.data
-            // Check if intent did contain data
-            if (data != null) {
-                val uri: Uri? = data.data
-                if (uri != null) {
-                    // Set the selected file as the selected model file.
-                    viewModelScope.launch(Dispatchers.IO) {
-                        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                            FileOutputStream(File(context.getExternalFilesDir(null),"anon_model")).use { outputStream ->
-                                val buffer = ByteArray(1024)
-                                while (inputStream.read(buffer) != -1) {
-                                    outputStream.write(buffer)
-                                }
-                            }
-                        }
+            val data: Intent = result.data ?: throw NullPointerException("No Data!")
+            val uri: Uri = data.data ?: throw NullPointerException("No Uri!")
+            val inputStream: InputStream = context.contentResolver.openInputStream(uri) ?: throw NullPointerException("Unable to open Input Stream!")
+            val fileName: String = uri.lastPathSegment ?: throw NullPointerException("No File Name!")
+            val targetFile: File = File(context.getExternalFilesDir(null), "anon_model")
 
-                        setAnonModel(FileSelection(uri.getName(context)))
-                    }
+            // Set the selected file as the selected model file.
+            inputStream.use { inputStream ->
+                targetFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
                 }
             }
+
+            // Set model after copy operation has finished!
+            setAnonModel(FileSelection(fileName))
         }
     }
 
