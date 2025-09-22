@@ -18,7 +18,7 @@
  */
 package de.cyface.app.r4r.capturing
 
-import android.content.Context
+/*import android.content.Context
 import android.location.Location
 import de.cyface.camera_service.background.ParcelableCapturingProcessListener
 import kotlinx.coroutines.CoroutineScope
@@ -60,4 +60,4 @@ class UnInterestedListener : ParcelableCapturingProcessListener {
     override fun shallStop(context: Context) {
         // Nothing to do
     }
-}
+}*/

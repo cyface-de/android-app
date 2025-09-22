@@ -62,13 +62,15 @@
         app:layout_constraintRight_toRightOf="parent" />
       </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- camera enabled -->
+    <!-- camera enabled - HIDDEN FOR PUBLIC RELEASE -->
+    <!-- when u enable it again, you also need to chang layout_constraintTop_toBottomOf of the next component -->
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!--androidx.constraintlayout.widget.ConstraintLayout
       android:id="@+id/camera_enabled_wrapper"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="horizontal"
+      android:visibility="gone"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintTop_toBottomOf="@id/upload">
 
@@ -86,7 +88,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout-->
 
     <!-- account deletion -->
 
@@ -95,7 +97,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/camera_enabled_wrapper"
+      app:layout_constraintTop_toBottomOf="@id/upload"
       android:orientation="horizontal">
       <TextView
         android:layout_width="wrap_content"

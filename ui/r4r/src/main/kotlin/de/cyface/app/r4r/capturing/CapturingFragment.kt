@@ -50,7 +50,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
-import de.cyface.app.r4r.CameraServiceProvider
 import de.cyface.app.r4r.MainActivity
 import de.cyface.app.r4r.R
 import de.cyface.app.r4r.capturing.map.MapFragment
@@ -61,13 +60,13 @@ import de.cyface.app.r4r.utils.Constants
 import de.cyface.app.r4r.utils.Constants.TAG
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
-import de.cyface.camera_service.CameraInfo
+/*import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.UIListener
 import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.camera_service.settings.CameraSettings
-import de.cyface.camera_service.settings.OriginalDigural
+import de.cyface.camera_service.settings.OriginalDigural*/
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -113,7 +112,7 @@ import java.util.concurrent.TimeUnit
  * @version 2.0.0
  * @since 1.0.0
  */
-class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
+class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ {
 
     /**
      * This property is only valid between onCreateView and onDestroyView.
@@ -133,7 +132,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * The [CameraService] required to control and check the visual capturing process.
      */
-    private lateinit var cameraService: CameraService
+    //private lateinit var cameraService: CameraService
 
     /**
      * The settings used by both, UIs and libraries.
@@ -143,7 +142,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     /**
      * The settings used by the camera service.
      */
-    private lateinit var cameraSettings: CameraSettings
+    //private lateinit var cameraSettings: CameraSettings
 
     /**
      * An implementation of the persistence layer which caches some data during capturing.
@@ -208,12 +207,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         } else {
             error("Context doesn't support the Fragment, implement `ServiceProvider`")
         }
-        if (activity is CameraServiceProvider) {
+        /*if (activity is CameraServiceProvider) {
             cameraService = (activity as CameraServiceProvider).cameraService
             cameraSettings = (activity as CameraServiceProvider).cameraSettings
         } else {
             error("Context doesn't support the Fragment, implement `CameraServiceProvider`")
-        }
+        }*/
     }
 
     /**
@@ -447,9 +446,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // Nothing to do here - handled by [CapturingEventHandler]
     }
 
-    override fun onCameraLowDiskSpace(allocation: DiskConsumption) {
+    /*override fun onCameraLowDiskSpace(allocation: DiskConsumption) {
         // Nothing to do here - handled by [CapturingEventHandler]
-    }
+    }*/
 
     override fun onSynchronizationSuccessful() {
         // Nothing to do here
@@ -459,9 +458,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         throw java.lang.IllegalStateException(e)
     }
 
-    override fun onCameraErrorState(e: Exception) {
+    /*override fun onCameraErrorState(e: Exception) {
         throw java.lang.IllegalStateException(e)
-    }
+    }*/
 
     override fun onRequiresPermission(
         permission: String,
@@ -470,9 +469,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         return false
     }
 
-    override fun onCameraRequiresPermission(permission: String, reason: Reason): Boolean {
+    /*override fun onCameraRequiresPermission(permission: String, reason: Reason): Boolean {
         return false
-    }
+    }*/
 
     override fun onCapturingStopped() {
         // Between roughly SDK 6.4.2 and 7.12.11 we used local broadcasts, which broke the
@@ -484,20 +483,20 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // ShutdownFinishedHandler, as this would "hide" a broken handler without intention.
 
         Log.d(TAG, "onCapturingStopped")
-        checkAndStopCameraCapturing(capturingStopped = true, updateUi = true, pause = false)
+        //checkAndStopCameraCapturing(capturingStopped = true, updateUi = true, pause = false)
     }
 
-    override fun onCameraCapturingStopped() {
+    /*override fun onCameraCapturingStopped() {
         Log.d(TAG, "onCameraCapturingStopped")
         checkAndStopCapturing(crashAsyncUI = false, pause = false)
-    }
+    }*/
 
     /**
      * Checks the current capturing state and refreshes the UI elements accordingly.
      */
     private suspend fun reconnect() {
         capturing.addDataCapturingListener(this)
-        cameraService.addCameraListener(this)
+        //cameraService.addCameraListener(this)
 
         // To avoid blocking the UI when switching Tabs, this is implemented in an async way.
         // I.e. we disable all buttons as the capturingState is set in the callback.
@@ -517,13 +516,13 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             updateCachedTrack(id)
 
             // Also try to reconnect to CameraService if it's alive
-            if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+            /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
                 // It does not matter whether isCameraServiceRequested() as this can change all the time
                 Log.d(
                     TAG,
                     "onResume: reconnecting CameraService succeeded"
                 )
-            }
+            }*/
             return
         }
 
@@ -540,7 +539,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // Check if there is a zombie CameraService running
         // In case anything went wrong and the camera is still bound by this app we're releasing it so that it
         // can be used by other apps again
-        if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
+        /*if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
             Log.w(
                 TAG,
                 "Zombie CameraService is running and it's "
@@ -557,7 +556,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 })
             // TODO: This cancels the stop above, we need a onTimedOut [LEIP-327]
             error("Camera stopped manually as the camera was not released. This should not happen!")
-        }
+        }*/
     }
 
     /**
@@ -565,7 +564,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     private fun disconnect() {
         capturing.removeDataCapturingListener(this)
-        cameraService.removeCameraListener(this)
+        //cameraService.removeCameraListener(this)
 
         try {
             capturing.disconnect()
@@ -573,12 +572,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // This just tells us there is no running capturing in the background, see [MOV-588]
             Log.d(TAG, "No need to unbind as the background service was not running.")
         }
-        try {
+        /*try {
             cameraService.disconnect()
         } catch (e: DataCapturingException) {
             // This just tells us there is no running capturing in the background, see [MOV-588]
             Log.d(TAG, "No need to unbind as the camera background service was not running.")
-        }
+        }*/
 
         viewModel.setMeasurementId(null) // Experimental, might influence other Fragments
         //setCapturingStatus(null) // Seems not necessary right not, but is called in `reconnect`
@@ -650,7 +649,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                     // Ensures both services stopped to avoid btn out of sync [LEIP-299]
                     val target = if (pause) "pause" else "stop"
                     Log.d(TAG, "stopCapturing: $target finished")
-                    checkAndStopCameraCapturing(capturingStopped = true, updateUi = true, pause)
+                    //checkAndStopCameraCapturing(capturingStopped = true, updateUi = true, pause)
                 }
             }
             if (pause) {
@@ -702,7 +701,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
                         // Start CameraService
                         lifecycleScope.launch {
-                            if (withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }) {
+                            /*if (withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }) {
                                 Log.d(TAG, "CameraServiceRequested")
                                 try {
                                     startCameraService(measurementIdentifier)
@@ -711,7 +710,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                                 } catch (e: MissingPermissionException) {
                                     throw IllegalStateException(e)
                                 }
-                            }
+                            }*/
                         }
                     }
                 })
@@ -745,7 +744,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
                         // Start CameraService
                         lifecycleScope.launch {
-                            if (withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }) {
+                            /*if (withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }) {
                                 Log.d(Constants.TAG, "CameraServiceRequested")
                                 try {
                                     startCameraService(measurementIdentifier)
@@ -754,7 +753,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                                 } catch (e: MissingPermissionException) {
                                     throw java.lang.IllegalStateException(e)
                                 }
-                            }
+                            }*/
                         }
                     }
                 })
@@ -792,7 +791,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val exposureValueIso100 = cameraSettings.getStaticExposureValueBlocking()*/
 
         // Set default setting as this UI does not allow the user to change it.
-        val cameraInfo = CameraInfo(requireContext())
+        /*val cameraInfo = CameraInfo(requireContext())
         val minFocusDistance = if (cameraInfo.hyperFocalDistance != null) {
             cameraInfo.hyperFocalDistance!!
         } else {
@@ -821,7 +820,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 override fun startUpFinished(measurementIdentifier: Long) {
                     Log.v(Constants.TAG, "startCameraService: CameraService startUpFinished")
                 }
-            })
+            })*/
     }
 
     private fun isRestrictionActive(): Boolean {
@@ -1075,7 +1074,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             })
     }
 
-    private fun checkAndStopCameraCapturing(capturingStopped: Boolean, updateUi: Boolean, pause: Boolean) {
+    /*private fun checkAndStopCameraCapturing(capturingStopped: Boolean, updateUi: Boolean, pause: Boolean) {
         cameraService.isRunning(
             DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT,
             TimeUnit.MILLISECONDS,
@@ -1133,9 +1132,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 }
             }
         )
-    }
+    }*/
 
-    override fun onNewPictureAcquired(picturesCaptured: Int) {
+    /*override fun onNewPictureAcquired(picturesCaptured: Int) {
         Log.d(TAG, "onNewPictureAcquired")
         /*val text =
             context!!.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured
@@ -1149,5 +1148,5 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
     override fun onVideoStopped() {
         Log.d(TAG, "onVideoStopped")
-    }
+    }*/
 }
