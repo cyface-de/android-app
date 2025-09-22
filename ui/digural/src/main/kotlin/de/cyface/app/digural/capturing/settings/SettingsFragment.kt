@@ -357,7 +357,13 @@ class SettingsFragment : Fragment() {
         viewModel.triggeringTime.observe(viewLifecycleOwner) { triggeringTime ->
             run {
                 Log.d(TAG, "updateView -> triggering time to $triggeringTime ms")
-                binding.staticTimeSlider.value = triggeringTime.toFloat()
+                val newSliderValue = triggeringTime.toFloat()
+                binding.staticTimeSlider.value = if (newSliderValue < binding.staticTimeSlider.valueFrom) {
+                    Log.w(TAG,"Value of timer slider was $newSliderValue, but minimum is ${binding.staticTimeSlider.valueFrom}")
+                    binding.staticTimeSlider.valueFrom
+                } else {
+                    triggeringTime.toFloat()
+                }
 
                 val text = StringBuilder(triggeringTime.toString())
                 while (text.length < 4) {
