@@ -138,7 +138,9 @@ class SettingsFragment : Fragment() {
         // Initialise file picker launcher.
         // This lambda is called as soon as a file has been picked.
         filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            viewModel.modelFilePicked(result, requireContext())
+            lifecycleScope.launch {
+                viewModel.modelFilePicked(result, requireContext())
+            }
         }
 
         // Initialize ViewModel

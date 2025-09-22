@@ -215,7 +215,7 @@ class SettingsViewModel(
     /**
      * Called when the user selects a new model file in the system file picker dialog.
      */
-    fun modelFilePicked(result: ActivityResult, context: Context) {
+    suspend fun modelFilePicked(result: ActivityResult, context: Context) {
         // Check if result is ok
         if (result.resultCode == Activity.RESULT_OK) {
             // Get the intent from the result
