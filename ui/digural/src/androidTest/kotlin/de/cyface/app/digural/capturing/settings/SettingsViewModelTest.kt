@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -28,9 +29,23 @@ class SettingsViewModelTest {
     fun setup() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
 
+        // FIXME: This test may not be reproducing the issue as the test file is unrealistic small.
+
         // Erstellen einer temporären Testdatei mit bekanntem Inhalt
         tempFile = File(context.cacheDir, "test_file.txt")
         tempFile.writeText("Dies ist der Inhalt der Testdatei für den Kopiervorgang.")
+
+        /*val testContext = InstrumentationRegistry.getInstrumentation().context
+        val inputStream = testContext.resources.openRawResource(
+            testContext.resources.getIdentifier("fixme_do_not_upload", "raw", testContext.packageName)
+        )
+
+        tempFile = File(context.cacheDir, "fixme_do_not_upload.tflite")
+        inputStream.use { inStream ->
+            tempFile.outputStream().use { outStream ->
+                inStream.copyTo(outStream)
+            }
+        }*/
     }
 
     @After
@@ -66,5 +81,11 @@ class SettingsViewModelTest {
         // THEN: Prüfen, ob der Inhalt der kopierten Datei korrekt ist
         val copiedContent = copiedFile.readText()
         assertEquals("Dies ist der Inhalt der Testdatei für den Kopiervorgang.", copiedContent)
+
+        // THEN: Byte-Größe vergleichen statt Inhalt
+        //val originalSize = tempFile.length()
+        //val copiedSize = copiedFile.length()
+        //Log.d("de.cyface", "$originalSize vs $copiedSize")
+        //assertEquals("Byte size mismatch!", originalSize, copiedSize)
     }
 }

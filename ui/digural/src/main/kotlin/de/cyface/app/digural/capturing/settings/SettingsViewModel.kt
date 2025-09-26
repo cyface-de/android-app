@@ -220,18 +220,26 @@ class SettingsViewModel(
         // Check if result is ok
         if (result.resultCode == Activity.RESULT_OK) {
             // Get the intent from the result
-            val data: Intent = result.data ?: throw NullPointerException("No Data!")
-            val uri: Uri = data.data ?: throw NullPointerException("No Uri!")
-            val inputStream: InputStream = context.contentResolver.openInputStream(uri) ?: throw NullPointerException("Unable to open Input Stream!")
-            val fileName: String = uri.lastPathSegment ?: throw NullPointerException("No File Name!")
-            val targetFile: File = File(context.getExternalFilesDir(null), "anon_model")
+            val data = result.data ?: throw NullPointerException("No Data!")
+            val uri = data.data ?: throw NullPointerException("No Uri!")
+
+            val fileName = uri.lastPathSegment ?: throw NullPointerException("No File Name!")
+            val targetFile = File(context.getExternalFilesDir(null), "anon_model")
 
             // Set the selected file as the selected model file.
-            inputStream.use { inputStream ->
-                targetFile.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
+            // FIXME: withContext(Dispatchers.IO) {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    targetFile.outputStream().use { outputStream ->
+                        val bytesCopied = inputStream.copyTo(outputStream)
+                        // should be called by copyTo: outputStream.flush()
+
+                        // Originalgröße bestimmen (sofern Content-Length vorhanden)
+                        val originalSize = context.contentResolver.openFileDescriptor(uri, "r")?.statSize ?: -1
+                        Log.d(TAG + ".ASD", "Model original size: $originalSize bytes")
+                        Log.d(TAG + ".ASD", "Copied anon_model. Size now: ${targetFile.length()} bytes, copied bytes: $bytesCopied")
+                    }
                 }
-            }
+            //}
 
             // Set model after copy operation has finished!
             setAnonModel(FileSelection(fileName))
@@ -245,7 +253,7 @@ class SettingsViewModel(
                 // context.filesDir liefert den Pfad zum internen 'files'-Verzeichnis deiner App
                 // z.B. /data/user/0/dein.paket.name/files/
                 val file = File(context.filesDir, filename)
-                Log.d(TAG, "Speichere String in: ${file.absolutePath}")
+                Log.d(TAG + ".ASD", "Speichere String in: ${file.absolutePath}")
 
                 // FileOutputStream öffnet die Datei zum Schreiben.
                 // Wenn die Datei nicht existiert, wird sie erstellt.
