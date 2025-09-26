@@ -22,6 +22,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.LiveData
@@ -40,10 +41,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
+import java.security.MessageDigest
 
 /**
  * This is the [ViewModel] for the [SettingsFragment].
@@ -234,9 +237,11 @@ class SettingsViewModel(
                         // should be called by copyTo: outputStream.flush()
 
                         // Originalgröße bestimmen (sofern Content-Length vorhanden)
-                        val originalSize = context.contentResolver.openFileDescriptor(uri, "r")?.statSize ?: -1
-                        Log.d(TAG + ".ASD", "Model original size: $originalSize bytes")
-                        Log.d(TAG + ".ASD", "Copied anon_model. Size now: ${targetFile.length()} bytes, copied bytes: $bytesCopied")
+                        val originalFile = context.contentResolver.openFileDescriptor(uri, "r")
+                        val originalSize = originalFile?.statSize ?: -1
+                        val originalHash = originalFile?.sha256() ?: "-1"
+                        Log.d(TAG + ".ASD", "Model original size: $originalSize bytes, hash: $originalHash")
+                        Log.d(TAG + ".ASD", "Model copied size: ${targetFile.length()} bytes, hash: $bytesCopied")
                     }
                 }
             //}
@@ -272,6 +277,19 @@ class SettingsViewModel(
                 false
             }
         }
+    }
+
+    private fun ParcelFileDescriptor.sha256(): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        FileInputStream(this.fileDescriptor).use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            var read = input.read(buffer)
+            while (read > 0) {
+                digest.update(buffer, 0, read)
+                read = input.read(buffer)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }
 

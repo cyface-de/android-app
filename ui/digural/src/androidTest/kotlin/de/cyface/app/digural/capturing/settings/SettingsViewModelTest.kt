@@ -8,6 +8,9 @@ import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import de.cyface.app.digural.utils.Constants.TAG
+import de.cyface.camera_service.background.camera.anon.yolo.md5
+import de.cyface.camera_service.background.camera.anon.yolo.sha256
 import de.cyface.camera_service.settings.CameraSettings
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.test.runTest
@@ -18,8 +21,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
-import java.io.FileInputStream
-import java.security.MessageDigest
 
 @RunWith(AndroidJUnit4::class)
 class SettingsViewModelTest {
@@ -31,14 +32,18 @@ class SettingsViewModelTest {
     fun setup() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
 
-        // Erstellen einer temporären Testdatei mit bekanntem Inhalt
-        //tempFile = File(context.cacheDir, "test_file.txt")
-        //tempFile.writeText("Dies ist der Inhalt der Testdatei für den Kopiervorgang.")
+        // Create a temp file with sample content
+        tempFile = File(context.cacheDir, "test_file.txt")
+        tempFile.writeText("This is the content of the test file.")
 
         // Using a real model file (12 MB) also does not reproduce [LEIP-386]
         /*val testContext = InstrumentationRegistry.getInstrumentation().context
         val inputStream = testContext.resources.openRawResource(
-            testContext.resources.getIdentifier("fixme_do_not_upload", "raw", testContext.packageName)
+            testContext.resources.getIdentifier(
+                "fixme_do_not_upload",
+                "raw",
+                testContext.packageName
+            )
         )
 
         tempFile = File(context.cacheDir, "fixme_do_not_upload.tflite")
@@ -74,24 +79,11 @@ class SettingsViewModelTest {
 
         // Compare Hashes of copied files content instead of byte size [LEIP-386].
         // Unfortunately, this test did not reproduce [LEIP-386], even with a realistic model.
+        require(tempFile.length() > 0 && copiedFile.length() > 0)
         assertEquals("Byte size mismatch!", tempFile.length(), copiedFile.length())
         assertEquals("MD5 mismatch!", tempFile.md5(), copiedFile.md5())
         assertEquals("SHA-256 mismatch!", tempFile.sha256(), copiedFile.sha256())
-    }
-
-    private fun File.md5(): String = this.hash("MD5")
-    private fun File.sha256(): String = this.hash("SHA-256")
-
-    private fun File.hash(algorithm: String): String {
-        val buffer = ByteArray(8192)
-        val digest = MessageDigest.getInstance(algorithm)
-        FileInputStream(this).use { fis ->
-            var read = fis.read(buffer)
-            while (read > 0) {
-                digest.update(buffer, 0, read)
-                read = fis.read(buffer)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
+        Log.d(TAG, "${tempFile.length()} Bytes vs ${copiedFile.length()} Bytes")
+        Log.d(TAG, "${tempFile.sha256()} vs ${copiedFile.sha256()}")
     }
 }
