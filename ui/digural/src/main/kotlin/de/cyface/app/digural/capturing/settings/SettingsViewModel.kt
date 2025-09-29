@@ -230,13 +230,12 @@ class SettingsViewModel(
             val targetFile = File(context.getExternalFilesDir(null), "anon_model")
 
             // Set the selected file as the selected model file.
-            // FIXME: withContext(Dispatchers.IO) {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            withContext(Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
                     targetFile.outputStream().use { outputStream ->
                         val bytesCopied = inputStream.copyTo(outputStream)
-                        // should be called by copyTo: outputStream.flush()
 
-                        // Originalgröße bestimmen (sofern Content-Length vorhanden)
+                        // Calculate original size (if Content-Length is given)
                         val originalFile = context.contentResolver.openFileDescriptor(uri, "r")
                         val originalSize = originalFile?.statSize ?: -1
                         val originalHash = originalFile?.sha256() ?: "-1"
@@ -244,7 +243,7 @@ class SettingsViewModel(
                         Log.d(TAG, "Model copied size: ${targetFile.length()} bytes, hash: $bytesCopied")
                     }
                 }
-            //}
+            }
 
             // Set model after copy operation has finished!
             setAnonModel(FileSelection(fileName))
@@ -255,25 +254,19 @@ class SettingsViewModel(
         val filename = "model_name.txt" // Same as in AnnotationsWriter
         return withContext(Dispatchers.IO) { // Führe Datei-I/O im IO-Dispatcher aus
             try {
-                // context.filesDir liefert den Pfad zum internen 'files'-Verzeichnis deiner App
-                // z.B. /data/user/0/dein.paket.name/files/
                 val file = File(context.filesDir, filename)
                 Log.d(TAG, "Speichere String in: ${file.absolutePath}")
 
-                // FileOutputStream öffnet die Datei zum Schreiben.
-                // Wenn die Datei nicht existiert, wird sie erstellt.
-                // Der zweite Parameter 'false' bedeutet, dass die Datei überschrieben wird,
-                // falls sie bereits existiert. Verwende 'true', um anzuhängen.
                 FileOutputStream(file, false).use { outputStream ->
-                    outputStream.write(text.toByteArray()) // Konvertiere den String in Bytes
-                    outputStream.flush() // Stelle sicher, dass alle Daten geschrieben wurden
+                    outputStream.write(text.toByteArray())
+                    outputStream.flush()
                 }
-                true // Erfolg
+                true
             } catch (e: IOException) {
-                Log.e(TAG, "Fehler beim Schreiben des Strings in die Datei '$filename'", e)
-                false // Fehler
+                Log.e(TAG, "Error while writing a string into '$filename'", e)
+                false
             } catch (e: Exception) {
-                Log.e(TAG, "Unerwarteter Fehler beim Schreiben des Strings in die Datei '$filename'", e)
+                Log.e(TAG, "Unexpected error while writing into '$filename'", e)
                 false
             }
         }
