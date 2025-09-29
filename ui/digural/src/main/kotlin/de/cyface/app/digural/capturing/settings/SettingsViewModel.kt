@@ -240,8 +240,8 @@ class SettingsViewModel(
                         val originalFile = context.contentResolver.openFileDescriptor(uri, "r")
                         val originalSize = originalFile?.statSize ?: -1
                         val originalHash = originalFile?.sha256() ?: "-1"
-                        Log.d(TAG + ".ASD", "Model original size: $originalSize bytes, hash: $originalHash")
-                        Log.d(TAG + ".ASD", "Model copied size: ${targetFile.length()} bytes, hash: $bytesCopied")
+                        Log.d(TAG, "Model original size: $originalSize bytes, hash: $originalHash")
+                        Log.d(TAG, "Model copied size: ${targetFile.length()} bytes, hash: $bytesCopied")
                     }
                 }
             //}
@@ -258,7 +258,7 @@ class SettingsViewModel(
                 // context.filesDir liefert den Pfad zum internen 'files'-Verzeichnis deiner App
                 // z.B. /data/user/0/dein.paket.name/files/
                 val file = File(context.filesDir, filename)
-                Log.d(TAG + ".ASD", "Speichere String in: ${file.absolutePath}")
+                Log.d(TAG, "Speichere String in: ${file.absolutePath}")
 
                 // FileOutputStream öffnet die Datei zum Schreiben.
                 // Wenn die Datei nicht existiert, wird sie erstellt.
