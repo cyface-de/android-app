@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.LiveData
@@ -223,10 +224,10 @@ class SettingsViewModel(
         // Check if result is ok
         if (result.resultCode == Activity.RESULT_OK) {
             // Get the intent from the result
-            val data = result.data ?: throw NullPointerException("No Data!")
-            val uri = data.data ?: throw NullPointerException("No Uri!")
+            val data = result.data ?: error("No Data!")
+            val uri = data.data ?: error("No Uri!")
 
-            val fileName = uri.lastPathSegment ?: throw NullPointerException("No File Name!")
+            val fileName = context.getFileName(uri) ?: "unknown_file"
             val targetFile = File(context.getExternalFilesDir(null), "anon_model")
 
             // Set the selected file as the selected model file.
@@ -250,12 +251,25 @@ class SettingsViewModel(
         }
     }
 
+    /**
+     * @return the file name from a content URI e.g. from system file picker selection
+     */
+    private fun Context.getFileName(uri: Uri): String? {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val index = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index != -1) return it.getString(index)
+            }
+        }
+        return null
+    }
+
     suspend fun saveToFile(context: Context, text: String) {
         val filename = "model_name.txt" // Same as in AnnotationsWriter
-        return withContext(Dispatchers.IO) { // Führe Datei-I/O im IO-Dispatcher aus
+        return withContext(Dispatchers.IO) {
             try {
                 val file = File(context.filesDir, filename)
-                Log.d(TAG, "Speichere String in: ${file.absolutePath}")
 
                 FileOutputStream(file, false).use { outputStream ->
                     outputStream.write(text.toByteArray())

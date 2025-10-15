@@ -102,7 +102,9 @@ class SettingsFragment : Fragment() {
                 } else {
                     Toast.makeText(
                         context,
-                        requireContext().getString(de.cyface.camera_service.R.string.camera_service_off_missing_permissions),
+                        requireContext().getString(
+                            de.cyface.camera_service.R.string.camera_service_off_missing_permissions
+                        ),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -121,19 +123,19 @@ class SettingsFragment : Fragment() {
         if (activity is ServiceProvider) {
             capturing = (activity as ServiceProvider).capturing
         } else {
-            throw RuntimeException("Context does not support the Fragment, implement ServiceProvider")
+            error("Context does not support the Fragment, implement ServiceProvider")
         }
         val cameraSettings =
             if (activity is CameraServiceProvider) {
                 (activity as CameraServiceProvider).cameraSettings
             } else {
-                throw RuntimeException("Context doesn't support the Fragment, implement `CameraServiceProvider`")
+                error("Context doesn't support the Fragment, implement `CameraServiceProvider`")
             }
         val customSettings: CustomSettings =
             if (activity is SettingsProvider) {
                 (activity as SettingsProvider).customSettings
             } else {
-                throw RuntimeException("Context doesn't support the Fragment, implement `CustomProvider`")
+                error("Context doesn't support the Fragment, implement `CustomProvider`")
             }
         // Initialise file picker launcher.
         // This lambda is called as soon as a file has been picked.
@@ -359,7 +361,11 @@ class SettingsFragment : Fragment() {
                 Log.d(TAG, "updateView -> triggering time to $triggeringTime ms")
                 val newSliderValue = triggeringTime.toFloat()
                 binding.staticTimeSlider.value = if (newSliderValue < binding.staticTimeSlider.valueFrom) {
-                    Log.w(TAG,"Value of timer slider was $newSliderValue, but minimum is ${binding.staticTimeSlider.valueFrom}")
+                    Log.w(
+                        TAG,
+                        "Value of timer slider was $newSliderValue, " +
+                            "but minimum is ${binding.staticTimeSlider.valueFrom}"
+                    )
                     binding.staticTimeSlider.valueFrom
                 } else {
                     triggeringTime.toFloat()
@@ -424,7 +430,7 @@ class SettingsFragment : Fragment() {
         viewModel.diguralAnonModel.observe(viewLifecycleOwner) { anonModel ->
             run {
                 binding.anonModelSelectionSpinner.setSelection(anonModel.index)
-                // Show file selector only if file selection model was choosen.
+                // Show file selector only if file selection model was chosen.
                 if (anonModel.index == 3) {
                     val fileModel = anonModel as FileSelection
                     binding.anonModelFileSelector.visibility = VISIBLE
