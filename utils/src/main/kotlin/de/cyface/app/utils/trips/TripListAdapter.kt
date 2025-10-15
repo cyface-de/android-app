@@ -26,7 +26,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.navigation.Navigation
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
@@ -40,6 +39,7 @@ import de.cyface.persistence.model.Modality
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.navigation.findNavController
 
 /**
  * [ListAdapter] which creates and binds a [TripViewHolder].
@@ -67,24 +67,24 @@ class TripListAdapter : ListAdapter<Measurement, TripViewHolder>(TripsComparator
         holder.itemView.setOnClickListener {
             // not passing complex data, as recommended: https://developer.android.com/guide/navigation/navigation-pass-data
             val action = TripsFragmentDirections.actionTripsToDetails(current.id)
-            Navigation.findNavController(it).navigate(action)
+            it.findNavController().navigate(action)
         }
         tracker?.let {
-            holder.bind(current, it.isSelected(position.toLong()))
+            holder.bind(current, it.isSelected(current.id))
         }
     }
 
     override fun getItemId(position: Int): Long {
-        return position.toLong()
+        return getItem(position).id
     }
 
-    public override fun getItem(position: Int): Measurement {
-        return super.getItem(position)
+    public override fun getItem(measurementId: Int): Measurement {
+        return super.getItem(measurementId)
     }
 
     fun selectAll() {
         for (i in 0 until itemCount) {
-            tracker!!.select(i.toLong())
+            tracker!!.select(getItem(i).id)
         }
     }
 
