@@ -221,28 +221,24 @@ class MenuProvider(
             // Load unfinished measurement
             val unFinishedMeasurement: Measurement? = try {
                 persistence.loadCurrentlyCapturedMeasurement()
-            } catch (e: NoSuchMeasurementException) {
+            } catch (_: NoSuchMeasurementException) {
                 null
             }
 
             val mutableSelection = MutableSelection<Long>()
             adapter.tracker!!.copySelection(mutableSelection)
-            mutableSelection.forEach { position ->
+            mutableSelection.forEach { measurementId ->
                 run {
                     // Ignoring the ongoing measurement
-                    val index = position.toInt()
-                    if (index < adapter.itemCount) {
-                        val measurementId = adapter.getItem(index).id
-                        if (unFinishedMeasurement == null || measurementId != unFinishedMeasurement.id) {
-                            // Delete files linked to measurement (e.g. image data)
-                            val attachmentsFolder = findMeasurementAttachmentsFolder(measurementId)
-                            if (attachmentsFolder != null) {
-                                deleteRecursively(context.get()!!, attachmentsFolder)
-                            }
-                            persistence.delete(measurementId)
+                    if (unFinishedMeasurement == null || measurementId != unFinishedMeasurement.id) {
+                        // Delete files linked to measurement (e.g. image data)
+                        val attachmentsFolder = findMeasurementAttachmentsFolder(measurementId)
+                        if (attachmentsFolder != null) {
+                            deleteRecursively(context.get()!!, attachmentsFolder)
                         }
-                        adapter.tracker!!.deselect(position)
+                        persistence.delete(measurementId)
                     }
+                    adapter.tracker!!.deselect(measurementId)
                 }
             }
         }
