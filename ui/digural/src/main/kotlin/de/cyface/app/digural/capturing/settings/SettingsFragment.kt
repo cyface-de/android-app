@@ -43,6 +43,7 @@ import de.cyface.app.digural.CameraServiceProvider
 import de.cyface.app.digural.R
 import de.cyface.app.digural.capturing.settings.ExposureTimeDialog.Companion.CAMERA_STATIC_EXPOSURE_TIME_KEY
 import de.cyface.app.digural.databinding.FragmentSettingsBinding
+import de.cyface.app.digural.capturing.settings.SaveFileResult
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
 import de.cyface.camera_service.Utils
@@ -438,6 +439,53 @@ class SettingsFragment : Fragment() {
                     // Don't write file on every observe - only when model is picked [CY-6647]
                 } else {
                     binding.anonModelFileSelector.visibility = GONE
+                }
+            }
+        }
+
+        // Observe storage errors and show warnings
+        viewModel.storageError.observe(viewLifecycleOwner) { error ->
+            run {
+                when (error) {
+                    is SaveFileResult.StorageFull -> {
+                        val availableMb = error.availableBytes / 1024 / 1024
+                        binding.storageWarning.visibility = VISIBLE
+                        binding.storageWarningText.text = getString(
+                            R.string.storage_full_warning,
+                            availableMb
+                        )
+                        Toast.makeText(
+                            context,
+                            getString(R.string.storage_full_error, availableMb),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    is SaveFileResult.ReadOnlyFilesystem -> {
+                        val availableMb = error.availableBytes / 1024 / 1024
+                        binding.storageWarning.visibility = VISIBLE
+                        binding.storageWarningText.text = getString(R.string.filesystem_readonly_warning)
+                        Toast.makeText(
+                            context,
+                            getString(R.string.filesystem_readonly_error),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    is SaveFileResult.OtherError -> {
+                        binding.storageWarning.visibility = VISIBLE
+                        binding.storageWarningText.text = getString(R.string.file_write_error)
+                        Toast.makeText(
+                            context,
+                            getString(R.string.file_write_error),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    null -> {
+                        binding.storageWarning.visibility = GONE
+                    }
+                    else -> {
+                        // Success case - hide warning
+                        binding.storageWarning.visibility = GONE
+                    }
                 }
             }
         }

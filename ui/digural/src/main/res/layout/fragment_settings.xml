@@ -641,6 +641,43 @@
               />
 
         </LinearLayout>
+
+        <!-- Storage Warning -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/storage_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="#FFF3CD"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="4dp">
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
+              android:padding="12dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:src="@android:drawable/ic_dialog_alert"
+                android:contentDescription="@string/warning_icon"
+                app:tint="#856404" />
+
+            <TextView
+                android:id="@+id/storage_warning_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#856404"
+                android:textSize="14sp"
+                android:text="@string/storage_warning_placeholder" />
+          </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
       </LinearLayout>
 
     </LinearLayout>
