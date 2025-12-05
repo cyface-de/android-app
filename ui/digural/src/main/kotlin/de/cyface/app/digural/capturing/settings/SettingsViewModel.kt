@@ -228,7 +228,9 @@ class SettingsViewModel(
             val uri = data.data ?: error("No Uri!")
 
             val fileName = context.getFileName(uri) ?: "unknown_file"
-            val targetFile = File(context.getExternalFilesDir(null), "anon_model")
+            val externalFilesDir = context.getExternalFilesDir(null)
+                ?: error("External files directory is not available")
+            val targetFile = File(externalFilesDir, "anon_model")
 
             // Set the selected file as the selected model file.
             withContext(Dispatchers.IO) {
@@ -248,6 +250,9 @@ class SettingsViewModel(
 
             // Set model after copy operation has finished!
             setAnonModel(FileSelection(fileName))
+
+            // Write model name to file for AnnotationsWriter
+            saveToFile(context, fileName)
         }
     }
 
@@ -275,9 +280,15 @@ class SettingsViewModel(
                     outputStream.write(text.toByteArray())
                     outputStream.flush()
                 }
+                Log.d(TAG, "Successfully wrote model name to '$filename'")
                 true
             } catch (e: IOException) {
-                Log.e(TAG, "Error while writing a string into '$filename'", e)
+                // Handle read-only filesystem (EROFS) and other IO errors gracefully
+                if (e.message?.contains("EROFS") == true || e.message?.contains("Read-only") == true) {
+                    Log.w(TAG, "Cannot write to '$filename': filesystem is read-only. This may indicate device storage issues.")
+                } else {
+                    Log.e(TAG, "Error while writing a string into '$filename'", e)
+                }
                 false
             } catch (e: Exception) {
                 Log.e(TAG, "Unexpected error while writing into '$filename'", e)

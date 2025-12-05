@@ -435,9 +435,7 @@ class SettingsFragment : Fragment() {
                     val fileModel = anonModel as FileSelection
                     binding.anonModelFileSelector.visibility = VISIBLE
                     binding.anonSelectedModelFilename.text = fileModel.modelName
-                    CoroutineScope(Dispatchers.Main).launch {
-                        context?.let { viewModel.saveToFile(it, fileModel.modelName) }
-                    }
+                    // Don't write file on every observe - only when model is picked [CY-6647]
                 } else {
                     binding.anonModelFileSelector.visibility = GONE
                 }
