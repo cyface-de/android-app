@@ -318,8 +318,8 @@ class SettingsViewModel(
                 val filesDir = context.filesDir
                 val availableBytes = filesDir.usableSpace
 
-                // Check if storage is critically low (< 10MB)
-                if (availableBytes < 10 * 1024 * 1024) {
+                // Check if storage is critically low (< 100MB)
+                if (availableBytes < 100 * 1024 * 1024) {
                     Log.w(TAG, "Storage critically low: ${availableBytes / 1024 / 1024} MB available")
                     return@withContext SaveFileResult.StorageFull(availableBytes)
                 }
