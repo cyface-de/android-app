@@ -435,7 +435,13 @@ class SettingsFragment : Fragment() {
                 if (anonModel.index == 3) {
                     val fileModel = anonModel as FileSelection
                     binding.anonModelFileSelector.visibility = VISIBLE
-                    binding.anonSelectedModelFilename.text = fileModel.modelName
+                    // Hide active model card if no file is selected yet, show with filename otherwise
+                    if (fileModel.modelName.isBlank()) {
+                        binding.activeModelCard.visibility = GONE
+                    } else {
+                        binding.activeModelCard.visibility = VISIBLE
+                        binding.anonSelectedModelFilename.text = fileModel.modelName
+                    }
                     // Don't write file on every observe - only when model is picked [CY-6647]
                 } else {
                     binding.anonModelFileSelector.visibility = GONE
