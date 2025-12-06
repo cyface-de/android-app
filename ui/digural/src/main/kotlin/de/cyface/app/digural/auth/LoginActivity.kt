@@ -32,7 +32,9 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.material.textfield.TextInputEditText
 import de.cyface.app.digural.Application
 import de.cyface.app.digural.Application.Companion.errorHandler
@@ -123,6 +125,9 @@ class LoginActivity : AccountAuthenticatorActivity() {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
+        // Set status bar appearance to light mode (dark icons/text) for visibility
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, findViewById(R.id.activity_login)).isAppearanceLightStatusBars = true
 
         context = WeakReference(this)
 

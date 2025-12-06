@@ -27,7 +27,9 @@ import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
@@ -92,6 +94,9 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
+        // Set status bar appearance to light mode (dark icons/text) for visibility
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, findViewById(R.id.root)).isAppearanceLightStatusBars = true
     }
 
     /**

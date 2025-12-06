@@ -37,7 +37,9 @@ import androidx.annotation.MainThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -223,6 +225,9 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
             view.setPadding(0, systemInsets.top, 0, /*systemInsets.bottom*/ 0)
             insets
         }
+        // Set status bar appearance to light mode (dark icons/text) for visibility
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = true
 
         // Setting up top action bar & bottom menu (no sidebar, see RFR-333]
         // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not

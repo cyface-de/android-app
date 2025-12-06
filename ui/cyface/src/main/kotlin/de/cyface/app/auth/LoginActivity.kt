@@ -35,7 +35,9 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import de.cyface.app.MainActivity
 import de.cyface.app.R
 import de.cyface.synchronization.AuthStateManager
@@ -114,6 +116,9 @@ class LoginActivity : AppCompatActivity() {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
+        // Set status bar appearance to light mode (dark icons/text) for visibility
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, findViewById(R.id.coordinator)).isAppearanceLightStatusBars = true
 
         findViewById<View>(R.id.retry).setOnClickListener {
             mExecutor.submit { initializeAppAuth() }
