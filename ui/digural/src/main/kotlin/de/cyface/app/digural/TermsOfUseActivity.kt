@@ -20,6 +20,7 @@ package de.cyface.app.digural
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -27,7 +28,9 @@ import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
@@ -93,6 +96,10 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
+        // Set status bar appearance based on theme (light icons for dark mode, dark icons for light mode)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val isLightTheme = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
+        WindowInsetsControllerCompat(window, findViewById(R.id.root)).isAppearanceLightStatusBars = isLightTheme
     }
 
     /**

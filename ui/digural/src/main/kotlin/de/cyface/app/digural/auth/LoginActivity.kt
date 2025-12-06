@@ -24,6 +24,7 @@ import android.accounts.AccountManager
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -32,7 +33,9 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.material.textfield.TextInputEditText
 import de.cyface.app.digural.Application
 import de.cyface.app.digural.Application.Companion.errorHandler
@@ -123,6 +126,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
+        // Set status bar appearance based on theme (light icons for dark mode, dark icons for light mode)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val isLightTheme = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
+        WindowInsetsControllerCompat(window, findViewById(R.id.activity_login)).isAppearanceLightStatusBars = isLightTheme
 
         context = WeakReference(this)
 

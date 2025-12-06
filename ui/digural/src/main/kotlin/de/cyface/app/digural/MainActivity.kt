@@ -23,6 +23,7 @@ import android.accounts.AccountManager
 import android.accounts.AccountManagerFuture
 import android.accounts.AuthenticatorException
 import android.accounts.OperationCanceledException
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
@@ -30,7 +31,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -232,6 +235,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             navHostFragment?.view?.setPadding(0, 0, 0, imeInsets.bottom)
             insets
         }
+        // Set status bar appearance based on theme (light icons for dark mode, dark icons for light mode)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val isLightTheme = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
+        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = isLightTheme
 
         // Setting up top action bar & bottom menu (no sidebar, see RFR-333]
         // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
