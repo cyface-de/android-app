@@ -40,4 +40,15 @@
   <string name="url_malformed_toast">Fehlerhaftes Adress-Format. Änderung wurde verworfen.</string>
   <string name="select_model_file">Modelldatei auswählen</string>
   <string name="nothing_selected">Nichts gewählt</string>
+  <string name="active_model_label">Aktives Modell</string>
+  <string name="info_icon">Info</string>
+
+  <!-- Storage warnings -->
+  <string name="warning_icon">Warnung</string>
+  <string name="storage_warning_placeholder">Speicherwarnung</string>
+  <string name="storage_full_warning">Gerätespeicher ist kritisch niedrig (%d MB verfügbar). Speicherplatz freigeben um Modelleinstellungen zu speichern.</string>
+  <string name="storage_full_error">Modell kann nicht gespeichert werden: Gerätespeicher ist voll (%d MB verfügbar). Bitte Speicherplatz freigeben.</string>
+  <string name="filesystem_readonly_warning">Gerätedateisystem ist schreibgeschützt. Dies kann auf Speicherprobleme hinweisen. Versuchen Sie, Ihr Gerät neu zu starten.</string>
+  <string name="filesystem_readonly_error">Modell kann nicht gespeichert werden: Dateisystem ist schreibgeschützt. Bitte starten Sie Ihr Gerät neu oder überprüfen Sie die Speicherintegrität.</string>
+  <string name="file_write_error">Modelleinstellungen können nicht gespeichert werden. Bitte versuchen Sie es erneut.</string>
 </resources>

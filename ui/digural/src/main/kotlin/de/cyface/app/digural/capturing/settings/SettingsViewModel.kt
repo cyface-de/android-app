@@ -50,6 +50,16 @@ import java.net.URL
 import java.security.MessageDigest
 
 /**
+ * Result of a file save operation with detailed error information.
+ */
+sealed class SaveFileResult {
+    object Success : SaveFileResult()
+    data class StorageFull(val availableBytes: Long) : SaveFileResult()
+    data class ReadOnlyFilesystem(val availableBytes: Long) : SaveFileResult()
+    data class OtherError(val exception: Exception) : SaveFileResult()
+}
+
+/**
  * This is the [ViewModel] for the [SettingsFragment].
  *
  * It holds the UI data/state for that UI element in a lifecycle-aware way, surviving configuration changes.
@@ -98,6 +108,7 @@ class SettingsViewModel(
     /** custom settings **/
     private val _diguralServerUrl = MutableLiveData<URL>()
     private val _anonModel = MutableLiveData<AnonymizationSettings>()
+    private val _storageError = MutableLiveData<SaveFileResult?>()
 
     /**
      * {@code True} if the camera allows to control the sensors (focus, exposure, etc.) manually.
@@ -125,6 +136,7 @@ class SettingsViewModel(
     /** custom settings **/
     val diguralServerUrl: LiveData<URL> = customSettings.diguralUrlFlow.asLiveData()
     val diguralAnonModel: LiveData<AnonymizationSettings> = cameraSettings.anonModelFlow.asLiveData()
+    val storageError: LiveData<SaveFileResult?> = _storageError
 
     init {
         viewModelScope.launch {
@@ -228,7 +240,9 @@ class SettingsViewModel(
             val uri = data.data ?: error("No Uri!")
 
             val fileName = context.getFileName(uri) ?: "unknown_file"
-            val targetFile = File(context.getExternalFilesDir(null), "anon_model")
+            val externalFilesDir = context.getExternalFilesDir(null)
+                ?: error("External files directory is not available")
+            val targetFile = File(externalFilesDir, "anon_model")
 
             // Set the selected file as the selected model file.
             withContext(Dispatchers.IO) {
@@ -246,9 +260,27 @@ class SettingsViewModel(
                 }
             }
 
-            // Set model after copy operation has finished!
-            setAnonModel(FileSelection(fileName))
+            // Write model name to file for AnnotationsWriter first
+            val result = saveToFile(context, fileName)
+
+            // Only set model if file write was successful
+            if (result is SaveFileResult.Success) {
+                setAnonModel(FileSelection(fileName))
+                _storageError.postValue(null)
+            } else {
+                // File write failed - clean up copied model file and update error state
+                targetFile.delete()
+                Log.w(TAG, "Cleaned up model file due to failed metadata write")
+                _storageError.postValue(result)
+            }
         }
+    }
+
+    /**
+     * Clears the storage error state.
+     */
+    fun clearStorageError() {
+        _storageError.value = null
     }
 
     /**
@@ -265,23 +297,59 @@ class SettingsViewModel(
         return null
     }
 
-    suspend fun saveToFile(context: Context, text: String) {
+    /**
+     * Checks if the device has available storage for writing.
+     *
+     * @param context The application context
+     * @param requiredBytes Minimum bytes required (default 100MB)
+     * @return true if storage is available, false if critically low
+     */
+    private fun hasAvailableStorage(context: Context, requiredBytes: Long = 100 * 1024 * 1024): Boolean {
+        val filesDir = context.filesDir
+        val usableSpace = filesDir.usableSpace
+        Log.d(TAG, "Available storage: ${usableSpace / 1024 / 1024} MB")
+        return usableSpace > requiredBytes
+    }
+
+    /**
+     * Saves text to a file with comprehensive error handling.
+     *
+     * @param context The application context
+     * @param text The text to write to the file
+     * @return SaveFileResult indicating success or specific error type
+     */
+    suspend fun saveToFile(context: Context, text: String): SaveFileResult {
         val filename = "model_name.txt" // Same as in AnnotationsWriter
         return withContext(Dispatchers.IO) {
             try {
+                // Check if storage is critically low (< 100MB)
+                if (!hasAvailableStorage(context)) {
+                    val availableBytes = context.filesDir.usableSpace
+                    Log.w(TAG, "Storage critically low: ${availableBytes / 1024 / 1024} MB available")
+                    return@withContext SaveFileResult.StorageFull(availableBytes)
+                }
+
                 val file = File(context.filesDir, filename)
 
                 FileOutputStream(file, false).use { outputStream ->
                     outputStream.write(text.toByteArray())
                     outputStream.flush()
                 }
-                true
+                Log.d(TAG, "Successfully wrote model name to '$filename'")
+                SaveFileResult.Success
             } catch (e: IOException) {
-                Log.e(TAG, "Error while writing a string into '$filename'", e)
-                false
+                val availableBytes = context.filesDir.usableSpace
+                // Handle read-only filesystem (EROFS) and other IO errors gracefully
+                if (e.message?.contains("EROFS") == true || e.message?.contains("Read-only") == true) {
+                    Log.w(TAG, "Cannot write to '$filename': filesystem is read-only. Available: ${availableBytes / 1024 / 1024} MB")
+                    SaveFileResult.ReadOnlyFilesystem(availableBytes)
+                } else {
+                    Log.e(TAG, "Error while writing a string into '$filename'", e)
+                    SaveFileResult.OtherError(e)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Unexpected error while writing into '$filename'", e)
-                false
+                SaveFileResult.OtherError(e)
             }
         }
     }

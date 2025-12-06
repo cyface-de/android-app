@@ -43,6 +43,8 @@
   <string name="url_malformed_toast">Invalid address format. The change was ignored.</string>
   <string name="select_model_file">Select Model File</string>
   <string name="nothing_selected">Nothing selected</string>
+  <string name="active_model_label">Active Model</string>
+  <string name="info_icon">Info</string>
   <string-array name="anon_models">
     <item>No Anonymization</item>
     <item>Model 1</item>
@@ -54,4 +56,13 @@
     <item>Time-based (adjustable)</item>
     <item>High frequency</item>
   </string-array>
+
+  <!-- Storage warnings -->
+  <string name="warning_icon">Warning</string>
+  <string name="storage_warning_placeholder">Storage warning</string>
+  <string name="storage_full_warning">Device storage is critically low (%d MB available). Free up space to save model settings.</string>
+  <string name="storage_full_error">Cannot save model: Device storage is full (%d MB available). Please free up space.</string>
+  <string name="filesystem_readonly_warning">Device filesystem is read-only. This may indicate storage issues. Try restarting your device.</string>
+  <string name="filesystem_readonly_error">Cannot save model: Filesystem is read-only. Please restart your device or check storage health.</string>
+  <string name="file_write_error">Unable to save model settings. Please try again.</string>
 </resources>
