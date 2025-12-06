@@ -301,10 +301,10 @@ class SettingsViewModel(
      * Checks if the device has available storage for writing.
      *
      * @param context The application context
-     * @param requiredBytes Minimum bytes required (default 1MB)
+     * @param requiredBytes Minimum bytes required (default 100MB)
      * @return true if storage is available, false if critically low
      */
-    private fun hasAvailableStorage(context: Context, requiredBytes: Long = 1024 * 1024): Boolean {
+    private fun hasAvailableStorage(context: Context, requiredBytes: Long = 100 * 1024 * 1024): Boolean {
         val filesDir = context.filesDir
         val usableSpace = filesDir.usableSpace
         Log.d(TAG, "Available storage: ${usableSpace / 1024 / 1024} MB")
@@ -322,16 +322,14 @@ class SettingsViewModel(
         val filename = "model_name.txt" // Same as in AnnotationsWriter
         return withContext(Dispatchers.IO) {
             try {
-                val filesDir = context.filesDir
-                val availableBytes = filesDir.usableSpace
-
                 // Check if storage is critically low (< 100MB)
-                if (availableBytes < 100 * 1024 * 1024) {
+                if (!hasAvailableStorage(context)) {
+                    val availableBytes = context.filesDir.usableSpace
                     Log.w(TAG, "Storage critically low: ${availableBytes / 1024 / 1024} MB available")
                     return@withContext SaveFileResult.StorageFull(availableBytes)
                 }
 
-                val file = File(filesDir, filename)
+                val file = File(context.filesDir, filename)
 
                 FileOutputStream(file, false).use { outputStream ->
                     outputStream.write(text.toByteArray())
