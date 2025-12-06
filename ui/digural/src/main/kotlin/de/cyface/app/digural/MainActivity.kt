@@ -225,7 +225,11 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
         // Fix for edge-to-edge introduced in targetSdkVersion 35
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container)) { view, insets ->
             val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
             view.setPadding(0, systemInsets.top, 0, /*systemInsets.bottom*/ 0)
+            // Apply bottom padding when keyboard is visible to ensure content is scrollable
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+            navHostFragment?.view?.setPadding(0, 0, 0, imeInsets.bottom)
             insets
         }
 
