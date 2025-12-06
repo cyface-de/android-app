@@ -116,9 +116,10 @@ class LoginActivity : AppCompatActivity() {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
-        // Set status bar appearance to light mode (dark icons/text) for visibility
+        // Set status bar appearance based on theme (light icons for dark mode, dark icons for light mode)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, findViewById(R.id.coordinator)).isAppearanceLightStatusBars = true
+        val isLightTheme = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_NO
+        WindowInsetsControllerCompat(window, findViewById(R.id.coordinator)).isAppearanceLightStatusBars = isLightTheme
 
         findViewById<View>(R.id.retry).setOnClickListener {
             mExecutor.submit { initializeAppAuth() }

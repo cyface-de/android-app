@@ -20,6 +20,7 @@ package de.cyface.app.r4r
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -94,9 +95,10 @@ class TermsOfUseActivity : AppCompatActivity(), View.OnClickListener {
             view.setPadding(0, systemInsets.top, 0, systemInsets.bottom)
             insets
         }
-        // Set status bar appearance to light mode (dark icons/text) for visibility
+        // Set status bar appearance based on theme (light icons for dark mode, dark icons for light mode)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, findViewById(R.id.root)).isAppearanceLightStatusBars = true
+        val isLightTheme = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
+        WindowInsetsControllerCompat(window, findViewById(R.id.root)).isAppearanceLightStatusBars = isLightTheme
     }
 
     /**

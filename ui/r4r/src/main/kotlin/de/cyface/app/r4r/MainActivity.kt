@@ -28,6 +28,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -228,9 +229,10 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
             view.setPadding(0, systemInsets.top, 0, /*systemInsets.bottom*/ 0)
             insets
         }
-        // Set status bar appearance to light mode (dark icons/text) for visibility
+        // Set status bar appearance based on theme (light icons for dark mode, dark icons for light mode)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = true
+        val isLightTheme = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
+        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = isLightTheme
 
         // Setting up top action bar & bottom menu (no sidebar, see RFR-333]
         // Not using `findNavController()` as `FragmentContainerView` in `activity_main.xml` does not
