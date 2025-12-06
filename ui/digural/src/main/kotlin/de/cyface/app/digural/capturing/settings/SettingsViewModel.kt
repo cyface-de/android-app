@@ -260,12 +260,19 @@ class SettingsViewModel(
                 }
             }
 
-            // Set model after copy operation has finished!
-            setAnonModel(FileSelection(fileName))
-
-            // Write model name to file for AnnotationsWriter and update error state
+            // Write model name to file for AnnotationsWriter first
             val result = saveToFile(context, fileName)
-            _storageError.postValue(if (result is SaveFileResult.Success) null else result)
+
+            // Only set model if file write was successful
+            if (result is SaveFileResult.Success) {
+                setAnonModel(FileSelection(fileName))
+                _storageError.postValue(null)
+            } else {
+                // File write failed - clean up copied model file and update error state
+                targetFile.delete()
+                Log.w(TAG, "Cleaned up model file due to failed metadata write")
+                _storageError.postValue(result)
+            }
         }
     }
 
