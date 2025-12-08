@@ -831,7 +831,7 @@ class CapturingFragment : Fragment(), DataCapturingListener/*, CameraListener*/ 
         if (activity == null) {
             Log.w(TAG, "Activity is null. If needed, dialogs wont appear.")
         }
-        if (!DiskConsumption.spaceAvailable()) {
+        if (!DiskConsumption.spaceAvailable(requireContext())) {
             showToast(
                 getString(de.cyface.app.utils.R.string.error_message_capturing_canceled_no_space),
                 false

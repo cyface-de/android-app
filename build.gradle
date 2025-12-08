@@ -59,17 +59,17 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceUtilsVersion = "4.2.2" // required for git sub-modules setup (energy-settings, backend)
+    cyfaceUtilsVersion = "5.0.1" // required for git sub-modules setup (energy-settings, backend)
     // (!) Match versions `android-app`, `SDK` and `camera-service`.
     // When `android-app` is checkout out, `rootProject.uploaderVersion` in the submodules will point
     // to `android-app/build.gradle` instead of `submodule/build.gradle`.
-    cyfaceSerializationVersion = "4.1.1" // required for git sub-modules setup (backend)
+    cyfaceSerializationVersion = "4.1.12" // required for git sub-modules setup (backend)
     cyfaceUploaderVersion = "1.6.2" // required for git sub-modules setup (backend)
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.13.19"
+    cyfaceAndroidBackendVersion = "7.13.21"
     cyfaceEnergySettingsVersion = "4.3.5"
-    cyfaceCameraServiceVersion = "4.14.4"
+    cyfaceCameraServiceVersion = "4.15.1"
 
     // Android SDK versions
     minSdkVersion = 26 // device support

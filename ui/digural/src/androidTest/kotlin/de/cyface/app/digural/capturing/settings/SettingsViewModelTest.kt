@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import de.cyface.app.digural.utils.Constants.TAG
+import de.cyface.camera_service.Constants
 import de.cyface.camera_service.background.camera.anon.yolo.md5
 import de.cyface.camera_service.background.camera.anon.yolo.sha256
 import de.cyface.camera_service.settings.CameraSettings
@@ -57,7 +58,7 @@ class SettingsViewModelTest {
     @After
     fun tearDown() {
         tempFile.delete()
-        File(context.getExternalFilesDir(null), "anon_model").delete()
+        Constants.getAnonymizationModelFilePath(context).delete()
     }
 
     @Test
@@ -74,7 +75,7 @@ class SettingsViewModelTest {
         viewModel.modelFilePicked(activityResult, context)
 
         // Assert
-        val copiedFile = File(context.getExternalFilesDir(null), "anon_model")
+        val copiedFile = Constants.getAnonymizationModelFilePath(context)
         assertTrue(copiedFile.exists())
 
         // Compare Hashes of copied files content instead of byte size [LEIP-386].

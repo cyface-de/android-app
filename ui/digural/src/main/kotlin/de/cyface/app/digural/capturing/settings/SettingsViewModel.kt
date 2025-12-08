@@ -20,7 +20,6 @@ package de.cyface.app.digural.capturing.settings
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
@@ -32,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import de.cyface.app.digural.MainActivity.Companion.TAG
+import de.cyface.camera_service.Constants
 import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.settings.AnonymizationSettings
 import de.cyface.camera_service.settings.CameraSettings
@@ -45,7 +45,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.net.URL
 import java.security.MessageDigest
 
@@ -241,9 +240,8 @@ class SettingsViewModel(
 
             val fileName = context.getFileName(uri) ?: "unknown_file"
 
-            // Try external storage first, fall back to internal if not available
-            val targetDir = context.getExternalFilesDir(null) ?: context.filesDir
-            val targetFile = File(targetDir, "anon_model")
+            // Use StorageHelper to get storage directory with automatic fallback
+            val targetFile = Constants.getAnonymizationModelFilePath(context)
             Log.d(TAG, "Saving model to: ${targetFile.absolutePath}")
 
             // Set the selected file as the selected model file.
@@ -300,17 +298,14 @@ class SettingsViewModel(
     }
 
     /**
-     * Checks if the device has available storage for writing.
+     * Returns the available storage for writing.
      *
-     * @param context The application context
-     * @param requiredBytes Minimum bytes required (default 100MB)
      * @return true if storage is available, false if critically low
      */
-    private fun hasAvailableStorage(context: Context, requiredBytes: Long = 100 * 1024 * 1024): Boolean {
-        val filesDir = context.filesDir
-        val usableSpace = filesDir.usableSpace
+    private fun availableStorage(filePath: File): Long {
+        val usableSpace = filePath.usableSpace
         Log.d(TAG, "Available storage: ${usableSpace / 1024 / 1024} MB")
-        return usableSpace > requiredBytes
+        return usableSpace
     }
 
     /**
@@ -321,36 +316,37 @@ class SettingsViewModel(
      * @return SaveFileResult indicating success or specific error type
      */
     suspend fun saveToFile(context: Context, text: String): SaveFileResult {
-        val filename = "model_name.txt" // Same as in AnnotationsWriter
         return withContext(Dispatchers.IO) {
+            val anonymizationModelFilePath = Constants.getAnonymizationModelFilePath(context)
+            val availableBytes = availableStorage(anonymizationModelFilePath)
             try {
-                // Check if storage is critically low (< 100MB)
-                if (!hasAvailableStorage(context)) {
-                    val availableBytes = context.filesDir.usableSpace
-                    Log.w(TAG, "Storage critically low: ${availableBytes / 1024 / 1024} MB available")
+                // Check if storage where model file itself should be written to is low (< 100MB)
+                val requiredBytes = 100 * 1024 * 1024
+                if (availableBytes < requiredBytes) {
                     return@withContext SaveFileResult.StorageFull(availableBytes)
                 }
 
-                val file = File(context.filesDir, filename)
-
-                FileOutputStream(file, false).use { outputStream ->
+                val modelNameFile = Constants.getModelNameFilePath(context)
+                FileOutputStream(modelNameFile, false).use { outputStream ->
                     outputStream.write(text.toByteArray())
                     outputStream.flush()
                 }
-                Log.d(TAG, "Successfully wrote model name to '$filename'")
+                Log.d(TAG, "Successfully wrote model name to '${modelNameFile.name}'")
                 SaveFileResult.Success
             } catch (e: IOException) {
-                val availableBytes = context.filesDir.usableSpace
                 // Handle read-only filesystem (EROFS) and other IO errors gracefully
                 if (e.message?.contains("EROFS") == true || e.message?.contains("Read-only") == true) {
-                    Log.w(TAG, "Cannot write to '$filename': filesystem is read-only. Available: ${availableBytes / 1024 / 1024} MB")
+                    Log.w(
+                        TAG,
+                        "Can't write model name file: fs is read-only. Available: ${availableBytes / 1024 / 1024} MB"
+                    )
                     SaveFileResult.ReadOnlyFilesystem(availableBytes)
                 } else {
-                    Log.e(TAG, "Error while writing a string into '$filename'", e)
+                    Log.e(TAG, "Error while writing model name file", e)
                     SaveFileResult.OtherError(e)
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Unexpected error while writing into '$filename'", e)
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Unexpected error while writing model name file", e)
                 SaveFileResult.OtherError(e)
             }
         }
