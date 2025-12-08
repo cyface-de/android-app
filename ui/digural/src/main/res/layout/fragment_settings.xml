@@ -591,20 +591,12 @@
             android:id="@+id/anon_model_selection_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="4pt"
-            android:paddingLeft="4pt"
-            android:paddingEnd="4pt"
-            android:paddingRight="4pt"
             android:text="@string/anon_model_selection_header_text" />
 
         <Spinner
             android:id="@+id/anon_model_selection_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="4pt"
-            android:paddingLeft="4pt"
-            android:paddingEnd="4pt"
-            android:paddingRight="4pt"
             android:minHeight="48dp"
             android:background="?attr/selectableItemBackground"
             />
@@ -621,10 +613,6 @@
             android:id="@+id/anon_model_file_selector_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="4pt"
-            android:paddingLeft="4pt"
-            android:paddingEnd="4pt"
-            android:paddingRight="4pt"
             android:minHeight="48dp"
             android:text="@string/select_model_file"
               />
@@ -727,6 +715,8 @@
       android:id="@+id/diguralServerAddressTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:paddingBottom="4pt"
       android:text="@string/settings_digural_server_address"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintTop_toBottomOf="@id/camera_settings_wrapper" />
@@ -781,6 +771,7 @@
       android:paddingLeft="4pt"
       android:paddingEnd="4pt"
       android:paddingRight="4pt"
+      android:paddingBottom="8pt"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintTop_toBottomOf="@id/sensor_frequency_title">
 

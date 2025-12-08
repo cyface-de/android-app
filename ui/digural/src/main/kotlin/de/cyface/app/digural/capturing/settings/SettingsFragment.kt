@@ -46,11 +46,13 @@ import de.cyface.app.digural.databinding.FragmentSettingsBinding
 import de.cyface.app.digural.capturing.settings.SaveFileResult
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.CameraInfo
+import de.cyface.camera_service.Constants
 import de.cyface.camera_service.Utils
 import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraModeDialog
 import de.cyface.camera_service.settings.FileSelection
 import de.cyface.datacapturing.CyfaceDataCapturingService
+import de.cyface.utils.StorageHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -440,7 +442,13 @@ class SettingsFragment : Fragment() {
                         binding.activeModelCard.visibility = GONE
                     } else {
                         binding.activeModelCard.visibility = VISIBLE
-                        binding.anonSelectedModelFilename.text = fileModel.modelName
+                        binding.anonSelectedModelFilename.text = buildString {
+                            append(fileModel.modelName)
+                            // Inform technical users via UI if external storage is available and used:
+                            append("\n\nUsing ")
+                            append(StorageHelper.getStorageType(requireContext()).name.lowercase())
+                            append(" storage.")
+                        }
                     }
                     // Don't write file on every observe - only when model is picked [CY-6647]
                 } else {

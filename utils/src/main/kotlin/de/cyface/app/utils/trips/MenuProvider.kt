@@ -39,7 +39,7 @@ import de.cyface.persistence.DefaultPersistenceLayer
 import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Measurement
 import de.cyface.synchronization.WiFiSurveyor
-import de.cyface.utils.Constants
+import de.cyface.utils.StorageHelper
 import de.cyface.utils.Utils
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.flow.first
@@ -281,7 +281,7 @@ class MenuProvider(
      */
     private fun findMeasurementAttachmentsFolder(measurementId: Long): File? {
         // If the app was reinstalled the pictures of the old installation were automatically deleted
-        val results = File(Constants.externalCyfaceFolderPath(context.get()!!))
+        val results = File(StorageHelper.getStoragePathWithFallback(context.get()!!))
             .listFiles { pathname: File -> pathname.name.endsWith("_$measurementId") }
         if (results != null && results.isNotEmpty()) {
             Arrays.sort(results)
