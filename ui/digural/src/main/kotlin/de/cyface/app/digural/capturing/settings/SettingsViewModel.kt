@@ -41,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -299,12 +300,10 @@ class SettingsViewModel(
     /**
      * Returns the available storage for writing.
      *
-     * @param context The application context
      * @return true if storage is available, false if critically low
      */
-    private fun availableStorage(context: Context): Long {
-        val storageDir = Constants.getModelNameFilePath(context)
-        val usableSpace = storageDir.usableSpace
+    private fun availableStorage(filePath: File): Long {
+        val usableSpace = filePath.usableSpace
         Log.d(TAG, "Available storage: ${usableSpace / 1024 / 1024} MB")
         return usableSpace
     }
@@ -318,22 +317,21 @@ class SettingsViewModel(
      */
     suspend fun saveToFile(context: Context, text: String): SaveFileResult {
         return withContext(Dispatchers.IO) {
-            val availableBytes = availableStorage(context)
+            val anonymizationModelFilePath = Constants.getAnonymizationModelFilePath(context)
+            val availableBytes = availableStorage(anonymizationModelFilePath)
             try {
-                // Check if storage is critically low (< 100MB)
+                // Check if storage where model file itself should be written to is low (< 100MB)
                 val requiredBytes = 100 * 1024 * 1024
                 if (availableBytes < requiredBytes) {
                     return@withContext SaveFileResult.StorageFull(availableBytes)
                 }
 
-                // Use Constants method to get model name file path (always internal storage for backward compatibility)
-                val file = Constants.getModelNameFilePath(context)
-
-                FileOutputStream(file, false).use { outputStream ->
+                val modelNameFile = Constants.getModelNameFilePath(context)
+                FileOutputStream(modelNameFile, false).use { outputStream ->
                     outputStream.write(text.toByteArray())
                     outputStream.flush()
                 }
-                Log.d(TAG, "Successfully wrote model name to '${file.name}'")
+                Log.d(TAG, "Successfully wrote model name to '${modelNameFile.name}'")
                 SaveFileResult.Success
             } catch (e: IOException) {
                 // Handle read-only filesystem (EROFS) and other IO errors gracefully
