@@ -240,9 +240,11 @@ class SettingsViewModel(
             val uri = data.data ?: error("No Uri!")
 
             val fileName = context.getFileName(uri) ?: "unknown_file"
-            val externalFilesDir = context.getExternalFilesDir(null)
-                ?: error("External files directory is not available")
-            val targetFile = File(externalFilesDir, "anon_model")
+
+            // Try external storage first, fall back to internal if not available
+            val targetDir = context.getExternalFilesDir(null) ?: context.filesDir
+            val targetFile = File(targetDir, "anon_model")
+            Log.d(TAG, "Saving model to: ${targetFile.absolutePath}")
 
             // Set the selected file as the selected model file.
             withContext(Dispatchers.IO) {
