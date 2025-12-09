@@ -60,8 +60,27 @@ import java.util.concurrent.TimeUnit
  */
 object DiguralApi {
 
-    lateinit var baseUrl: URL
+    /**
+     * No lateinit used to ensure URL changes take affect without app restart [LEIP-410].
+     */
+    private var _baseUrl: URL? = null
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
+
+    /**
+     * The base URL for the API endpoints.
+     * Invalidates any cached Retrofit instances when set to ensure the new URL is used [LEIP-410].
+     */
+    var baseUrl: URL
+        get() = _baseUrl ?: error("baseUrl not initialized")
+        set(value) {
+            if (_baseUrl != value) {
+                _baseUrl = value
+                // Invalidate cached instances so they're recreated with the new URL
+                _retrofit = null
+                _diguralService = null
+                Log.d(TAG, "DiguralApi: baseUrl changed to $value, Retrofit instance will be recreated")
+            }
+        }
 
     /**
      * Ensures the API calls use the WiFi network (as we're not expecting this API to be available
@@ -101,7 +120,16 @@ object DiguralApi {
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 
-    private val retrofit: Retrofit by lazy {
+    private var _retrofit: Retrofit? = null
+    private val retrofit: Retrofit
+        get() {
+            if (_retrofit == null) {
+                _retrofit = createRetrofit()
+            }
+            return _retrofit!!
+        }
+
+    private fun createRetrofit(): Retrofit {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
@@ -112,14 +140,19 @@ object DiguralApi {
             .readTimeout(1, TimeUnit.SECONDS)
             .build()
 
-        Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(baseUrl.toString())
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpClient)
             .build()
     }
 
-    val diguralService: DiguralApiService by lazy {
-        retrofit.create(DiguralApiService::class.java)
-    }
+    private var _diguralService: DiguralApiService? = null
+    val diguralService: DiguralApiService
+        get() {
+            if (_diguralService == null) {
+                _diguralService = retrofit.create(DiguralApiService::class.java)
+            }
+            return _diguralService!!
+        }
 }
