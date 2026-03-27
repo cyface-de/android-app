@@ -163,6 +163,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      */
     private lateinit var pauseButton: FloatingActionButton
 
+    /**
+     * Number of images captured in the current measurement, updated via [onNewPictureAcquired].
+     */
+    private var picturesCaptured = 0
+
     /*+
      * Listeners which are interested in the status of the calibration dialog.
      */
@@ -363,13 +368,6 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val staticExposure = withContext(Dispatchers.IO) { cameraSettings.staticExposureFlow.first() }
         val anonModel = withContext(Dispatchers.IO) { cameraSettings.anonModelFlow.first() }
 
-        // Determine image mode text
-        val imageModeText = when {
-            videoMode -> getString(R.string.camera_image_mode_video)
-            rawMode -> getString(R.string.camera_image_mode_raw)
-            else -> getString(R.string.camera_image_mode_jpg)
-        }
-
         // Determine trigger mode text
         val triggerModeText = when (triggerMode) {
             TriggerMode.STATIC_DISTANCE -> getString(
@@ -427,8 +425,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // Image mode row
             binding.cameraImageModeTitle.visibility = detailVisibility
             binding.cameraImageModeView.visibility = detailVisibility
-            binding.cameraImageModeView.text = imageModeText
             val isJpg = !videoMode && !rawMode
+            binding.cameraImageModeView.text = when {
+                videoMode -> getString(R.string.camera_image_mode_video)
+                rawMode -> getString(R.string.camera_image_mode_raw)
+                else -> imageModeText()
+            }
             binding.cameraImageModeView.setTextColor(if (isJpg) defaultColor else warningColor)
 
             // Trigger mode row
@@ -453,6 +455,10 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 binding.cameraWarningView.visibility = View.GONE
             }
         }
+    }
+
+    private fun imageModeText(): String {
+        return getString(R.string.camera_image_mode_jpg_count, picturesCaptured)
     }
 
     private suspend fun showModalitySelectionDialogIfNeeded() {
@@ -891,6 +897,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * Starts capturing
      */
     private suspend fun startCapturing() {
+        picturesCaptured = 0
         // Measurement is stopped, so we start a new measurement
         if (persistence.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
             withContext(Dispatchers.Main) {
@@ -1364,8 +1371,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {
         Log.d(Constants.TAG, "onNewPictureAcquired: $picturesCaptured")
-        binding.cameraImageModeView.text =
-            getString(R.string.camera_image_mode_jpg_count, picturesCaptured)
+        this.picturesCaptured = picturesCaptured
+        binding.cameraImageModeView.text = imageModeText()
     }
 
     override fun onNewVideoStarted() {
