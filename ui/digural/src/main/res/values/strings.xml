@@ -63,6 +63,7 @@
   <string name="camera_status_disabled">DISABLED</string>
   <string name="camera_image_mode">Image Mode</string>
   <string name="camera_image_mode_jpg">JPG</string>
+  <string name="camera_image_mode_jpg_count">JPG (%d Bilder)</string>
   <string name="camera_image_mode_video">Video</string>
   <string name="camera_image_mode_raw">RAW</string>
   <string name="camera_focus_mode">Focus</string>

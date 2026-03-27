@@ -1363,11 +1363,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {
-        Log.d(Constants.TAG, "onNewPictureAcquired")
-        /*val text =
-            context!!.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured
-        cameraInfoTextView.setText(text)
-        Log.d(TAG, "cameraInfoTextView: " + cameraInfoTextView.getText())*/
+        Log.d(Constants.TAG, "onNewPictureAcquired: $picturesCaptured")
+        binding.cameraImageModeView.text =
+            getString(R.string.camera_image_mode_jpg_count, picturesCaptured)
     }
 
     override fun onNewVideoStarted() {
