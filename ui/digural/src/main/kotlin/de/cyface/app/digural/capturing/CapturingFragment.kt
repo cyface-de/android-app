@@ -60,9 +60,11 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.UIListener
+import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.camera_service.settings.CameraSettings
+import de.cyface.camera_service.settings.NoAnonymization
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -264,6 +266,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)*/
 
             lifecycleScope.launch { updateDurationView(it?.id) }
+
+            // Show camera settings status when a measurement is active
+            lifecycleScope.launch { updateCameraStatusViews(it != null) }
         }
         viewModel.location.observe(viewLifecycleOwner) {
             lifecycleScope.launch { updateLocationViews(it) }
@@ -338,6 +343,107 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         } catch (e: NoSuchMeasurementException) {
             // Happen when locations arrive late
             Log.d(TAG, "Position changed while no capturing is active, ignoring.")
+        }
+    }
+
+    /**
+     * Shows the current camera settings (enabled, image mode, trigger mode) and a red warning
+     * if the settings deviate from the expected configuration (camera enabled, JPG,
+     * location-based, static focus, dynamic exposure, anonymization enabled).
+     */
+    private suspend fun updateCameraStatusViews(isCapturing: Boolean) {
+        val cameraEnabled = withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }
+        val videoMode = withContext(Dispatchers.IO) { cameraSettings.videoModeFlow.first() }
+        val rawMode = withContext(Dispatchers.IO) { cameraSettings.rawModeFlow.first() }
+        val triggerMode = withContext(Dispatchers.IO) { cameraSettings.triggerMode.first() }
+        val triggeringDistance = withContext(Dispatchers.IO) { cameraSettings.triggeringDistanceFlow.first() }
+        val triggeringTime = withContext(Dispatchers.IO) { cameraSettings.triggeringTimeFlow.first() }
+        val staticFocus = withContext(Dispatchers.IO) { cameraSettings.staticFocusFlow.first() }
+        val staticExposure = withContext(Dispatchers.IO) { cameraSettings.staticExposureFlow.first() }
+        val anonModel = withContext(Dispatchers.IO) { cameraSettings.anonModelFlow.first() }
+
+        val cameraViewVisibility = if (isCapturing) VISIBLE else View.GONE
+
+        // Determine image mode text
+        val imageModeText = when {
+            videoMode -> getString(R.string.camera_image_mode_video)
+            rawMode -> getString(R.string.camera_image_mode_raw)
+            else -> getString(R.string.camera_image_mode_jpg)
+        }
+
+        // Determine trigger mode text
+        val triggerModeText = when (triggerMode) {
+            TriggerMode.STATIC_DISTANCE -> getString(
+                R.string.camera_trigger_distance,
+                triggeringDistance.toString()
+            )
+            TriggerMode.STATIC_TIME -> getString(
+                R.string.camera_trigger_time,
+                triggeringTime.toString()
+            )
+            TriggerMode.HIGH_FREQUENCY -> getString(R.string.camera_trigger_high_freq)
+        }
+
+        // Build warning messages
+        val warnings = mutableListOf<String>()
+        if (!cameraEnabled) {
+            warnings.add(getString(R.string.camera_warning_disabled))
+        }
+        if (cameraEnabled && triggerMode != TriggerMode.STATIC_DISTANCE) {
+            warnings.add(getString(R.string.camera_warning_not_location_based))
+        }
+        if (cameraEnabled && (videoMode || rawMode)) {
+            warnings.add(getString(R.string.camera_warning_not_jpg))
+        }
+        if (cameraEnabled && !staticFocus) {
+            warnings.add(getString(R.string.camera_warning_focus_not_static))
+        }
+        if (cameraEnabled && staticExposure) {
+            warnings.add(getString(R.string.camera_warning_exposure_not_dynamic))
+        }
+        if (cameraEnabled && anonModel is NoAnonymization) {
+            warnings.add(getString(R.string.camera_warning_no_anonymization))
+        }
+
+        withContext(Dispatchers.Main) {
+            // Camera status row
+            binding.cameraStatusTitle.visibility = cameraViewVisibility
+            binding.cameraStatusView.visibility = cameraViewVisibility
+            binding.cameraStatusView.text = if (cameraEnabled)
+                getString(R.string.camera_status_enabled)
+            else
+                getString(R.string.camera_status_disabled)
+            binding.cameraStatusView.setTextColor(
+                if (cameraEnabled) binding.speedTitle.currentTextColor
+                else resources.getColor(android.R.color.holo_red_dark, null)
+            )
+
+            // Image mode row
+            binding.cameraImageModeTitle.visibility = cameraViewVisibility
+            binding.cameraImageModeView.visibility = cameraViewVisibility
+            binding.cameraImageModeView.text = imageModeText
+            val isJpg = !videoMode && !rawMode
+            binding.cameraImageModeView.setTextColor(
+                if (isJpg) binding.speedTitle.currentTextColor
+                else resources.getColor(android.R.color.holo_red_dark, null)
+            )
+
+            // Trigger mode row
+            binding.cameraTriggerModeTitle.visibility = cameraViewVisibility
+            binding.cameraTriggerModeView.visibility = cameraViewVisibility
+            binding.cameraTriggerModeView.text = triggerModeText
+            binding.cameraTriggerModeView.setTextColor(
+                if (triggerMode == TriggerMode.STATIC_DISTANCE) binding.speedTitle.currentTextColor
+                else resources.getColor(android.R.color.holo_red_dark, null)
+            )
+
+            // Warning row
+            if (isCapturing && warnings.isNotEmpty()) {
+                binding.cameraWarningView.visibility = VISIBLE
+                binding.cameraWarningView.text = warnings.joinToString("\n")
+            } else {
+                binding.cameraWarningView.visibility = View.GONE
+            }
         }
     }
 

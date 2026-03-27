@@ -112,18 +112,80 @@
       android:layout_marginBottom="8dp"
       android:text="@string/ascend"
       android:visibility="invisible"
-      app:layout_constraintBottom_toTopOf="@+id/startResumeButton"
+      app:layout_constraintBottom_toTopOf="@+id/cameraStatusTitle"
       app:layout_constraintStart_toStartOf="@+id/durationTitle" />
 
-  <!--TextView
-      android:id="@+id/co2Title"
+  <!-- Camera status row: enabled/disabled -->
+  <TextView
+      android:id="@+id/cameraStatusTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:text="@string/avoided_co2"
-      android:visibility="invisible"
+      android:layout_marginBottom="4dp"
+      android:text="@string/camera_status"
+      android:visibility="gone"
+      app:layout_constraintBottom_toTopOf="@+id/cameraImageModeTitle"
+      app:layout_constraintStart_toStartOf="@+id/ascendTitle" />
+
+  <TextView
+      android:id="@+id/cameraStatusView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="@+id/ascendView"
+      app:layout_constraintTop_toTopOf="@+id/cameraStatusTitle" />
+
+  <!-- Camera image mode row: JPG / Video / RAW -->
+  <TextView
+      android:id="@+id/cameraImageModeTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="4dp"
+      android:text="@string/camera_image_mode"
+      android:visibility="gone"
+      app:layout_constraintBottom_toTopOf="@+id/cameraTriggerModeTitle"
+      app:layout_constraintStart_toStartOf="@+id/cameraStatusTitle" />
+
+  <TextView
+      android:id="@+id/cameraImageModeView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="@+id/cameraStatusView"
+      app:layout_constraintTop_toTopOf="@+id/cameraImageModeTitle" />
+
+  <!-- Camera trigger mode row: Distance / Time / High Frequency -->
+  <TextView
+      android:id="@+id/cameraTriggerModeTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="4dp"
+      android:text="@string/camera_trigger_mode"
+      android:visibility="gone"
+      app:layout_constraintBottom_toTopOf="@+id/cameraWarningView"
+      app:layout_constraintStart_toStartOf="@+id/cameraImageModeTitle" />
+
+  <TextView
+      android:id="@+id/cameraTriggerModeView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="@+id/cameraImageModeView"
+      app:layout_constraintTop_toTopOf="@+id/cameraTriggerModeTitle" />
+
+  <!-- Camera warning (red text, shown when settings are suboptimal) -->
+  <TextView
+      android:id="@+id/cameraWarningView"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="4dp"
+      android:textColor="#D32F2F"
+      android:textStyle="bold"
+      android:visibility="gone"
       app:layout_constraintBottom_toTopOf="@+id/startResumeButton"
-      app:layout_constraintStart_toStartOf="@+id/ascendTitle" /-->
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
 
   <TextView
       android:id="@+id/speedView"
