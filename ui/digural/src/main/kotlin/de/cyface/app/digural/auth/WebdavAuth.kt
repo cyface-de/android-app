@@ -64,6 +64,10 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
         return DUMMY_USER_ID
     }
 
+    override fun isAuthorized(): Boolean {
+        return authorized
+    }
+
     override fun endSession(activity: FragmentActivity) {
         TODO("Not yet implemented")
     }
