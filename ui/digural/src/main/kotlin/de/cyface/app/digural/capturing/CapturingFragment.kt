@@ -424,8 +424,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val warningColor = resources.getColor(android.R.color.holo_red_dark, null)
 
         withContext(Dispatchers.Main) {
-            // Camera status row: only shown when camera is disabled
-            val disabledVisibility = if (isCapturing && !cameraEnabled) VISIBLE else View.GONE
+            // Camera status row: shown when camera is disabled (regardless of capturing state)
+            val disabledVisibility = if (!cameraEnabled) VISIBLE else View.GONE
             binding.cameraStatusTitle.visibility = disabledVisibility
             binding.cameraStatusView.visibility = disabledVisibility
             binding.cameraStatusView.text = getString(R.string.camera_status_disabled)
@@ -459,8 +459,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             binding.cameraFocusModeView.text = focusModeText
             binding.cameraFocusModeView.setTextColor(if (staticFocus) defaultColor else warningColor)
 
-            // Warning row
-            if (isCapturing && warnings.isNotEmpty()) {
+            // Warning row: always visible when there are warnings, even when not capturing
+            if (warnings.isNotEmpty()) {
                 binding.cameraWarningView.visibility = VISIBLE
                 binding.cameraWarningView.text = warnings.joinToString("\n")
             } else {
