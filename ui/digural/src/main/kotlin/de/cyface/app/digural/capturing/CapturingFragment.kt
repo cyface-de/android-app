@@ -660,6 +660,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume: reconnecting ...")
+        picturesCaptured = 0 // Reset so updateCameraStatusViews reloads from DB
         lifecycleScope.launch(Dispatchers.IO) { reconnect() }
     }
 
