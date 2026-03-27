@@ -368,6 +368,18 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val staticExposure = withContext(Dispatchers.IO) { cameraSettings.staticExposureFlow.first() }
         val anonModel = withContext(Dispatchers.IO) { cameraSettings.anonModelFlow.first() }
 
+        // Load image count from DB once (on start, resume, or UI recreation) to seed the counter.
+        // After this, onNewPictureAcquired increments it live.
+        val measurementId = viewModel.measurementId.value
+        if (isCapturing && picturesCaptured == 0 && measurementId != null) {
+            picturesCaptured = withContext(Dispatchers.IO) {
+                persistence.attachmentDao?.countByMeasurementIdAndType(
+                    measurementId,
+                    de.cyface.protos.model.File.FileType.JPG
+                ) ?: 0
+            }
+        }
+
         // Determine trigger mode text
         val triggerModeText = when (triggerMode) {
             TriggerMode.STATIC_DISTANCE -> getString(
@@ -1370,8 +1382,8 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {
-        Log.d(Constants.TAG, "onNewPictureAcquired: $picturesCaptured")
-        this.picturesCaptured = picturesCaptured
+        this.picturesCaptured++
+        Log.d(Constants.TAG, "onNewPictureAcquired: ${this.picturesCaptured}")
         binding.cameraImageModeView.text = imageModeText()
     }
 
