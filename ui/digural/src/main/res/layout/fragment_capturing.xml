@@ -161,7 +161,7 @@
       android:layout_marginBottom="4dp"
       android:text="@string/camera_trigger_mode"
       android:visibility="gone"
-      app:layout_constraintBottom_toTopOf="@+id/cameraWarningView"
+      app:layout_constraintBottom_toTopOf="@+id/cameraFocusModeTitle"
       app:layout_constraintStart_toStartOf="@+id/cameraImageModeTitle" />
 
   <TextView
@@ -171,6 +171,25 @@
       android:visibility="gone"
       app:layout_constraintEnd_toEndOf="@+id/cameraImageModeView"
       app:layout_constraintTop_toTopOf="@+id/cameraTriggerModeTitle" />
+
+  <!-- Camera focus mode row: Static (distance) / Dynamic -->
+  <TextView
+      android:id="@+id/cameraFocusModeTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="4dp"
+      android:text="@string/camera_focus_mode"
+      android:visibility="gone"
+      app:layout_constraintBottom_toTopOf="@+id/cameraWarningView"
+      app:layout_constraintStart_toStartOf="@+id/cameraTriggerModeTitle" />
+
+  <TextView
+      android:id="@+id/cameraFocusModeView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      app:layout_constraintEnd_toEndOf="@+id/cameraTriggerModeView"
+      app:layout_constraintTop_toTopOf="@+id/cameraFocusModeTitle" />
 
   <!-- Camera warning (red text, shown when settings are suboptimal) -->
   <TextView

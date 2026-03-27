@@ -347,7 +347,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     /**
-     * Shows the current camera settings (enabled, image mode, trigger mode) and a red warning
+     * Shows the current camera settings (image mode, trigger mode, focus mode) and a red warning
      * if the settings deviate from the expected configuration (camera enabled, JPG,
      * location-based, static focus, dynamic exposure, anonymization enabled).
      */
@@ -359,10 +359,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         val triggeringDistance = withContext(Dispatchers.IO) { cameraSettings.triggeringDistanceFlow.first() }
         val triggeringTime = withContext(Dispatchers.IO) { cameraSettings.triggeringTimeFlow.first() }
         val staticFocus = withContext(Dispatchers.IO) { cameraSettings.staticFocusFlow.first() }
+        val staticFocusDistance = withContext(Dispatchers.IO) { cameraSettings.staticFocusDistanceFlow.first() }
         val staticExposure = withContext(Dispatchers.IO) { cameraSettings.staticExposureFlow.first() }
         val anonModel = withContext(Dispatchers.IO) { cameraSettings.anonModelFlow.first() }
-
-        val cameraViewVisibility = if (isCapturing) VISIBLE else View.GONE
 
         // Determine image mode text
         val imageModeText = when {
@@ -383,6 +382,12 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             )
             TriggerMode.HIGH_FREQUENCY -> getString(R.string.camera_trigger_high_freq)
         }
+
+        // Determine focus mode text
+        val focusModeText = if (staticFocus)
+            getString(R.string.camera_focus_static, staticFocusDistance.toString())
+        else
+            getString(R.string.camera_focus_dynamic)
 
         // Build warning messages
         val warnings = mutableListOf<String>()
@@ -405,37 +410,40 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             warnings.add(getString(R.string.camera_warning_no_anonymization))
         }
 
+        val defaultColor = binding.speedTitle.currentTextColor
+        val warningColor = resources.getColor(android.R.color.holo_red_dark, null)
+
         withContext(Dispatchers.Main) {
-            // Camera status row
-            binding.cameraStatusTitle.visibility = cameraViewVisibility
-            binding.cameraStatusView.visibility = cameraViewVisibility
-            binding.cameraStatusView.text = if (cameraEnabled)
-                getString(R.string.camera_status_enabled)
-            else
-                getString(R.string.camera_status_disabled)
-            binding.cameraStatusView.setTextColor(
-                if (cameraEnabled) binding.speedTitle.currentTextColor
-                else resources.getColor(android.R.color.holo_red_dark, null)
-            )
+            // Camera status row: only shown when camera is disabled
+            val disabledVisibility = if (isCapturing && !cameraEnabled) VISIBLE else View.GONE
+            binding.cameraStatusTitle.visibility = disabledVisibility
+            binding.cameraStatusView.visibility = disabledVisibility
+            binding.cameraStatusView.text = getString(R.string.camera_status_disabled)
+            binding.cameraStatusView.setTextColor(warningColor)
+
+            // The detail rows are only shown when camera is enabled and capturing
+            val detailVisibility = if (isCapturing && cameraEnabled) VISIBLE else View.GONE
 
             // Image mode row
-            binding.cameraImageModeTitle.visibility = cameraViewVisibility
-            binding.cameraImageModeView.visibility = cameraViewVisibility
+            binding.cameraImageModeTitle.visibility = detailVisibility
+            binding.cameraImageModeView.visibility = detailVisibility
             binding.cameraImageModeView.text = imageModeText
             val isJpg = !videoMode && !rawMode
-            binding.cameraImageModeView.setTextColor(
-                if (isJpg) binding.speedTitle.currentTextColor
-                else resources.getColor(android.R.color.holo_red_dark, null)
-            )
+            binding.cameraImageModeView.setTextColor(if (isJpg) defaultColor else warningColor)
 
             // Trigger mode row
-            binding.cameraTriggerModeTitle.visibility = cameraViewVisibility
-            binding.cameraTriggerModeView.visibility = cameraViewVisibility
+            binding.cameraTriggerModeTitle.visibility = detailVisibility
+            binding.cameraTriggerModeView.visibility = detailVisibility
             binding.cameraTriggerModeView.text = triggerModeText
             binding.cameraTriggerModeView.setTextColor(
-                if (triggerMode == TriggerMode.STATIC_DISTANCE) binding.speedTitle.currentTextColor
-                else resources.getColor(android.R.color.holo_red_dark, null)
+                if (triggerMode == TriggerMode.STATIC_DISTANCE) defaultColor else warningColor
             )
+
+            // Focus mode row
+            binding.cameraFocusModeTitle.visibility = detailVisibility
+            binding.cameraFocusModeView.visibility = detailVisibility
+            binding.cameraFocusModeView.text = focusModeText
+            binding.cameraFocusModeView.setTextColor(if (staticFocus) defaultColor else warningColor)
 
             // Warning row
             if (isCapturing && warnings.isNotEmpty()) {

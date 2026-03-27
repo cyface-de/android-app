@@ -65,6 +65,9 @@
   <string name="camera_image_mode_jpg">JPG</string>
   <string name="camera_image_mode_video">Video</string>
   <string name="camera_image_mode_raw">RAW</string>
+  <string name="camera_focus_mode">Focus</string>
+  <string name="camera_focus_static">Static (%s dpt)</string>
+  <string name="camera_focus_dynamic">Dynamic</string>
   <string name="camera_trigger_mode">Trigger</string>
   <string name="camera_trigger_distance">Distance (%s m)</string>
   <string name="camera_trigger_time">Time (%s ms)</string>
