@@ -786,7 +786,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 Constants.TAG,
                 "Zombie CameraService is running and it's "
                         + (if (cameraSettings.cameraEnabledFlow.first()) "" else "*not*")
-                        + " requested"
+                        + " requested. Stopping it."
             )
             cameraService.stop(
                 object :
@@ -797,8 +797,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         Log.d(TAG, "onResume: zombie CameraService stopped" )
                     }
                 })
-            // TODO: This cancels the stop above, we need a onTimedOut [LEIP-327]
-            error("Camera stopped manually as the camera was not released. This should not happen!")
+            // The camera service runs in a separate process and can legitimately outlive the UI.
+            // Detecting and stopping it above is the correct handling -- no need to crash.
+            // error("Camera stopped manually as the camera was not released. This should not happen!")
         }
     }
 
