@@ -60,9 +60,11 @@ import de.cyface.app.digural.utils.Constants
 import de.cyface.app.utils.CalibrationDialogListener
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.camera_service.UIListener
+import de.cyface.camera_service.background.TriggerMode
 import de.cyface.camera_service.background.camera.CameraListener
 import de.cyface.camera_service.foreground.CameraService
 import de.cyface.camera_service.settings.CameraSettings
+import de.cyface.camera_service.settings.NoAnonymization
 import de.cyface.datacapturing.CyfaceDataCapturingService
 import de.cyface.datacapturing.DataCapturingListener
 import de.cyface.datacapturing.DataCapturingService
@@ -160,6 +162,11 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * Button which allows to pause a measurement.
      */
     private lateinit var pauseButton: FloatingActionButton
+
+    /**
+     * Number of images captured in the current measurement, updated via [onNewPictureAcquired].
+     */
+    private var picturesCaptured = 0
 
     /*+
      * Listeners which are interested in the status of the calibration dialog.
@@ -264,6 +271,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 if (co2Kg == null) "" else getString(de.cyface.app.utils.R.string.co2kg, co2Kg)*/
 
             lifecycleScope.launch { updateDurationView(it?.id) }
+
+            // Show camera settings status when a measurement is active
+            lifecycleScope.launch { updateCameraStatusViews(it != null) }
         }
         viewModel.location.observe(viewLifecycleOwner) {
             lifecycleScope.launch { updateLocationViews(it) }
@@ -339,6 +349,128 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
             // Happen when locations arrive late
             Log.d(TAG, "Position changed while no capturing is active, ignoring.")
         }
+    }
+
+    /**
+     * Shows the current camera settings (image mode, trigger mode, focus mode) and a red warning
+     * if the settings deviate from the expected configuration (camera enabled, JPG,
+     * location-based, static focus, dynamic exposure, anonymization enabled).
+     */
+    private suspend fun updateCameraStatusViews(isCapturing: Boolean) {
+        val cameraEnabled = withContext(Dispatchers.IO) { cameraSettings.cameraEnabledFlow.first() }
+        val videoMode = withContext(Dispatchers.IO) { cameraSettings.videoModeFlow.first() }
+        val rawMode = withContext(Dispatchers.IO) { cameraSettings.rawModeFlow.first() }
+        val triggerMode = withContext(Dispatchers.IO) { cameraSettings.triggerMode.first() }
+        val triggeringDistance = withContext(Dispatchers.IO) { cameraSettings.triggeringDistanceFlow.first() }
+        val triggeringTime = withContext(Dispatchers.IO) { cameraSettings.triggeringTimeFlow.first() }
+        val staticFocus = withContext(Dispatchers.IO) { cameraSettings.staticFocusFlow.first() }
+        val staticFocusDistance = withContext(Dispatchers.IO) { cameraSettings.staticFocusDistanceFlow.first() }
+        val staticExposure = withContext(Dispatchers.IO) { cameraSettings.staticExposureFlow.first() }
+        val anonModel = withContext(Dispatchers.IO) { cameraSettings.anonModelFlow.first() }
+
+        // Load image count from DB once (on start, resume, or UI recreation) to seed the counter.
+        // After this, onNewPictureAcquired increments it live.
+        val measurementId = viewModel.measurementId.value
+        if (isCapturing && picturesCaptured == 0 && measurementId != null) {
+            picturesCaptured = withContext(Dispatchers.IO) {
+                persistence.attachmentDao?.countByMeasurementIdAndType(
+                    measurementId,
+                    de.cyface.protos.model.File.FileType.JPG
+                ) ?: 0
+            }
+        }
+
+        // Determine trigger mode text
+        val triggerModeText = when (triggerMode) {
+            TriggerMode.STATIC_DISTANCE -> getString(
+                R.string.camera_trigger_distance,
+                triggeringDistance.toString()
+            )
+            TriggerMode.STATIC_TIME -> getString(
+                R.string.camera_trigger_time,
+                triggeringTime.toString()
+            )
+            TriggerMode.HIGH_FREQUENCY -> getString(R.string.camera_trigger_high_freq)
+        }
+
+        // Determine focus mode text
+        val focusModeText = if (staticFocus)
+            getString(R.string.camera_focus_static, staticFocusDistance.toString())
+        else
+            getString(R.string.camera_focus_dynamic)
+
+        // Build warning messages
+        val warnings = mutableListOf<String>()
+        if (!cameraEnabled) {
+            warnings.add(getString(R.string.camera_warning_disabled))
+        }
+        if (cameraEnabled && triggerMode != TriggerMode.STATIC_DISTANCE) {
+            warnings.add(getString(R.string.camera_warning_not_location_based))
+        }
+        if (cameraEnabled && (videoMode || rawMode)) {
+            warnings.add(getString(R.string.camera_warning_not_jpg))
+        }
+        if (cameraEnabled && !staticFocus) {
+            warnings.add(getString(R.string.camera_warning_focus_not_static))
+        }
+        if (cameraEnabled && staticExposure) {
+            warnings.add(getString(R.string.camera_warning_exposure_not_dynamic))
+        }
+        if (cameraEnabled && anonModel is NoAnonymization) {
+            warnings.add(getString(R.string.camera_warning_no_anonymization))
+        }
+
+        val defaultColor = binding.speedTitle.currentTextColor
+        val warningColor = resources.getColor(android.R.color.holo_red_dark, null)
+
+        withContext(Dispatchers.Main) {
+            // Camera status row: shown when camera is disabled (regardless of capturing state)
+            val disabledVisibility = if (!cameraEnabled) VISIBLE else View.GONE
+            binding.cameraStatusTitle.visibility = disabledVisibility
+            binding.cameraStatusView.visibility = disabledVisibility
+            binding.cameraStatusView.text = getString(R.string.camera_status_disabled)
+            binding.cameraStatusView.setTextColor(warningColor)
+
+            // The detail rows are only shown when camera is enabled and capturing
+            val detailVisibility = if (isCapturing && cameraEnabled) VISIBLE else View.GONE
+
+            // Image mode row
+            binding.cameraImageModeTitle.visibility = detailVisibility
+            binding.cameraImageModeView.visibility = detailVisibility
+            val isJpg = !videoMode && !rawMode
+            binding.cameraImageModeView.text = when {
+                videoMode -> getString(R.string.camera_image_mode_video)
+                rawMode -> getString(R.string.camera_image_mode_raw)
+                else -> imageModeText()
+            }
+            binding.cameraImageModeView.setTextColor(if (isJpg) defaultColor else warningColor)
+
+            // Trigger mode row
+            binding.cameraTriggerModeTitle.visibility = detailVisibility
+            binding.cameraTriggerModeView.visibility = detailVisibility
+            binding.cameraTriggerModeView.text = triggerModeText
+            binding.cameraTriggerModeView.setTextColor(
+                if (triggerMode == TriggerMode.STATIC_DISTANCE) defaultColor else warningColor
+            )
+
+            // Focus mode row
+            binding.cameraFocusModeTitle.visibility = detailVisibility
+            binding.cameraFocusModeView.visibility = detailVisibility
+            binding.cameraFocusModeView.text = focusModeText
+            binding.cameraFocusModeView.setTextColor(if (staticFocus) defaultColor else warningColor)
+
+            // Warning row: always visible when there are warnings, even when not capturing
+            if (warnings.isNotEmpty()) {
+                binding.cameraWarningView.visibility = VISIBLE
+                binding.cameraWarningView.text = warnings.joinToString("\n")
+            } else {
+                binding.cameraWarningView.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun imageModeText(): String {
+        return getString(R.string.camera_image_mode_jpg_count, picturesCaptured)
     }
 
     private suspend fun showModalitySelectionDialogIfNeeded() {
@@ -528,6 +660,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume: reconnecting ...")
+        picturesCaptured = 0 // Reset so updateCameraStatusViews reloads from DB
         lifecycleScope.launch(Dispatchers.IO) { reconnect() }
     }
 
@@ -653,7 +786,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                 Constants.TAG,
                 "Zombie CameraService is running and it's "
                         + (if (cameraSettings.cameraEnabledFlow.first()) "" else "*not*")
-                        + " requested"
+                        + " requested. Stopping it."
             )
             cameraService.stop(
                 object :
@@ -664,8 +797,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
                         Log.d(TAG, "onResume: zombie CameraService stopped" )
                     }
                 })
-            // TODO: This cancels the stop above, we need a onTimedOut [LEIP-327]
-            error("Camera stopped manually as the camera was not released. This should not happen!")
+            // The camera service runs in a separate process and can legitimately outlive the UI.
+            // Detecting and stopping it above is the correct handling -- no need to crash.
+            // error("Camera stopped manually as the camera was not released. This should not happen!")
         }
     }
 
@@ -777,6 +911,7 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * Starts capturing
      */
     private suspend fun startCapturing() {
+        picturesCaptured = 0
         // Measurement is stopped, so we start a new measurement
         if (persistence.hasMeasurement(MeasurementStatus.OPEN) && isProblematicManufacturer) {
             withContext(Dispatchers.Main) {
@@ -1249,11 +1384,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
     }
 
     override fun onNewPictureAcquired(picturesCaptured: Int) {
-        Log.d(Constants.TAG, "onNewPictureAcquired")
-        /*val text =
-            context!!.getString(de.cyface.camera_service.R.string.camera_images) + " " + picturesCaptured
-        cameraInfoTextView.setText(text)
-        Log.d(TAG, "cameraInfoTextView: " + cameraInfoTextView.getText())*/
+        this.picturesCaptured++
+        Log.d(Constants.TAG, "onNewPictureAcquired: ${this.picturesCaptured}")
+        binding.cameraImageModeView.text = imageModeText()
     }
 
     override fun onNewVideoStarted() {

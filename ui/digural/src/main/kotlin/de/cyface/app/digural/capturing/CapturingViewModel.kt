@@ -163,6 +163,13 @@ class CapturingViewModel(
             }
             return
         }
+        // Locations can arrive after stopCapturing() cleared the measurementId (race between
+        // the background service's location listener being unregistered and the UI state reset).
+        // The data is already persisted by the background service, so it's safe to ignore here.
+        if (measurementId.value == null) {
+            Log.d(TAG, "addToTrack: ignoring location, measurementId is null")
+            return
+        }
         if (!location.isValid) {
             Log.d(TAG, "addToTrack: ignoring invalid point")
             return

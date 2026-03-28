@@ -57,6 +57,29 @@
     <item>High frequency</item>
   </string-array>
 
+  <!-- Camera status in capturing fragment -->
+  <string name="camera_status">Camera</string>
+  <string name="camera_status_enabled">Enabled</string>
+  <string name="camera_status_disabled">DISABLED</string>
+  <string name="camera_image_mode">Image Mode</string>
+  <string name="camera_image_mode_jpg">JPG</string>
+  <string name="camera_image_mode_jpg_count">JPG (%d images)</string>
+  <string name="camera_image_mode_video">Video</string>
+  <string name="camera_image_mode_raw">RAW</string>
+  <string name="camera_focus_mode">Focus</string>
+  <string name="camera_focus_static">Static (%s dpt)</string>
+  <string name="camera_focus_dynamic">Dynamic</string>
+  <string name="camera_trigger_mode">Trigger</string>
+  <string name="camera_trigger_distance">Distance (%s m)</string>
+  <string name="camera_trigger_time">Time (%s ms)</string>
+  <string name="camera_trigger_high_freq">High Frequency</string>
+  <string name="camera_warning_disabled">Camera capturing is disabled!</string>
+  <string name="camera_warning_not_location_based">Not using location-based capturing!</string>
+  <string name="camera_warning_not_jpg">Not using JPG image mode!</string>
+  <string name="camera_warning_focus_not_static">Focus is not static!</string>
+  <string name="camera_warning_exposure_not_dynamic">Exposure is static (not dynamic)!</string>
+  <string name="camera_warning_no_anonymization">No anonymization model selected!</string>
+
   <!-- Storage warnings -->
   <string name="warning_icon">Warning</string>
   <string name="storage_warning_placeholder">Storage warning</string>

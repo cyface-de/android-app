@@ -206,6 +206,17 @@ class SettingsFragment : Fragment() {
         handler: Callback,
         authErrorHandler: AuthExceptionListener
     ) {
+        // Check before calling performActionWithFreshTokens to avoid an unhandled
+        // AuthorizationException("Session not active") thrown from AppAuth's internal
+        // AsyncTask, which crashes the app before the callback is ever invoked.
+        if (!auth.isAuthorized()) {
+            Log.w(SharedConstants.TAG, "Session expired, redirecting to login")
+            requireActivity().runOnUiThread {
+                Toast.makeText(context, R.string.auth_error, Toast.LENGTH_LONG).show()
+            }
+            auth.endSession(requireActivity())
+            return
+        }
         val client = OkHttpClient()
         auth.performActionWithFreshTokens { accessToken, _, ex ->
             if (ex != null) {

@@ -362,9 +362,13 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     // This closes the app when the LoginActivity is closed
                     this.finish()
                 } catch (e: AuthenticatorException) {
-                    throw IllegalStateException(e)
+                    // Transient failure (e.g. authenticator timeout). Don't crash -- the user
+                    // can retry by reopening the app.
+                    Log.w(TAG, "Authentication failed: ${e.message}")
+                    this.finish()
                 } catch (e: IOException) {
-                    throw IllegalStateException(e)
+                    Log.w(TAG, "Authentication I/O error: ${e.message}")
+                    this.finish()
                 } catch (e: SetupException) {
                     throw IllegalStateException(e)
                 }
