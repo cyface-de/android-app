@@ -19,22 +19,31 @@
 package de.cyface.app.digural
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
+import de.cyface.camera_service.MessageCodes
 import de.cyface.energy_settings.TrackingSettings
+import de.cyface.synchronization.BundlesExtrasCodes
 import de.cyface.synchronization.settings.DefaultSynchronizationSettings
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.settings.SyncConfig
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.Locale
 
 /**
@@ -56,6 +65,67 @@ class Application : Application() {
      */
     private val lazyAppSettings by lazy { // android-utils
         AppSettings.getInstance(this)
+    }
+
+    /**
+     * Receives [MessageCodes.GLOBAL_BROADCAST_MEMORY_PRESSURE] emitted by camera_service's
+     * `BackgroundService` when Android fires a high-severity memory callback in the
+     * `:camera_process`. Forwards the payload to Sentry (if opt-in) along with the log-file
+     * sizes in the measurement's folder, so field LOW_MEMORY episodes are observable without
+     * adb access.
+     */
+    private val memoryPressureReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != MessageCodes.GLOBAL_BROADCAST_MEMORY_PRESSURE) return
+
+            // Snapshot extras before the intent is recycled by the system
+            val level = intent.getIntExtra("level", 0)
+            val source = intent.getStringExtra("source") ?: "?"
+            val measurementId = if (intent.hasExtra(BundlesExtrasCodes.MEASUREMENT_ID)) {
+                intent.getLongExtra(BundlesExtrasCodes.MEASUREMENT_ID, -1L)
+            } else null
+            val nativeHeapKb = intent.getLongExtra("nativeHeapKb", -1L)
+            val javaHeapUsedKb = intent.getLongExtra("javaHeapUsedKb", -1L)
+            val javaHeapTotalKb = intent.getLongExtra("javaHeapTotalKb", -1L)
+            val javaHeapMaxKb = intent.getLongExtra("javaHeapMaxKb", -1L)
+            val logFolder = intent.getStringExtra("logFolder")
+
+            Log.w(
+                TAG,
+                "Memory pressure from camera_service (source=$source level=$level) " +
+                        "mid=$measurementId nativeHeap=${nativeHeapKb}KB " +
+                        "javaHeap=$javaHeapUsedKb/$javaHeapTotalKb(max=$javaHeapMaxKb)KB"
+            )
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val reportErrors = lazyAppSettings.reportErrorsFlow.firstOrNull() == true
+                if (!reportErrors) return@launch
+
+                val fileSizes = logFolder?.let { path ->
+                    val dir = File(path)
+                    if (dir.isDirectory) {
+                        dir.listFiles()?.associate { it.name to it.length() } ?: emptyMap()
+                    } else emptyMap()
+                } ?: emptyMap()
+
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    scope.setTag("source", source)
+                    measurementId?.let { scope.setTag("measurementId", it.toString()) }
+                    scope.setExtra("level", level.toString())
+                    scope.setExtra("nativeHeapKb", nativeHeapKb.toString())
+                    scope.setExtra("javaHeapUsedKb", javaHeapUsedKb.toString())
+                    scope.setExtra("javaHeapTotalKb", javaHeapTotalKb.toString())
+                    scope.setExtra("javaHeapMaxKb", javaHeapMaxKb.toString())
+                    fileSizes.forEach { (name, size) ->
+                        scope.setExtra("logFile_$name", size.toString())
+                    }
+                    Sentry.captureMessage(
+                        "camera_service memory pressure ($source level=$level)"
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -120,6 +190,15 @@ class Application : Application() {
 
         errorHandler!!.addListener(errorListener)
 
+        // Listen for memory-pressure broadcasts from camera_service's :camera_process.
+        // RECEIVER_NOT_EXPORTED: only same-UID (our own processes) can deliver this broadcast.
+        ContextCompat.registerReceiver(
+            this,
+            memoryPressureReceiver,
+            IntentFilter(MessageCodes.GLOBAL_BROADCAST_MEMORY_PRESSURE),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
         // Use strict mode in dev environment to crash when a resource failed to call close.
         // Cannot be enabled due to an open issue in the sardine library and probably DataStore.
         /*if (BuildConfig.DEBUG) {
@@ -139,10 +218,12 @@ class Application : Application() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
             errorHandler!!
         )
+        unregisterReceiver(memoryPressureReceiver)
         super.onTerminate()
     }
 
     companion object {
+        private const val TAG = "de.cyface.app.digural"
         /**
          * Allows to subscribe to error events.
          */
