@@ -105,7 +105,10 @@ class WebdavUploader(
         require(deviceId.isNotEmpty())
         require(login.isNotEmpty())
         require(password.isNotEmpty())
-        sardine.setCredentials(login, password)
+        // `isPreemptive = true`: send the Authorization header on the first request instead of
+        // waiting for a 401 challenge. Halves the number of TCP round-trips during sync, which
+        // dominates upload time on latency-bound wifi.
+        sardine.setCredentials(login, password, true)
     }
 
     @Suppress("unused", "CyclomaticComplexMethod", "LongMethod") // Part of the API

@@ -181,7 +181,9 @@ class WebdavAuth(private val context: Context, private val settings: Synchroniza
     ) {
         updateAccount(applicationContext, username, password, accountType, authority)
 
-        sardine.setCredentials(username, password)
+        // `isPreemptive = true` matches WebdavUploader's client config: auth header is sent
+        // up-front instead of waiting for a 401 challenge.
+        sardine.setCredentials(username, password, true)
 
         // Send a small request to ensure the credentials are correct
         try {
