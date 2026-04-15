@@ -40,7 +40,6 @@ import de.cyface.uploader.exception.ConflictException
 import de.cyface.uploader.exception.EntityNotParsableException
 import de.cyface.uploader.exception.ForbiddenException
 import de.cyface.uploader.exception.InternalServerErrorException
-import de.cyface.uploader.exception.MeasurementTooLarge
 import de.cyface.uploader.exception.NetworkUnavailableException
 import de.cyface.uploader.exception.ServerUnavailableException
 import de.cyface.uploader.exception.SynchronisationException
@@ -64,6 +63,7 @@ import java.net.URL
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ConcurrentHashMap
 import javax.net.ssl.SSLException
 
 /**
@@ -86,12 +86,29 @@ class WebdavUploader(
 
     private val sardine = OkHttpSardine()
 
+    /**
+     * Serializes the `ensureDirectoriesExist` setup across parallel attachment uploads.
+     * Without this lock, N parallel threads on a brand-new measurement all see the target
+     * directory as missing, all issue MKCOL, and all but the first receive HTTP 405
+     * "Method Not Allowed", aborting their uploads.
+     */
+    private val directorySetupLock = Any()
+
+    /** `measurementId`s for which the attachment directory chain has been verified/created. */
+    private val attachmentDirsReady = ConcurrentHashMap.newKeySet<Long>()
+
+    /** `measurementId`s for which the measurement directory chain has been verified/created. */
+    private val measurementDirsReady = ConcurrentHashMap.newKeySet<Long>()
+
     init {
         require(apiEndpoint.isNotEmpty())
         require(deviceId.isNotEmpty())
         require(login.isNotEmpty())
         require(password.isNotEmpty())
-        sardine.setCredentials(login, password)
+        // `isPreemptive = true`: send the Authorization header on the first request instead of
+        // waiting for a 401 challenge. Halves the number of TCP round-trips during sync, which
+        // dominates upload time on latency-bound wifi.
+        sardine.setCredentials(login, password, true)
     }
 
     @Suppress("unused", "CyclomaticComplexMethod", "LongMethod") // Part of the API
@@ -218,13 +235,11 @@ class WebdavUploader(
             //FileInputStream(file).use { fis ->
             //val bufferedInputStream = BufferedInputStream(fis)
 
-            // We currently cannot merge multiple upload-chunk requests into one file on server side.
-            // Thus, we prevent slicing the file into multiple files by increasing the chunk size.
-            // If the file is larger sync would be successful but only the 1st chunk received DAT-730.
-            // i.e. we throw an exception (which skips the upload) for too large measurements (44h+).
-            if (file.length() > MAX_CHUNK_SIZE) {
-                throw MeasurementTooLarge("Transfer file is too large: ${file.length()}")
-            }
+            // Note: No client-side size cap. Sardine streams the file from disk via OkHttp's
+            // request body, so multi-GB uploads don't buffer in memory. The 100 MB cap
+            // previously here was copy-pasted from the Cyface Collector flow (DAT-730, where
+            // chunks couldn't be merged server-side) and did not apply to WebDAV. It caused
+            // silent data loss for recordings longer than ~11 hours.
 
             // ** attention ** It's normal to see the log info:
             // `Authenticating for response: Response{protocol=http/1.1, code=401, message=Unauthorized,`
@@ -287,10 +302,12 @@ class WebdavUploader(
                     fileNamePrefix(uploadable.deviceId(), uploadable.measurementId())
                 )
                 val attachmentUri = "$uploadDir/$diguralFileName"
-                if (!sardine.exists(attachmentUri)) {
-                    Log.d(TAG, "Upload attachment: $diguralFileName ...")
-                    sardine.put(attachmentUri, file, "application/octet-stream")
-                }
+                // No `exists()` check: a redundant HEAD per attachment doubled round-trips in
+                // the hot path. Per-attachment idempotency is already tracked in AttachmentDao
+                // (SAVED -> SYNCED). WebDAV PUT overwrites if the file happens to be on the
+                // server already, which is acceptable.
+                Log.d(TAG, "Upload attachment: $diguralFileName ...")
+                sardine.put(attachmentUri, file, "application/octet-stream")
             }
             de.cyface.uploader.Result.UPLOAD_SUCCESSFUL
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -299,29 +316,40 @@ class WebdavUploader(
     }
 
     /**
-     * Function to check and create directories for upload if they don't exist.
+     * Check and create directories for upload if they don't exist.
      *
-     * It's less important how many requests are made for the measurement upload, as this only
-     * happens once every hour or so, but for attachments we should try to minimize the number of
-     * requests.
+     * Thread-safe: parallel attachment uploads (see `ATTACHMENT_UPLOAD_PARALLELISM` in
+     * SyncAdapter) would otherwise race on the WebDAV `MKCOL` call for a brand-new
+     * measurement, with the losing threads receiving HTTP 405 "Method Not Allowed" and
+     * failing the upload. We serialize on [directorySetupLock] and cache per-measurement
+     * "directories ready" state so only the first attachment of a measurement pays the
+     * setup cost.
      */
     private fun ensureDirectoriesExist(isMeasurementUpload: Boolean, uploadable: Uploadable) {
-        Log.e(TAG, "Checking for directories ...")
-        val isAttachmentUpload = !isMeasurementUpload
+        val measurementId = uploadable.measurementId()
+        val cache = if (isMeasurementUpload) measurementDirsReady else attachmentDirsReady
+        if (measurementId in cache) return
 
-        val imagesDir = imagesDirectory(uploadable)
-        val imuDir = imuDirectory(uploadable)
-        if (isAttachmentUpload && !sardine.exists(imagesDir)) {
-            // Attachment Upload
-            ensureDeviceMeasurementDirectoryExists(uploadable)
-            Log.d(TAG, "Creating directory: $imagesDir")
-            sardine.createDirectory(imagesDir)
-        } else if (isMeasurementUpload && !sardine.exists(imuDir)) {
-            // Measurement Upload
-            ensureDeviceMeasurementDirectoryExists(uploadable)
-            ensureDirectoryExists(sardine, sensorDirectory(uploadable))
-            Log.d(TAG, "Creating directory: $imuDir")
-            sardine.createDirectory(imuDir)
+        synchronized(directorySetupLock) {
+            if (measurementId in cache) return
+
+            val isAttachmentUpload = !isMeasurementUpload
+            val imagesDir = imagesDirectory(uploadable)
+            val imuDir = imuDirectory(uploadable)
+            if (isAttachmentUpload && !sardine.exists(imagesDir)) {
+                // Attachment Upload
+                ensureDeviceMeasurementDirectoryExists(uploadable)
+                Log.d(TAG, "Creating directory: $imagesDir")
+                sardine.createDirectory(imagesDir)
+            } else if (isMeasurementUpload && !sardine.exists(imuDir)) {
+                // Measurement Upload
+                ensureDeviceMeasurementDirectoryExists(uploadable)
+                ensureDirectoryExists(sardine, sensorDirectory(uploadable))
+                Log.d(TAG, "Creating directory: $imuDir")
+                sardine.createDirectory(imuDir)
+            }
+
+            cache.add(measurementId)
         }
     }
 
@@ -405,9 +433,6 @@ class WebdavUploader(
             }
 
             is IOException -> handleIOException(exception)
-            // File is too large to be uploaded. Handle in caller (e.g. skip the upload).
-            // The max size is currently static and set to 100 MB which should be about 44 hours of 100 Hz measurement.
-            is MeasurementTooLarge -> throw UploadFailed(exception)
             // `HTTP_BAD_REQUEST` (400).
             is BadRequestException -> throw UploadFailed(exception)
             // `HTTP_UNAUTHORIZED` (401).
@@ -441,12 +466,6 @@ class WebdavUploader(
     companion object {
         @Suppress("SpellCheckingInspection")
         private const val MEASUREMENT_FILE_FILENAME = "measurement.ccyf"
-        private const val MB_FROM_MEDIA_HTTP_UPLOADER = 0x100000
-
-        /**
-         * With a sensor frequency of 100 Hz this supports Measurements up to ~ 44 hours.
-         */
-        private const val MAX_CHUNK_SIZE = 100 * MB_FROM_MEDIA_HTTP_UPLOADER
 
         /**
          * Adds a trailing slash to the server URL or leaves an existing trailing slash untouched.
