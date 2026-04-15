@@ -284,10 +284,12 @@ class WebdavUploader(
                     fileNamePrefix(uploadable.deviceId(), uploadable.measurementId())
                 )
                 val attachmentUri = "$uploadDir/$diguralFileName"
-                if (!sardine.exists(attachmentUri)) {
-                    Log.d(TAG, "Upload attachment: $diguralFileName ...")
-                    sardine.put(attachmentUri, file, "application/octet-stream")
-                }
+                // No `exists()` check: a redundant HEAD per attachment doubled round-trips in
+                // the hot path. Per-attachment idempotency is already tracked in AttachmentDao
+                // (SAVED -> SYNCED). WebDAV PUT overwrites if the file happens to be on the
+                // server already, which is acceptable.
+                Log.d(TAG, "Upload attachment: $diguralFileName ...")
+                sardine.put(attachmentUri, file, "application/octet-stream")
             }
             de.cyface.uploader.Result.UPLOAD_SUCCESSFUL
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
