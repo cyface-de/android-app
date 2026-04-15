@@ -63,6 +63,7 @@ import java.net.URL
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.ConcurrentHashMap
 import javax.net.ssl.SSLException
 
 /**
@@ -84,6 +85,20 @@ class WebdavUploader(
 ) : Uploader {
 
     private val sardine = OkHttpSardine()
+
+    /**
+     * Serializes the `ensureDirectoriesExist` setup across parallel attachment uploads.
+     * Without this lock, N parallel threads on a brand-new measurement all see the target
+     * directory as missing, all issue MKCOL, and all but the first receive HTTP 405
+     * "Method Not Allowed", aborting their uploads.
+     */
+    private val directorySetupLock = Any()
+
+    /** `measurementId`s for which the attachment directory chain has been verified/created. */
+    private val attachmentDirsReady = ConcurrentHashMap.newKeySet<Long>()
+
+    /** `measurementId`s for which the measurement directory chain has been verified/created. */
+    private val measurementDirsReady = ConcurrentHashMap.newKeySet<Long>()
 
     init {
         require(apiEndpoint.isNotEmpty())
@@ -298,29 +313,40 @@ class WebdavUploader(
     }
 
     /**
-     * Function to check and create directories for upload if they don't exist.
+     * Check and create directories for upload if they don't exist.
      *
-     * It's less important how many requests are made for the measurement upload, as this only
-     * happens once every hour or so, but for attachments we should try to minimize the number of
-     * requests.
+     * Thread-safe: parallel attachment uploads (see `ATTACHMENT_UPLOAD_PARALLELISM` in
+     * SyncAdapter) would otherwise race on the WebDAV `MKCOL` call for a brand-new
+     * measurement, with the losing threads receiving HTTP 405 "Method Not Allowed" and
+     * failing the upload. We serialize on [directorySetupLock] and cache per-measurement
+     * "directories ready" state so only the first attachment of a measurement pays the
+     * setup cost.
      */
     private fun ensureDirectoriesExist(isMeasurementUpload: Boolean, uploadable: Uploadable) {
-        Log.e(TAG, "Checking for directories ...")
-        val isAttachmentUpload = !isMeasurementUpload
+        val measurementId = uploadable.measurementId()
+        val cache = if (isMeasurementUpload) measurementDirsReady else attachmentDirsReady
+        if (measurementId in cache) return
 
-        val imagesDir = imagesDirectory(uploadable)
-        val imuDir = imuDirectory(uploadable)
-        if (isAttachmentUpload && !sardine.exists(imagesDir)) {
-            // Attachment Upload
-            ensureDeviceMeasurementDirectoryExists(uploadable)
-            Log.d(TAG, "Creating directory: $imagesDir")
-            sardine.createDirectory(imagesDir)
-        } else if (isMeasurementUpload && !sardine.exists(imuDir)) {
-            // Measurement Upload
-            ensureDeviceMeasurementDirectoryExists(uploadable)
-            ensureDirectoryExists(sardine, sensorDirectory(uploadable))
-            Log.d(TAG, "Creating directory: $imuDir")
-            sardine.createDirectory(imuDir)
+        synchronized(directorySetupLock) {
+            if (measurementId in cache) return
+
+            val isAttachmentUpload = !isMeasurementUpload
+            val imagesDir = imagesDirectory(uploadable)
+            val imuDir = imuDirectory(uploadable)
+            if (isAttachmentUpload && !sardine.exists(imagesDir)) {
+                // Attachment Upload
+                ensureDeviceMeasurementDirectoryExists(uploadable)
+                Log.d(TAG, "Creating directory: $imagesDir")
+                sardine.createDirectory(imagesDir)
+            } else if (isMeasurementUpload && !sardine.exists(imuDir)) {
+                // Measurement Upload
+                ensureDeviceMeasurementDirectoryExists(uploadable)
+                ensureDirectoryExists(sardine, sensorDirectory(uploadable))
+                Log.d(TAG, "Creating directory: $imuDir")
+                sardine.createDirectory(imuDir)
+            }
+
+            cache.add(measurementId)
         }
     }
 
