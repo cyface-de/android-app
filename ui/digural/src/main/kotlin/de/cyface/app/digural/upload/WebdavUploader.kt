@@ -23,6 +23,8 @@ import android.util.Log
 import com.thegrizzlylabs.sardineandroid.Sardine
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import de.cyface.app.digural.MainActivity.Companion.TAG
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 import de.cyface.camera_service.foreground.AnnotationsWriter
 import de.cyface.camera_service.foreground.NoAnnotationsFound
 import de.cyface.model.Json
@@ -84,7 +86,37 @@ class WebdavUploader(
     private val context: Context,
 ) : Uploader {
 
-    private val sardine = OkHttpSardine()
+    /**
+     * OkHttpClient tuned for image-heavy WebDAV uploads.
+     *
+     * Defaults for OkHttp are `connect=10s, read=10s, write=10s` which is too tight for a
+     * multi-MB PUT over slow depot wifi - a single congested upload slot can throw
+     * `SocketTimeoutException` and abort an attachment that would otherwise have finished.
+     * The values here are a pragmatic upper bound:
+     *
+     * - `connectTimeout = 30s`: DNS + TCP + TLS handshake on slow links.
+     * - `readTimeout = 60s`: time without any response bytes. Nextcloud can stall briefly on
+     *   server-side MKCOL / PROPFIND lookups.
+     * - `writeTimeout = 120s`: time without the body making progress. An attachment PUT of
+     *   ~2 MB on 100 kbit/s of usable bandwidth needs ~160s to complete; this keeps slow
+     *   but-progressing uploads alive without hiding a truly wedged socket forever.
+     * - `retryOnConnectionFailure = true`: OkHttp default, kept explicit for clarity.
+     *
+     * Note: sardine-android 0.9's `setCredentials(user, pass, boolean)` does
+     * `client.newBuilder().addInterceptor(PreemptiveAuthInterceptor(...)).build()` which
+     * preserves everything else, so our timeouts survive the credentials rebuild.
+     *
+     * HTTP/2 is not currently usable against scadsai's Nextcloud (server ALPN advertises
+     * only `http/1.1`). Left as-is; OkHttp will auto-upgrade if the server ever enables h2.
+     */
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
+        .build()
+
+    private val sardine = OkHttpSardine(httpClient)
 
     /**
      * Serializes the `ensureDirectoriesExist` setup across parallel attachment uploads.
