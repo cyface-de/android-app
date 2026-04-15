@@ -40,7 +40,6 @@ import de.cyface.uploader.exception.ConflictException
 import de.cyface.uploader.exception.EntityNotParsableException
 import de.cyface.uploader.exception.ForbiddenException
 import de.cyface.uploader.exception.InternalServerErrorException
-import de.cyface.uploader.exception.MeasurementTooLarge
 import de.cyface.uploader.exception.NetworkUnavailableException
 import de.cyface.uploader.exception.ServerUnavailableException
 import de.cyface.uploader.exception.SynchronisationException
@@ -218,13 +217,11 @@ class WebdavUploader(
             //FileInputStream(file).use { fis ->
             //val bufferedInputStream = BufferedInputStream(fis)
 
-            // We currently cannot merge multiple upload-chunk requests into one file on server side.
-            // Thus, we prevent slicing the file into multiple files by increasing the chunk size.
-            // If the file is larger sync would be successful but only the 1st chunk received DAT-730.
-            // i.e. we throw an exception (which skips the upload) for too large measurements (44h+).
-            if (file.length() > MAX_CHUNK_SIZE) {
-                throw MeasurementTooLarge("Transfer file is too large: ${file.length()}")
-            }
+            // Note: No client-side size cap. Sardine streams the file from disk via OkHttp's
+            // request body, so multi-GB uploads don't buffer in memory. The 100 MB cap
+            // previously here was copy-pasted from the Cyface Collector flow (DAT-730, where
+            // chunks couldn't be merged server-side) and did not apply to WebDAV. It caused
+            // silent data loss for recordings longer than ~11 hours.
 
             // ** attention ** It's normal to see the log info:
             // `Authenticating for response: Response{protocol=http/1.1, code=401, message=Unauthorized,`
@@ -405,9 +402,6 @@ class WebdavUploader(
             }
 
             is IOException -> handleIOException(exception)
-            // File is too large to be uploaded. Handle in caller (e.g. skip the upload).
-            // The max size is currently static and set to 100 MB which should be about 44 hours of 100 Hz measurement.
-            is MeasurementTooLarge -> throw UploadFailed(exception)
             // `HTTP_BAD_REQUEST` (400).
             is BadRequestException -> throw UploadFailed(exception)
             // `HTTP_UNAUTHORIZED` (401).
@@ -441,12 +435,6 @@ class WebdavUploader(
     companion object {
         @Suppress("SpellCheckingInspection")
         private const val MEASUREMENT_FILE_FILENAME = "measurement.ccyf"
-        private const val MB_FROM_MEDIA_HTTP_UPLOADER = 0x100000
-
-        /**
-         * With a sensor frequency of 100 Hz this supports Measurements up to ~ 44 hours.
-         */
-        private const val MAX_CHUNK_SIZE = 100 * MB_FROM_MEDIA_HTTP_UPLOADER
 
         /**
          * Adds a trailing slash to the server URL or leaves an existing trailing slash untouched.
