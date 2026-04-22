@@ -753,17 +753,33 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
         // OPEN: running capturing
         if (capturing.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
             Log.d(TAG, "onResume: reconnecting DCS succeeded")
+
+            // Detect a camera self-stop that happened while the fragment was paused. In that
+            // case :camera_process bailed (e.g. onCameraAccessLost because another app grabbed
+            // the camera) and dispatched SERVICE_STOPPED_ITSELF, but our CameraListener was
+            // already unregistered by disconnect() so onCameraCapturingStopped() never ran.
+            // DCS kept running, so without this check we would render OPEN and the user would
+            // see a "capturing" UI while no camera frames are being captured.
+            val cameraRequested = cameraSettings.cameraEnabledFlow.first()
+            val cameraAlive = cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)
+            if (cameraRequested && !cameraAlive) {
+                Log.w(
+                    TAG,
+                    "onResume: camera was requested but CameraService is not alive - finalizing capturing"
+                )
+                checkAndStopCapturing(crashAsyncUI = false, pause = false)
+                return
+            }
+            if (cameraAlive) {
+                // It does not matter whether isCameraServiceRequested() as this can change all the time
+                Log.d(TAG, "onResume: reconnecting CameraService succeeded")
+            }
+
             val (id) = capturing.loadCurrentlyCapturedMeasurement()
             viewModel.setMeasurementId(id)
             // We re-sync the button here as the data capturing can be canceled while the app is closed
             setCapturingStatus(MeasurementStatus.OPEN)
             updateCachedTrack(id)
-
-            // Also try to reconnect to CameraService if it's alive
-            if (cameraService.reconnect(DataCapturingService.IS_RUNNING_CALLBACK_TIMEOUT)) {
-                // It does not matter whether isCameraServiceRequested() as this can change all the time
-                Log.d(TAG, "onResume: reconnecting CameraService succeeded")
-            }
             return
         }
 
