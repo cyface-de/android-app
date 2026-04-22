@@ -30,6 +30,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
+import de.cyface.camera_service.BundlesExtrasCodes as CameraBundlesExtrasCodes
 import de.cyface.camera_service.MessageCodes
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.synchronization.BundlesExtrasCodes
@@ -129,6 +130,42 @@ class Application : Application() {
     }
 
     /**
+     * Receives [MessageCodes.GLOBAL_BROADCAST_CAPTURING_ABORTED] emitted by camera_service's
+     * `BackgroundService` whenever it stops itself (camera access lost, camera hard error, or a
+     * strategy-driven stop). Forwards the reason to Sentry so we can see on kiosk trucks *why*
+     * the capturing is bailing out without adb access.
+     */
+    private val capturingAbortedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != MessageCodes.GLOBAL_BROADCAST_CAPTURING_ABORTED) return
+
+            val reason = intent.getStringExtra(CameraBundlesExtrasCodes.STOP_REASON) ?: "UNKNOWN"
+            val detail = intent.getStringExtra(CameraBundlesExtrasCodes.STOP_DETAIL)
+            val measurementId = if (intent.hasExtra(BundlesExtrasCodes.MEASUREMENT_ID)) {
+                intent.getLongExtra(BundlesExtrasCodes.MEASUREMENT_ID, -1L)
+            } else null
+
+            Log.w(
+                TAG,
+                "Capturing aborted (reason=$reason, detail=$detail, mid=$measurementId)"
+            )
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val reportErrors = lazyAppSettings.reportErrorsFlow.firstOrNull() == true
+                if (!reportErrors) return@launch
+
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    scope.setTag("stopReason", reason)
+                    measurementId?.let { scope.setTag("measurementId", it.toString()) }
+                    detail?.let { scope.setExtra("detail", it) }
+                    Sentry.captureMessage("camera_service capturing aborted ($reason)")
+                }
+            }
+        }
+    }
+
+    /**
      * Reports error events to the user via UI and to Sentry, if opted-in.
      */
     private val errorListener = object : ErrorHandler.ErrorListener {
@@ -199,6 +236,14 @@ class Application : Application() {
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
+        // Listen for capturing-aborted broadcasts from :camera_process self-stops.
+        ContextCompat.registerReceiver(
+            this,
+            capturingAbortedReceiver,
+            IntentFilter(MessageCodes.GLOBAL_BROADCAST_CAPTURING_ABORTED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
         // Use strict mode in dev environment to crash when a resource failed to call close.
         // Cannot be enabled due to an open issue in the sardine library and probably DataStore.
         /*if (BuildConfig.DEBUG) {
@@ -219,6 +264,7 @@ class Application : Application() {
             errorHandler!!
         )
         unregisterReceiver(memoryPressureReceiver)
+        unregisterReceiver(capturingAbortedReceiver)
         super.onTerminate()
     }
 
