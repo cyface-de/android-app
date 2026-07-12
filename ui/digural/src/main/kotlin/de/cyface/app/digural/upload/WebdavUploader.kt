@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.Log
 import com.thegrizzlylabs.sardineandroid.Sardine
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
+import com.thegrizzlylabs.sardineandroid.impl.SardineException
 import de.cyface.app.digural.MainActivity.Companion.TAG
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -334,12 +335,21 @@ class WebdavUploader(
                     fileNamePrefix(uploadable.deviceId(), uploadable.measurementId())
                 )
                 val attachmentUri = "$uploadDir/$diguralFileName"
-                // No `exists()` check: a redundant HEAD per attachment doubled round-trips in
-                // the hot path. Per-attachment idempotency is already tracked in AttachmentDao
-                // (SAVED -> SYNCED). WebDAV PUT overwrites if the file happens to be on the
-                // server already, which is acceptable.
+                // No pre-upload exists() check: a redundant HEAD per attachment doubles
+                // round-trips in the hot path. Per-attachment idempotency is tracked in
+                // AttachmentDao (SAVED -> SYNCED). Overwrite via PUT does not seem to be
+                // allowed on the Digural WebDAV, so on 403 we check existence and treat as
+                // successful to avoid an ever-growing list of retries on each sync cycle.
                 Log.d(TAG, "Upload attachment: $diguralFileName ...")
-                sardine.put(attachmentUri, file, "application/octet-stream")
+                try {
+                    sardine.put(attachmentUri, file, "application/octet-stream")
+                } catch (e: SardineException) {
+                    if (e.statusCode == 403 && sardine.exists(attachmentUri)) {
+                        Log.i(TAG, "Attachment already exists on server, marking as synced: $diguralFileName")
+                    } else {
+                        throw e
+                    }
+                }
             }
             de.cyface.uploader.Result.UPLOAD_SUCCESSFUL
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
