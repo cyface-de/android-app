@@ -67,6 +67,7 @@ class WebdavSyncService : Service() {
                         persistence.measurementRepository,
                         applicationContext,
                     ),
+                    MAX_MEASUREMENT_UPLOAD_BYTES,
                 )
             }
         }
@@ -100,5 +101,10 @@ class WebdavSyncService : Service() {
         private val LOCK = Any()
 
         const val AUTH_TOKEN_TYPE = "de.cyface.digural.auth_token_type"
+
+        // At ~5 MB/h serialized, 100 MB corresponds to ~20 hours. Measurements larger than
+        // this cannot be serialized within Android's SyncManager timeout (~2 min) and would
+        // block the sync queue. They are skipped with a warning.
+        private const val MAX_MEASUREMENT_UPLOAD_BYTES = 100L * 1024 * 1024
     }
 }
