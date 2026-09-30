@@ -326,10 +326,7 @@ class TripsFragment : Fragment() {
 
     private suspend fun handleException(e: Exception) {
         // This should not happen, thus, reporting to Sentry
-        val reportErrors = appSettings.reportErrorsFlow.first()
-        if (reportErrors) {
-            Sentry.captureException(e)
-        }
+        Sentry.captureException(e)
         Handler(Looper.getMainLooper()).post {
             _binding?.achievementsErrorMessage?.text =
                 getString(R.string.error_message_request_failed)
@@ -343,8 +340,7 @@ class TripsFragment : Fragment() {
 
     private suspend fun handleAuthorizationException(it: AuthorizationException) {
         // This should not happen, thus, reporting to Sentry
-        val reportErrors = appSettings.reportErrorsFlow.first()
-        if (reportErrors && it.cause !is UnknownHostException && it.cause !is ConnectException) {
+        if (it.cause !is UnknownHostException && it.cause !is ConnectException) {
             Sentry.captureException(it)
         }
         if (it.cause is UnknownHostException || it.cause is ConnectException) {
@@ -364,10 +360,7 @@ class TripsFragment : Fragment() {
 
     private suspend fun handleError(it: IOException) {
         // This should not happen, thus, reporting to Sentry
-        val reportErrors = appSettings.reportErrorsFlow.first()
-        if (reportErrors) {
-            Sentry.captureException(it)
-        }
+        Sentry.captureException(it)
         Handler(Looper.getMainLooper()).post {
             // This could also be another problem than "offline"
             _binding?.achievementsErrorMessage?.text =
@@ -382,10 +375,7 @@ class TripsFragment : Fragment() {
 
     private suspend fun handleUnknownResponse(responseCode: Int) {
         // This should not happen, thus, reporting to Sentry
-        val reportErrors = appSettings.reportErrorsFlow.first()
-        if (reportErrors) {
-            Sentry.captureMessage("Unknown response code: $responseCode")
-        }
+        Sentry.captureMessage("Unknown response code: $responseCode")
         throw IllegalArgumentException("Unknown response code: $responseCode")
     }
 
@@ -394,10 +384,7 @@ class TripsFragment : Fragment() {
         // If parsing crashes the server probably returned a 302 which forwards to
         // the Keycloak page (`<!DOCTYPE html>...`) which can't be parsed.
         // So it'S ok that this crashes, as this should not happen (302 = no Auth header)
-        val reportErrors = appSettings.reportErrorsFlow.first()
-        if (reportErrors) {
-            Sentry.captureMessage("Forwarded? Forgot Auth header?")
-        }
+        Sentry.captureMessage("Forwarded? Forgot Auth header?")
         throw java.lang.IllegalStateException("Forwarded? Forgot Auth header?", e)
     }
 
@@ -583,10 +570,7 @@ class TripsFragment : Fragment() {
                     // The last voucher just got assigned or the server forgot to send JSON content
                     showNoVouchersLeft()
                     // This should hardly ever happen, thus, reporting to Sentry
-                    val reportErrors = appSettings.reportErrorsFlow.first()
-                    if (reportErrors) {
-                        Sentry.captureMessage("Last voucher just got assigned?")
-                    }
+                    Sentry.captureMessage("Last voucher just got assigned?")
                 }
 
                 200 -> {

@@ -18,6 +18,7 @@
  */
 package de.cyface.app.digural
 
+import android.accounts.AccountManager
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -30,6 +31,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.digural.auth.LoginActivity
 import de.cyface.app.digural.auth.WebdavAuth
 import de.cyface.app.digural.auth.WebdavAuthenticator
+import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
+import de.cyface.app.utils.ErrorTracking
 import de.cyface.camera_service.BundlesExtrasCodes as CameraBundlesExtrasCodes
 import de.cyface.camera_service.MessageCodes
 import de.cyface.energy_settings.TrackingSettings
@@ -42,7 +45,6 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Locale
@@ -99,8 +101,6 @@ class Application : Application() {
             )
 
             CoroutineScope(Dispatchers.IO).launch {
-                val reportErrors = lazyAppSettings.reportErrorsFlow.firstOrNull() == true
-                if (!reportErrors) return@launch
 
                 val fileSizes = logFolder?.let { path ->
                     val dir = File(path)
@@ -151,8 +151,6 @@ class Application : Application() {
             )
 
             CoroutineScope(Dispatchers.IO).launch {
-                val reportErrors = lazyAppSettings.reportErrorsFlow.firstOrNull() == true
-                if (!reportErrors) return@launch
 
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.WARNING
@@ -166,7 +164,7 @@ class Application : Application() {
     }
 
     /**
-     * Reports error events to the user via UI and to Sentry, if opted-in.
+     * Reports error events to the user via UI and to Sentry, while the user is logged in.
      */
     private val errorListener = object : ErrorHandler.ErrorListener {
         override fun onErrorReceive(
@@ -190,13 +188,7 @@ class Application : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            CoroutineScope(Dispatchers.Default).launch {
-                lazyAppSettings.reportErrorsFlow.firstOrNull()?.let { reportErrors ->
-                    if (reportErrors) {
-                        Sentry.captureMessage(errorCode.name + ": " + errorMessage)
-                    }
-                }
-            }
+            Sentry.captureMessage(errorCode.name + ": " + errorMessage)
         }
     }
 
@@ -216,6 +208,12 @@ class Application : Application() {
 
         // Register the activity to be called by the authenticator to request credentials from the user.
         WebdavAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
+
+        // Error tracking while the user is logged in (a WebDAV account exists), also after a
+        // restart of the app [CY-6870]
+        if (AccountManager.get(this).getAccountsByType(ACCOUNT_TYPE).isNotEmpty()) {
+            ErrorTracking.start(this)
+        }
 
         // Register error listener
         errorHandler = ErrorHandler()

@@ -51,6 +51,7 @@ import de.cyface.app.digural.notification.CapturingEventHandler
 import de.cyface.app.digural.utils.Constants
 import de.cyface.app.digural.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.digural.utils.Constants.AUTHORITY
+import de.cyface.app.utils.ErrorTracking
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiSettings
 import de.cyface.camera_service.settings.CameraSettings
@@ -82,8 +83,7 @@ import java.io.IOException
 import java.lang.ref.WeakReference
 
 /**
- * The base `Activity` for the actual Cyface measurement client. It's called by the [TermsOfUseActivity]
- * class.
+ * The base `Activity` for the actual Cyface measurement client, launched as the entry point.
  *
  * It calls the [de.cyface.app.digural.auth.LoginActivity] if the user is unauthorized and uses the
  * outcome to authorize [WebdavAuth].
@@ -291,12 +291,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            lifecycleScope.launch {
-                val reportErrors = appSettings.reportErrorsFlow.first()
-                if (reportErrors) {
-                    Sentry.captureException(e)
-                }
-            }
+            Sentry.captureException(e)
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
     }
@@ -352,6 +347,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                     }
                     Log.d(TAG, "Starting WifiSurveyor with new account.")
                     capturing.startWifiSurveyor()
+                    ErrorTracking.start(this)
                 } catch (e: OperationCanceledException) {
                     // Remove temp account when LoginActivity is closed during login [CY-5087]
                     val accounts = accountManager1.getAccountsByType(ACCOUNT_TYPE)
@@ -359,6 +355,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider, CameraServiceProvider
                         val account = accounts[0]
                         accountManager1.removeAccount(account, null, null)
                     }
+                    ErrorTracking.stop()
                     // This closes the app when the LoginActivity is closed
                     this.finish()
                 } catch (e: AuthenticatorException) {

@@ -55,6 +55,7 @@ import de.cyface.app.r4r.utils.Constants.ACCOUNT_TYPE
 import de.cyface.app.r4r.utils.Constants.AUTHORITY
 import de.cyface.app.r4r.utils.Constants.SUPPORT_EMAIL
 import de.cyface.app.r4r.utils.Constants.TAG
+import de.cyface.app.utils.ErrorTracking
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.capturing.settings.UiConfig
 import de.cyface.app.utils.capturing.settings.UiSettings
@@ -89,8 +90,7 @@ import java.io.IOException
 import kotlin.system.exitProcess
 
 /**
- * The base `Activity` for the actual Cyface measurement client. It's called by the
- * [de.cyface.app.r4r.TermsOfUseActivity] class.
+ * The base `Activity` for the actual Cyface measurement client, launched as the entry point.
  *
  * It calls the [de.cyface.app.r4r.auth.LoginActivity] if the user is unauthorized and uses the
  * outcome of the OAuth 2 authorization flow to negotiate the final authorized state. This is done
@@ -336,12 +336,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
             capturing.shutdownDataCapturingService()
             // Before we only called: shutdownConnectionStatusReceiver();
         } catch (e: SynchronisationException) {
-            lifecycleScope.launch {
-                val reportErrors = appSettings.reportErrorsFlow.first()
-                if (reportErrors) {
-                    Sentry.captureException(e)
-                }
-            }
+            Sentry.captureException(e)
             Log.w(TAG, "Failed to shut down CyfaceDataCapturingService. ", e)
         }
 
@@ -449,6 +444,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
     private fun onAuthorized(message: String) {
         runOnUiThread {
             Log.d(TAG, "authorized ($message)")
+            ErrorTracking.start(this)
             startSynchronization()
         }
     }
@@ -489,6 +485,7 @@ class MainActivity : AppCompatActivity(), ServiceProvider/*, CameraServiceProvid
     @MainThread
     private fun signOut(removeAccount: Boolean = false) {
         auth.signOut()
+        ErrorTracking.stop()
 
         // E.g. `MainActivity.onStart()` calls `signOut()` when the user is already signed out
         // so there is no account to be removed.

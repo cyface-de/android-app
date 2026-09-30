@@ -49,11 +49,12 @@ The credentials are usually injected by the CI:
 ==== Sentry
 
 Create a file `sentry.properties` at the root of a UI project with the following credentials,
-the `auth.token` can be found on `Sentry > Settings > Account > API > Auth Tokens`.
+the `auth.token` can be found on `Sentry > Settings > Account > API > Auth Tokens` of the EU
+organization `cyface-eu`.
 
 ....
 defaults.project=android-app
-defaults.org=cyface
+defaults.org=cyface-eu
 auth.token=SECRET_TOKEN
 ....
 
