@@ -18,7 +18,11 @@
  */
 package de.cyface.app.utils
 
+import android.app.ActivityManager
+import android.app.Application
 import android.content.Context
+import android.os.Build
+import android.os.Process
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryEvent
@@ -41,6 +45,11 @@ import io.sentry.protocol.User
  */
 object ErrorTracking {
     /**
+     * The maximal time in milliseconds to send the pending events when the error tracking stops.
+     */
+    private const val FLUSH_TIMEOUT_MILLIS = 2_000L
+
+    /**
      * The DSN of the project `android-app` in the EU organization `cyface-eu` of Sentry (data
      * residency in the EU), used by all app variants. It identifies the project but is not a secret.
      */
@@ -61,12 +70,17 @@ object ErrorTracking {
     /**
      * Starts the error tracking. Does nothing when it is already started.
      *
+     * Only in the main process: the logout stops the error tracking there, while the other
+     * processes of the app (e.g. `:sync`, `:capturing_process`) keep running.
+     *
      * @param context The context to initialize Sentry with.
      */
     fun start(context: Context) {
-        if (Sentry.isEnabled()) return
+        if (!isMainProcess(context) || Sentry.isEnabled()) return
         SentryAndroid.init(context) { options ->
             options.dsn = DSN
+            // `stop()` is called on the main thread at the logout: do not block it for long
+            options.flushTimeoutMillis = FLUSH_TIMEOUT_MILLIS
             // No IP address and no device name
             options.isSendDefaultPii = false
             options.beforeSend = SentryOptions.BeforeSendCallback { event, _ -> scrubEvent(event) }
@@ -81,6 +95,20 @@ object ErrorTracking {
      */
     fun stop() {
         Sentry.close()
+    }
+
+    /**
+     * @return `true` if this is the main process of the app, which has the name of the package.
+     */
+    private fun isMainProcess(context: Context): Boolean {
+        val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Application.getProcessName()
+        } else {
+            val pid = Process.myPid()
+            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            activityManager.runningAppProcesses?.firstOrNull { it.pid == pid }?.processName
+        }
+        return processName == context.packageName
     }
 
     /**
