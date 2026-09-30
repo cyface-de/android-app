@@ -96,7 +96,6 @@ import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
@@ -177,12 +176,9 @@ class CapturingFragment : Fragment(), DataCapturingListener, CameraListener {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val viewModel: CapturingViewModel by activityViewModels {
-        // With async in onCreate the app crashes as late-init `capturing` is not initialized yet.
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
-            persistence.eventRepository!!,
-            reportErrors
+            persistence.eventRepository!!
         )
     }
 

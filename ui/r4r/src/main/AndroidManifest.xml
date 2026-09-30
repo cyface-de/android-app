@@ -73,24 +73,13 @@
     tools:replace="android:usesCleartextTraffic"
     android:usesCleartextTraffic="${usesCleartextTraffic}">
 
-    <!-- Sentry DSN. This ids the account but is not a secret. -->
-    <meta-data android:name="io.sentry.dsn" android:value="https://41f5b42d132a4545a749d1a520c71635@o418976.ingest.sentry.io/5325978" />
+    <!-- Sentry starts after the login and stops at the logout, see `ErrorTracking` [CY-6870] -->
+    <meta-data android:name="io.sentry.auto-init" android:value="false" />
 
     <!-- Google Maps for Android requirements -->
     <meta-data
       android:name="com.google.android.geo.API_KEY"
       android:value="${googleMapsApiKey}" />
-
-    <!-- The TermsOfUseActivity is the activity which is launched as an entry point -->
-    <!-- `exported="true"` or else the app cannot be launched after installation! -->
-    <!-- As the user can opt-in for Sentry, we can't remove the terms page (DSE in Keycloak) -->
-    <activity android:name=".TermsOfUseActivity"
-      android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
 
     <!-- MainActivity is called by LoginActivity. -->
     <!-- See https://github.com/openid/AppAuth-Android/blob/master/app/AndroidManifest.xml
@@ -100,6 +89,19 @@
       android:exported="true"
       android:launchMode="singleTop"> <!-- needed so that we don't have "two activities" when opening the activity via the notification bar and hitting the back button -->
     </activity>
+
+    <!-- The entry point. It keeps the name of the removed terms screen, so that the launcher -->
+    <!-- shortcuts of installed apps still work after the update [CY-6870]. -->
+    <!-- `exported="true"` or else the app cannot be launched after installation! -->
+    <activity-alias
+      android:name=".TermsOfUseActivity"
+      android:exported="true"
+      android:targetActivity=".MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity-alias>
 
     <!-- The LoginActivity automatically launched by the SDK's CyfaceAuthenticator -->
     <activity

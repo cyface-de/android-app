@@ -55,8 +55,7 @@ import io.sentry.Sentry
  */
 class CapturingViewModel(
     private val repository: MeasurementRepository,
-    eventRepository: EventRepository,
-    private val isReportingEnabled: Boolean
+    eventRepository: EventRepository
 ) : ViewModel() {
 
     /**
@@ -158,9 +157,7 @@ class CapturingViewModel(
         if (_tracks.value == null) {
             Log.i(TAG, "addToTrack: ignoring location, tracking is inactive")
             // Collect metrics about this in Sentry, to see if this happens a lot
-            if (isReportingEnabled) {
-                Sentry.captureMessage("addToTrack: ignoring location, tracking is inactive")
-            }
+            Sentry.captureMessage("addToTrack: ignoring location, tracking is inactive")
             return
         }
         // Locations can arrive after stopCapturing() cleared the measurementId (race between
@@ -234,14 +231,13 @@ class CapturingViewModel(
  */
 class CapturingViewModelFactory(
     private val repository: MeasurementRepository,
-    private val eventRepository: EventRepository,
-    private val isReportingEnabled: Boolean
+    private val eventRepository: EventRepository
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CapturingViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CapturingViewModel(repository, eventRepository, isReportingEnabled) as T
+            return CapturingViewModel(repository, eventRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

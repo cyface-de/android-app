@@ -57,9 +57,6 @@ android {
 
         testInstrumentationRunner rootProject.ext.testInstrumentationRunner
 
-        // If our terms change that much that they to be re-accepted, increase this (see Confluence!)
-        buildConfigField "int", "currentTerms", "5"
-
         // Placeholders for AndroidManifest.xml
         manifestPlaceholders = [
                 // Load Google Maps API key

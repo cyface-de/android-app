@@ -69,7 +69,7 @@ jobs:
       - name: Add sentry.properties
         run: |
           echo "defaults.project=android-app" > sentry.properties
-          echo "defaults.org=cyface" >> sentry.properties
+          echo "defaults.org=cyface-eu" >> sentry.properties
           echo "auth.token=${{ secrets.SENTRY_API_TOKEN }}" >> sentry.properties
 
       - name: Add gradle.properties

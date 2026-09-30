@@ -375,14 +375,9 @@ class Map(
                 googleMap!!.isMyLocationEnabled = true
             }
         } catch (e: SecurityException) {
-            lifecycleOwner.lifecycleScope.launch {
-                if (permissionWereJustGranted) {
-                    Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
-                    val reportErrors = appSettings.reportErrorsFlow.first()
-                    if (reportErrors) {
-                        Sentry.captureException(e)
-                    }
-                }
+            if (permissionWereJustGranted) {
+                Log.w(TAG, "showAndMoveToCurrentLocation: Location permission are missing")
+                Sentry.captureException(e)
             }
         }
     }
@@ -410,22 +405,16 @@ class Map(
             // Occurred on Huawei CY-3456
             if (googleMap == null) {
                 Log.w(TAG, "GoogleMap is null, unable to animate camera")
-                lifecycleOwner.lifecycleScope.launch {
-                    val reportErrors = appSettings.reportErrorsFlow.first()
-                    if (!highFrequentRequest && reportErrors) {
-                        Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
-                    }
+                if (!highFrequentRequest) {
+                    Sentry.captureMessage("Map.moveToLocation: GoogleMap is null")
                 }
                 return
             }
             googleMap!!.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         } catch (e: SecurityException) {
             Log.e(TAG, "Location permission not granted or Google play service out of date?")
-            lifecycleOwner.lifecycleScope.launch {
-                val reportErrors = appSettings.reportErrorsFlow.first()
-                if (!highFrequentRequest && reportErrors) {
-                    Sentry.captureException(e)
-                }
+            if (!highFrequentRequest) {
+                Sentry.captureException(e)
             }
         }
     }

@@ -109,7 +109,6 @@ class CapturingNotificationTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         // Arrange: Reach MainFragment with capturing button
-        acceptTermsIfNeeded(device)
         device!!.waitForIdle()
 
         loginIfNeeded(device)
@@ -175,17 +174,6 @@ class CapturingNotificationTest {
         }
     }
 
-    private fun acceptTermsIfNeeded(device: UiDevice?) {
-        if (device!!.hasObject(By.res(CYFACE_APP_PACKAGE, "accept_terms_button"))
-        ) {
-            val acceptTermsButtonSelector = By.res(CYFACE_APP_PACKAGE, "accept_terms_button")
-            val acceptTermsButton = device.findObject(acceptTermsButtonSelector)
-            MatcherAssert.assertThat(acceptTermsButton.isClickable, `is`(true))
-            MatcherAssert.assertThat(acceptTermsButton.isEnabled, `is`(true))
-            Log.i(TAG, "Clicking accept terms button and waiting up to $DEFAULT_TIMEOUT ms")
-            acceptTermsButton.clickAndWait(Until.newWindow(), DEFAULT_TIMEOUT.toLong())
-        }
-    }
 
     private fun loginIfNeeded(device: UiDevice?) {
         val loginTextBoxSelector = By.res(CYFACE_APP_PACKAGE, "input_login")

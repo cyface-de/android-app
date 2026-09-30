@@ -23,18 +23,16 @@ import android.content.IntentFilter
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import de.cyface.app.r4r.auth.LoginActivity
+import de.cyface.app.utils.ErrorTracking
 import de.cyface.energy_settings.TrackingSettings
 import de.cyface.synchronization.settings.DefaultSynchronizationSettings
+import de.cyface.synchronization.AuthStateManager
 import de.cyface.synchronization.CyfaceAuthenticator
 import de.cyface.synchronization.ErrorHandler
 import de.cyface.synchronization.OAuth2
 import de.cyface.synchronization.settings.SyncConfig
 import de.cyface.utils.settings.AppSettings
 import io.sentry.Sentry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
@@ -59,7 +57,7 @@ class Application : Application() {
     }
 
     /**
-     * Reports error events to the user via UI and to Sentry, if opted-in.
+     * Reports error events to the user via UI and to Sentry, while the user is logged in.
      */
     private val errorListener = object : ErrorHandler.ErrorListener {
         override fun onErrorReceive(
@@ -83,13 +81,7 @@ class Application : Application() {
             // but in the second case we cannot get the stacktrace as it's only available in the SDK.
             // For that reason we also capture a message here.
             // However, it seems like e.g. a interrupted upload shows a toast but does not trigger sentry.
-            CoroutineScope(Dispatchers.Default).launch {
-                lazyAppSettings.reportErrorsFlow.firstOrNull()?.let { reportErrors ->
-                    if (reportErrors) {
-                        Sentry.captureMessage(errorCode.name + ": " + errorMessage)
-                    }
-                }
-            }
+            Sentry.captureMessage(errorCode.name + ": " + errorMessage)
         }
     }
 
@@ -109,6 +101,11 @@ class Application : Application() {
 
         // Register the activity to be called by the authenticator to request credentials from the user.
         CyfaceAuthenticator.LOGIN_ACTIVITY = LoginActivity::class.java
+
+        // Error tracking while the user is logged in, also after a restart of the app [CY-6870]
+        if (AuthStateManager.getInstance(this).current.isAuthorized) {
+            ErrorTracking.start(this)
+        }
 
         // Register error listener
         errorHandler = ErrorHandler()

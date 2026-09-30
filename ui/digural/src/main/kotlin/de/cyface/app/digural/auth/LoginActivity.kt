@@ -52,7 +52,6 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.lang.RuntimeException
 import java.lang.ref.WeakReference
@@ -266,10 +265,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private suspend fun reportError(e: Exception) {
         // Before, we could not capture the exceptions in CyfaceAuthenticator as it's part of the SDK.
         // We also didn't want to capture the errors in the error handler as we don't have the stacktrace there.
-        val reportErrors = appSettings.reportErrorsFlow.first()
-        if (reportErrors) {
-            Sentry.captureException(e)
-        }
+        Sentry.captureException(e)
         // "the authenticator could not honor the request due to a network error"
         Log.d(TAG, "Login failed - removing account to allow new login.", e)
     }

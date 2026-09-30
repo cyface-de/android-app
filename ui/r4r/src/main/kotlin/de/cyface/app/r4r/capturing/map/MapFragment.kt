@@ -54,9 +54,7 @@ import de.cyface.persistence.exception.NoSuchMeasurementException
 import de.cyface.persistence.model.Track
 import de.cyface.utils.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 /**
@@ -117,12 +115,9 @@ class MapFragment : Fragment() {
      * Shared instance of the [CapturingViewModel] which is used by multiple `Fragments.
      */
     private val capturingViewModel: CapturingViewModel by activityViewModels {
-        // Synchronously to ensure viewModel is available when needed.
-        val reportErrors = runBlocking { appSettings.reportErrorsFlow.first() }
         CapturingViewModelFactory(
             persistence.measurementRepository!!,
-            persistence.eventRepository!!,
-            reportErrors
+            persistence.eventRepository!!
         )
     }
 
@@ -182,13 +177,11 @@ class MapFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            val reportErrors = appSettings.reportErrorsFlow.first()
             ViewModelProvider(
                 this@MapFragment,
                 CapturingViewModelFactory(
                     persistence.measurementRepository!!,
-                    persistence.eventRepository!!,
-                    reportErrors
+                    persistence.eventRepository!!
                 ),
             )[CapturingViewModel::class.java]
         }
