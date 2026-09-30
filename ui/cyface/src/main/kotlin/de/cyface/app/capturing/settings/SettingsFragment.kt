@@ -31,6 +31,7 @@ import de.cyface.app.BuildConfig
 import de.cyface.app.Application
 import de.cyface.app.R
 import de.cyface.app.databinding.FragmentSettingsBinding
+import de.cyface.app.utils.ErrorTracking
 import de.cyface.app.utils.ServiceProvider
 import de.cyface.app.utils.SharedConstants
 import de.cyface.app.utils.trips.incentives.AuthExceptionListener
@@ -155,6 +156,9 @@ class SettingsFragment : Fragment() {
                                         Toast.LENGTH_LONG
                                     ).show()
                                 }
+
+                                // The account is deleted, also when the user cancels the end session
+                                ErrorTracking.stop()
 
                                 // This inform the auth server that the user wants to end its session
                                 auth.endSession(requireActivity())
