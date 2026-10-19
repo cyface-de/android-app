@@ -147,7 +147,7 @@ jobs:
                 "$bundle" "$SIGNING_ALIAS"
               # `jarsigner -verify` also exits with 0 for an unsigned bundle, so check its output.
               # The output is in the log, so a failed check shows the reason.
-              out=$(jarsigner -verify "$bundle")
+              out=$(jarsigner -verify "$bundle") || { echo "$out"; exit 1; }
               echo "$out"
               grep -q '^jar verified' <<< "$out"
             done
