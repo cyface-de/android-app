@@ -21,6 +21,8 @@ These three projects are included as Git submodules and are developed in their o
 ** <<android-coding-guidelines,Android Coding Guidelines>>
 ** <<running-integration-tests-in-android-studio,Running integration tests in Android Studio>>
 ** <<importing-the-cyface-depeendencies-as-submodules,Importing the Cyface Dependencies as Submodules>>
+** <<development,Development>>
+** <<github-workflows,GitHub Workflows>>
 ** <<release-a-new-version,Release a new version>>
 * <<license,License>>
 
@@ -63,18 +65,24 @@ auth.token=SECRET_TOKEN
 Add the following to your `gradle.properties` file:
 ....
 google.maps_api_key=SECRET_KEY
-google.maps_api_key.r4f=SECRET_KEY
+google.maps_api_key.r4r=SECRET_KEY
 ....
 
 ==== Authentication and Data Collection APIs
 
-TODO: This seems to be deprecated. There are much more settings there at the moment.
-Add the following to your `gradle.properties` file:
+Add the following to your `gradle.properties` file (the release build uses them):
 
 ....
-cyface.api=https://some.url.com/api/v3
-cyface.auth_api=https://some.url.com/auth/api/v1
+cyface.api=https://some.url.com/api/v4
+cyface.provider_api=https://some.url.com/provider
+cyface.incentives_api=https://some.url.com/incentives
+cyface.oauth_discovery=https://some.url.com/auth
+cyface.oauth_redirect=de.cyface.app:/oauth2redirect
+cyface.oauth_redirect.r4r=de.cyface.app.r4r:/oauth2redirect
+digural.api=https://some.digural.url.com
 ....
+
+The other build types read the same properties with a prefix: `cyface.staging_*` (also `cyface.staging_user` and `cyface.staging_password`), `cyface.demo_*`, `cyface.emulator_*`, `cyface.local_*` and `digural.staging_api`. See the `buildConfigField` lines in `ui/*/build.gradle`. The CI uses the mock API `https://demo.cyface.de`, which accepts all credentials, so that the UI tests can skip the login.
 
 
 [[developer-guide]]
@@ -128,17 +136,58 @@ $ git commit
 $ git push
 ....
 
+[[development]]
+=== Development
+
+The repository contains three apps (Cyface, R4R, Digural), which share the modules of the submodules. Java 21, minSdk 26, compileSdk and targetSdk 35, Gradle with Groovy DSL. All versions are `ext` properties in the root `build.gradle`.
+
+....
+./gradlew :ui:cyface:assembleDebug        # build one app (also :ui:r4r, :ui:digural)
+./gradlew :ui:cyface:testDebugUnitTest    # unit tests of one app
+./gradlew :persistence:testDebugUnitTest  # unit tests of a backend module (also :datacapturing, :synchronization)
+./gradlew :ui:cyface:connectedDebugAndroidTest   # instrumented tests (need an emulator or a device)
+./gradlew :ui:cyface:lintDebug            # Android lint
+....
+
+Modules:
+
+....
+ui/cyface, ui/r4r, ui/digural
+    └── utils (shared UI: auth, navigation, settings, trips, statistics)
+         ├── backend/datacapturing (foreground service for the sensor capture)
+         │    └── backend/persistence (Room database: measurements, events, sensor data)
+         ├── backend/synchronization (upload to the server, WiFi detection)
+         ├── energy_settings (background location prompts)
+         └── camera_service (visual capture, used only by Digural)
+....
+
+* `:utils` -- shared by all three apps: OAuth 2.0 (AppAuth), navigation, Proto DataStore settings, trips, incentives, map utilities.
+* `:ui:cyface` -- the main app with Google Maps, the capturing UI and the settings.
+* `:ui:r4r` -- the R4R app with speed display and trip grouping.
+* `:ui:digural` -- the Digural app with WebDAV upload (sardine), a Retrofit HTTP client and the camera service. It has its own Proto DataStore settings and its own collector API.
+* `backend/`, `energy_settings/` and `camera_service/` are Git submodules. Their versions are also in the root `build.gradle` (`cyfaceAndroidBackendVersion`, `cyfaceEnergySettingsVersion`, `cyfaceCameraServiceVersion`). Update the submodule commit and the version together.
+
+Patterns: MVVM with ViewModel and LiveData, Navigation Component with Safe Args, ViewBinding, Proto DataStore instead of SharedPreferences, `BroadcastReceiver` for the communication between components. Packages: `de.cyface.app`, `de.cyface.app.r4r`, `de.cyface.app.digural`, `de.cyface.app.utils`.
+
+[[github-workflows]]
+=== GitHub Workflows
+
+* `gradle_build.yml` builds the three apps and runs their unit tests for each push and pull request to `main` and `release-*`.
+* `gradle_connected-tests.yml` runs the instrumented tests of the Cyface app on an API 28 emulator (`google_apis`).
+* `gradle_publish.yml` runs on version tags: it builds and signs the three App Bundles, uploads them as artifacts and creates the GitHub release.
+* `codeql.yml` runs the CodeQL analysis each week and on pushes and pull requests.
+
+Pull requests from forks are skipped, because the workflows need the secrets of this repository. The workflows check out the private submodule `camera_service` with the deploy key in `SSH_DEPLOY_KEY_CAMERA_SERVICE`. They write the other secrets into `gradle.properties` and `sentry.properties` through `env:`, never through the script text.
+
+Rules of the workflows (hardening of CY-6748): do not use `${{ github.ref_name }}` or other event values directly in a `run:` script, pass them through `env:`; pass secrets through `env:` of the step that needs them; pin third-party actions to a commit SHA; use `runs-on: ubuntu-26.04`, not `ubuntu-latest`.
+
 [[release-a-new-version]]
 === Release a new version
 
-See https://github.com/cyface-de/data-collector#release-a-new-version[Cyface Collector Readme]
-
-* `versionName` and `versionCode` in root `build.gradle` are automatically set by the CI
-* Just tag the release and push the tag to Github
-* After pushing the release tag the CI builds and signs the App Bundle automatically
-* Checkout that build, copy the `cyface-release.aab` from the artifacts and upload it to Play Store
-* The tag is automatically marked as a 'new Release' on https://github.com/cyface-de/android-app/releases[Github]
-
+* The CI sets `versionName` from the tag and `versionCode` from the run number plus 320 in the root `build.gradle`. Do not change them manually.
+* Create an annotated tag with a semantic version on `main` and push it. The body of the tag message becomes the release notes.
+* The CI builds and signs the App Bundles. Download the artifacts `Signed Cyface Bundle`, `Signed R4R Bundle` and `Signed Digural Bundle` of that run and upload them to the Play Store.
+* A tag with a suffix (for example `3.15.1-beta1`) becomes a pre-release.
 
 [[known-issues]]
 == Known Issues
@@ -158,7 +207,7 @@ The CI tests are flaky due to emulator-instability on the CI:
 
 [[license]]
 == License
-Copyright 2017-2023 Cyface GmbH
+Copyright 2017-2026 Cyface GmbH
 
 This file is part of the Cyface App for Android.
 

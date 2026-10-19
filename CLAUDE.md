@@ -2,103 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+The README is the main documentation. It describes the installation, the secrets, the modules, the development commands, the workflows and the release:
 
-Android app for capturing sensor (accelerometer, gyroscope) and GPS data to measure road surface quality. Three app variants -- Cyface, R4R, Digural -- share a modular SDK via Git submodules.
+@README.adoc
 
-## Build & Test Commands
+## Rules for Changes
 
-```bash
-# Build a specific variant
-./gradlew :ui:cyface:assembleDebug
-./gradlew :ui:r4r:assembleDebug
-./gradlew :ui:digural:assembleDebug
+- Keep the README current. When you change a module, a property in `gradle.properties`, a command or a workflow, update the README in the same commit.
+- `backend/`, `energy_settings/` and `camera_service/` are submodules with their own repositories. Change them there, then update the submodule commit and the version in the root `build.gradle` together.
+- Debug builds use the staging or demo APIs, release builds the production APIs. Never commit `gradle.properties` or `sentry.properties`.
+- Follow the rules of the workflows in the README section "GitHub Workflows" for each change of `.github/workflows/`.
 
-# Unit tests
-./gradlew :ui:cyface:testDebugUnitTest
-./gradlew :ui:r4r:testDebugUnitTest
-./gradlew :ui:digural:testDebugUnitTest
+## Commit Style
 
-# Backend module tests
-./gradlew :persistence:testDebugUnitTest
-./gradlew :datacapturing:testDebugUnitTest
-./gradlew :synchronization:testDebugUnitTest
-
-# Single test class
-./gradlew :ui:cyface:testDebugUnitTest --tests "de.cyface.app.SomeTestClass"
-
-# Instrumented tests (needs device/emulator)
-./gradlew :ui:cyface:connectedDebugAndroidTest
-# Single instrumented test
-./gradlew :ui:cyface:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=de.cyface.app.SomeTestClass
-
-# Lint
-./gradlew :ui:cyface:lintDebug
-```
-
-## Architecture
-
-### Module Dependency Graph
-
-```
-ui/cyface, ui/r4r, ui/digural
-    └── utils (shared UI: auth, navigation, settings, trips, statistics)
-         ├── backend/datacapturing (foreground service for sensor capture)
-         │    └── backend/persistence (Room DB: measurements, events, sensor data)
-         ├── backend/synchronization (upload to server, WiFi detection)
-         ├── energy_settings (background location permission prompts)
-         └── camera_service (visual footage capture, used by Digural only)
-```
-
-### Module Details
-
-- **`:utils`** -- Shared across all three apps. Contains OAuth 2.0 auth (AppAuth), navigation, Proto DataStore settings, trip management, incentives, and map utilities.
-- **`:ui:cyface`** -- Main app with Google Maps, capturing UI, and settings.
-- **`:ui:r4r`** -- R4R variant with speed display and trip grouping/markers.
-- **`:ui:digural`** -- Digural variant adds WebDAV upload (sardine library), Retrofit HTTP client, and camera service integration. Has its own Proto DataStore settings and a separate `collectorApi` configuration.
-- **Backend modules** (`persistence`, `datacapturing`, `synchronization`, `testutils`) live in the `backend/` Git submodule.
-- **`energy_settings/`** and **`camera_service/`** are also Git submodules.
-
-### Key Patterns
-
-- **Data flow**: Sensors -> `CyfaceDataCapturingService` (foreground service) -> Room DB -> Synchronization -> Server
-- **UI**: MVVM with ViewModel/LiveData, Navigation Component with Safe Args, ViewBinding
-- **Settings**: Proto DataStore (protobuf-based), not SharedPreferences
-- **Inter-component communication**: BroadcastReceiver / LocalBroadcastManager
-
-## Submodules
-
-The `backend/`, `camera_service/`, and `energy_settings/` directories are Git submodules. They can be used as local source (for development) or as published packages from GitHub Packages.
-
-```bash
-# Initialize submodules for local development
-git submodule update --init --recursive
-
-# Update submodule to latest
-cd backend/ && git fetch -p && git checkout <branch> && cd ..
-```
-
-Submodule version numbers are documented in root `build.gradle` (`cyfaceAndroidBackendVersion`, `cyfaceEnergySettingsVersion`, `cyfaceCameraServiceVersion`). When upgrading, update the submodule commit and these version constants together.
-
-## Build Configuration
-
-- **Build system**: Gradle with Groovy DSL (not Kotlin DSL)
-- **Java**: 21 (source and target)
-- **Android SDK**: min 26, target/compile 35
-- **All versions** are centralized as `ext` properties in root `build.gradle`
-- **Credentials**: Copy `gradle.properties.template` to `gradle.properties` and fill in `githubUser`/`githubToken` (required for GitHub Packages access)
-- **Debug builds** connect to staging/demo APIs; **release builds** connect to production APIs
-- Each app variant has its own Google Maps API key and OAuth redirect URI configured via `gradle.properties`
-
-## Commit Convention
-
-`[TICKET-ID] Short imperative summary` -- e.g., `[LEIP-410] Fix Digural API URL not updating without app restart`
-
-## Package Structure
-
-- `de.cyface.app` -- Cyface app (`ui/cyface/src/main/kotlin/`)
-- `de.cyface.app.r4r` -- R4R app (`ui/r4r/src/main/kotlin/`)
-- `de.cyface.app.digural` -- Digural app (`ui/digural/src/main/kotlin/`)
-- `de.cyface.app.utils` -- Shared utils (`utils/src/main/kotlin/`)
-
-Each app's source has sub-packages: `auth`, `capturing` (with `settings`, `map`), `notification`, `utils`.
+`[TICKET-ID] Short imperative summary`, for example `[LEIP-410] Fix Digural API URL not updating without app restart`.
