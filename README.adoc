@@ -175,7 +175,7 @@ Patterns: MVVM with ViewModel and LiveData, Navigation Component with Safe Args,
 * `gradle_build.yml` builds the three apps and runs their unit tests for each push and pull request to `main` and `release-*`.
 * `gradle_connected-tests.yml` runs the instrumented tests of the Cyface app on an API 28 emulator (`google_apis`).
 * `gradle_publish.yml` runs on version tags: it builds and signs the three App Bundles, uploads them as artifacts and creates the GitHub release.
-* `codeql.yml` runs the CodeQL analysis each week and on pushes and pull requests.
+* `codeql.yml` runs the CodeQL analysis on pushes and pull requests. It has no weekly run, because GitHub disables a scheduled workflow in a public repository after 60 days without activity.
 
 Pull requests from forks are skipped, because the workflows need the secrets of this repository. The workflows check out the private submodule `camera_service` with the deploy key in `SSH_DEPLOY_KEY_CAMERA_SERVICE`. They write the other secrets into `gradle.properties` and `sentry.properties` through `env:`, never through the script text.
 
