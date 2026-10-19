@@ -123,36 +123,28 @@ jobs:
       - name: Build App
         run: ./gradlew bundleRelease
 
-      # The signing action is pinned to the commit of its tag `v1` (no update since 2020, runs on Node 12)
-      - name: Sign Digural App
-        id: sign_app_digural
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ui/digural/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.SIGNING_ALIAS }}
-          keyStorePassword: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }} # optional
-
-      - name: Sign R4R App
-        id: sign_app_r4r
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ui/r4r/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.SIGNING_ALIAS }}
-          keyStorePassword: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }} # optional
-
-      - name: Sign Cyface App
-        id: sign_app
-        uses: r0adkll/sign-android-release@349ebdef58775b1e0d8099458af0816dc79b6407 # v1
-        with:
-          releaseDirectory: ui/cyface/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.SIGNING_ALIAS }}
-          keyStorePassword: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }} # optional
+      # Sign the three App Bundles with `jarsigner` of the JDK (the same command as the former action
+      # `r0adkll/sign-android-release`, which had no update since 2020). The bundles are signed in place.
+      - name: Sign App Bundles
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_ALIAS: ${{ secrets.SIGNING_ALIAS }}
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          KEY_STORE="$RUNNER_TEMP/signing-key.jks"
+          echo "$SIGNING_KEY" | base64 --decode > "$KEY_STORE"
+          # `:env` reads the passwords from the environment, so they are not in the process list
+          for app in digural r4r cyface; do
+            for bundle in ui/$app/build/outputs/bundle/release/*.aab; do
+              jarsigner -keystore "$KEY_STORE" \
+                -storepass:env SIGNING_KEY_STORE_PASSWORD \
+                -keypass:env SIGNING_KEY_PASSWORD \
+                "$bundle" "$SIGNING_ALIAS"
+              jarsigner -verify "$bundle"
+            done
+          done
+          rm "$KEY_STORE"
 
       # We currently upload the app manually to Play Store, but we could automate this using a
       # Google Service Account and the Github Action `r0adkll/upload-google-play`.
@@ -160,17 +152,17 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Signed Digural Bundle
-          path: ${{ steps.sign_app_digural.outputs.signedReleaseFile }}
+          path: ui/digural/build/outputs/bundle/release/*.aab
       - name: Make R4R app available
         uses: actions/upload-artifact@v7
         with:
           name: Signed R4R Bundle
-          path: ${{ steps.sign_app_r4r.outputs.signedReleaseFile }}
+          path: ui/r4r/build/outputs/bundle/release/*.aab
       - name: Make Cyface app available
         uses: actions/upload-artifact@v7
         with:
           name: Signed Cyface Bundle
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          path: ui/cyface/build/outputs/bundle/release/*.aab
 
       # Automatically mark this tag as release on Github. The message of the tag, without its first line, becomes the release notes.
       - name: Mark tag as release on Github
