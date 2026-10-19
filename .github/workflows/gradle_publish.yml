@@ -145,8 +145,11 @@ jobs:
                 -storepass:env SIGNING_KEY_STORE_PASSWORD \
                 -keypass:env SIGNING_KEY_PASSWORD \
                 "$bundle" "$SIGNING_ALIAS"
-              # `jarsigner -verify` also exits with 0 for an unsigned bundle, so check its output
-              jarsigner -verify "$bundle" | grep '^jar verified' > /dev/null
+              # `jarsigner -verify` also exits with 0 for an unsigned bundle, so check its output.
+              # The output is in the log, so a failed check shows the reason.
+              out=$(jarsigner -verify "$bundle")
+              echo "$out"
+              grep -q '^jar verified' <<< "$out"
             done
           done
 
