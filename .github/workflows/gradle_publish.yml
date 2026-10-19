@@ -132,7 +132,11 @@ jobs:
           SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: |
+          set -o pipefail
+          # Only the runner user can read the key, and the key is deleted also when a command fails
+          umask 077
           KEY_STORE="$RUNNER_TEMP/signing-key.jks"
+          trap 'rm -f "$KEY_STORE"' EXIT
           echo "$SIGNING_KEY" | base64 --decode > "$KEY_STORE"
           # `:env` reads the passwords from the environment, so they are not in the process list
           for app in digural r4r cyface; do
@@ -141,10 +145,10 @@ jobs:
                 -storepass:env SIGNING_KEY_STORE_PASSWORD \
                 -keypass:env SIGNING_KEY_PASSWORD \
                 "$bundle" "$SIGNING_ALIAS"
-              jarsigner -verify "$bundle"
+              # `jarsigner -verify` also exits with 0 for an unsigned bundle, so check its output
+              jarsigner -verify "$bundle" | grep '^jar verified' > /dev/null
             done
           done
-          rm "$KEY_STORE"
 
       # We currently upload the app manually to Play Store, but we could automate this using a
       # Google Service Account and the Github Action `r0adkll/upload-google-play`.
