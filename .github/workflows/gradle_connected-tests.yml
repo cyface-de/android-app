@@ -26,22 +26,32 @@ on:
   push:
     branches:
       - main
+      - 'release-*'
   pull_request:
     branches:
       - main
+      - 'release-*'
 
+# Explicit workflow permissions (as little as required)
 permissions:
   contents: read
 
+# A new commit on a pull request stops the run of the previous commit
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   androidTest:
+    # Only for pushes (assumes protected branches) and for PRs from this repo (not from forks)
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     # Faster, but MacOS costs 8 ct/min instead of 0.8 ct/min of on Linux.
     # Unfortunately, `DataCapturingServiceTest.testDisconnectReconnect` fails on linux stack.
     # But as this is a public repository, Github Actions are currently free of charge.
     #runs-on: macos-latest # as recommended in `actions/android-emulator-runner`
 
     # But we had to add `free-disk-space` to fix emulator flakiness. It only runs on ubuntu.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     timeout-minutes: 55
     strategy:
@@ -53,7 +63,8 @@ jobs:
       # From https://github.com/android/nowinandroid/pull/1219/files to fix flaky emulator start
       # See https://github.com/ReactiveCircus/android-emulator-runner/issues/324#issuecomment-1998737488
       - name: Delete unnecessary tools 🔧
-        uses: jlumbroso/free-disk-space@v1.3.1
+        # Third-party actions are pinned to a commit SHA: a tag or branch of a third-party action can change
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           android: false # Keep Don't remove Android tools
           tool-cache: true # Remove image tool cache - rm -rf "$AGENT_TOOLSDIRECTORY"
@@ -72,14 +83,16 @@ jobs:
           sudo udevadm trigger --name-match=kvm
           ls /dev/kvm
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v7
         # Does not work out of the box with a private repository
         # see https://github.com/actions/checkout/issues/287
-        #with:
-        #  submodules: true
+        with:
+          #submodules: true
+          # Do not keep the token on the runner after the checkout, where build scripts and dependencies can read it
+          persist-credentials: false
       - name: Link Deploy Keys for Submodules
-        uses: webfactory/ssh-agent@v0.7.0
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
         with:
           # This allows to add multiple individual deploy keys for multiple private submodules
           # for a guide, see https://github.com/marketplace/actions/webfactory-ssh-agent
@@ -89,29 +102,29 @@ jobs:
         run: git submodule update --init --recursive
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: '21'
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          # Only update cache on hash change (gradle build files and the wrapper properties)
-          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: gradle-
+          cache: 'gradle'
 
       - name: Add gradle.properties
+        env:
+          GH_READ_ACCOUNT: ${{ secrets.GH_READ_ACCOUNT }}
+          GH_READ_TOKEN: ${{ secrets.GH_READ_TOKEN }}
+          GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
+          GOOGLE_MAPS_KEY_R4R: ${{ secrets.GOOGLE_MAPS_KEY_R4R }}
         run: |
           # Use a personal read token to install the Cyface Utils package
           cp gradle.properties.template gradle.properties
-          echo "githubUser=${{ secrets.GH_READ_ACCOUNT }}" >> gradle.properties
-          echo "githubToken=${{ secrets.GH_READ_TOKEN }}" >> gradle.properties
-          echo "google.maps_api_key=${{ secrets.GOOGLE_MAPS_KEY }}" >> gradle.properties
-          echo "google.maps_api_key.r4r=${{ secrets.GOOGLE_MAPS_KEY_R4R }}" >> gradle.properties
+          echo "githubUser=$GH_READ_ACCOUNT" >> gradle.properties
+          echo "githubToken=$GH_READ_TOKEN" >> gradle.properties
+          echo "google.maps_api_key=$GOOGLE_MAPS_KEY" >> gradle.properties
+          echo "google.maps_api_key.r4r=$GOOGLE_MAPS_KEY_R4R" >> gradle.properties
 
       - name: Inject dummy credentials for UI tests to skip login
+        env:
+          DIGURAL_API: ${{ secrets.DIGURAL_API }}
         run: |
           # This mock API accepts all credentials and allows the UI test to skip the login
           echo "cyface.staging_api=https://demo.cyface.de/api/v2" >> gradle.properties
@@ -124,7 +137,7 @@ jobs:
           echo "cyface.oauth_redirect.r4r=de.cyface.app.r4r:/oauth2redirect" >> gradle.properties
           echo "cyface.oauth_redirect.digural=de.cyface.app.digural:/oauth2redirect" >> gradle.properties
           # Digural
-          echo "digural.api=${{ secrets.DIGURAL_API }}" >> gradle.properties
+          echo "digural.api=$DIGURAL_API" >> gradle.properties
 
       # Not executing build here on MacOS stack (10x costs, if private repository)
       # Not using "gradle build" as we don't want to run the tests of all dependencies (e.g. backend)
@@ -132,10 +145,6 @@ jobs:
       #  run: ./gradlew assemble
       #- name: Test with Gradle
       #  run: ./gradlew :ui:cyface:test :ui:r4r:test
-
-      # Add caching to speed up connected tests below (see `actions/android-emulator-runner`)
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
 
       #- name: AVD cache
       #  uses: actions/cache@v3
@@ -165,7 +174,7 @@ jobs:
 
       # Only execute mock tests to exclude `@FlakyTest`s (instead of running `connectedCheck`)
       - name: Connected tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: ${{ matrix.api-level }}
           #target: ${{ matrix.target }}
@@ -189,7 +198,7 @@ jobs:
       # From https://github.com/android/nowinandroid/blob/main/.github/workflows/Build.yaml#L142
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-${{ matrix.api-level }}
           path: '**/build/reports/androidTests'
