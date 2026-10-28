@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 Cyface GmbH
+ * Copyright 2017-2026 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -24,7 +24,6 @@
  */
 apply plugin: 'com.android.application'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
 apply plugin: 'kotlin-parcelize' // Generate Parcelable in Kotlin from Annotation
 apply plugin: 'com.google.protobuf' // For Proto DataStore
@@ -43,18 +42,18 @@ buildscript {
 }
 
 android {
-    namespace 'de.cyface.app.digural'
+    namespace = 'de.cyface.app.digural'
     compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk = rootProject.ext.minSdkVersion
+        targetSdk = rootProject.ext.targetSdkVersion
 
         applicationId = "de.cyface.app.digural"
-        versionCode rootProject.ext.versionCode
-        versionName rootProject.ext.versionName
+        versionCode = rootProject.ext.versionCode
+        versionName = rootProject.ext.versionName
 
-        testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+        testInstrumentationRunner = rootProject.ext.testInstrumentationRunner
 
         // Placeholders for AndroidManifest.xml
         manifestPlaceholders = [
@@ -69,7 +68,7 @@ android {
     buildTypes {
         debug {
             // Run code coverage reports by default on debug builds.
-            testCoverageEnabled = true
+            enableAndroidTestCoverage = true
 
             // Staging
             buildConfigField "String", "collectorApi", "\"${project.findProperty('digural.staging_api')}\""
@@ -77,7 +76,7 @@ android {
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
-            minifyEnabled true
+            minifyEnabled = true
             // https://developer.android.com/studio/build/shrink-code.html
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
@@ -95,23 +94,19 @@ android {
     }
 
     lint {
-        abortOnError false
+        abortOnError = false
     }
 
     // Enabling desugaring to support Java 8 and Java 11 features
     compileOptions {
-        sourceCompatibility rootProject.ext.sourceCompatibility
-        targetCompatibility rootProject.ext.targetCompatibility
+        sourceCompatibility = rootProject.ext.sourceCompatibility
+        targetCompatibility = rootProject.ext.targetCompatibility
 
-        coreLibraryDesugaringEnabled true
-    }
-
-    kotlinOptions {
-        jvmTarget = rootProject.ext.kotlinTargetJavaVersion
+        coreLibraryDesugaringEnabled = true
     }
 
     // Avoid `2 files found with path ...` error
-    packagingOptions {
+    packaging {
         resources {
             // To resolve the conflict warning after adding google-api-client dependency
             excludes += ['META-INF/DEPENDENCIES']
@@ -120,7 +115,8 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
+        viewBinding = true
+        buildConfig = true // AGP 9 removed `android.defaults.buildfeatures.buildconfig`
     }
 }
 
@@ -157,10 +153,12 @@ dependencies {
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
     // Proto DataStore with MultiProcess support to store settings
-    implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
+    implementation  "com.google.protobuf:protobuf-javalite:${rootProject.ext.protobufVersion}"
 
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
+    // `Application` uses it directly, it is not part of the compile classpath transitively
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
@@ -217,7 +215,7 @@ dependencies {
 // Required for Proto DataStore
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:$protobufVersion"
+        artifact = "com.google.protobuf:protoc:${rootProject.ext.protobufVersion}"
     }
 
     // Generates the java Protobuf-lite code for the Protobuf files in this project. See

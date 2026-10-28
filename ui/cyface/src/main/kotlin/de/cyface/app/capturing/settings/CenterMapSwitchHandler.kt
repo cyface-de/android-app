@@ -37,7 +37,7 @@ class CenterMapSwitchHandler(
     private val context: Context?
 ) : CompoundButton.OnCheckedChangeListener {
 
-    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
         if (viewModel.centerMap.value == isChecked) {
             return
         }

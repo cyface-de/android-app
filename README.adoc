@@ -139,7 +139,7 @@ $ git push
 [[development]]
 === Development
 
-The repository contains three apps (Cyface, R4R, Digural), which share the modules of the submodules. Java 21, minSdk 26, compileSdk and targetSdk 35, Gradle with Groovy DSL. All versions are `ext` properties in the root `build.gradle`.
+The repository contains three apps (Cyface, R4R, Digural), which share the modules of the submodules. Java 21, Kotlin 2.4.21, Gradle 9.7.1 with Groovy DSL, Android Gradle Plugin 9.4.1, minSdk 26, compileSdk 37, targetSdk 36. AGP 9 compiles the Kotlin code (built-in Kotlin), so the modules do not apply `org.jetbrains.kotlin.android`. All versions are `ext` properties in the root `build.gradle`.
 
 ....
 ./gradlew :ui:cyface:assembleDebug        # build one app (also :ui:r4r, :ui:digural)

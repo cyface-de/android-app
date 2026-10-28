@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Cyface GmbH
+ * Copyright 2023-2026 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -25,7 +25,6 @@
  */
 apply plugin: 'com.android.library'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
 apply plugin: 'com.google.protobuf' // For Proto DataStore
 
@@ -43,14 +42,13 @@ buildscript {
 }
 
 android {
-    namespace 'de.cyface.app.utils'
+    namespace = 'de.cyface.app.utils'
     compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk = rootProject.ext.minSdkVersion
 
-        testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+        testInstrumentationRunner = rootProject.ext.testInstrumentationRunner
 
         // Placeholders for AndroidManifest.xml
         manifestPlaceholders = [
@@ -63,11 +61,11 @@ android {
     buildTypes {
         debug {
             // Run code coverage reports by default on debug builds.
-            testCoverageEnabled = true
+            enableAndroidTestCoverage = true
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
-            minifyEnabled true
+            minifyEnabled = true
             // https://developer.android.com/studio/build/shrink-code.html
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -75,16 +73,20 @@ android {
 
     // Enabling desugaring to support Java 8 and Java 11 features
     compileOptions {
-        sourceCompatibility rootProject.ext.sourceCompatibility
-        targetCompatibility rootProject.ext.targetCompatibility
-    }
-
-    kotlinOptions {
-        jvmTarget = rootProject.ext.kotlinTargetJavaVersion
+        sourceCompatibility = rootProject.ext.sourceCompatibility
+        targetCompatibility = rootProject.ext.targetCompatibility
     }
 
     buildFeatures {
-        viewBinding true
+        viewBinding = true
+    }
+
+    // A library has no targetSdk of its own, the app sets it. These are only used by the tests and lint.
+    testOptions {
+        targetSdk = rootProject.ext.targetSdkVersion
+    }
+    lint {
+        targetSdk = rootProject.ext.targetSdkVersion
     }
 }
 
@@ -121,12 +123,12 @@ dependencies {
     implementation "io.sentry:sentry-android:$rootProject.ext.sentryAndroidVersion"
 
     // Proto DataStore with MultiProcess support to store settings
-    implementation  "com.google.protobuf:protobuf-javalite:${protobufVersion}"
+    implementation  "com.google.protobuf:protobuf-javalite:${rootProject.ext.protobufVersion}"
 
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     // Allows to select list entries in the recycler view list
-    implementation "androidx.recyclerview:recyclerview-selection:1.1.0"
+    implementation "androidx.recyclerview:recyclerview-selection:$rootProject.ext.androidxRecyclerViewSelectionVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
@@ -161,7 +163,7 @@ dependencies {
 // Required for Proto DataStore
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:$protobufVersion"
+        artifact = "com.google.protobuf:protoc:${rootProject.ext.protobufVersion}"
     }
 
     // Generates the java Protobuf-lite code for the Protobuf files in this project. See
