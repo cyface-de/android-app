@@ -145,22 +145,24 @@
 
 
     <!-- Imprint -->
-    <string name="publisher">Herausgeber</string>
+    <string name="publisher">Diensteanbieter</string>
     <string name="publisher_content">Cyface GmbH
-        \nBehringstr. 46
-        \n01159 Dresden\n
+        \nBehringstraße 46
+        \n01159 Dresden
+        \nDeutschland\n
 
-        \nVertreten durch:
-        \nDr. Klemens Muthmann\n
+        \nVertreten durch die Geschäftsführer:
+        \nDr. Klemens Muthmann, Armin Schnabel\n
 
+        \nTelefon: +49 351 6475 2580
         \nE-Mail: mail@cyface.de
-        \nTelefon: +49 351 6475 2580\n
+        \nInternet: cyface.de\n
 
-        \nAmtsgericht Dresden
-        \nHRB: 36726
-        \nUSt.-Id.: DE-312598748</string>
+        \nRegistergericht: Amtsgericht Dresden
+        \nRegisternummer: HRB 36726
+        \nUmsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz: DE 312598748</string>
 
-    <!-- Attention: The legal text should be updated first in Confluence! -->
+    <!-- Keep in sync with the imprint of the website (src/website/de/legal.jsx in cyface-de/web-app) -->
 
     <string name="privacy">Datenschutzerklärung</string>
     <string name="privacy_content">Hier klicken um zur Datenschutzerklärung zu gelangen.</string>
