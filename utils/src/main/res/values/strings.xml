@@ -180,4 +180,7 @@
 
     <string name="privacy">Privacy Policy</string>
     <string name="privacy_content">Click here to open the privacy policy.</string>
+    <!-- The privacy policy in the language of the app. The Play Store entries (App content) use the
+         German link of values-de. -->
+    <string name="privacy_url">https://cyface.de/en/privacy</string>
 </resources>

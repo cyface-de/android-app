@@ -164,4 +164,6 @@
 
     <string name="privacy">Datenschutzerklärung</string>
     <string name="privacy_content">Hier klicken um zur Datenschutzerklärung zu gelangen.</string>
+    <!-- The Play Store entries (App content) use this link -->
+    <string name="privacy_url">https://cyface.de/datenschutz</string>
 </resources>

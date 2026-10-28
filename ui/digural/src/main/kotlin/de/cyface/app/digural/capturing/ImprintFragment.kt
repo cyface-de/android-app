@@ -55,8 +55,8 @@ class ImprintFragment : Fragment() {
 
         // Link in privacy policy
         binding.privacyPolicy.setOnClickListener {
-            // Sync link with link used in `Play Store > App Content`
-            val uri = Uri.parse("https://www.cyface.de/datenschutzbestimmung-der-app/")
+            // The link depends on the language of the app (`privacy_url` in the `utils` resources)
+            val uri = Uri.parse(getString(de.cyface.app.utils.R.string.privacy_url))
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
         }
