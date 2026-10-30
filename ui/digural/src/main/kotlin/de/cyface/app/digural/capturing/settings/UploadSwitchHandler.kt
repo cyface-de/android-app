@@ -38,7 +38,7 @@ class UploadSwitchHandler(
     private val context: Context?,
     private val capturingService: CyfaceDataCapturingService
 ) : CompoundButton.OnCheckedChangeListener {
-    override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
         if (viewModel.uploadEnabled.value == isChecked) {
             return
         }

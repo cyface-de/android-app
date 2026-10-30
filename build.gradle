@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Cyface GmbH
+ * Copyright 2017-2026 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -21,10 +21,9 @@
  */
 
 buildscript {
-    ext.gradle_version = '8.5.0'
-    ext.kotlin_version = "2.0.21" // Upgrade together with `com.google.devtools.ksp`
-    ext.matcher_version = "1.2.4"
-    ext.room_version = "2.6.1" // Keep in Sync with version in `plugins` section below
+    ext.gradle_version = '9.4.1'
+    ext.kotlin_version = "2.4.21" // Kotlin is built into AGP 9, this sets the Kotlin version
+    ext.room_version = "2.8.5" // Keep in Sync with version in `plugins` section below
 
     repositories {
         google()
@@ -33,8 +32,6 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradle_version"
-        // Required for versioning Google play services.
-        classpath "com.google.android.gms:strict-version-matcher-plugin:$matcher_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "androidx.room:room-gradle-plugin:$room_version"
     }
@@ -42,9 +39,9 @@ buildscript {
 
 plugins {
     // To generate Proto DataStores for settings in ui/digural and utils/
-    id 'com.google.protobuf' version '0.9.4' apply false // Maybe keep in sync with other usages
+    id 'com.google.protobuf' version '0.10.0' apply false // Maybe keep in sync with other usages
 
-    id 'com.google.devtools.ksp' version '2.0.21-1.0.28' // Only upgrade together with `kotlin_version`
+    id 'com.google.devtools.ksp' version '2.3.12' // KSP 2.3+ has its own version, which does not depend on `kotlin_version`
 }
 
 ext {
@@ -59,7 +56,7 @@ ext {
      */
 
     // Cyface dependencies
-    cyfaceUtilsVersion = "5.1.0" // required for git sub-modules setup (energy-settings, backend)
+    cyfaceUtilsVersion = "6.0.0" // required for git sub-modules setup (energy-settings, backend)
     // (!) Match versions `android-app`, `SDK` and `camera-service`.
     // When `android-app` is checkout out, `rootProject.uploaderVersion` in the submodules will point
     // to `android-app/build.gradle` instead of `submodule/build.gradle`.
@@ -67,69 +64,67 @@ ext {
     cyfaceUploaderVersion = "1.6.2" // required for git sub-modules setup (backend)
     // These versions just document the currently linked version of this dependency.
     // To upgrade the dependencies you need to update the submodules to a newer commit.
-    cyfaceAndroidBackendVersion = "7.14.0"
-    cyfaceEnergySettingsVersion = "4.3.5"
-    cyfaceCameraServiceVersion = "4.15.6"
+    cyfaceAndroidBackendVersion = "8.0.0"
+    cyfaceEnergySettingsVersion = "5.0.0"
+    cyfaceCameraServiceVersion = "5.0.0"
 
     // Android SDK versions
     minSdkVersion = 26 // device support
-    targetSdkVersion = 35 // behavioral changes, follow migration guide & test the app against this
-    compileSdkVersion = 35 // allows newest APIs to be used and to see deprecations, use latest
-    buildToolsVersion = '35.0.0' // optional, if defined, use latest (SDK Manager > SDK Tools)
+    targetSdkVersion = 36 // behavioral changes, follow migration guide & test the app against this
+    compileSdkVersion = 37 // allows newest APIs to be used and to see deprecations, use latest
 
     // Android dependencies
     desugaringVersion = "2.1.5"
-    androidxAnnotationVersion = '1.9.1'
+    androidxAnnotationVersion = '1.11.0'
     localbroadcastmanagerVersion = '1.1.0'
-    exifinterfaceVersion = "1.4.0" // Required by Camera Service submodule
-    roomVersion = "2.6.1"
-    lifecycleVersion = "2.8.7"
-    navigationVersion = "2.8.9"
-    okHttpVersion = "4.12.0"
+    exifinterfaceVersion = "1.4.2" // Required by Camera Service submodule
+    roomVersion = "2.8.5"
+    lifecycleVersion = "2.11.0"
+    navigationVersion = "2.10.2"
+    okHttpVersion = "5.5.1"
 
     // Kotlin components
-    coroutinesVersion = "1.10.1"
-    kotlinxSerializationVersion = "1.8.0" // Required by Camera Service submodule
+    coroutinesVersion = "1.11.0"
+    kotlinxSerializationVersion = "1.12.0" // Required by Camera Service submodule
 
     // Digural UI dependencies
     sardineVersion = "0.9"
 
     // Machine Learning
-    liteRtVersion = "1.2.0" // Required by git sub-module `camera-service` for image classification
+    liteRtVersion = "1.4.2" // Required by git sub-module `camera-service` for image classification
 
     // Other dependencies
     materialDialogsVersion = "3.3.0" // used by git sub-module `energy-settings`
-    chartVersion = "v3.1.0"
+    chartVersion = "v3.2.0" // 4.x is a rewrite in Kotlin with new coordinates
     // Can't be a SDK dependency as `appAuthRedirectScheme` needs to be defined at build-time
     appAuthVersion = "0.11.1" // Can't move to uploader lib because of dependency issues
-    retrofitVersion = "2.11.0" // Used by digural UI
-    protobufVersion = '4.30.0' // For Proto Datastore. Maybe keep in sync with other versions.
+    retrofitVersion = "3.0.0" // Used by digural UI
+    protobufVersion = '4.36.2' // For Proto Datastore. Maybe keep in sync with other versions.
 
     // Testing
-    junitVersion = "1.2.1"
-    mockitoVersion = '5.16.0'
-    mockitoKotlinVersion = '5.4.0'
+    junitVersion = "1.3.0"
+    mockitoVersion = '5.24.0'
+    mockitoKotlinVersion = '6.4.0'
     hamcrestVersion = "3.0"
-    rulesVersion = "1.6.1"
-    robolectricVersion = "4.14.1"
-    androidxTestCoreVersion = "1.6.1"
-    uiAutomatorVersion = "2.3.0"
-    espressoVersion = "3.6.1"
+    rulesVersion = "1.7.0"
+    robolectricVersion = "4.17"
+    androidxTestCoreVersion = "1.7.0"
+    uiAutomatorVersion = "2.4.0"
+    espressoVersion = "3.7.0"
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     // Java version
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
-    kotlinTargetJavaVersion = "21"
 
     // Android-frontend
-    sentryAndroidVersion = '7.9.0'
-    sentryAndroidGradlePluginVersion = "5.3.0"
-    androidNavigationPluginVersion = "2.8.8"
-    mapPlayServicesVersion = '19.1.0'
-    locationPlayServicesVersion = '21.3.0'
-    materialVersion = '1.12.0'
-    androidxRecyclerViewSelectionVersion = "1.1.0"
+    sentryAndroidVersion = '8.62.0'
+    sentryAndroidGradlePluginVersion = "6.24.0"
+    androidNavigationPluginVersion = "2.10.2"
+    mapPlayServicesVersion = '20.1.0'
+    locationPlayServicesVersion = '21.4.0'
+    materialVersion = '1.14.0'
+    androidxRecyclerViewSelectionVersion = "1.2.0"
 }
 
 // Attention: Overwrites also the repositories used to retrieve the transitive dependencies in the submodules
@@ -140,13 +135,13 @@ allprojects {
         gradlePluginPortal()
         // Required by submodules: camera_service, energy_settings, ui, backend
         maven {
-            url "https://maven.pkg.github.com/cyface-de/android-utils"
+            url = "https://maven.pkg.github.com/cyface-de/android-utils"
             credentials {
                 username = project.findProperty("githubUser")
                 password = project.findProperty("githubToken")
             }
         }
-        maven { url 'https://jitpack.io' } // For MPAndroidChart
+        maven { url = 'https://jitpack.io' } // For MPAndroidChart
         maven {
             url = uri("https://maven.pkg.github.com/cyface-de/uploader")
             // Needed even for public projects: https://github.community/t5/GitHub-API-Development-and/Download-from-Github-Package-Registry-without-authentication/m-p/35255

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 Cyface GmbH
+ * Copyright 2017-2026 Cyface GmbH
  *
  * This file is part of the Cyface App for Android.
  *
@@ -26,7 +26,6 @@
  */
 apply plugin: 'com.android.application'
 apply plugin: 'io.sentry.android.gradle' // Exception tracking when using proguard
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'androidx.navigation.safeargs.kotlin' // recommended to navigate between fragments
 apply plugin: 'kotlin-parcelize' // Generate Parcelable in Kotlin from Annotation
 
@@ -44,18 +43,18 @@ buildscript {
 }
 
 android {
-    namespace 'de.cyface.app'
+    namespace = 'de.cyface.app'
     compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk = rootProject.ext.minSdkVersion
+        targetSdk = rootProject.ext.targetSdkVersion
 
         applicationId = "de.cyface.app"
-        versionCode rootProject.ext.versionCode
-        versionName rootProject.ext.versionName
+        versionCode = rootProject.ext.versionCode
+        versionName = rootProject.ext.versionName
 
-        testInstrumentationRunner rootProject.ext.testInstrumentationRunner
+        testInstrumentationRunner = rootProject.ext.testInstrumentationRunner
 
         // Placeholders for AndroidManifest.xml
         manifestPlaceholders = [
@@ -75,7 +74,7 @@ android {
     buildTypes {
         debug {
             // Run code coverage reports by default on debug builds.
-            testCoverageEnabled = true
+            enableAndroidTestCoverage = true
 
             // Select one of the APIs below, depending on your needs
 
@@ -116,7 +115,7 @@ android {
         }
         release {
             // mapping.xml file required to decode stack traces, but it's included in the bundle
-            minifyEnabled true
+            minifyEnabled = true
             // https://developer.android.com/studio/build/shrink-code.html
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
@@ -137,23 +136,19 @@ android {
     }
 
     lint {
-        abortOnError false
+        abortOnError = false
     }
 
     // Enabling desugaring to support Java 8 and Java 11 features
     compileOptions {
-        sourceCompatibility rootProject.ext.sourceCompatibility
-        targetCompatibility rootProject.ext.targetCompatibility
+        sourceCompatibility = rootProject.ext.sourceCompatibility
+        targetCompatibility = rootProject.ext.targetCompatibility
 
-        coreLibraryDesugaringEnabled true
-    }
-
-    kotlinOptions {
-        jvmTarget = rootProject.ext.kotlinTargetJavaVersion
+        coreLibraryDesugaringEnabled = true
     }
 
     // Avoid `2 files found with path ...` error
-    packagingOptions {
+    packaging {
         resources {
             // To resolve the conflict warning after adding google-api-client dependency
             excludes += ['META-INF/DEPENDENCIES']
@@ -162,7 +157,8 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
+        viewBinding = true
+        buildConfig = true // AGP 9 removed `android.defaults.buildfeatures.buildconfig`
     }
 }
 
@@ -201,6 +197,8 @@ dependencies {
 
     // To use material elements (tabs, nav bar, slider, etc.)
     implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
+    // `Application` uses it directly, it is not part of the compile classpath transitively
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:$rootProject.ext.localbroadcastmanagerVersion"
     // To use Google Map
     implementation "com.google.android.gms:play-services-maps:$rootProject.ext.mapPlayServicesVersion"
     implementation "com.google.android.gms:play-services-location:$rootProject.ext.locationPlayServicesVersion"
